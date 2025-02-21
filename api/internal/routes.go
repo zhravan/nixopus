@@ -6,6 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/raghavyuva/nixopus-api/internal/controller"
+	"github.com/raghavyuva/nixopus-api/internal/controller/auth"
+	"github.com/raghavyuva/nixopus-api/internal/controller/organization"
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 )
@@ -47,7 +49,7 @@ func (router *Router) Routes() *mux.Router {
 	u := r.PathPrefix("/api/v1").Subrouter()
 
 	// Unauthenticated routes
-	authController := controller.NewAuthController(router.app)
+	authController := auth.NewAuthController(router.app)
 	u.HandleFunc("/auth/register", authController.Register).Methods("POST", "OPTIONS")
 	u.HandleFunc("/auth/login", authController.Login).Methods("POST", "OPTIONS")
 
@@ -65,7 +67,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/auth/verify-email", authController.VerifyEmail).Methods("POST", "OPTIONS")
 
 	// Role based routes
-	roleController := controller.NewRolesController(router.app)
+	roleController := organization.NewRolesController(router.app)
 	api.HandleFunc("/roles", roleController.CreateRole).Methods("POST", "OPTIONS")
 	api.HandleFunc("/roles/{id}", roleController.GetRole).Methods("GET", "OPTIONS")
 	api.HandleFunc("/roles/{id}", roleController.UpdateRole).Methods("PUT", "OPTIONS")
@@ -73,7 +75,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/roles", roleController.GetRoles).Methods("GET", "OPTIONS")
 
 	// Organization Routes
-	organizationController := controller.NewOrganizationsController(router.app)
+	organizationController := organization.NewOrganizationsController(router.app)
 	api.HandleFunc("/organizations", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
 	api.HandleFunc("/organizations/{id}", organizationController.GetOrganization).Methods("GET", "OPTIONS")
 	api.HandleFunc("/organizations/{id}", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
@@ -81,7 +83,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/organizations", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
 
 	// Permission Routes
-	permissionController := controller.NewPermissionsController(router.app)
+	permissionController := organization.NewPermissionsController(router.app)
 	api.HandleFunc("/permissions", permissionController.CreatePermission).Methods("POST", "OPTIONS")
 	api.HandleFunc("/permissions/{id}", permissionController.GetPermission).Methods("GET", "OPTIONS")
 	api.HandleFunc("/permissions/{id}", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")

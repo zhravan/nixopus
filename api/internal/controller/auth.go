@@ -104,6 +104,8 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(registration_request)
+
 	var user types.User
 	user = user.
 		SetUserName(registration_request.Username).
@@ -379,13 +381,13 @@ func (c *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if refreshRequest.RefreshToken == "" {
-		utils.SendErrorResponse(w, "Refresh token is required", http.StatusBadRequest)
+		utils.SendErrorResponse(w, types.ErrRefreshTokenIsRequired.Error(), http.StatusBadRequest)
 		return
 	}
 
 	refreshToken, err := storage.GetRefreshToken(c.app.Store.DB, refreshRequest.RefreshToken, c.app.Ctx)
 	if err != nil {
-		utils.SendErrorResponse(w, "Invalid refresh token", http.StatusUnauthorized)
+		utils.SendErrorResponse(w, types.ErrInvalidRefreshToken.Error(), http.StatusUnauthorized)
 		return
 	}
 

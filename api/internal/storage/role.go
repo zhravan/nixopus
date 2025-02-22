@@ -23,9 +23,9 @@ func GetRoleByName(db *bun.DB, name string, ctx context.Context) (*types.Role, e
 	return role, err
 }
 
-func GetRoles(db *bun.DB, isDisabled bool, ctx context.Context) ([]types.Role, error) {
+func GetRoles(db *bun.DB, ctx context.Context) ([]types.Role, error) {
 	var roles []types.Role
-	err := db.NewSelect().Model(&roles).Where("deleted_at != ?", nil).Scan(ctx)
+	err := db.NewSelect().Model(&roles).Scan(ctx)
 	return roles, err
 }
 
@@ -35,7 +35,7 @@ func GetRole(db *bun.DB, id string, ctx context.Context) (*types.Role, error) {
 	return role, err
 }
 
-func UpdateRole(db *bun.DB, role *types.UpdateRoleRequest, ctx context.Context) error {
+func UpdateRole(db *bun.DB, role *types.Role, ctx context.Context) error {
 	_, err := db.NewUpdate().Model(role).Where("id = ?", role.ID).Exec(ctx)
 	return err
 }
@@ -45,7 +45,7 @@ func DeleteRole(db *bun.DB, id string, ctx context.Context) error {
 	return err
 }
 
-func CreatePermission(db *bun.DB, permission types.CreatePermissionRequest, ctx context.Context) error {
+func CreatePermission(db *bun.DB, permission types.Permission, ctx context.Context) error {
 	_, err := db.NewInsert().Model(&permission).Exec(ctx)
 	return err
 }
@@ -68,7 +68,7 @@ func GetPermissionByName(db *bun.DB, name string, ctx context.Context) (*types.P
 	return permission, err
 }
 
-func UpdatePermission(db *bun.DB, permission *types.UpdatePermissionRequest, ctx context.Context) error {
+func UpdatePermission(db *bun.DB, permission *types.Permission, ctx context.Context) error {
 	_, err := db.NewUpdate().Model(permission).Where("id = ?", permission.ID).Exec(ctx)
 	return err
 }
@@ -78,18 +78,19 @@ func DeletePermission(db *bun.DB, id string, ctx context.Context) error {
 	return err
 }
 
-func AddPermissionToRole(db *bun.DB, permission types.AddPermissionToRoleRequest, ctx context.Context) error {
+func AddPermissionToRole(db *bun.DB, permission types.RolePermissions, ctx context.Context) error {
 	_, err := db.NewInsert().Model(&permission).Exec(ctx)
 	return err
 }
 
-func RemovePermissionFromRole(db *bun.DB, permission types.RemovePermissionFromRoleRequest, ctx context.Context) error {
-	_, err := db.NewDelete().Model(&permission).Exec(ctx)
+func RemovePermissionFromRole(db *bun.DB, permission_id string, ctx context.Context) error {
+	var p types.RolePermissions
+	_, err := db.NewDelete().Model(&p).Where("permission_id = ?", permission_id).Exec(ctx)
 	return err
 }
 
-func GetPermissionsByRole(db *bun.DB, id string, ctx context.Context) ([]types.Permission, error) {
-	var permissions []types.Permission
+func GetPermissionsByRole(db *bun.DB, id string, ctx context.Context) ([]types.RolePermissions, error) {
+	var permissions []types.RolePermissions
 	err := db.NewSelect().Model(&permissions).Where("role_id = ?", id).Scan(ctx)
 	return permissions, err
 }
@@ -100,7 +101,7 @@ func GetOrganizations(db *bun.DB, ctx context.Context) ([]types.Organization, er
 	return organizations, err
 }
 
-func CreateOrganization(db *bun.DB, organization types.CreateOrganizationRequest, ctx context.Context) error {
+func CreateOrganization(db *bun.DB, organization types.Organization, ctx context.Context) error {
 	_, err := db.NewInsert().Model(&organization).Exec(ctx)
 	return err
 }
@@ -111,7 +112,7 @@ func GetOrganization(db *bun.DB, id string, ctx context.Context) (*types.Organiz
 	return organization, err
 }
 
-func UpdateOrganization(db *bun.DB, organization *types.UpdateOrganizationRequest, ctx context.Context) error {
+func UpdateOrganization(db *bun.DB, organization *types.Organization, ctx context.Context) error {
 	_, err := db.NewUpdate().Model(organization).Where("id = ?", organization.ID).Exec(ctx)
 	return err
 }

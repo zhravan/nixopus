@@ -85,9 +85,7 @@ func (c *RolesController) CreateRole(w http.ResponseWriter, r *http.Request) {
 // GetRoles returns all roles that are active in the database
 // passing is_disabled as true will return all roles
 func (c *RolesController) GetRoles(w http.ResponseWriter, r *http.Request) {
-	isDisabled := r.URL.Query().Get("is_disabled") == "true"
-
-	roles, err := storage.GetRoles(c.app.Store.DB, isDisabled, c.app.Ctx)
+	roles, err := storage.GetRoles(c.app.Store.DB, c.app.Ctx)
 	if err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToGetRoles.Error(), http.StatusInternalServerError)
 		return
@@ -135,7 +133,15 @@ func (c *RolesController) UpdateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := storage.UpdateRole(c.app.Store.DB, &role, c.app.Ctx); err != nil {
+	updatingRole := types.Role{
+		ID:          existingRole.ID,
+		Name:        role.Name,
+		Description: role.Description,
+		UpdatedAt:   time.Now(),
+		DeletedAt:   existingRole.DeletedAt,
+	}
+
+	if err := storage.UpdateRole(c.app.Store.DB, &updatingRole, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToUpdateRole.Error(), http.StatusInternalServerError)
 		return
 	}

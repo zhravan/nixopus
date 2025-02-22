@@ -3,6 +3,7 @@ package organization
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
@@ -74,7 +75,16 @@ func (c *OrganizationsController) CreateOrganization(w http.ResponseWriter, r *h
 		return
 	}
 
-	if err := storage.CreateOrganization(c.app.Store.DB, organization, c.app.Ctx); err != nil {
+	organizationToCreate := types.Organization{
+		Name: organization.Name,
+		Description: organization.Description,
+		UpdatedAt: time.Now(),
+		CreatedAt: time.Now(),
+		DeletedAt: nil,
+		ID: uuid.New(),
+	}
+
+	if err := storage.CreateOrganization(c.app.Store.DB, organizationToCreate, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToCreateOrganization.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -101,7 +111,16 @@ func (c *OrganizationsController) UpdateOrganization(w http.ResponseWriter, r *h
 		return
 	}
 
-	if err := storage.UpdateOrganization(c.app.Store.DB, &organization, c.app.Ctx); err != nil {
+	organizationToUpdate := types.Organization{
+		Name: organization.Name,
+		Description: organization.Description,
+		UpdatedAt: time.Now(),
+		CreatedAt: existingOrganization.CreatedAt,
+		DeletedAt: existingOrganization.DeletedAt,
+		ID: existingOrganization.ID,
+	}
+
+	if err := storage.UpdateOrganization(c.app.Store.DB, &organizationToUpdate, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToUpdateOrganization.Error(), http.StatusInternalServerError)
 		return
 	}

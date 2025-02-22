@@ -3,6 +3,7 @@ package organization
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
@@ -83,7 +84,14 @@ func (c *PermissionsController) CreatePermission(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := storage.CreatePermission(c.app.Store.DB, permission, c.app.Ctx); err != nil {
+	permissionToCreate := types.Permission{
+		ID:          uuid.New(),
+		Name:        permission.Name,
+		Resource:    permission.Resource,
+		Description: permission.Description,
+	}
+
+	if err := storage.CreatePermission(c.app.Store.DB, permissionToCreate, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToCreatePermission.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -133,7 +141,15 @@ func (c *PermissionsController) UpdatePermission(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := storage.UpdatePermission(c.app.Store.DB, &permission, c.app.Ctx); err != nil {
+	permissionToUpdate := types.Permission{
+		ID:          existingPermission.ID,
+		Name:        permission.Name,
+		Resource:    permission.Resource,
+		Description: permission.Description,
+		UpdatedAt:   time.Now(),
+	}
+
+	if err := storage.UpdatePermission(c.app.Store.DB, &permissionToUpdate, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToUpdatePermission.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -193,7 +209,15 @@ func (p *PermissionsController) AddPermissionToRole(w http.ResponseWriter, r *ht
 		return
 	}
 
-	if err := storage.AddPermissionToRole(p.app.Store.DB, permission, p.app.Ctx); err != nil {
+	rolePermissionToCreate := types.RolePermissions{
+		ID:           uuid.New(),
+		RoleID:       existingRole.ID,
+		PermissionID: existingPermission.ID,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+
+	if err := storage.AddPermissionToRole(p.app.Store.DB, rolePermissionToCreate, p.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToAddPermissionToRole.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -226,7 +250,7 @@ func (p *PermissionsController) RemovePermissionFromRole(w http.ResponseWriter, 
 		return
 	}
 
-	if err := storage.RemovePermissionFromRole(p.app.Store.DB, permission, p.app.Ctx); err != nil {
+	if err := storage.RemovePermissionFromRole(p.app.Store.DB, permission.PermissionID, p.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToRemovePermissionFromRole.Error(), http.StatusInternalServerError)
 		return
 	}

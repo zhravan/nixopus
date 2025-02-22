@@ -1,7 +1,6 @@
 package organization
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -10,50 +9,6 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
 )
-
-func validateGetOrganizationRequest(id string) error {
-	if id == "" {
-		return types.ErrMissingOrganizationID
-	}
-	return nil
-}
-
-func validateCreateOrganizationRequest(organization types.CreateOrganizationRequest) error {
-	if organization.Name == "" {
-		return types.ErrMissingOrganizationName
-	}
-	return nil
-}
-
-func validateUpdateOrganizationRequest(organization types.UpdateOrganizationRequest) error {
-	if organization.Name == "" {
-		return types.ErrMissingOrganizationName
-	}
-	return nil
-}
-
-func validateAddUserToOrganizationRequest(user types.AddUserToOrganizationRequest) error {
-	if user.OrganizationID == "" {
-		return types.ErrMissingOrganizationID
-	}
-	if user.UserID == "" {
-		return types.ErrMissingUserID
-	}
-	if user.RoleId == "" {
-		return types.ErrMissingRoleID
-	}
-	return nil
-}
-
-func validateRemoveUserFromOrganizationRequest(user types.RemoveUserFromOrganizationRequest) error {
-	if user.OrganizationID == "" {
-		return types.ErrMissingOrganizationID
-	}
-	if user.UserID == "" {
-		return types.ErrMissingUserID
-	}
-	return nil
-}
 
 func (c *OrganizationsController) GetOrganizations(w http.ResponseWriter, r *http.Request) {
 	organization, err := storage.GetOrganizations(c.app.Store.DB, c.app.Ctx)
@@ -66,7 +21,7 @@ func (c *OrganizationsController) GetOrganizations(w http.ResponseWriter, r *htt
 
 func (c *OrganizationsController) GetOrganization(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
-	if err := validateGetOrganizationRequest(id); err != nil {
+	if err := c.validator.ValidateID(id, types.ErrMissingOrganizationID); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -81,12 +36,12 @@ func (c *OrganizationsController) GetOrganization(w http.ResponseWriter, r *http
 func (c *OrganizationsController) CreateOrganization(w http.ResponseWriter, r *http.Request) {
 	var organization types.CreateOrganizationRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&organization); err != nil {
+	if err := c.validator.ParseRequestBody(r, r.Body, &organization); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := validateCreateOrganizationRequest(organization); err != nil {
+	if err := c.validator.ValidateRequest(organization); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -117,12 +72,12 @@ func (c *OrganizationsController) CreateOrganization(w http.ResponseWriter, r *h
 func (c *OrganizationsController) UpdateOrganization(w http.ResponseWriter, r *http.Request) {
 	var organization types.UpdateOrganizationRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&organization); err != nil {
+	if err := c.validator.ParseRequestBody(r, r.Body, &organization); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := validateUpdateOrganizationRequest(organization); err != nil {
+	if err := c.validator.ValidateRequest(organization); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -153,12 +108,12 @@ func (c *OrganizationsController) UpdateOrganization(w http.ResponseWriter, r *h
 func (c *OrganizationsController) DeleteOrganization(w http.ResponseWriter, r *http.Request) {
 	var organization types.DeleteOrganizationRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&organization); err != nil {
+	if err := c.validator.ParseRequestBody(r, r.Body, &organization); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := validateGetOrganizationRequest(organization.ID); err != nil {
+	if err := c.validator.ValidateRequest(organization); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -178,90 +133,90 @@ func (c *OrganizationsController) DeleteOrganization(w http.ResponseWriter, r *h
 }
 
 func (c *OrganizationsController) AddUserToOrganization(w http.ResponseWriter, r *http.Request) {
-    var user types.AddUserToOrganizationRequest
-    if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-        utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
-        return
-    }
+	var user types.AddUserToOrganizationRequest
+	if err := c.validator.ParseRequestBody(r, r.Body, &user); err != nil {
+		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
+		return
+	}
 
-    if err := validateAddUserToOrganizationRequest(user); err != nil {
-        utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+	if err := c.validator.ValidateRequest(user); err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-    roleId, err := uuid.Parse(user.RoleId)
-    if err != nil {
-        utils.SendErrorResponse(w, types.ErrInvalidRoleID.Error(), http.StatusBadRequest)
-        return
-    }
+	roleId, err := uuid.Parse(user.RoleId)
+	if err != nil {
+		utils.SendErrorResponse(w, types.ErrInvalidRoleID.Error(), http.StatusBadRequest)
+		return
+	}
 
-    existingOrganization, err := storage.GetOrganization(c.app.Store.DB, user.OrganizationID, c.app.Ctx)
-    if err != nil {
-        utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-    if existingOrganization.ID == uuid.Nil {
-        utils.SendErrorResponse(w, types.ErrOrganizationDoesNotExist.Error(), http.StatusBadRequest)
-        return
-    }
+	existingOrganization, err := storage.GetOrganization(c.app.Store.DB, user.OrganizationID, c.app.Ctx)
+	if err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existingOrganization.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrOrganizationDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
 
-    existingUser, err := storage.FindUserByID(c.app.Store.DB, user.UserID, c.app.Ctx)
-    if err != nil {
-        utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-    if existingUser.ID == uuid.Nil {
-        utils.SendErrorResponse(w, types.ErrUserDoesNotExist.Error(), http.StatusBadRequest)
-        return
-    }
+	existingUser, err := storage.FindUserByID(c.app.Store.DB, user.UserID, c.app.Ctx)
+	if err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existingUser.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrUserDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
 
-    existingRole, err := storage.GetRole(c.app.Store.DB, roleId.String(), c.app.Ctx)
-    if err != nil {
-        utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-    if existingRole.ID == uuid.Nil {
-        utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
-        return
-    }
+	existingRole, err := storage.GetRole(c.app.Store.DB, roleId.String(), c.app.Ctx)
+	if err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existingRole.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
 
-    existingUserInOrganization, err := storage.FindUserInOrganization(c.app.Store.DB, user.UserID, user.OrganizationID, c.app.Ctx)
-    if err != nil {
-        utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-    if existingUserInOrganization.ID != uuid.Nil {
-        utils.SendErrorResponse(w, types.ErrUserAlreadyInOrganization.Error(), http.StatusBadRequest)
-        return
-    }
+	existingUserInOrganization, err := storage.FindUserInOrganization(c.app.Store.DB, user.UserID, user.OrganizationID, c.app.Ctx)
+	if err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existingUserInOrganization.ID != uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrUserAlreadyInOrganization.Error(), http.StatusBadRequest)
+		return
+	}
 
-    organizationUser := types.OrganizationUsers{
-        UserID:         existingUser.ID,
-        OrganizationID: existingOrganization.ID,
-        RoleID:         roleId,
-        CreatedAt:      time.Now(),
-        UpdatedAt:      time.Now(),
-        DeletedAt:      nil,
-        ID:             uuid.New(),
-    }
+	organizationUser := types.OrganizationUsers{
+		UserID:         existingUser.ID,
+		OrganizationID: existingOrganization.ID,
+		RoleID:         roleId,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		DeletedAt:      nil,
+		ID:             uuid.New(),
+	}
 
-    if err := storage.AddUserToOrganization(c.app.Store.DB, organizationUser, c.app.Ctx); err != nil {
-        utils.SendErrorResponse(w, types.ErrFailedToAddUserToOrganization.Error(), http.StatusInternalServerError)
-        return
-    }
+	if err := storage.AddUserToOrganization(c.app.Store.DB, organizationUser, c.app.Ctx); err != nil {
+		utils.SendErrorResponse(w, types.ErrFailedToAddUserToOrganization.Error(), http.StatusInternalServerError)
+		return
+	}
 
-    utils.SendJSONResponse(w, "success", "User added to organization successfully", nil)
+	utils.SendJSONResponse(w, "success", "User added to organization successfully", nil)
 }
 
 func (c *OrganizationsController) RemoveUserFromOrganization(w http.ResponseWriter, r *http.Request) {
 	var user types.RemoveUserFromOrganizationRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := c.validator.ParseRequestBody(r, r.Body, &user); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := validateRemoveUserFromOrganizationRequest(user); err != nil {
+	if err := c.validator.ValidateRequest(user); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -294,7 +249,7 @@ func (c *OrganizationsController) RemoveUserFromOrganization(w http.ResponseWrit
 
 func (c *OrganizationsController) GetOrganizationUsers(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
-	if err := validateGetOrganizationRequest(id); err != nil {
+	if err := c.validator.ValidateID(id, types.ErrMissingOrganizationID); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}

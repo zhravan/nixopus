@@ -70,8 +70,8 @@ func (router *Router) Routes() *mux.Router {
 	roleController := organization.NewRolesController(router.app)
 	api.HandleFunc("/roles", roleController.CreateRole).Methods("POST", "OPTIONS")
 	// api.HandleFunc("/roles/{id}", roleController.GetRole).Methods("GET", "OPTIONS")
-	api.HandleFunc("/roles/{id}", roleController.UpdateRole).Methods("PUT", "OPTIONS")
-	api.HandleFunc("/roles/{id}", roleController.DeleteRole).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/roles/", roleController.UpdateRole).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/roles/", roleController.DeleteRole).Methods("DELETE", "OPTIONS")
 	api.HandleFunc("/roles", roleController.GetRoles).Methods("GET", "OPTIONS")
 
 	// Organization Routes
@@ -81,6 +81,11 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/organizations/{id}", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
 	api.HandleFunc("/organizations/{id}", organizationController.DeleteOrganization).Methods("DELETE", "OPTIONS")
 	api.HandleFunc("/organizations", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
+
+	api.HandleFunc("/add-user/organizations", organizationController.AddUserToOrganization).Methods("POST", "OPTIONS")
+	api.HandleFunc("/remove-user/organizations", organizationController.RemoveUserFromOrganization).Methods("DELETE", "OPTIONS")
+
+	api.HandleFunc("/organization/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 
 	// Permission Routes
 	permissionController := organization.NewPermissionsController(router.app)

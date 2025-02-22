@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
@@ -67,6 +68,12 @@ func (c *OrganizationsController) CreateOrganization(w http.ResponseWriter, r *h
 		return
 	}
 
+	existingOrganization, err := storage.GetOrganizationByName(c.app.Store.DB, organization.Name, c.app.Ctx)
+	if err == nil && existingOrganization.ID != uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrOrganizationAlreadyExists.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := storage.CreateOrganization(c.app.Store.DB, organization, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToCreateOrganization.Error(), http.StatusInternalServerError)
 		return
@@ -88,6 +95,12 @@ func (c *OrganizationsController) UpdateOrganization(w http.ResponseWriter, r *h
 		return
 	}
 
+	existingOrganization, err := storage.GetOrganization(c.app.Store.DB, organization.ID, c.app.Ctx)
+	if err == nil && existingOrganization.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrOrganizationDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := storage.UpdateOrganization(c.app.Store.DB, &organization, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToUpdateOrganization.Error(), http.StatusInternalServerError)
 		return
@@ -101,6 +114,17 @@ func (c *OrganizationsController) DeleteOrganization(w http.ResponseWriter, r *h
 
 	if err := json.NewDecoder(r.Body).Decode(&organization); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := validateGetOrganizationRequest(organization.ID); err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingOrganization, err := storage.GetOrganization(c.app.Store.DB, organization.ID, c.app.Ctx)
+	if err == nil && existingOrganization.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrOrganizationDoesNotExist.Error(), http.StatusBadRequest)
 		return
 	}
 

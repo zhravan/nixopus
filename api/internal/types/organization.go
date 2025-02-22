@@ -164,6 +164,8 @@ var (
 	ErrFailedToDeleteOrganization    = errors.New("failed to delete organization")
 	ErrFailedToGetOrganizationUsers  = errors.New("failed to get organization users")
 	ErrFailedToAddUserToOrganization = errors.New("failed to add user to organization")
+	ErrOrganizationDoesNotExist      = errors.New("organization does not exist")
+	ErrOrganizationAlreadyExists     = errors.New("organization already exists")
 )
 
 type CreateOrganizationRequest struct {

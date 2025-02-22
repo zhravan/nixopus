@@ -69,7 +69,7 @@ func (router *Router) Routes() *mux.Router {
 	// Role based routes
 	roleController := organization.NewRolesController(router.app)
 	api.HandleFunc("/roles", roleController.CreateRole).Methods("POST", "OPTIONS")
-	api.HandleFunc("/roles/{id}", roleController.GetRole).Methods("GET", "OPTIONS")
+	// api.HandleFunc("/roles/{id}", roleController.GetRole).Methods("GET", "OPTIONS")
 	api.HandleFunc("/roles/{id}", roleController.UpdateRole).Methods("PUT", "OPTIONS")
 	api.HandleFunc("/roles/{id}", roleController.DeleteRole).Methods("DELETE", "OPTIONS")
 	api.HandleFunc("/roles", roleController.GetRoles).Methods("GET", "OPTIONS")
@@ -85,12 +85,12 @@ func (router *Router) Routes() *mux.Router {
 	// Permission Routes
 	permissionController := organization.NewPermissionsController(router.app)
 	api.HandleFunc("/permissions", permissionController.CreatePermission).Methods("POST", "OPTIONS")
-	api.HandleFunc("/permissions/{id}", permissionController.GetPermission).Methods("GET", "OPTIONS")
-	api.HandleFunc("/permissions/{id}", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
-	api.HandleFunc("/permissions/{id}", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
-
-	api.HandleFunc("/permissions/{id}/roles", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
-	api.HandleFunc("/permissions/{id}/roles", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/permission/", permissionController.GetPermission).Methods("GET", "OPTIONS")
+	api.HandleFunc("/permissions/update", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/permissions/delete", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/permissions", permissionController.GetPermissions).Methods("GET", "OPTIONS")	
+	api.HandleFunc("/add-permission/roles", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
+	api.HandleFunc("/remove-permission/roles", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
 
 	api.HandleFunc("/permissions/roles", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
 

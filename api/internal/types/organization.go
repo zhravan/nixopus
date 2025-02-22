@@ -155,17 +155,25 @@ type RemovePermissionFromRoleRequest struct {
 }
 
 var (
-	ErrMissingOrganizationID         = errors.New("organization id is required to get organizations")
-	ErrFailedToGetOrganizations      = errors.New("failed to get organizations")
-	ErrFailedToGetOrganization       = errors.New("failed to get organization")
-	ErrMissingOrganizationName       = errors.New("name is required to create an organization")
-	ErrFailedToCreateOrganization    = errors.New("failed to create organization")
-	ErrFailedToUpdateOrganization    = errors.New("failed to update organization")
-	ErrFailedToDeleteOrganization    = errors.New("failed to delete organization")
-	ErrFailedToGetOrganizationUsers  = errors.New("failed to get organization users")
-	ErrFailedToAddUserToOrganization = errors.New("failed to add user to organization")
-	ErrOrganizationDoesNotExist      = errors.New("organization does not exist")
-	ErrOrganizationAlreadyExists     = errors.New("organization already exists")
+	ErrMissingOrganizationID              = errors.New("organization id is required to get organizations")
+	ErrFailedToGetOrganizations           = errors.New("failed to get organizations")
+	ErrFailedToGetOrganization            = errors.New("failed to get organization")
+	ErrMissingOrganizationName            = errors.New("name is required to create an organization")
+	ErrFailedToCreateOrganization         = errors.New("failed to create organization")
+	ErrFailedToUpdateOrganization         = errors.New("failed to update organization")
+	ErrFailedToDeleteOrganization         = errors.New("failed to delete organization")
+	ErrFailedToGetOrganizationUsers       = errors.New("failed to get organization users")
+	ErrFailedToAddUserToOrganization      = errors.New("failed to add user to organization")
+	ErrOrganizationDoesNotExist           = errors.New("organization does not exist")
+	ErrOrganizationAlreadyExists          = errors.New("organization already exists")
+	ErrMissingUserID                      = errors.New("user id is required to add user to organization")
+	ErrUserDoesNotExist                   = errors.New("user does not exist")
+	ErrUserAlreadyInOrganization          = errors.New("user already in organization")
+	ErrUserNotInOrganization              = errors.New("user not in organization")
+	ErrFailedToRemoveUserFromOrganization = errors.New("failed to remove user from organization")
+	ErrInternalServer                     = errors.New("internal server error")
+	ErrInvalidRoleID                      = errors.New("invalid role id")
+	ErrMissingRoleID                      = errors.New("role id is required to add user to organization")
 )
 
 type CreateOrganizationRequest struct {
@@ -184,6 +192,12 @@ type DeleteOrganizationRequest struct {
 }
 
 type AddUserToOrganizationRequest struct {
+	UserID         string `json:"user_id"`
+	OrganizationID string `json:"organization_id"`
+	RoleId         string `json:"role_id"`
+}
+
+type RemoveUserFromOrganizationRequest struct {
 	UserID         string `json:"user_id"`
 	OrganizationID string `json:"organization_id"`
 }

@@ -168,6 +168,8 @@ var (
 	ErrFailedToCreateRefreshToken              = errors.New("failed to create refresh token")
 	ErrRefreshTokenIsRequired                  = errors.New("refresh token is required")
 	ErrInvalidRefreshToken                     = errors.New("invalid refresh token")
+	ErrPermissionAlreadyExists                 = errors.New("permission already exists")
+	ErrPermissionDoesNotExist                  = errors.New("permission does not exist")
 )
 
 func containsNumber(password string) bool {

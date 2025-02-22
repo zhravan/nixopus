@@ -12,9 +12,15 @@ import (
 // It takes in a role object and inserts it into the database.
 // It returns an error if the role already exists or if there is a problem
 // with the database.
-func CreateRole(db *bun.DB, role types.CreateRoleRequest, ctx context.Context) error {
+func CreateRole(db *bun.DB, role types.Role, ctx context.Context) error {
 	_, err := db.NewInsert().Model(&role).Exec(ctx)
 	return err
+}
+
+func GetRoleByName(db *bun.DB, name string, ctx context.Context) (*types.Role, error) {
+	role := &types.Role{}
+	err := db.NewSelect().Model(role).Where("name = ?", name).Scan(ctx)
+	return role, err
 }
 
 func GetRoles(db *bun.DB, isDisabled bool, ctx context.Context) ([]types.Role, error) {
@@ -53,6 +59,12 @@ func GetPermissions(db *bun.DB, ctx context.Context) ([]types.Permission, error)
 func GetPermission(db *bun.DB, id string, ctx context.Context) (*types.Permission, error) {
 	permission := &types.Permission{}
 	err := db.NewSelect().Model(permission).Where("id = ?", id).Scan(ctx)
+	return permission, err
+}
+
+func GetPermissionByName(db *bun.DB, name string, ctx context.Context) (*types.Permission, error) {
+	permission := &types.Permission{}
+	err := db.NewSelect().Model(permission).Where("name = ?", name).Scan(ctx)
 	return permission, err
 }
 

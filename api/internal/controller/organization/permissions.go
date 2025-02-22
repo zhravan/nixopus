@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
@@ -43,6 +44,26 @@ func validateUpdatePermissionRequest(permission types.UpdatePermissionRequest) e
 	return nil
 }
 
+func validateAddPermissionToRoleRequest(permission types.AddPermissionToRoleRequest) error {
+	if permission.PermissionID == "" {
+		return types.ErrPermissionIDRequired
+	}
+	if permission.RoleID == "" {
+		return types.ErrRoleIDRequired
+	}
+	return nil
+}
+
+func validateRemovePermissionFromRoleRequest(permission types.RemovePermissionFromRoleRequest) error {
+	if permission.PermissionID == "" {
+		return types.ErrPermissionIDRequired
+	}
+	if permission.RoleID == "" {
+		return types.ErrRoleIDRequired
+	}
+	return nil
+}
+
 func (c *PermissionsController) CreatePermission(w http.ResponseWriter, r *http.Request) {
 	var permission types.CreatePermissionRequest
 
@@ -53,6 +74,12 @@ func (c *PermissionsController) CreatePermission(w http.ResponseWriter, r *http.
 
 	if err := validateCreatePermissionRequest(permission); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingPermission, err := storage.GetPermissionByName(c.app.Store.DB, permission.Name, c.app.Ctx)
+	if err == nil && existingPermission.ID != uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrPermissionAlreadyExists.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -100,6 +127,12 @@ func (c *PermissionsController) UpdatePermission(w http.ResponseWriter, r *http.
 		return
 	}
 
+	existingPermission, err := storage.GetPermission(c.app.Store.DB, permission.ID, c.app.Ctx)
+	if err == nil && existingPermission.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrPermissionDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := storage.UpdatePermission(c.app.Store.DB, &permission, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToUpdatePermission.Error(), http.StatusInternalServerError)
 		return
@@ -113,6 +146,17 @@ func (c *PermissionsController) DeletePermission(w http.ResponseWriter, r *http.
 
 	if err := json.NewDecoder(r.Body).Decode(&permission); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := validateGetPermissionRequest(permission.ID); err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingPermission, err := storage.GetPermission(c.app.Store.DB, permission.ID, c.app.Ctx)
+	if err == nil && existingPermission.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrPermissionDoesNotExist.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -132,6 +176,23 @@ func (p *PermissionsController) AddPermissionToRole(w http.ResponseWriter, r *ht
 		return
 	}
 
+	if err := validateAddPermissionToRoleRequest(permission); err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingRole, err := storage.GetRole(p.app.Store.DB, permission.RoleID, p.app.Ctx)
+	if err == nil && existingRole.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingPermission, err := storage.GetPermission(p.app.Store.DB, permission.PermissionID, p.app.Ctx)
+	if err == nil && existingPermission.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrPermissionDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := storage.AddPermissionToRole(p.app.Store.DB, permission, p.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToAddPermissionToRole.Error(), http.StatusInternalServerError)
 		return
@@ -145,6 +206,23 @@ func (p *PermissionsController) RemovePermissionFromRole(w http.ResponseWriter, 
 
 	if err := json.NewDecoder(r.Body).Decode(&permission); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := validateRemovePermissionFromRoleRequest(permission); err != nil {
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingRole, err := storage.GetRole(p.app.Store.DB, permission.RoleID, p.app.Ctx)
+	if err == nil && existingRole.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingPermission, err := storage.GetPermission(p.app.Store.DB, permission.PermissionID, p.app.Ctx)
+	if err == nil && existingPermission.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrPermissionDoesNotExist.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -162,6 +240,13 @@ func (p *PermissionsController) GetPermissionsByRole(w http.ResponseWriter, r *h
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	existingRole, err := storage.GetRole(p.app.Store.DB, id, p.app.Ctx)
+	if err == nil && existingRole.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
 	permissions, err := storage.GetPermissionsByRole(p.app.Store.DB, id, p.app.Ctx)
 	if err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToGetPermissionsByRole.Error(), http.StatusInternalServerError)

@@ -108,6 +108,8 @@ var (
 	ErrFailedToUpdateRole = errors.New("failed to update role")
 	ErrRoleEmptyFields    = errors.New("name or description is required to update a role")
 	ErrFailedToDeleteRole = errors.New("failed to delete role")
+	ErrRoleAlreadyExists  = errors.New("role already exists")
+	ErrRoleDoesNotExist   = errors.New("role does not exist")
 )
 
 type CreatePermissionRequest struct {

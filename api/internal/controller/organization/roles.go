@@ -3,7 +3,9 @@ package organization
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
@@ -57,7 +59,22 @@ func (c *RolesController) CreateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := storage.CreateRole(c.app.Store.DB, role, c.app.Ctx); err != nil {
+	existingRole, err := storage.GetRoleByName(c.app.Store.DB, role.Name, c.app.Ctx)
+	if err == nil && existingRole.ID != uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleAlreadyExists.Error(), http.StatusBadRequest)
+		return
+	}
+
+	insertingRole := types.Role{
+		ID:          uuid.New(),
+		Name:        role.Name,
+		Description: role.Description,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		DeletedAt:   nil,
+	}
+
+	if err := storage.CreateRole(c.app.Store.DB, insertingRole, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToCreateRole.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -112,6 +129,12 @@ func (c *RolesController) UpdateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	existingRole, err := storage.GetRole(c.app.Store.DB, role.ID, c.app.Ctx)
+	if err == nil && existingRole.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := storage.UpdateRole(c.app.Store.DB, &role, c.app.Ctx); err != nil {
 		utils.SendErrorResponse(w, types.ErrFailedToUpdateRole.Error(), http.StatusInternalServerError)
 		return
@@ -126,6 +149,12 @@ func (c *RolesController) DeleteRole(w http.ResponseWriter, r *http.Request) {
 
 	if err := validateGetRoleRequest(id); err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	existingRole, err := storage.GetRole(c.app.Store.DB, id, c.app.Ctx)
+	if err == nil && existingRole.ID == uuid.Nil {
+		utils.SendErrorResponse(w, types.ErrRoleDoesNotExist.Error(), http.StatusBadRequest)
 		return
 	}
 

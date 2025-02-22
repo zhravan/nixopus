@@ -77,27 +77,27 @@ func (router *Router) Routes() *mux.Router {
 	// Organization Routes
 	organizationController := organization.NewOrganizationsController(router.app)
 	api.HandleFunc("/organizations", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
-	api.HandleFunc("/organizations/{id}", organizationController.GetOrganization).Methods("GET", "OPTIONS")
-	api.HandleFunc("/organizations/{id}", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
-	api.HandleFunc("/organizations/{id}", organizationController.DeleteOrganization).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/organizations", organizationController.GetOrganization).Methods("GET", "OPTIONS")
+	api.HandleFunc("/organizations", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/organizations", organizationController.DeleteOrganization).Methods("DELETE", "OPTIONS")
 	api.HandleFunc("/organizations", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
 
-	api.HandleFunc("/add-user/organizations", organizationController.AddUserToOrganization).Methods("POST", "OPTIONS")
-	api.HandleFunc("/remove-user/organizations", organizationController.RemoveUserFromOrganization).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/organizations/user", organizationController.AddUserToOrganization).Methods("POST", "OPTIONS")
+	api.HandleFunc("/organizations/user", organizationController.RemoveUserFromOrganization).Methods("DELETE", "OPTIONS")
 
 	api.HandleFunc("/organization/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 
 	// Permission Routes
 	permissionController := organization.NewPermissionsController(router.app)
 	api.HandleFunc("/permissions", permissionController.CreatePermission).Methods("POST", "OPTIONS")
-	api.HandleFunc("/permission/", permissionController.GetPermission).Methods("GET", "OPTIONS")
-	api.HandleFunc("/permissions/update", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
-	api.HandleFunc("/permissions/delete", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/permission", permissionController.GetPermission).Methods("GET", "OPTIONS")
+	api.HandleFunc("/permissions", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
+	api.HandleFunc("/permissions", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
 	api.HandleFunc("/permissions", permissionController.GetPermissions).Methods("GET", "OPTIONS")	
-	api.HandleFunc("/add-permission/roles", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
-	api.HandleFunc("/remove-permission/roles", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
+	api.HandleFunc("/roles/permission", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
+	api.HandleFunc("/roles/permission", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
 
-	api.HandleFunc("/permissions/roles", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
+	api.HandleFunc("/roles/permissions", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
 
 	// User Routes
 	// userController := controller.NewUserController(router.app)

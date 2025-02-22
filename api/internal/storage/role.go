@@ -137,3 +137,9 @@ func AddUserToOrganization(db *bun.DB, orgainzation_user types.OrganizationUsers
 	_, err := db.NewInsert().Model(&orgainzation_user).Exec(ctx)
 	return err
 }
+
+func GetOrganizationByName(db *bun.DB, name string, ctx context.Context) (*types.Organization, error) {
+	organization := &types.Organization{}
+	err := db.NewSelect().Model(organization).Where("name = ?", name).Scan(ctx)
+	return organization, err
+}

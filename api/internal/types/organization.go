@@ -174,6 +174,12 @@ var (
 	ErrInternalServer                     = errors.New("internal server error")
 	ErrInvalidRoleID                      = errors.New("invalid role id")
 	ErrMissingRoleID                      = errors.New("role id is required to add user to organization")
+	ErrOrganizationNameTooLong            = errors.New("organization name is too long")
+	ErrOrganizationNameContainsSpaces     = errors.New("organization name contains spaces")
+	ErrOrganizationDescriptionTooLong     = errors.New("organization description is too long")
+	ErrInvalidOrganizationID              = errors.New("invalid organization id")
+	ErrInvalidUserID                      = errors.New("invalid user id")
+	ErrInvalidRequestType                 = errors.New("invalid request type")
 )
 
 type CreateOrganizationRequest struct {

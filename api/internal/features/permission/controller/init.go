@@ -17,10 +17,10 @@ type PermissionController struct {
 	validator *validation.Validator
 }
 
-func (c *PermissionController) NewPermissionController(store shared_storage.Store, ctx context.Context) *PermissionController {
+func NewPermissionController(store *shared_storage.Store, ctx context.Context) *PermissionController {
 	return &PermissionController{
-		service:   *service.NewPermissionService(&store, ctx),
-		store:     store,
+		service:   *service.NewPermissionService(store, ctx),
+		store:     *store,
 		storage:   storage.PermissionStorage{DB: store.DB, Ctx: ctx},
 		ctx:       ctx,
 		validator: validation.NewValidator(),

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/google/uuid"
+	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/organization/types"
 )
 
@@ -22,8 +23,11 @@ func (o *OrganizationService) RemoveUserFromOrganization(user *types.RemoveUserF
 	if err == nil && existingOrganization.ID == uuid.Nil {
 		return types.ErrOrganizationDoesNotExist
 	}
-
-	existingUser, err := o.storage.FindUserByID(user.UserID)
+	user_storage := user_storage.UserStorage{
+		DB:  o.store.DB,
+		Ctx: o.Ctx,
+	}
+	existingUser, err := user_storage.FindUserByID(user.UserID)
 	if err == nil && existingUser.ID == uuid.Nil {
 		return types.ErrUserDoesNotExist
 	}

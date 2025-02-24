@@ -4,8 +4,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/organization/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	role_storage "github.com/raghavyuva/nixopus-api/internal/features/role/storage"
 )
 
 func (o *OrganizationService) AddUserToOrganization(user types.AddUserToOrganizationRequest, organization shared_types.Organization) error {
@@ -22,7 +24,12 @@ func (o *OrganizationService) AddUserToOrganization(user types.AddUserToOrganiza
 		return types.ErrOrganizationDoesNotExist
 	}
 
-	existingUser, err := o.storage.FindUserByID(user.UserID)
+	user_storage := user_storage.UserStorage{
+		DB:  o.store.DB,
+		Ctx: o.Ctx,
+	}
+
+	existingUser, err := user_storage.FindUserByID(user.UserID)
 	if err != nil {
 		return err
 	}
@@ -30,7 +37,11 @@ func (o *OrganizationService) AddUserToOrganization(user types.AddUserToOrganiza
 		return types.ErrUserDoesNotExist
 	}
 
-	existingRole, err := o.storage.GetRole(roleId.String())
+	role_storage := role_storage.RoleStorage{
+		DB:  o.store.DB,
+		Ctx: o.Ctx,
+	}
+	existingRole, err := role_storage.GetRole(roleId.String())
 	if err != nil {
 		return err
 	}

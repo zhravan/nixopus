@@ -5,8 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	health "github.com/raghavyuva/nixopus-api/internal/features/health"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
+	health "github.com/raghavyuva/nixopus-api/internal/features/health"
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
 	permission "github.com/raghavyuva/nixopus-api/internal/features/permission/controller"
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
@@ -33,7 +34,7 @@ func NewRouter(app *storage.App) *Router {
 // - middleware.AuthMiddleware: checks if the request is authenticated
 func (router *Router) Routes() *mux.Router {
 	r := mux.NewRouter()
-
+	l := logger.NewLogger()
 	r.Use(middleware.CorsMiddleware)
 	r.Use(middleware.LoggingMiddleware)
 	r.Use(middleware.RateLimiter)
@@ -51,7 +52,7 @@ func (router *Router) Routes() *mux.Router {
 	u := r.PathPrefix("/api/v1").Subrouter()
 
 	// Unauthenticated routes
-	authController := auth.NewAuthController(router.app.Store, router.app.Ctx)
+	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l)
 	u.HandleFunc("/auth/register", authController.Register).Methods("POST", "OPTIONS")
 	u.HandleFunc("/auth/login", authController.Login).Methods("POST", "OPTIONS")
 
@@ -77,7 +78,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/roles", roleController.GetRoles).Methods("GET", "OPTIONS")
 
 	// Organization Routes
-	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx)
+	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l)
 	api.HandleFunc("/organizations", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
 	api.HandleFunc("/organizations", organizationController.GetOrganization).Methods("GET", "OPTIONS")
 	api.HandleFunc("/organizations", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")

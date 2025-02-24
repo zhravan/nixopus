@@ -25,8 +25,8 @@ type AuthController struct {
 func NewAuthController(
 	store *shared_storage.Store,
 	ctx context.Context,
+	l logger.Logger,
 ) *AuthController {
-	l := logger.NewLogger()
 	return &AuthController{
 		store:     store,
 		validator: validation.NewValidator(),

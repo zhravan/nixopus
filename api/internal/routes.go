@@ -91,7 +91,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/organization/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 
 	// Permission Routes
-	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx)
+	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx,l)
 	api.HandleFunc("/permissions", permissionController.CreatePermission).Methods("POST", "OPTIONS")
 	api.HandleFunc("/permission", permissionController.GetPermission).Methods("GET", "OPTIONS")
 	api.HandleFunc("/permissions", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")

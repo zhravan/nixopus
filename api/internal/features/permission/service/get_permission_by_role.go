@@ -4,10 +4,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/permission/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	role_storage "github.com/raghavyuva/nixopus-api/internal/features/role/storage"
 )
 
 func (p *PermissionService) GetPermissionByRole(roleID string) ([]shared_types.RolePermissions, error) {
-	existingRole, err := p.storage.GetRole(roleID)
+	role_storage := role_storage.RoleStorage{
+		DB:  p.store.DB,
+		Ctx: p.ctx,
+	}
+	existingRole, err := role_storage.GetRole(roleID)
 	if err == nil && existingRole.ID == uuid.Nil {
 		return nil, types.ErrRoleDoesNotExist
 	}

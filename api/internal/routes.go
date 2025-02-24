@@ -70,7 +70,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/auth/verify-email", authController.VerifyEmail).Methods("POST", "OPTIONS")
 
 	// Role based routes
-	roleController := role.NewRolesController(router.app.Store, router.app.Ctx)
+	roleController := role.NewRolesController(router.app.Store, router.app.Ctx, l)
 	api.HandleFunc("/roles", roleController.CreateRole).Methods("POST", "OPTIONS")
 	// api.HandleFunc("/roles/{id}", roleController.GetRole).Methods("GET", "OPTIONS")
 	api.HandleFunc("/roles/", roleController.UpdateRole).Methods("PUT", "OPTIONS")
@@ -91,7 +91,7 @@ func (router *Router) Routes() *mux.Router {
 	api.HandleFunc("/organization/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 
 	// Permission Routes
-	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx,l)
+	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx, l)
 	api.HandleFunc("/permissions", permissionController.CreatePermission).Methods("POST", "OPTIONS")
 	api.HandleFunc("/permission", permissionController.GetPermission).Methods("GET", "OPTIONS")
 	api.HandleFunc("/permissions", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")

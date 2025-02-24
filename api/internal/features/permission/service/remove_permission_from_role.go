@@ -26,7 +26,7 @@ func (p *PermissionService) RemovePermissionFromRole(permissionID string, roleId
 	}
 
 	if err := p.storage.RemovePermissionFromRole(permissionID); err != nil {
-		p.logger.Log(logger.Error, types.ErrFailedToRemovePermissionFromRole.Error(),err.Error())
+		p.logger.Log(logger.Error, types.ErrFailedToRemovePermissionFromRole.Error(), err.Error())
 		return types.ErrFailedToRemovePermissionFromRole
 	}
 

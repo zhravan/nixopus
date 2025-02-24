@@ -20,8 +20,8 @@ func NewOrganizationService(store *shared_storage.Store, ctx context.Context, lo
 	return &OrganizationService{
 		store: store,
 		storage: storage.OrganizationStore{
-			DB:     store.DB,
-			Ctx:    ctx,
+			DB:  store.DB,
+			Ctx: ctx,
 		},
 		logger: logger,
 	}

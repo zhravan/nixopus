@@ -10,7 +10,7 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-func (p *PermissionController)  AddPermissionToRole(w http.ResponseWriter, r *http.Request) {
+func (p *PermissionController) AddPermissionToRole(w http.ResponseWriter, r *http.Request) {
 	var permission types.AddPermissionToRoleRequest
 
 	if err := p.validator.ParseRequestBody(&permission, r.Body, &permission); err != nil {
@@ -32,4 +32,3 @@ func (p *PermissionController)  AddPermissionToRole(w http.ResponseWriter, r *ht
 
 	utils.SendJSONResponse(w, "success", "Permission added to role successfully", nil)
 }
-

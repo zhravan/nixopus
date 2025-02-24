@@ -65,7 +65,7 @@ func (o *OrganizationService) AddUserToOrganization(user types.AddUserToOrganiza
 		return err
 	}
 	if existingUserInOrganization.ID != uuid.Nil {
-		o.logger.Log(logger.Error, types.ErrUserAlreadyInOrganization.Error(),"")
+		o.logger.Log(logger.Error, types.ErrUserAlreadyInOrganization.Error(), "")
 		return types.ErrUserAlreadyInOrganization
 	}
 

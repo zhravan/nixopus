@@ -15,14 +15,14 @@ type AuthService struct {
 	logger  logger.Logger
 }
 
-func NewAuthService(store *shared_storage.Store, ctx context.Context,logger logger.Logger) *AuthService {
+func NewAuthService(store *shared_storage.Store, ctx context.Context, logger logger.Logger) *AuthService {
 	return &AuthService{
 		storage: storage.UserStorage{
 			DB:  store.DB,
 			Ctx: ctx,
 		},
-		store: store,
-		Ctx:   ctx,
+		store:  store,
+		Ctx:    ctx,
 		logger: logger,
 	}
 }

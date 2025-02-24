@@ -27,7 +27,7 @@ func (c *PermissionService) UpdatePermission(permission *types.UpdatePermissionR
 
 	if err := c.storage.UpdatePermission(&permissionToUpdate); err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToUpdatePermission.Error(), err.Error())
-		return  types.ErrFailedToUpdatePermission
+		return types.ErrFailedToUpdatePermission
 	}
 
 	return nil

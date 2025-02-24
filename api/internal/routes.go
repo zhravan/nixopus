@@ -36,7 +36,7 @@ func (router *Router) Routes() *mux.Router {
 
 	r.Use(middleware.CorsMiddleware)
 	r.Use(middleware.LoggingMiddleware)
-
+	r.Use(middleware.RateLimiter)
 	r.HandleFunc("/health", health.HealthCheck).Methods("GET", "OPTIONS")
 
 	wsServer, err := NewSocketServer()

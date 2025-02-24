@@ -15,8 +15,8 @@ import (
 // If the storage layer succeeds in fetching the users, it returns the users.
 func (o *OrganizationService) GetOrganizationUsers(id string) ([]shared_types.OrganizationUsers, error) {
 	existingOrganization, err := o.storage.GetOrganization(id)
-	if err == nil && existingOrganization.ID != uuid.Nil {
-		return nil, types.ErrOrganizationAlreadyExists
+	if err != nil && existingOrganization.ID == uuid.Nil {
+		return nil, types.ErrOrganizationDoesNotExist
 	}
 
 	users, err := o.storage.GetOrganizationUsers(id)

@@ -9,6 +9,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/config"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
+	_ "github.com/raghavyuva/nixopus-api/internal/log"
 )
 
 func main() {

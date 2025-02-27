@@ -18,6 +18,11 @@ definitions:
       password:
         type: string
     type: object
+  types.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
   types.Organization:
     properties:
       created_at:
@@ -128,6 +133,36 @@ paths:
           schema:
             $ref: '#/definitions/types.Response'
       summary: User login endpoint
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out a user by revoking the refresh token.
+      parameters:
+      - description: Logout request
+        in: body
+        name: logout
+        required: true
+        schema:
+          $ref: '#/definitions/types.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      summary: Logout user endpoint
       tags:
       - auth
 swagger: "2.0"

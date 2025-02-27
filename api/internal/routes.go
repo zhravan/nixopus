@@ -108,7 +108,7 @@ func (router *Router) Routes() *mux.Router {
 	orgApi.HandleFunc("", organizationController.GetOrganization).Methods("GET", "OPTIONS")
 	orgApi.HandleFunc("", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
 	orgApi.HandleFunc("", organizationController.DeleteOrganization).Methods("DELETE", "OPTIONS")
-	orgApi.HandleFunc("", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
+	orgApi.HandleFunc("/all", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
 	orgApi.HandleFunc("/user", organizationController.AddUserToOrganization).Methods("POST", "OPTIONS")
 	orgApi.HandleFunc("/user", organizationController.RemoveUserFromOrganization).Methods("DELETE", "OPTIONS")
 	orgApi.HandleFunc("/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")

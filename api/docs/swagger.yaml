@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  types.AddUserToOrganizationRequest:
+    properties:
+      organization_id:
+        type: string
+      role_id:
+        type: string
+      user_id:
+        type: string
+    type: object
   types.AuthResponse:
     properties:
       access_token:
@@ -16,6 +25,18 @@ definitions:
       new_password:
         type: string
       old_password:
+        type: string
+    type: object
+  types.CreateOrganizationRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  types.DeleteOrganizationRequest:
+    properties:
+      id:
         type: string
     type: object
   types.LoginRequest:
@@ -49,6 +70,50 @@ definitions:
           $ref: '#/definitions/types.User'
         type: array
     type: object
+  types.OrganizationUsers:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      organization:
+        $ref: '#/definitions/types.Organization'
+      organization_id:
+        type: string
+      role:
+        $ref: '#/definitions/types.Role'
+      role_id:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/types.User'
+      user_id:
+        type: string
+    type: object
+  types.Permission:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      resource:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/types.Role'
+        type: array
+      updated_at:
+        type: string
+    type: object
   types.RefreshTokenRequest:
     properties:
       refresh_token:
@@ -61,6 +126,13 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  types.RemoveUserFromOrganizationRequest:
+    properties:
+      organization_id:
+        type: string
+      user_id:
         type: string
     type: object
   types.Response:
@@ -82,6 +154,34 @@ definitions:
         description: |-
           Status of the response ("success" or "error")
           @Example success
+        type: string
+    type: object
+  types.Role:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/types.Permission'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  types.UpdateOrganizationRequest:
+    properties:
+      description omitempty:
+        type: string
+      id:
+        type: string
+      name omitempty:
         type: string
     type: object
   types.User:
@@ -304,6 +404,256 @@ paths:
       summary: Reset password endpoint
       tags:
       - auth
+  /health:
+    get:
+      description: Simple health check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+      summary: Check if the server is up
+      tags:
+      - health
+  /organization/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an organization by its ID.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with organization
+          schema:
+            $ref: '#/definitions/types.Organization'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get an organization
+      tags:
+      - organization
+  /organization/{id}/users:
+    get:
+      consumes:
+      - application/json
+      description: Get users of an organization
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with organization users
+          schema:
+            $ref: '#/definitions/types.OrganizationUsers'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get organization users
+      tags:
+      - organization
+  /organization/add-user-to-organization:
+    post:
+      consumes:
+      - application/json
+      description: Adds a user to an organization
+      parameters:
+      - description: Add user to organization request
+        in: body
+        name: add_user_to_organization
+        required: true
+        schema:
+          $ref: '#/definitions/types.AddUserToOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with user
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Add a user to an organization
+      tags:
+      - organization
+  /organization/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new organization in the application.
+      parameters:
+      - description: Create organization request
+        in: body
+        name: create_organization
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with organization
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new organization
+      tags:
+      - organization
+  /organization/delete:
+    post:
+      consumes:
+      - application/json
+      description: Deletes an organization with the given id.
+      parameters:
+      - description: Delete organization request
+        in: body
+        name: delete_organization
+        required: true
+        schema:
+          $ref: '#/definitions/types.DeleteOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete an organization
+      tags:
+      - organization
+  /organization/remove-user-from-organization:
+    post:
+      consumes:
+      - application/json
+      description: Removes a user from an organization
+      parameters:
+      - description: Remove user from organization request
+        in: body
+        name: remove_user_from_organization
+        required: true
+        schema:
+          $ref: '#/definitions/types.RemoveUserFromOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove a user from an organization
+      tags:
+      - organization
+  /organization/update:
+    post:
+      consumes:
+      - application/json
+      description: Updates an organization
+      parameters:
+      - description: Update organization request
+        in: body
+        name: update_organization
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Update an organization
+      tags:
+      - organization
+  /organizations:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all organizations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with organizations
+          schema:
+            items:
+              $ref: '#/definitions/types.Organization'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all organizations
+      tags:
+      - organization
 securityDefinitions:
   BearerAuth:
     description: Enter your bearer token in the format **Bearer &lt;token&gt;**

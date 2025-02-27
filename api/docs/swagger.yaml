@@ -1,4 +1,86 @@
 basePath: /v1
+definitions:
+  types.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/types.User'
+    type: object
+  types.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  types.Organization:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/types.User'
+        type: array
+    type: object
+  types.Response:
+    description: Standard API response structure
+    properties:
+      data:
+        description: Actual response data
+      error:
+        description: |-
+          Error message in case of error
+          @Example Invalid input parameters
+        type: string
+      message:
+        description: |-
+          Optional message providing additional information
+          @Example Operation completed successfully
+        type: string
+      status:
+        description: |-
+          Status of the response ("success" or "error")
+          @Example success
+        type: string
+    type: object
+  types.User:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_verified:
+        type: boolean
+      organizations:
+        items:
+          $ref: '#/definitions/types.Organization'
+        type: array
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -12,5 +94,40 @@ info:
   termsOfService: http://nixopus.com/terms/
   title: Nixopus Documentation
   version: "1.0"
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/types.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with token
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.AuthResponse'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.Response'
+      summary: User login endpoint
+      tags:
+      - auth
 swagger: "2.0"

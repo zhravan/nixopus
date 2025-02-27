@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  types.AddPermissionToRoleRequest:
+    properties:
+      permission_id:
+        type: string
+      role_id:
+        type: string
+    type: object
   types.AddUserToOrganizationRequest:
     properties:
       organization_id:
@@ -34,7 +41,21 @@ definitions:
       name:
         type: string
     type: object
+  types.CreatePermissionRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      resource:
+        type: string
+    type: object
   types.DeleteOrganizationRequest:
+    properties:
+      id:
+        type: string
+    type: object
+  types.DeletePermissionRequest:
     properties:
       id:
         type: string
@@ -128,6 +149,13 @@ definitions:
       username:
         type: string
     type: object
+  types.RemovePermissionFromRoleRequest:
+    properties:
+      permission_id:
+        type: string
+      role_id:
+        type: string
+    type: object
   types.RemoveUserFromOrganizationRequest:
     properties:
       organization_id:
@@ -182,6 +210,17 @@ definitions:
       id:
         type: string
       name omitempty:
+        type: string
+    type: object
+  types.UpdatePermissionRequest:
+    properties:
+      description omitempty:
+        type: string
+      id:
+        type: string
+      name omitempty:
+        type: string
+      resource omitempty:
         type: string
     type: object
   types.User:
@@ -654,6 +693,250 @@ paths:
       summary: Get all organizations
       tags:
       - organization
+  /permissions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all permissions.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with permissions
+          schema:
+            items:
+              $ref: '#/definitions/types.Permission'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all permissions
+      tags:
+      - permission
+    post:
+      consumes:
+      - application/json
+      description: Creates a new permission in the application.
+      parameters:
+      - description: Create permission request
+        in: body
+        name: create_permission
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreatePermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success response with permission
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new permission
+      tags:
+      - permission
+  /permissions/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a permission by its ID.
+      parameters:
+      - description: Permission ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with permission
+          schema:
+            $ref: '#/definitions/types.Permission'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get a permission
+      tags:
+      - permission
+  /permissions/delete:
+    post:
+      consumes:
+      - application/json
+      description: Deletes a permission with the given id.
+      parameters:
+      - description: Delete permission request
+        in: body
+        name: delete_permission
+        required: true
+        schema:
+          $ref: '#/definitions/types.DeletePermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete a permission
+      tags:
+      - permission
+  /permissions/roles:
+    post:
+      consumes:
+      - application/json
+      description: Add permission to role
+      parameters:
+      - description: Add permission to role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.AddPermissionToRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Add permission to role
+      tags:
+      - permission
+  /permissions/roles/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get permissions by role
+      parameters:
+      - description: Role ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get permissions by role
+      tags:
+      - permission
+  /permissions/roles/remove:
+    post:
+      consumes:
+      - application/json
+      description: Remove permission from role
+      parameters:
+      - description: Remove permission from role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.RemovePermissionFromRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove permission from role
+      tags:
+      - permission
+  /permissions/update:
+    post:
+      consumes:
+      - application/json
+      description: Updates a permission
+      parameters:
+      - description: Update permission request
+        in: body
+        name: update_permission
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdatePermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Update a permission
+      tags:
+      - permission
 securityDefinitions:
   BearerAuth:
     description: Enter your bearer token in the format **Bearer &lt;token&gt;**

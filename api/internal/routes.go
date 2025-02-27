@@ -13,33 +13,52 @@ import (
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type Router struct {
-	app            *storage.App
+	app *storage.App
 }
 
 func NewRouter(app *storage.App) *Router {
 	return &Router{
-		app:            app,
+		app: app,
 	}
 }
 
-// Routes returns a new router that handles all API routes, including
-// unauthenticated and authenticated routes.
-// The following middleware is used:
-//
-// - middleware.CorsMiddleware: enables CORS
-// - middleware.LoggingMiddleware: logs all requests
-// - middleware.AuthMiddleware: checks if the request is authenticated
+// @title Nixopus Documentation
+// @version 1.0
+// @description Api for Nixopus
+// @termsOfService http://nixopus.com/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email raghav@nixopus.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /v1
 func (router *Router) Routes() *mux.Router {
 	r := mux.NewRouter()
 	l := logger.NewLogger()
 	r.Use(middleware.CorsMiddleware)
 	r.Use(middleware.LoggingMiddleware)
 	r.Use(middleware.RateLimiter)
-	
+
 	r.HandleFunc("/health", health.HealthCheck).Methods("GET", "OPTIONS")
+	r.PathPrefix("/docs/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+		httpSwagger.DeepLinking(true),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	))
+
+	r.HandleFunc("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		http.ServeFile(w, r, "./docs/swagger.json")
+	})
 
 	wsServer, err := NewSocketServer()
 	if err != nil {
@@ -97,7 +116,7 @@ func (router *Router) Routes() *mux.Router {
 	permApi.HandleFunc("", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
 	permApi.HandleFunc("", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
 	permApi.HandleFunc("", permissionController.GetPermissions).Methods("GET", "OPTIONS")
-	
+
 	rolePermApi := api.PathPrefix("/roles/permission").Subrouter()
 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
 	rolePermApi.HandleFunc("", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")

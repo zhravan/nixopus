@@ -1,0 +1,16 @@
+basePath: /v1
+host: localhost:8080
+info:
+  contact:
+    email: raghav@nixopus.com
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Api for Nixopus
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://nixopus.com/terms/
+  title: Nixopus Documentation
+  version: "1.0"
+paths: {}
+swagger: "2.0"

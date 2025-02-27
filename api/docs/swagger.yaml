@@ -50,6 +50,13 @@ definitions:
       resource:
         type: string
     type: object
+  types.CreateRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
   types.DeleteOrganizationRequest:
     properties:
       id:
@@ -221,6 +228,15 @@ definitions:
       name omitempty:
         type: string
       resource omitempty:
+        type: string
+    type: object
+  types.UpdateRoleRequest:
+    properties:
+      description omitempty:
+        type: string
+      id:
+        type: string
+      name omitempty:
         type: string
     type: object
   types.User:
@@ -937,6 +953,150 @@ paths:
       summary: Update a permission
       tags:
       - permission
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all roles in the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with roles
+          schema:
+            items:
+              $ref: '#/definitions/types.Role'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all roles
+      tags:
+      - role
+    post:
+      consumes:
+      - application/json
+      description: Creates a new role in the application.
+      parameters:
+      - description: Create role request
+        in: body
+        name: create_role
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success response with role
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new role
+      tags:
+      - role
+  /roles/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a role by its ID
+      parameters:
+      - description: Role ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with role
+          schema:
+            $ref: '#/definitions/types.Role'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get a role
+      tags:
+      - role
+  /roles/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a role with the given id.
+      parameters:
+      - description: Role ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete a role
+      tags:
+      - role
+  /roles/update:
+    post:
+      consumes:
+      - application/json
+      description: Updates a role with the given id.
+      parameters:
+      - description: Update role request
+        in: body
+        name: update_role
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Update a role
+      tags:
+      - role
 securityDefinitions:
   BearerAuth:
     description: Enter your bearer token in the format **Bearer &lt;token&gt;**

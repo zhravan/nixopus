@@ -119,12 +119,12 @@ func (router *Router) Routes() *mux.Router {
 	permApi.HandleFunc("", permissionController.GetPermission).Methods("GET", "OPTIONS")
 	permApi.HandleFunc("", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
 	permApi.HandleFunc("", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
-	permApi.HandleFunc("", permissionController.GetPermissions).Methods("GET", "OPTIONS")
+	permApi.HandleFunc("/all", permissionController.GetPermissions).Methods("GET", "OPTIONS")
 
 	rolePermApi := api.PathPrefix("/roles/permission").Subrouter()
 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
 	rolePermApi.HandleFunc("", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
-	rolePermApi.HandleFunc("s", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
+	rolePermApi.HandleFunc("", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
 
 	return r
 }

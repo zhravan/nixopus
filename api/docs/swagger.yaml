@@ -1,4 +1,4 @@
-basePath: /v1
+basePath: /api/v1
 definitions:
   types.AuthResponse:
     properties:
@@ -10,6 +10,13 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/types.User'
+    type: object
+  types.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
     type: object
   types.LoginRequest:
     properties:
@@ -41,6 +48,20 @@ definitions:
         items:
           $ref: '#/definitions/types.User'
         type: array
+    type: object
+  types.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  types.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
     type: object
   types.Response:
     description: Standard API response structure
@@ -100,6 +121,32 @@ info:
   title: Nixopus Documentation
   version: "1.0"
 paths:
+  /auth/generate-password-reset-link:
+    post:
+      consumes:
+      - application/json
+      description: Generates a password reset link for a user and sends it to the
+        user's email
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset link sent successfully
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Failed to decode or validate request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Generates a password reset link for a user
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -162,7 +209,105 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
       summary: Logout user endpoint
       tags:
       - auth
+  /auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes a users access token with a new one.
+      parameters:
+      - description: Refresh request
+        in: body
+        name: refresh
+        required: true
+        schema:
+          $ref: '#/definitions/types.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with token
+          schema:
+            $ref: '#/definitions/types.AuthResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Refresh token endpoint
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user in the application.
+      parameters:
+      - description: Register request
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/types.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with token
+          schema:
+            $ref: '#/definitions/types.AuthResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+      summary: Register a new user
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Resets the user's password using the provided information.
+      parameters:
+      - description: Reset password request
+        in: body
+        name: resetPassword
+        required: true
+        schema:
+          $ref: '#/definitions/types.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successfully
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Failed to decode or validate request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Reset password endpoint
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    description: Enter your bearer token in the format **Bearer &lt;token&gt;**
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

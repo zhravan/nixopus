@@ -14,6 +14,7 @@ import (
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param logout body types.LogoutRequest true "Logout request"
 // @Success 200 {object} types.Response "Success response"
 // @Failure 400 {object} types.Response "Bad request"
@@ -42,4 +43,3 @@ func (c *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 
 	utils.SendJSONResponse(w, "success", "Logged out successfully", nil)
 }
-

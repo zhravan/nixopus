@@ -39,7 +39,11 @@ func NewRouter(app *storage.App) *Router {
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host localhost:8080
-// @BasePath /v1
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter your bearer token in the format **Bearer &lt;token&gt;**
 func (router *Router) Routes() *mux.Router {
 	r := mux.NewRouter()
 	l := logger.NewLogger()

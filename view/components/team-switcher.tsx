@@ -28,6 +28,10 @@ export function TeamSwitcher({
   const { isMobile } = useSidebar()
   const [activeTeam, setActiveTeam] = React.useState(teams?.[0])
 
+  React.useEffect(() => {
+    setActiveTeam(teams?.[0])
+  }, [teams])
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -42,7 +46,7 @@ export function TeamSwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeTeam?.organization.name}</span>
-                <span className="truncate text-xs">{activeTeam?.role.description}</span>
+                <span className="truncate text-xs">{activeTeam?.organization.description}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>

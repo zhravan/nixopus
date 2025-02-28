@@ -57,14 +57,9 @@ func (s *UserStorage) GetUserOrganizationsWithRolesAndPermissions(userID string)
 			continue
 		}
 
-		roleResponse := types.RolesResponse{
-			Role:        role,
-			Permissions: role.Permissions,
-		}
-
 		orgResponse := types.UserOrganizationsResponse{
 			Organization: organization,
-			Role:         roleResponse,
+			Role:         role,
 		}
 
 		response = append(response, orgResponse)

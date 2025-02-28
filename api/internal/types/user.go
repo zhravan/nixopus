@@ -55,7 +55,7 @@ func (u User) NewUser() User {
 	}
 }
 
-func NewUser(email string, password string, username string, avatar string, role string) User {
+func NewUser(email string, password string, username string, avatar string, role string, isVerified bool) User {
 	return User{
 		ID:         uuid.New(),
 		Username:   username,
@@ -65,7 +65,7 @@ func NewUser(email string, password string, username string, avatar string, role
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 		DeletedAt:  nil,
-		IsVerified: false,
+		IsVerified: isVerified,
 		Type:       role,
 	}
 }

@@ -15,7 +15,7 @@ export const userApi = createApi({
             }),
             providesTags: [{ type: 'User', id: 'LIST' }],
             transformResponse: (response: { data: UserOrganization[] }) => {
-                return { ...response.data };
+                return response.data;
             },
         }),
     }),

@@ -11,6 +11,7 @@ import (
 	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
 	permission "github.com/raghavyuva/nixopus-api/internal/features/permission/controller"
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
+	user "github.com/raghavyuva/nixopus-api/internal/features/user/controller"
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
@@ -125,6 +126,10 @@ func (router *Router) Routes() *mux.Router {
 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
 	rolePermApi.HandleFunc("", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
 	rolePermApi.HandleFunc("", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
+
+	userApi := api.PathPrefix("/user").Subrouter()
+	userController := user.NewUserController(router.app.Store, router.app.Ctx, l)
+	userApi.HandleFunc("", userController.GetUserDetails).Methods("GET", "OPTIONS")
 
 	return r
 }

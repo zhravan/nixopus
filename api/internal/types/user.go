@@ -71,4 +71,5 @@ func NewUser(email string, password string, username string, avatar string) User
 
 var (
 	ErrFailedToDecodeRequest = errors.New("failed to decode request")
+	ErrFailedToGetUserFromContext = errors.New("failed to get user from context")
 )

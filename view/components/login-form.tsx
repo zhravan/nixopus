@@ -10,6 +10,7 @@ export interface LoginFormProps {
   handleEmailChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   handlePasswordChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   handleLogin: () => void
+  isLoading: boolean
 }
 
 export function LoginForm({
@@ -50,8 +51,8 @@ export function LoginForm({
                 </div>
                 <Input id="password" type="password" required value={props.password} onChange={props.handlePasswordChange} />
               </div>
-              <Button type="submit" className="w-full" onClick={props.handleLogin}>
-                Login
+              <Button type="submit" className="w-full" onClick={props.handleLogin} disabled={props.isLoading}>
+                {props.isLoading ? "Loading..." : "Login"} 
               </Button>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}

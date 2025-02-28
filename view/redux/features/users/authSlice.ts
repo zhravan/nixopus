@@ -80,7 +80,7 @@ export const initializeAuth = createAsyncThunk<AuthPayload | null>(
                         authApi.endpoints.refreshToken.initiate({ refresh_token: refreshToken })
                     ).unwrap();
 
-                    if (refreshResult?.accessToken) {
+                    if (refreshResult?.access_token) {
                         console.log('Token refreshed successfully');
 
                         const userResult = await dispatch(
@@ -89,9 +89,9 @@ export const initializeAuth = createAsyncThunk<AuthPayload | null>(
 
                         return {
                             user: userResult,
-                            token: refreshResult.accessToken,
-                            refreshToken: refreshResult.refreshToken || refreshToken,
-                            expiresIn: refreshResult.expiresIn
+                            token: refreshResult.access_token,
+                            refreshToken: refreshResult.refresh_token || refreshToken,
+                            expiresIn: refreshResult.expires_in
                         };
                     } else {
                         console.error('Invalid refresh response');
@@ -214,25 +214,25 @@ export const authSlice = createSlice({
                 state.isInitialized = true;
             })
             .addMatcher(authApi.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
-                if (payload?.accessToken) {
+                if (payload?.access_token) {
                     state.user = payload.user;
-                    state.token = payload.accessToken;
-                    state.refreshToken = payload.refreshToken || null;
-                    state.expiresIn = payload.expiresIn || null;
+                    state.token = payload.access_token;
+                    state.refreshToken = payload.refresh_token || null;
+                    state.expiresIn = payload.expires_in || null;
                     state.isAuthenticated = true;
-                    setTokensToStorage(payload.accessToken, payload.refreshToken, payload.expiresIn);
+                    setTokensToStorage(payload.access_token, payload.refresh_token, payload.expires_in);
                 }
             })
             .addMatcher(authApi.endpoints.refreshToken.matchFulfilled, (state, { payload }) => {
-                if (payload?.accessToken) {
-                    state.token = payload.accessToken;
-                    if (payload.refreshToken) {
-                        state.refreshToken = payload.refreshToken;
+                if (payload?.access_token) {
+                    state.token = payload.access_token;
+                    if (payload.refresh_token) {
+                        state.refreshToken = payload.refresh_token;
                     }
-                    if (payload.expiresIn) {
-                        state.expiresIn = payload.expiresIn;
+                    if (payload.expires_in) {
+                        state.expiresIn = payload.expires_in;
                     }
-                    setTokensToStorage(payload.accessToken, payload.refreshToken, payload.expiresIn);
+                    setTokensToStorage(payload.access_token, payload.refresh_token, payload.expires_in);
                 }
             })
             .addMatcher(authApi.endpoints.getUserDetails.matchFulfilled, (state, { payload }) => {

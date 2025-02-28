@@ -4,12 +4,19 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
+export interface LoginFormProps {
+  email: string
+  password: string
+  handleEmailChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  handlePasswordChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  handleLogin: () => void
+}
+
 export function LoginForm({
-  className,
   ...props
-}: React.ComponentProps<"div">) {
+}: LoginFormProps) {
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6")}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <div className="p-6 md:p-8">
@@ -27,6 +34,8 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  value={props.email}
+                  onChange={props.handleEmailChange}
                 />
               </div>
               <div className="grid gap-3">
@@ -39,9 +48,9 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" required value={props.password} onChange={props.handlePasswordChange} />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" onClick={props.handleLogin}>
                 Login
               </Button>
               <div className="text-center text-sm">

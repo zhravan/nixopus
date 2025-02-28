@@ -1,10 +1,12 @@
 "use client"
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const authenticated = false
+  const [authenticated, setAuthenticated] = useState(false);
   const router = useRouter()
+
   return (
     <div className="flex h-screen flex-col items-center justify-center">
       <div className="text-5xl">Hello, Welcome to Nixopus</div>

@@ -2,10 +2,7 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
   Bot,
-  Command,
-  GalleryVerticalEnd,
   Settings2,
   SquareTerminal,
 } from "lucide-react"
@@ -21,25 +18,9 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useAppSelector } from "@/redux/hooks"
+import { useGetUserOrganizationsQuery } from "@/redux/services/users/userApi"
 
 const data = {
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
       title: "Playground",
@@ -94,11 +75,12 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppSelector(state => state.auth.user)
+  const { data: organizations, isLoading } = useGetUserOrganizationsQuery()
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={isLoading ? [] : organizations} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

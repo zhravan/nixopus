@@ -75,7 +75,8 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useAppSelector(state => state.auth.user)
-  const { data: organizations, isLoading } = useGetUserOrganizationsQuery()
+  const {  isLoading } = useGetUserOrganizationsQuery()
+  const organizations = useAppSelector(state => state.user.organizations)
 
   return (
     <Sidebar collapsible="icon" {...props}>

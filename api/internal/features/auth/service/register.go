@@ -28,7 +28,7 @@ func (c *AuthService) Register(registration_request types.RegisterRequest) (type
 		return types.AuthResponse{}, types.ErrFailedToHashPassword
 	}
 
-	user = shared_types.NewUser(registration_request.Email, hashedPassword, registration_request.Username, "")
+	user = shared_types.NewUser(registration_request.Email, hashedPassword, registration_request.Username, "", registration_request.Type)
 
 	if db_user, err := c.storage.FindUserByEmail(registration_request.Email); err == nil {
 		c.logger.Log(logger.Error, types.ErrUserWithEmailAlreadyExists.Error(), "")

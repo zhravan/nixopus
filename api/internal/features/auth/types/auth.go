@@ -23,6 +23,7 @@ type RegisterRequest struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Type     string `json:"type"`
 }
 
 type UpdateUserRequest struct {
@@ -80,4 +81,5 @@ var (
 	ErrInvalidRequestType                      = errors.New("invalid request type")
 	ErrFailedToCreateAccessToken               = errors.New("failed to create access token")
 	ErrMissingRefreshToken                     = errors.New("refresh token is required")
+	ErrInvalidUserType                         = errors.New("invalid user type")
 )

@@ -105,7 +105,7 @@ func (router *Router) Routes() *mux.Router {
 	roleApi.HandleFunc("/all", roleController.GetRoles).Methods("GET", "OPTIONS")
 
 	orgApi := api.PathPrefix("/organizations").Subrouter()
-	roleApi.Use(middleware.IsAdmin)
+	orgApi.Use(middleware.IsAdmin)
 	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l)
 	orgApi.HandleFunc("", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
 	orgApi.HandleFunc("", organizationController.GetOrganization).Methods("GET", "OPTIONS")
@@ -117,7 +117,7 @@ func (router *Router) Routes() *mux.Router {
 	orgApi.HandleFunc("/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 
 	permApi := api.PathPrefix("/permissions").Subrouter()
-	roleApi.Use(middleware.IsAdmin)
+	permApi.Use(middleware.IsAdmin)
 	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx, l)
 	permApi.HandleFunc("", permissionController.CreatePermission).Methods("POST", "OPTIONS")
 	permApi.HandleFunc("", permissionController.GetPermission).Methods("GET", "OPTIONS")
@@ -126,6 +126,7 @@ func (router *Router) Routes() *mux.Router {
 	permApi.HandleFunc("/all", permissionController.GetPermissions).Methods("GET", "OPTIONS")
 
 	rolePermApi := api.PathPrefix("/roles/permission").Subrouter()
+	rolePermApi.Use(middleware.IsAdmin)
 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
 	rolePermApi.HandleFunc("", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
 	rolePermApi.HandleFunc("", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")

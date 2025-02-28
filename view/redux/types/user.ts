@@ -3,17 +3,17 @@ export interface User {
     username: string;
     email: string;
     avatar: string;
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt: Date | null;
-    isVerified: boolean;
-    resetToken: string;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date | null;
+    is_verified: boolean;
+    reset_token: string;
 }
 
 export interface AuthResponse {
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
     user: User;
 }
 

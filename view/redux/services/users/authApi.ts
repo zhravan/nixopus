@@ -36,7 +36,7 @@ const baseQueryWithReauth: BaseQueryFn<
         const refreshResult = await baseQuery({
             url: AUTHURLS.REFRESH_TOKEN,
             method: 'POST',
-            body: { refreshToken }
+            body: { refresh_token: refreshToken },
         }, api, extraOptions);
 
         if (refreshResult.data) {
@@ -44,9 +44,9 @@ const baseQueryWithReauth: BaseQueryFn<
 
             api.dispatch(setCredentials({
                 user: null,
-                token: refreshData.accessToken,
-                refreshToken: refreshData.refreshToken,
-                expiresIn: refreshData.expiresIn
+                token: refreshData.access_token,
+                refreshToken: refreshData.refresh_token,
+                expiresIn: refreshData.expires_in
             }));
 
             result = await baseQuery(args, api, extraOptions);

@@ -96,6 +96,7 @@ func (router *Router) Routes() *mux.Router {
 	authApi.HandleFunc("/verify-email", authController.VerifyEmail).Methods("POST", "OPTIONS")
 
 	roleApi := api.PathPrefix("/roles").Subrouter()
+	roleApi.Use(middleware.IsAdmin)
 	roleController := role.NewRolesController(router.app.Store, router.app.Ctx, l)
 	roleApi.HandleFunc("", roleController.CreateRole).Methods("POST", "OPTIONS")
 	roleApi.HandleFunc("", roleController.GetRole).Methods("GET", "OPTIONS")
@@ -104,6 +105,7 @@ func (router *Router) Routes() *mux.Router {
 	roleApi.HandleFunc("/all", roleController.GetRoles).Methods("GET", "OPTIONS")
 
 	orgApi := api.PathPrefix("/organizations").Subrouter()
+	roleApi.Use(middleware.IsAdmin)
 	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l)
 	orgApi.HandleFunc("", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
 	orgApi.HandleFunc("", organizationController.GetOrganization).Methods("GET", "OPTIONS")
@@ -115,6 +117,7 @@ func (router *Router) Routes() *mux.Router {
 	orgApi.HandleFunc("/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 
 	permApi := api.PathPrefix("/permissions").Subrouter()
+	roleApi.Use(middleware.IsAdmin)
 	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx, l)
 	permApi.HandleFunc("", permissionController.CreatePermission).Methods("POST", "OPTIONS")
 	permApi.HandleFunc("", permissionController.GetPermission).Methods("GET", "OPTIONS")

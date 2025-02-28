@@ -5,11 +5,6 @@ import (
 )
 
 type UserOrganizationsResponse struct {
-	Organization shared_types.Organization
-	Role         RolesResponse
-}
-
-type RolesResponse struct {
-	shared_types.Role
-	Permissions []shared_types.Permission
+	Organization shared_types.Organization `json:"organization"`
+	Role         shared_types.Role         `json:"role"`
 }

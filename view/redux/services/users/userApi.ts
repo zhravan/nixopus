@@ -4,6 +4,8 @@ import {
   AddUserToOrganizationRequest,
   CreateOrganizationRequest,
   Organization,
+  OrganizationUsers,
+  UpdateOrganizationDetailsRequest,
   UserOrganization
 } from '@/redux/types/orgs';
 import { baseQueryWithReauth } from '@/redux/base-query';
@@ -69,6 +71,27 @@ export const userApi = createApi({
           method: 'POST'
         };
       }
+    }),
+    getOrganizationUsers: builder.query<OrganizationUsers[], string>({
+      query(organizationId) {
+        return {
+          url: `${USERURLS.ORGANIZATION_USERS}?id=${organizationId}`,
+          method: 'GET'
+        };
+      },
+      providesTags: [{ type: 'User', id: 'LIST' }],
+      transformResponse: (response: { data: OrganizationUsers[] }) => {
+        return response.data;
+      }
+    }),
+    updateOrganizationDetails: builder.mutation<Organization, UpdateOrganizationDetailsRequest>({
+      query(payload) {
+        return {
+          url: `${USERURLS.CREATE_ORGANIZATION}?id=${payload.id}`,
+          method: 'PUT',
+          body: payload
+        };
+      }
     })
   })
 });
@@ -78,5 +101,7 @@ export const {
   useCreateOrganizationMutation,
   useAddUserToOrganizationMutation,
   useUpdateUserNameMutation,
-  useRequestPasswordResetLinkMutation
+  useRequestPasswordResetLinkMutation,
+  useGetOrganizationUsersQuery,
+  useUpdateOrganizationDetailsMutation
 } = userApi;

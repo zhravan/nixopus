@@ -13,7 +13,7 @@ interface TeamStatsProps {
   users: {
     id: string;
     name: string;
-    role: 'Admin' | 'Member' | 'Viewer';
+    role: 'Admin' | 'Member' | 'Viewer' | 'Owner';
   }[];
 }
 
@@ -21,8 +21,8 @@ function TeamStats({ users }: TeamStatsProps) {
   return (
     <Card className="col-span-1">
       <CardHeader>
-        <CardTitle>Organization Stats</CardTitle>
-        <CardDescription>Overview of your organization</CardDescription>
+        <CardTitle>Team Stats</CardTitle>
+        <CardDescription>Overview of your team</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
@@ -31,8 +31,8 @@ function TeamStats({ users }: TeamStatsProps) {
             <span className="font-medium">{users.length}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Admins</span>
-            <span className="font-medium">{users.filter((u) => u.role === 'Admin').length}</span>
+            <span className="text-sm text-muted-foreground">Owners</span>
+            <span className="font-medium">{users.filter((u) => u.role === 'Owner').length}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Members</span>
@@ -44,11 +44,6 @@ function TeamStats({ users }: TeamStatsProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full">
-          View Details
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

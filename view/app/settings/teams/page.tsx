@@ -1,12 +1,11 @@
 'use client';
-import DashboardPageHeader from '@/components/dashboard-page-header';
 import React from 'react';
 import RecentActivity from './components/RecentActivity';
 import TeamStats from './components/TeamStats';
 import useTeamSettings from '../hooks/use-team-settings';
 import AddMember from './components/AddMember';
 import TeamMembers from './components/TeamMembers';
-import { useAppSelector } from '@/redux/hooks';
+import EditTeam from './components/EditTeam';
 
 function Page() {
   const {
@@ -17,14 +16,36 @@ function Page() {
     setNewUser,
     handleAddUser,
     handleRemoveUser,
-    getRoleBadgeVariant
+    getRoleBadgeVariant,
+    handleUpdateTeam,
+    setEditTeamDialogOpen,
+    setTeamName,
+    setTeamDescription,
+    isEditTeamDialogOpen,
+    teamName,
+    teamDescription,
+    isUpdating
   } = useTeamSettings();
-  const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl">
-      <DashboardPageHeader label={activeOrganization?.name} description={activeOrganization?.description} />
-      <div className="flex justify-end">
+      <div className={'flex items-center justify-between space-y-2'}>
+        <div className="flex items-center">
+          <span className="">
+            <h2 className="text-2xl font-bold tracking-tight">{teamName}</h2>
+            <p className="text-muted-foreground">{teamDescription}</p>
+          </span>
+          <EditTeam
+            teamName={teamName || ''}
+            teamDescription={teamDescription || ''}
+            setEditTeamDialogOpen={setEditTeamDialogOpen}
+            handleUpdateTeam={handleUpdateTeam}
+            setTeamName={setTeamName}
+            setTeamDescription={setTeamDescription}
+            isEditTeamDialogOpen={isEditTeamDialogOpen}
+            isUpdating={isUpdating}
+          />
+        </div>
         <AddMember
           isAddUserDialogOpen={isAddUserDialogOpen}
           setIsAddUserDialogOpen={setIsAddUserDialogOpen}

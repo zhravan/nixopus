@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Home, Package, Settings2 } from 'lucide-react';
+import { Home, Package, Settings2, SettingsIcon } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -27,26 +27,12 @@ const data = {
     {
       title: 'Self Host',
       url: '#',
-      icon: Package,
-      items: [
-        {
-          title: 'Genesis',
-          url: '#'
-        },
-        {
-          title: 'Explorer',
-          url: '#'
-        },
-        {
-          title: 'Quantum',
-          url: '#'
-        }
-      ]
+      icon: Package
     },
     {
       title: 'Settings',
       url: '/settings/general',
-      icon: Settings2,
+      icon: SettingsIcon,
       items: [
         {
           title: 'General',

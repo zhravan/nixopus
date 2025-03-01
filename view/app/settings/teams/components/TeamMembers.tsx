@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TrashIcon } from 'lucide-react';
 import { DotsVerticalIcon } from '@radix-ui/react-icons';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAppSelector } from '@/redux/hooks';
 
 interface TeamMembersProps {
   users: {
@@ -27,7 +29,7 @@ interface TeamMembersProps {
     name: string;
     email: string;
     avatar: string;
-    role: 'Admin' | 'Member' | 'Viewer';
+    role: 'Owner' | 'Admin' | 'Member' | 'Viewer';
     permissions: string[];
   }[];
   handleRemoveUser: (userId: string) => void;
@@ -35,11 +37,13 @@ interface TeamMembersProps {
 }
 
 function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembersProps) {
+  const loggedInUser = useAppSelector((state) => state.auth.user);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Team Members</CardTitle>
-        <CardDescription>Manage users and their roles in your organization.</CardDescription>
+        <CardDescription>Manage users and their roles in your team.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -56,7 +60,15 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center space-x-3">
-                    <img src={user.avatar} alt={user.name} className="rounded-full" />
+                    <Avatar className="w-12 h-12 shadow-md">
+                      {user.avatar ? (
+                        <AvatarImage src={user.avatar} alt="Profile avatar" />
+                      ) : (
+                        <AvatarFallback className="bg-secondary text-foreground text-xl font-medium">
+                          {user.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
                     <div>
                       <div className="font-medium">{user.name}</div>
                       <div className="text-sm text-muted-foreground">{user.email}</div>
@@ -75,28 +87,30 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
                     ))}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <DotsVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit User</DropdownMenuItem>
-                      <DropdownMenuItem>Change Role</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => handleRemoveUser(user.id)}
-                      >
-                        <TrashIcon className="h-4 w-4 mr-2" />
-                        Remove User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                {loggedInUser.id != user.id && (
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <DotsVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem>Edit User</DropdownMenuItem>
+                        <DropdownMenuItem>Change Role</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => handleRemoveUser(user.id)}
+                        >
+                          <TrashIcon className="h-4 w-4 mr-2" />
+                          Remove User
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

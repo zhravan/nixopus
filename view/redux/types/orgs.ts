@@ -1,3 +1,5 @@
+import { User } from './user';
+
 export interface Permission {
   id: string;
   name: string;
@@ -59,4 +61,22 @@ export interface AddUserToOrganizationRequest {
   user_id: string;
   organization_id: string;
   role_id: string;
+}
+
+export interface OrganizationUsers {
+  id: string;
+  user_id: string;
+  organization_id: string;
+  role_id: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+  role: RoleWithPermissions;
+  user: User;
+}
+
+export interface UpdateOrganizationDetailsRequest {
+  id: string;
+  name: string;
+  description: string;
 }

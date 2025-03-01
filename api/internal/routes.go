@@ -134,6 +134,7 @@ func (router *Router) Routes() *mux.Router {
 	userApi := api.PathPrefix("/user").Subrouter()
 	userController := user.NewUserController(router.app.Store, router.app.Ctx, l)
 	userApi.HandleFunc("", userController.GetUserDetails).Methods("GET", "OPTIONS")
+	userApi.HandleFunc("/name", userController.UpdateUserName).Methods("PATCH", "OPTIONS")
 	userApi.HandleFunc("/organizations", userController.GetUserOrganizations).Methods("GET", "OPTIONS")
 
 	return r

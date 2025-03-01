@@ -13,6 +13,8 @@ import { useAppSelector } from '@/redux/hooks';
 import { useRouter } from 'next/navigation';
 import { CreateTeam } from './create-team';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
+import use_bread_crumbs from '@/hooks/use_bread_crumbs';
+import React from 'react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = useAppSelector((state) => state.auth.user);
@@ -28,6 +30,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     handleTeamNameChange,
     handleTeamDescriptionChange
   } = useTeamSwitcher();
+  const { getBreadcrumbs } = use_bread_crumbs();
+  const breadcrumbs = React.useMemo(() => getBreadcrumbs(), [getBreadcrumbs]);
 
   if (!user) {
     router.push('/login');
@@ -41,17 +45,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink onClick={() => router.push('/')}>Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+            {breadcrumbs.length > 0 && (
+              <Breadcrumb>
+                <BreadcrumbList>
+                  {breadcrumbs.map((breadcrumb, idx) => (
+                    <>
+                      <BreadcrumbItem className="hidden md:block">
+                        <BreadcrumbLink onClick={() => router.push(breadcrumb.href)}>{breadcrumb.label}</BreadcrumbLink>
+                      </BreadcrumbItem>
+                      {idx < breadcrumbs.length - 1 && (
+                        <BreadcrumbSeparator className="hidden md:block" />
+                      )}
+                    </>
+                  ))}
+                </BreadcrumbList>
+              </Breadcrumb>
+            )}
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

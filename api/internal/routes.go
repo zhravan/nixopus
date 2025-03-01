@@ -8,6 +8,7 @@ import (
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	health "github.com/raghavyuva/nixopus-api/internal/features/health"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
 	permission "github.com/raghavyuva/nixopus-api/internal/features/permission/controller"
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
@@ -74,11 +75,14 @@ func (router *Router) Routes() *mux.Router {
 		wsServer.HandleHTTP(w, r)
 	})
 
+	notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), router.app.Store.DB)
+	notificationManager.Start()
+
 	u := r.PathPrefix("/api/v1").Subrouter()
 
 	authCB := u.PathPrefix("/auth").Subrouter()
 
-	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l)
+	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l, notificationManager)
 	authCB.HandleFunc("/register", authController.Register).Methods("POST", "OPTIONS")
 	authCB.HandleFunc("/login", authController.Login).Methods("POST", "OPTIONS")
 	authCB.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST", "OPTIONS")

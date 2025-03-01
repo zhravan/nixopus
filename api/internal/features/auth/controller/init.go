@@ -6,15 +6,17 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/service"
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/validation"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	shared_storage "github.com/raghavyuva/nixopus-api/internal/storage"
 )
 
 type AuthController struct {
-	store     *shared_storage.Store
-	validator *validation.Validator
-	service   *service.AuthService
-	ctx       context.Context
-	logger    logger.Logger
+	store        *shared_storage.Store
+	validator    *validation.Validator
+	service      *service.AuthService
+	ctx          context.Context
+	logger       logger.Logger
+	notification *notification.NotificationManager
 }
 
 // NewAuthController creates a new AuthController with the given App.
@@ -26,12 +28,14 @@ func NewAuthController(
 	store *shared_storage.Store,
 	ctx context.Context,
 	l logger.Logger,
+	notificationManager *notification.NotificationManager,
 ) *AuthController {
 	return &AuthController{
-		store:     store,
-		validator: validation.NewValidator(),
-		service:   service.NewAuthService(store, ctx, l),
-		ctx:       ctx,
-		logger:    l,
+		store:        store,
+		validator:    validation.NewValidator(),
+		service:      service.NewAuthService(store, ctx, l),
+		ctx:          ctx,
+		logger:       l,
+		notification: notificationManager,
 	}
 }

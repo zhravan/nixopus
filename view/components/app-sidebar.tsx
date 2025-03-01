@@ -1,87 +1,89 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {
-  Bot,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react"
+import * as React from 'react';
+import { Bot, Settings2, SquareTerminal } from 'lucide-react';
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
+import { TeamSwitcher } from '@/components/team-switcher';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar"
-import { useAppSelector } from "@/redux/hooks"
-import { useGetUserOrganizationsQuery } from "@/redux/services/users/userApi"
+  SidebarRail
+} from '@/components/ui/sidebar';
+import { useAppSelector } from '@/redux/hooks';
+import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
 
 const data = {
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: 'Playground',
+      url: '#',
       icon: SquareTerminal,
-      isActive: true,
+      isActive: true
     },
     {
-      title: "Models",
-      url: "#",
+      title: 'Models',
+      url: '#',
       icon: Bot,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: 'Genesis',
+          url: '#'
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: 'Explorer',
+          url: '#'
         },
         {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
+          title: 'Quantum',
+          url: '#'
+        }
+      ]
     },
     {
-      title: "Settings",
-      url: "#",
+      title: 'Settings',
+      url: '/settings/general',
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: 'General',
+          url: '/settings/general'
         },
         {
-          title: "Team",
-          url: "#",
+          title: 'Team',
+          url: '#'
         },
         {
-          title: "Billing",
-          url: "#",
+          title: 'Billing',
+          url: '#'
         },
         {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
+          title: 'Limits',
+          url: '#'
+        }
+      ]
+    }
   ]
-}
+};
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar> & { toggleAddTeamModal?: () => void }) {
-  const user = useAppSelector(state => state.auth.user)
-  const {  isLoading } = useGetUserOrganizationsQuery()
-  const organizations = useAppSelector(state => state.user.organizations)
+export function AppSidebar({
+  toggleAddTeamModal,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { toggleAddTeamModal?: () => void }) {
+  const user = useAppSelector((state) => state.auth.user);
+  const { isLoading } = useGetUserOrganizationsQuery();
+  const organizations = useAppSelector((state) => state.user.organizations);
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={isLoading ? [] : organizations} toggleAddTeamModal={props.toggleAddTeamModal} />
+        <TeamSwitcher
+          teams={isLoading ? [] : organizations}
+          toggleAddTeamModal={toggleAddTeamModal}
+        />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
@@ -91,5 +93,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar> & 
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

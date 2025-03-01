@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/user/types"
-	"github.com/uptrace/bun"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	"github.com/uptrace/bun"
 )
 
 type UserStorage struct {

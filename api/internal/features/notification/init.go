@@ -37,14 +37,11 @@ func (m *NotificationManager) Start() {
 		for {
 			select {
 			case payload := <-m.PayloadChan:
-				switch payload.Type {
-				case NotificationPayloadTypeRegister:
-					// m.Channels.Email.SendRegisterEmail(payload.UserID, payload.OrganizationID, payload.Data)
-				case NotificationPayloadTypeLogin:
-					fmt.Println("NotificationPayloadTypeLogin", payload)
-					// m.Channels.Email.SendLoginEmail(payload.UserID, payload.OrganizationID, payload.Data)
-				case NotificationPayloadTypeLogout:
-					// m.Channels.Email.SendLogoutEmail(payload.UserID, payload.OrganizationID, payload.Data)
+				switch payload.Category {
+				case NotificationCategoryAuthentication:
+					fmt.Printf("Authentication Notification - %+v", payload)
+				case NotificationCategoryOrganization:
+					fmt.Printf("Organization Notification - %+v", payload)
 				}
 			case <-m.ctx.Done():
 				return

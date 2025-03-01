@@ -57,9 +57,11 @@ func (c *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 		notification.NotificationPayloadTypeLogout,
 		user.ID.String(),
 		notification.NotificationAuthenticationData{
-			Email:    user.Email,
-			IP:       r.RemoteAddr,
-			Browser:  r.UserAgent(),
+			Email: user.Email,
+			NotificationBaseData: notification.NotificationBaseData{
+				IP:      r.RemoteAddr,
+				Browser: r.UserAgent(),
+			},
 			UserName: user.Username,
 		},
 		notification.NotificationCategoryAuthentication,

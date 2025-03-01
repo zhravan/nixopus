@@ -60,8 +60,10 @@ func (c *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		user.ID.String(),
 		notification.NotificationAuthenticationData{
 			Email:    user.Email,
-			IP:       r.RemoteAddr,
-			Browser:  r.UserAgent(),
+			NotificationBaseData: notification.NotificationBaseData{
+				IP:      r.RemoteAddr,
+				Browser: r.UserAgent(),
+			},
 			UserName: user.Username,
 		},
 		notification.NotificationCategoryAuthentication,

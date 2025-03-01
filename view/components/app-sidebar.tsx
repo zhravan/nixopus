@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Bot, Settings2, SquareTerminal } from 'lucide-react';
+import { Home, Package, Settings2 } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -19,15 +19,15 @@ import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
 const data = {
   navMain: [
     {
-      title: 'Playground',
-      url: '#',
-      icon: SquareTerminal,
+      title: 'Dashboard',
+      url: '/',
+      icon: Home,
       isActive: true
     },
     {
-      title: 'Models',
+      title: 'Self Host',
       url: '#',
-      icon: Bot,
+      icon: Package,
       items: [
         {
           title: 'Genesis',
@@ -54,7 +54,7 @@ const data = {
         },
         {
           title: 'Team',
-          url: '#'
+          url: '/settings/teams'
         },
         {
           title: 'Billing',

@@ -14,6 +14,7 @@ import {
   SidebarMenuSubItem
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function NavMain({
   items
@@ -29,6 +30,8 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const router = useRouter();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -42,13 +45,13 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+                <SidebarMenuButton tooltip={item.title} onClick={() => { (item.items?.length || 0) <= 0 ? router.push(item.url) : null }}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  {(item.items?.length || 0) > 0 && <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />}
                 </SidebarMenuButton>
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              {(item.items?.length || 0) > 0 && <CollapsibleContent>
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
@@ -61,6 +64,7 @@ export function NavMain({
                   ))}
                 </SidebarMenuSub>
               </CollapsibleContent>
+              }
             </SidebarMenuItem>
           </Collapsible>
         ))}

@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const router = useRouter();
   const authenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const user = useAppSelector((state) => state.auth.user);
 
-  if (authenticated) {
+  if (authenticated && user) {
     router.push('/dashboard');
     return <></>;
   }

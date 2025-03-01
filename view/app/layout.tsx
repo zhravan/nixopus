@@ -46,11 +46,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
 const ChildrenWrapper = ({ children }: { children: React.ReactNode }) => {
   const authenticated = useAppSelector((state) => state.auth.isAuthenticated);
-
+  const user = useAppSelector((state) => state.auth.user);
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        {authenticated ? <DashboardLayout>{children}</DashboardLayout> : children}
+        {authenticated && user ? <DashboardLayout>{children}</DashboardLayout> : children}
       </ThemeProvider>
       <Toaster />
     </>

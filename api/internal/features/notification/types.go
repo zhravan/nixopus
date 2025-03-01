@@ -41,11 +41,21 @@ func NewNotificationChannels() *NotificationChannels {
 	}
 }
 
+type NotificationBaseData struct {
+	IP      string
+	Browser string
+}
+
 type NotificationAuthenticationData struct {
+	NotificationBaseData
 	Email    string
-	IP       string
-	Browser  string
 	UserName string
+}
+
+type NotificationOrganizationData struct {
+	NotificationBaseData
+	OrganizationID string
+	UserID         string
 }
 
 type NotificationManager struct {
@@ -60,16 +70,25 @@ type NotificationManager struct {
 type NotificationPayloadType string
 
 const (
-	NotificationPayloadTypeRegister      NotificationPayloadType = "register"
-	NotificationPayloadTypeLogin         NotificationPayloadType = "login"
-	NotificationPayloadTypeLogout        NotificationPayloadType = "logout"
-	NotificationPayloadTypePasswordReset NotificationPayloadType = "password_reset"
+	NotificationPayloadTypeRegister               NotificationPayloadType = "register"
+	NotificationPayloadTypeLogin                  NotificationPayloadType = "login"
+	NotificationPayloadTypeLogout                 NotificationPayloadType = "logout"
+	NotificationPayloadTypePasswordReset          NotificationPayloadType = "password_reset"
+	NortificationPayloadTypeAddUserToOrganization NotificationPayloadType = "add_user_to_organization"
+)
+
+const (
+	NortificationPayloadTypeCreateOrganization         NotificationPayloadType = "create_organization"
+	NortificationPayloadTypeRemoveUserFromOrganization NotificationPayloadType = "remove_user_from_organization"
+	NotificationPayloadTypeDeleteOrganization          NotificationPayloadType = "delete_organization"
+	NotificationPayloadTypeUpdateOrganization          NotificationPayloadType = "update_organization"
 )
 
 type NotificationCategory string
 
 const (
 	NotificationCategoryAuthentication NotificationCategory = "authentication"
+	NotificationCategoryOrganization   NotificationCategory = "organization"
 )
 
 type NotificationPayload struct {

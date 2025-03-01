@@ -47,9 +47,11 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		notification.NotificationPayloadTypeLogin,
 		response.User.ID.String(),
 		notification.NotificationAuthenticationData{
-			Email:    login_request.Email,
-			IP:       r.RemoteAddr,
-			Browser:  r.UserAgent(),
+			Email: login_request.Email,
+			NotificationBaseData: notification.NotificationBaseData{
+				IP:      r.RemoteAddr,
+				Browser: r.UserAgent(),
+			},
 			UserName: response.User.Username,
 		},
 		notification.NotificationCategoryAuthentication,

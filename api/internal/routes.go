@@ -110,7 +110,7 @@ func (router *Router) Routes() *mux.Router {
 
 	orgApi := api.PathPrefix("/organizations").Subrouter()
 	orgApi.Use(middleware.IsAdmin)
-	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l)
+	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l, notificationManager)
 	orgApi.HandleFunc("", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
 	orgApi.HandleFunc("", organizationController.GetOrganization).Methods("GET", "OPTIONS")
 	orgApi.HandleFunc("", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")

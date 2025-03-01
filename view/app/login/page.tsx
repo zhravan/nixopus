@@ -16,9 +16,10 @@ export default function LoginPage() {
     error
   } = useLogin();
   const authenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const user = useAppSelector((state) => state.auth.user);
   const router = useRouter();
 
-  if (authenticated) {
+  if (authenticated && user) {
     router.push('/');
     return <></>;
   }

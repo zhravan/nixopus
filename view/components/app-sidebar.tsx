@@ -39,6 +39,10 @@ const data = {
           url: '/settings/general'
         },
         {
+          title: 'Notifications',
+          url: '/settings/notifications'
+        },
+        {
           title: 'Team',
           url: '/settings/teams'
         },
@@ -46,10 +50,6 @@ const data = {
           title: 'Billing',
           url: '#'
         },
-        {
-          title: 'Limits',
-          url: '#'
-        }
       ]
     }
   ]

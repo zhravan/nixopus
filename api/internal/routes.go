@@ -81,6 +81,7 @@ func (router *Router) Routes() *mux.Router {
 	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l)
 	authCB.HandleFunc("/register", authController.Register).Methods("POST", "OPTIONS")
 	authCB.HandleFunc("/login", authController.Login).Methods("POST", "OPTIONS")
+	authCB.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST", "OPTIONS")
 
 	api := r.PathPrefix("/api/v1").Subrouter()
 	api.Use(func(next http.Handler) http.Handler {
@@ -90,7 +91,6 @@ func (router *Router) Routes() *mux.Router {
 	authApi := api.PathPrefix("/auth").Subrouter()
 	authApi.HandleFunc("/request-password-reset", authController.GeneratePasswordResetLink).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/reset-password", authController.ResetPassword).Methods("POST", "OPTIONS")
-	authApi.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/logout", authController.Logout).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/send-verification-email", authController.SendVerificationEmail).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/verify-email", authController.VerifyEmail).Methods("POST", "OPTIONS")

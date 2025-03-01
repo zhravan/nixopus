@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     router.push('/login');
-    return null;
+    return <>Loading...</>;
   }
   return (
     <SidebarProvider>

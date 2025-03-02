@@ -104,12 +104,12 @@ type NotificationPayload struct {
 }
 
 type CreateSMTPConfigRequest struct {
-	Host      string    `json:"host"`
-	Port      int       `json:"port"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
-	FromName  string    `json:"from_name"`
-	FromEmail string    `json:"from_email"`
+	Host      string `json:"host"`
+	Port      int    `json:"port"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	FromName  string `json:"from_name"`
+	FromEmail string `json:"from_email"`
 }
 
 type UpdateSMTPConfigRequest struct {
@@ -139,7 +139,7 @@ var (
 	ErrMissingID          = errors.New("id is required")
 )
 
-func NewSMTPConfig(c *CreateSMTPConfigRequest,userID uuid.UUID) *shared_types.SMTPConfigs {
+func NewSMTPConfig(c *CreateSMTPConfigRequest, userID uuid.UUID) *shared_types.SMTPConfigs {
 	if c.FromEmail == "" {
 		c.FromEmail = c.Username
 	}
@@ -157,4 +157,117 @@ func NewSMTPConfig(c *CreateSMTPConfigRequest,userID uuid.UUID) *shared_types.SM
 		UserID:    userID,
 		ID:        uuid.New(),
 	}
+}
+
+type Category string
+
+const (
+	ActivityCategory Category = "activity"
+	SecurityCategory Category = "security"
+	UpdateCategory   Category = "update"
+)
+
+type PreferenceType struct {
+	ID          string `json:"id" validate:"required"`
+	Label       string `json:"label" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Enabled     bool   `json:"enabled"`
+}
+
+type CategoryPreferences struct {
+	Category    Category         `json:"category" validate:"required"`
+	Preferences []PreferenceType `json:"preferences" validate:"required"`
+}
+
+type UpdatePreferenceRequest struct {
+	Category string `json:"category" validate:"required,oneof=activity security update"`
+	Type     string `json:"type" validate:"required"`
+	Enabled  bool   `json:"enabled"`
+}
+
+type GetPreferencesResponse struct {
+	Activity []PreferenceType `json:"activity"`
+	Security []PreferenceType `json:"security"`
+	Update   []PreferenceType `json:"update"`
+}
+
+type PreferenceItem struct {
+	ID           uuid.UUID `json:"id"`
+	PreferenceID uuid.UUID `json:"preference_id"`
+	Category     string    `json:"category"`
+	Type         string    `json:"type"`
+	Enabled      bool      `json:"enabled"`
+}
+
+func MapToResponse(items []PreferenceItem) GetPreferencesResponse {
+	response := GetPreferencesResponse{
+		Activity: []PreferenceType{},
+		Security: []PreferenceType{},
+		Update:   []PreferenceType{},
+	}
+
+	typeInfo := map[string]map[string]struct {
+		Label       string
+		Description string
+	}{
+		"activity": {
+			"team-updates": {
+				Label:       "Team Updates",
+				Description: "When team members join or leave your team",
+			},
+		},
+		"security": {
+			"login-alerts": {
+				Label:       "Login Alerts",
+				Description: "When a new device logs into your account",
+			},
+			"password-changes": {
+				Label:       "Password Changes",
+				Description: "When your password is changed",
+			},
+			"security-alerts": {
+				Label:       "Security Alerts",
+				Description: "Important security notifications",
+			},
+		},
+		"update": {
+			"product-updates": {
+				Label:       "Product Updates",
+				Description: "New features and improvements",
+			},
+			"newsletter": {
+				Label:       "Newsletter",
+				Description: "Our monthly newsletter with tips and updates",
+			},
+			"marketing": {
+				Label:       "Marketing",
+				Description: "Promotions and special offers",
+			},
+		},
+	}
+
+	for _, item := range items {
+		info, exists := typeInfo[item.Category][item.Type]
+		if !exists {
+			continue
+		}
+
+		pref := PreferenceType{
+			ID:          item.Type,
+			Label:       info.Label,
+			Description: info.Description,
+			Enabled:     item.Enabled,
+		}
+
+		switch item.Category {
+		case "activity":
+			response.Activity = append(response.Activity, pref)
+		case "security":
+			response.Security = append(response.Security, pref)
+		case "update":
+			response.Update = append(response.Update, pref)
+		}
+	}
+
+	return response
 }

@@ -49,6 +49,10 @@ const data = {
         {
           title: 'Billing',
           url: '#'
+        },
+        {
+          title: 'Servers',
+          url: '/settings/servers'
         }
       ]
     }

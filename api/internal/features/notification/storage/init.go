@@ -20,14 +20,14 @@ func (s NotificationStorage) AddSmtp(config *shared_types.SMTPConfigs) error {
 }
 
 func (s NotificationStorage) UpdateSmtp(config *notification.UpdateSMTPConfigRequest) error {
-	var smtp shared_types.SMTPConfigs
+	var smtp *shared_types.SMTPConfigs
 	_, err := s.DB.NewUpdate().Model(smtp).
-		SetColumn("host", config.Host).
-		SetColumn("port", strconv.Itoa(config.Port)).
-		SetColumn("username", config.Username).
-		SetColumn("password", config.Password).
-		SetColumn("from_name", config.FromName).
-		SetColumn("from_email", config.FromEmail).
+		Set("host = ?", config.Host).
+		Set("port = ?", strconv.Itoa(config.Port)).
+		Set("username = ?", config.Username).
+		Set("password = ?", config.Password).
+		Set("from_name = ?", config.FromName).
+		Set("from_email = ?", config.FromEmail).
 		Where("id = ?", config.ID).Exec(s.Ctx)
 	return err
 }

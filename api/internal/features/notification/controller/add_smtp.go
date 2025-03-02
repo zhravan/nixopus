@@ -33,7 +33,16 @@ func (c *NotificationController) AddSmtp(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err := c.service.AddSmtp(SMTPConfigs)
+	userAny := r.Context().Value(shared_types.UserContextKey)
+	user, ok := userAny.(*shared_types.User)
+
+	if !ok {
+		c.logger.Log(logger.Error, shared_types.ErrFailedToGetUserFromContext.Error(), shared_types.ErrFailedToGetUserFromContext.Error())
+		utils.SendErrorResponse(w, shared_types.ErrFailedToGetUserFromContext.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err := c.service.AddSmtp(SMTPConfigs,user.ID)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)

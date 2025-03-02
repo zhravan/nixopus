@@ -1,8 +1,13 @@
 package storage
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
@@ -45,4 +50,210 @@ func (s NotificationStorage) GetSmtp(ID string) (*shared_types.SMTPConfigs, erro
 		return nil, err
 	}
 	return config, nil
+}
+
+func (s *NotificationStorage) UpdatePreference(ctx context.Context, req notification.UpdatePreferenceRequest, userID uuid.UUID) error {
+	var preferenceID uuid.UUID
+	err := s.DB.NewSelect().
+		Model((*shared_types.NotificationPreferences)(nil)).
+		Column("id").
+		Where("user_id = ?", userID).
+		Where("deleted_at IS NULL").
+		Scan(ctx, &preferenceID)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return s.initUserPreferences(ctx, userID, req)
+		}
+		return fmt.Errorf("failed to fetch user preferences: %w", err)
+	}
+
+	_, err = s.DB.NewUpdate().
+		Model((*shared_types.PreferenceItem)(nil)).
+		Set("enabled = ?", req.Enabled).
+		Set("updated_at = ?", time.Now()).
+		Where("preference_id = ?", preferenceID).
+		Where("category = ?", req.Category).
+		Where("type = ?", req.Type).
+		Exec(ctx)
+
+	if err != nil {
+		return fmt.Errorf("failed to update preference: %w", err)
+	}
+
+	return nil
+}
+
+func (s *NotificationStorage) GetPreferences(ctx context.Context, userID uuid.UUID) (*notification.GetPreferencesResponse, error) {
+	var preferenceID uuid.UUID
+	err := s.DB.NewSelect().
+		Model((*shared_types.NotificationPreferences)(nil)).
+		Column("id").
+		Where("user_id = ?", userID).
+		Where("deleted_at IS NULL").
+		Scan(ctx, &preferenceID)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			if err := s.initDefaultPreferences(ctx, userID); err != nil {
+				return nil, fmt.Errorf("failed to initialize preferences: %w", err)
+			}
+
+			err = s.DB.NewSelect().
+				Model((*shared_types.NotificationPreferences)(nil)).
+				Column("id").
+				Where("user_id = ?", userID).
+				Where("deleted_at IS NULL").
+				Scan(ctx, &preferenceID)
+
+			if err != nil {
+				return nil, fmt.Errorf("failed to fetch newly created preferences: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("failed to fetch user preferences: %w", err)
+		}
+	}
+
+	var items []notification.PreferenceItem
+	err = s.DB.NewSelect().
+		Model((*notification.PreferenceItem)(nil)).
+		Where("preference_id = ?", preferenceID).
+		Scan(ctx, &items)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch preference items: %w", err)
+	}
+
+	response := notification.MapToResponse(items)
+	return &response, nil
+}
+
+func (s *NotificationStorage) initUserPreferences(ctx context.Context, userID uuid.UUID, update notification.UpdatePreferenceRequest) error {
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	prefID := uuid.New()
+	now := time.Now()
+	preferences := &shared_types.NotificationPreferences{
+		ID:        prefID,
+		UserID:    userID,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	_, err = tx.NewInsert().Model(preferences).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to insert preferences: %w", err)
+	}
+
+	items := createDefaultPreferenceItems(prefID)
+
+	for i, item := range items {
+		if item.Category == update.Category && item.Type == update.Type {
+			items[i].Enabled = update.Enabled
+		}
+	}
+
+	_, err = tx.NewInsert().Model(&items).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to insert preference items: %w", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (s *NotificationStorage) initDefaultPreferences(ctx context.Context, userID uuid.UUID) error {
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	prefID := uuid.New()
+	now := time.Now()
+	preferences := &shared_types.NotificationPreferences{
+		ID:        prefID,
+		UserID:    userID,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	_, err = tx.NewInsert().Model(preferences).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to insert preferences: %w", err)
+	}
+
+	items := createDefaultPreferenceItems(prefID)
+
+	_, err = tx.NewInsert().Model(&items).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to insert preference items: %w", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func createDefaultPreferenceItems(preferenceID uuid.UUID) []notification.PreferenceItem {
+	return []notification.PreferenceItem{
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "activity",
+			Type:         "team-updates",
+			Enabled:      true,
+		},
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "security",
+			Type:         "login-alerts",
+			Enabled:      true,
+		},
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "security",
+			Type:         "password-changes",
+			Enabled:      true,
+		},
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "security",
+			Type:         "security-alerts",
+			Enabled:      true,
+		},
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "update",
+			Type:         "product-updates",
+			Enabled:      true,
+		},
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "update",
+			Type:         "newsletter",
+			Enabled:      false,
+		},
+		{
+			ID:           uuid.New(),
+			PreferenceID: preferenceID,
+			Category:     "update",
+			Type:         "marketing",
+			Enabled:      false,
+		},
+	}
 }

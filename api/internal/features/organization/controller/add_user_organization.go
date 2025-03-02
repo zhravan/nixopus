@@ -57,8 +57,8 @@ func (c *OrganizationsController) AddUserToOrganization(w http.ResponseWriter, r
 				IP:      r.RemoteAddr,
 				Browser: r.UserAgent(),
 			},
-			OrganizationID:   user.OrganizationID,
-			UserID: user.UserID,
+			OrganizationID: user.OrganizationID,
+			UserID:         user.UserID,
 		},
 		notification.NotificationCategoryOrganization,
 	))

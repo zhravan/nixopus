@@ -110,7 +110,6 @@ type CreateSMTPConfigRequest struct {
 	Password  string    `json:"password"`
 	FromName  string    `json:"from_name"`
 	FromEmail string    `json:"from_email"`
-	UserID    uuid.UUID `json:"user_id"`
 }
 
 type UpdateSMTPConfigRequest struct {
@@ -140,7 +139,7 @@ var (
 	ErrMissingID          = errors.New("id is required")
 )
 
-func NewSMTPConfig(c *CreateSMTPConfigRequest) *shared_types.SMTPConfigs {
+func NewSMTPConfig(c *CreateSMTPConfigRequest,userID uuid.UUID) *shared_types.SMTPConfigs {
 	if c.FromEmail == "" {
 		c.FromEmail = c.Username
 	}
@@ -155,6 +154,7 @@ func NewSMTPConfig(c *CreateSMTPConfigRequest) *shared_types.SMTPConfigs {
 		Password:  c.Password,
 		FromName:  c.FromName,
 		FromEmail: c.FromEmail,
-		UserID:    c.UserID,
+		UserID:    userID,
+		ID:        uuid.New(),
 	}
 }

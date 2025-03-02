@@ -18,7 +18,7 @@ type NotificationPreferences struct {
 }
 
 type PreferenceItem struct {
-	bun.BaseModel `bun:"table:notification_preference_items,alias:npi" swaggerignore:"true"`
+	bun.BaseModel `bun:"table:preference_item,alias:npi" swaggerignore:"true"`
 	ID            uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
 	PreferenceID  uuid.UUID `json:"preference_id" bun:"preference_id,notnull,type:uuid"`
 	Category      string    `json:"category" bun:"category,notnull"`

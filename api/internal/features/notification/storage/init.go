@@ -114,9 +114,9 @@ func (s *NotificationStorage) GetPreferences(ctx context.Context, userID uuid.UU
 		}
 	}
 
-	var items []notification.PreferenceItem
+	var items []shared_types.PreferenceItem
 	err = s.DB.NewSelect().
-		Model((*notification.PreferenceItem)(nil)).
+		Model((*shared_types.PreferenceItem)(nil)).
 		Where("preference_id = ?", preferenceID).
 		Scan(ctx, &items)
 
@@ -124,7 +124,7 @@ func (s *NotificationStorage) GetPreferences(ctx context.Context, userID uuid.UU
 		return nil, fmt.Errorf("failed to fetch preference items: %w", err)
 	}
 
-	response := notification.MapToResponse(items)
+	response := MapToResponse(items)
 	return &response, nil
 }
 
@@ -204,8 +204,8 @@ func (s *NotificationStorage) initDefaultPreferences(ctx context.Context, userID
 	return nil
 }
 
-func createDefaultPreferenceItems(preferenceID uuid.UUID) []notification.PreferenceItem {
-	return []notification.PreferenceItem{
+func createDefaultPreferenceItems(preferenceID uuid.UUID) []shared_types.PreferenceItem {
+	return []shared_types.PreferenceItem{
 		{
 			ID:           uuid.New(),
 			PreferenceID: preferenceID,
@@ -256,4 +256,77 @@ func createDefaultPreferenceItems(preferenceID uuid.UUID) []notification.Prefere
 			Enabled:      false,
 		},
 	}
+}
+
+func MapToResponse(items []shared_types.PreferenceItem) notification.GetPreferencesResponse {
+	response := notification.GetPreferencesResponse{
+		Activity: []notification.PreferenceType{},
+		Security: []notification.PreferenceType{},
+		Update:   []notification.PreferenceType{},
+	}
+
+	typeInfo := map[string]map[string]struct {
+		Label       string
+		Description string
+	}{
+		"activity": {
+			"team-updates": {
+				Label:       "Team Updates",
+				Description: "When team members join or leave your team",
+			},
+		},
+		"security": {
+			"login-alerts": {
+				Label:       "Login Alerts",
+				Description: "When a new device logs into your account",
+			},
+			"password-changes": {
+				Label:       "Password Changes",
+				Description: "When your password is changed",
+			},
+			"security-alerts": {
+				Label:       "Security Alerts",
+				Description: "Important security notifications",
+			},
+		},
+		"update": {
+			"product-updates": {
+				Label:       "Product Updates",
+				Description: "New features and improvements",
+			},
+			"newsletter": {
+				Label:       "Newsletter",
+				Description: "Our monthly newsletter with tips and updates",
+			},
+			"marketing": {
+				Label:       "Marketing",
+				Description: "Promotions and special offers",
+			},
+		},
+	}
+
+	for _, item := range items {
+		info, exists := typeInfo[item.Category][item.Type]
+		if !exists {
+			continue
+		}
+
+		pref := notification.PreferenceType{
+			ID:          item.Type,
+			Label:       info.Label,
+			Description: info.Description,
+			Enabled:     item.Enabled,
+		}
+
+		switch item.Category {
+		case "activity":
+			response.Activity = append(response.Activity, pref)
+		case "security":
+			response.Security = append(response.Security, pref)
+		case "update":
+			response.Update = append(response.Update, pref)
+		}
+	}
+
+	return response
 }

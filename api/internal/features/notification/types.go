@@ -137,6 +137,8 @@ var (
 	ErrMissingUsername    = errors.New("username is required")
 	ErrMissingPassword    = errors.New("password is required")
 	ErrMissingID          = errors.New("id is required")
+	ErrMissingCategory    = errors.New("category is required")
+	ErrMissingType        = errors.New("type is required")
 )
 
 func NewSMTPConfig(c *CreateSMTPConfigRequest, userID uuid.UUID) *shared_types.SMTPConfigs {
@@ -197,77 +199,4 @@ type PreferenceItem struct {
 	Category     string    `json:"category"`
 	Type         string    `json:"type"`
 	Enabled      bool      `json:"enabled"`
-}
-
-func MapToResponse(items []PreferenceItem) GetPreferencesResponse {
-	response := GetPreferencesResponse{
-		Activity: []PreferenceType{},
-		Security: []PreferenceType{},
-		Update:   []PreferenceType{},
-	}
-
-	typeInfo := map[string]map[string]struct {
-		Label       string
-		Description string
-	}{
-		"activity": {
-			"team-updates": {
-				Label:       "Team Updates",
-				Description: "When team members join or leave your team",
-			},
-		},
-		"security": {
-			"login-alerts": {
-				Label:       "Login Alerts",
-				Description: "When a new device logs into your account",
-			},
-			"password-changes": {
-				Label:       "Password Changes",
-				Description: "When your password is changed",
-			},
-			"security-alerts": {
-				Label:       "Security Alerts",
-				Description: "Important security notifications",
-			},
-		},
-		"update": {
-			"product-updates": {
-				Label:       "Product Updates",
-				Description: "New features and improvements",
-			},
-			"newsletter": {
-				Label:       "Newsletter",
-				Description: "Our monthly newsletter with tips and updates",
-			},
-			"marketing": {
-				Label:       "Marketing",
-				Description: "Promotions and special offers",
-			},
-		},
-	}
-
-	for _, item := range items {
-		info, exists := typeInfo[item.Category][item.Type]
-		if !exists {
-			continue
-		}
-
-		pref := PreferenceType{
-			ID:          item.Type,
-			Label:       info.Label,
-			Description: info.Description,
-			Enabled:     item.Enabled,
-		}
-
-		switch item.Category {
-		case "activity":
-			response.Activity = append(response.Activity, pref)
-		case "security":
-			response.Security = append(response.Security, pref)
-		case "update":
-			response.Update = append(response.Update, pref)
-		}
-	}
-
-	return response
 }

@@ -33,7 +33,6 @@ type RefreshToken struct {
 	RevokedAt *time.Time `json:"revoked_at,omitempty" bson:"revoked_at,omitempty"`
 }
 
-
 // NewUser returns a new User with default values set. If the provided User has empty strings for Role, CreatedAt, UpdatedAt, DeletedAt, or IsVerified, the corresponding fields in the returned User will be set with default values.
 func (u User) NewUser() User {
 	if u.CreatedAt.IsZero() {

@@ -42,7 +42,7 @@ func (c *NotificationController) AddSmtp(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err := c.service.AddSmtp(SMTPConfigs,user.ID)
+	err := c.service.AddSmtp(SMTPConfigs, user.ID)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)

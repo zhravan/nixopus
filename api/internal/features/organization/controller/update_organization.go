@@ -35,7 +35,6 @@ func (c *OrganizationsController) UpdateOrganization(w http.ResponseWriter, r *h
 		return
 	}
 
-
 	if err := c.validator.ParseRequestBody(r, r.Body, &organization); err != nil {
 		c.logger.Log(logger.Error, shared_types.ErrFailedToDecodeRequest.Error(), err.Error())
 		utils.SendErrorResponse(w, shared_types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)

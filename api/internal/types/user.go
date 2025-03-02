@@ -46,6 +46,7 @@ type SMTPConfigs struct {
 	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	UpdatedAt     time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
 	IsActive      bool      `json:"is_active" bun:"is_active,notnull,default:false"`
+	UserID        uuid.UUID `json:"user_id" bson:"user_id"`
 }
 
 // NewUser returns a new User with default values set. If the provided User has empty strings for Role, CreatedAt, UpdatedAt, DeletedAt, or IsVerified, the corresponding fields in the returned User will be set with default values.

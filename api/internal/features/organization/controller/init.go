@@ -11,11 +11,11 @@ import (
 )
 
 type OrganizationsController struct {
-	store     *shared_storage.Store
-	validator *validation.Validator
-	service   *service.OrganizationService
-	ctx       context.Context
-	logger    logger.Logger
+	store        *shared_storage.Store
+	validator    *validation.Validator
+	service      *service.OrganizationService
+	ctx          context.Context
+	logger       logger.Logger
 	notification *notification.NotificationManager
 }
 
@@ -26,10 +26,10 @@ func NewOrganizationsController(
 	notificationManager *notification.NotificationManager,
 ) *OrganizationsController {
 	return &OrganizationsController{
-		store:     store,
-		validator: validation.NewValidator(),
-		service:   service.NewOrganizationService(store, ctx, l),
-		ctx:       ctx,
+		store:        store,
+		validator:    validation.NewValidator(),
+		service:      service.NewOrganizationService(store, ctx, l),
+		ctx:          ctx,
 		notification: notificationManager,
 	}
 }

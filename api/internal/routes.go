@@ -9,6 +9,7 @@ import (
 	health "github.com/raghavyuva/nixopus-api/internal/features/health"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
+	notificationController "github.com/raghavyuva/nixopus-api/internal/features/notification/controller"
 	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
 	permission "github.com/raghavyuva/nixopus-api/internal/features/permission/controller"
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
@@ -140,6 +141,13 @@ func (router *Router) Routes() *mux.Router {
 	userApi.HandleFunc("", userController.GetUserDetails).Methods("GET", "OPTIONS")
 	userApi.HandleFunc("/name", userController.UpdateUserName).Methods("PATCH", "OPTIONS")
 	userApi.HandleFunc("/organizations", userController.GetUserOrganizations).Methods("GET", "OPTIONS")
+
+	notificationApi := api.PathPrefix("/notification").Subrouter()
+	notificationController := notificationController.NewNotificationController(router.app.Store, router.app.Ctx, l, notificationManager)
+	notificationApi.HandleFunc("/smtp", notificationController.AddSmtp).Methods("POST", "OPTIONS")
+	notificationApi.HandleFunc("/smtp", notificationController.GetSmtp).Methods("GET", "OPTIONS")
+	notificationApi.HandleFunc("/smtp", notificationController.UpdateSmtp).Methods("PUT", "OPTIONS")
+	notificationApi.HandleFunc("/smtp", notificationController.DeleteSmtp).Methods("DELETE", "OPTIONS")
 
 	return r
 }

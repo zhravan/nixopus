@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 
-const GithubCallback = () => {
+const Page = () => {
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
     const [error, setError] = useState<string | null>(null);
     // const [addInstallationIdToGithubApp, { isLoading, data }] =
@@ -79,4 +79,4 @@ const GithubCallback = () => {
     );
 };
 
-export default GithubCallback;
+export default Page;

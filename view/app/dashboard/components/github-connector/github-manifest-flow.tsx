@@ -56,7 +56,6 @@ const GitHubAppManifestComponent: React.FC<GitHubAppProps> = ({
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         const stateParam = params.get('state');
-
         if (code) {
             handleGitHubCallback(code, stateParam);
         }
@@ -70,7 +69,6 @@ const GitHubAppManifestComponent: React.FC<GitHubAppProps> = ({
 
     const createManifestForm = (): void => {
         const state = generateState();
-
         const manifest: GitHubAppManifest = {
             name: appName,
             url: appUrl || window.location.origin,
@@ -78,8 +76,8 @@ const GitHubAppManifestComponent: React.FC<GitHubAppProps> = ({
                 url: webhookUrl || `${window.location.origin}/github/webhook`,
                 active: true,
             },
-            redirect_url: redirectUrl || `${window.location.origin}/github/setup/callback`,
-            callback_urls: [redirectUrl || `${window.location.origin}/callback`],
+            redirect_url: redirectUrl || `${window.location.origin}/dashboard`,
+            callback_urls: [redirectUrl || `${window.location.origin}/dashboard`],
             public: true,
             default_permissions: {
                 contents: 'read',
@@ -88,7 +86,7 @@ const GitHubAppManifestComponent: React.FC<GitHubAppProps> = ({
                 pull_requests: 'write',
             },
             default_events: ['issues', 'issue_comment', 'pull_request', 'push'],
-            setup_url: `${window.location.origin}/self-host/github-install`,
+            setup_url: `${window.location.origin}/dashboard`,
             setup_on_update: true,
         };
 
@@ -125,6 +123,7 @@ const GitHubAppManifestComponent: React.FC<GitHubAppProps> = ({
             );
 
             if (!response.ok) {
+                console.log('response', response);
                 throw new Error('Failed to convert manifest');
             }
 

@@ -47,13 +47,13 @@ func (c *DomainsController) CreateDomain(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	created, err := c.service.CreateDomain(domainRequest, user.ID.String())
+	_, err = c.service.CreateDomain(domainRequest, user.ID.String())
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	utils.SendJSONResponse(w, "success", "Domain created successfully", created)
+	utils.SendJSONResponse(w, "success", "Domain created successfully", nil)
 }
 

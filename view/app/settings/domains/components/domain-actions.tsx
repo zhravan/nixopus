@@ -1,21 +1,23 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import UpdateDomainDialog from './update-domain';
+import { Domain } from '@/redux/types/domain';
+import DeleteDomain from './delete-domain';
 
 interface DomainActionsProps {
-  domainId: string;
+  domain: Domain;
 }
 
-export function DomainActions({ domainId }: DomainActionsProps) {
+export function DomainActions({ domain }: DomainActionsProps) {
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+
   const handleEdit = () => {
-    console.log(`Editing domain ${domainId}`);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = () => {
-    console.log(`Deleting domain ${domainId}`);
-  };
-
-  const handleManage = () => {
-    console.log(`Managing domain ${domainId}`);
+    setIsDeleteModalOpen(true);
   };
 
   return (
@@ -23,12 +25,20 @@ export function DomainActions({ domainId }: DomainActionsProps) {
       <Button variant="ghost" className="text-primary p-0 m-0" onClick={handleEdit}>
         Edit
       </Button>
-      <Button variant="ghost" className="text-destructive p-0 m-0" onClick={handleDelete}>
+      <Button variant="ghost" className="text-red-500 p-0 m-0" onClick={handleDelete}>
         Delete
       </Button>
-      <Button variant="ghost" className="text-muted-foreground p-0 m-0" onClick={handleManage}>
-        Manage
-      </Button>
+      {isEditModalOpen && (
+        <UpdateDomainDialog
+          open={isEditModalOpen}
+          setOpen={setIsEditModalOpen}
+          id={domain.id}
+          data={domain}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteDomain open={isDeleteModalOpen} setOpen={setIsDeleteModalOpen} id={domain.id} />
+      )}
     </div>
   );
 }

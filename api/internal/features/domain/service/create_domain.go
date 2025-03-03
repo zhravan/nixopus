@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,13 +11,17 @@ import (
 )
 
 func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID string) (types.CreateDomainResponse, error) {
+	fmt.Printf("create domain request received: domain_name=%s, user_id=%s\n", req.Name, userID)
+
 	existing_domain, err := s.storage.GetDomainByName(req.Name)
-	if existing_domain.ID != uuid.Nil {
-		return types.CreateDomainResponse{}, types.ErrDomainAlreadyExists
+	if err != nil {
+		fmt.Printf("error while retrieving domain: error=%s\n", err.Error())
+		return types.CreateDomainResponse{}, err
 	}
 
-	if err != nil {
-		return types.CreateDomainResponse{}, err
+	if existing_domain != nil {
+		fmt.Printf("domain already exists: domain_name=%s\n", req.Name)
+		return types.CreateDomainResponse{}, types.ErrDomainAlreadyExists
 	}
 
 	domain := &shared_types.Domain{
@@ -29,8 +34,12 @@ func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID stri
 	}
 
 	if err := s.storage.CreateDomain(domain); err != nil {
+		fmt.Printf("error while creating domain: error=%s\n", err.Error())
 		return types.CreateDomainResponse{}, err
 	}
 
+	fmt.Printf("domain created successfully: domain_id=%s\n", domain.ID)
+
 	return types.CreateDomainResponse{}, nil
 }
+

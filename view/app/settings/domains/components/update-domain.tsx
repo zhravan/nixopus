@@ -15,6 +15,11 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
+import {
+  useCreateDomainMutation,
+  useUpdateDomainMutation
+} from '@/redux/services/settings/domainsApi';
+import { Domain } from '@/redux/types/domain';
 
 const domainFormSchema = z.object({
   domainName: z
@@ -26,34 +31,49 @@ const domainFormSchema = z.object({
     )
 });
 
-interface AddDomainDialogProps {
+interface UpdateDomainDialogProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  id?: string;
+  data?: Domain;
 }
 
-function AddDomainDialog({ open, setOpen }: AddDomainDialogProps) {
+function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps) {
+  const [createDomain, { isLoading }] = useCreateDomainMutation();
+  const [updateDomain, { isLoading: isUpdating }] = useUpdateDomainMutation();
   const form = useForm({
     resolver: zodResolver(domainFormSchema),
     defaultValues: {
-      domainName: ''
+      domainName: data?.name || ''
     }
   });
 
-  function onSubmit(data: z.infer<typeof domainFormSchema>) {
-    console.log('Form submitted:', data);
-    toast('Domain added successfully');
-    form.reset();
-    setOpen(false);
+  async function onSubmit(data: z.infer<typeof domainFormSchema>) {
+    try {
+      if (!id) {
+        await createDomain({ name: data.domainName });
+      } else {
+        await updateDomain({ name: data.domainName, id: id });
+      }
+      toast.success('Domain added successfully');
+    } catch (error) {
+      toast.error('Failed to add domain');
+    } finally {
+      form.reset();
+      setOpen(false);
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Domain</Button>
-      </DialogTrigger>
+      {!id && (
+        <DialogTrigger asChild>
+          <Button variant="outline">Add Domain</Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Domain</DialogTitle>
+          <DialogTitle>{!id ? 'Add Domain' : 'Update Domain'}</DialogTitle>
           <DialogDescription>Domain will help to deploy your applications</DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -81,7 +101,9 @@ function AddDomainDialog({ open, setOpen }: AddDomainDialogProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit">Add Domain</Button>
+              <Button type="submit" disabled={isLoading || isUpdating}>
+                {isLoading || isUpdating ? 'Saving...' : 'Save'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
@@ -90,4 +112,4 @@ function AddDomainDialog({ open, setOpen }: AddDomainDialogProps) {
   );
 }
 
-export default AddDomainDialog;
+export default UpdateDomainDialog;

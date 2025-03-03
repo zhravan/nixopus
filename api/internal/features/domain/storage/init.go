@@ -38,10 +38,13 @@ func (s *DomainStorage) GetDomain(id string) (*shared_types.Domain, error) {
 
 func (s *DomainStorage) UpdateDomain(ID string,Name string) error {
 	var domain shared_types.Domain
-	_, err := s.DB.NewUpdate().Model(domain).
-		Set("name = ?", Name).
-		Set("updated_at = ?", time.Now()).
-		Where("id = ?", ID).Exec(s.Ctx)
+	err := s.DB.NewSelect().Model(&domain).Where("id = ?", ID).Scan(s.Ctx)
+	if err != nil {
+		return err
+	}
+	domain.Name = Name
+	domain.UpdatedAt = time.Now()
+	_, err = s.DB.NewUpdate().Model(&domain).Where("id = ?", ID).Exec(s.Ctx)
 	if err != nil {
 		return err
 	}
@@ -70,7 +73,7 @@ func (s *DomainStorage) GetDomainByName(name string) (*shared_types.Domain, erro
 	err := s.DB.NewSelect().Model(&domain).Where("name = ?", name).Scan(s.Ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, types.ErrDomainNotFound
+			return nil,nil
 		}
 		return nil, err
 	}

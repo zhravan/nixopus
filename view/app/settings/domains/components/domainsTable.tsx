@@ -1,5 +1,5 @@
 import React from 'react';
-import { ServerAndDomain } from '@/redux/types/domain';
+import { Domain } from '@/redux/types/domain';
 import {
   Table,
   TableBody,
@@ -10,13 +10,12 @@ import {
 } from '@/components/ui/table';
 import { DomainTypeTag } from './domain-type-tag';
 import { DomainActions } from './domain-actions';
-import { ServerTag } from './server-tag';
 
 interface DomainsTableProps {
-  serverAndDomains: ServerAndDomain[];
+  domains: Domain[];
 }
 
-function DomainsTable({ serverAndDomains }: DomainsTableProps) {
+function DomainsTable({ domains }: DomainsTableProps) {
   return (
     <div className="bg-secondary shadow-md rounded-lg overflow-hidden p-4">
       <Table>
@@ -24,31 +23,25 @@ function DomainsTable({ serverAndDomains }: DomainsTableProps) {
           <TableRow>
             <TableHead className="text-xs font-medium text-muted-foreground">Domain</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Type</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground">Server</TableHead>
             <TableHead className="text-right text-xs font-medium text-muted-foreground">
               Actions
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="bg-secondary divide-y divide-border">
-          {serverAndDomains.flatMap((item) =>
-            item.domains.map((domain) => (
-              <TableRow key={domain.id}>
-                <TableCell className="whitespace-nowrap font-medium text-foreground">
-                  {domain.domain}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-muted-foreground">
-                  <DomainTypeTag isWildcard={domain.is_wildcard} />
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-muted-foreground">
-                  <ServerTag name={item.server.name} isPrimary={item.server.is_primary} />
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  <DomainActions domainId={domain.id} />
-                </TableCell>
-              </TableRow>
-            ))
-          )}
+          {domains?.flatMap((domain) => (
+            <TableRow key={domain.id}>
+              <TableCell className="whitespace-nowrap font-medium text-foreground">
+                {domain.name}
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-muted-foreground">
+                <DomainTypeTag isWildcard={domain.name.startsWith('*')} />
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-right">
+                <DomainActions domain={domain} />
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

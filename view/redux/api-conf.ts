@@ -24,8 +24,8 @@ export enum USER_NOTIFICATION_SETTINGS {
 }
 
 export enum DOMAIN_SETTINGS {
-  ADD_DOMAIN = 'v1/domains',
-  GET_DOMAINS = 'v1/domains',
-  UPDATE_DOMAIN = 'v1/domains',
-  DELETE_DOMAIN = 'v1/domains'
+  ADD_DOMAIN = 'v1/domain',
+  GET_DOMAINS = 'v1/domain/all',
+  UPDATE_DOMAIN = 'v1/domain',
+  DELETE_DOMAIN = 'v1/domain'
 }

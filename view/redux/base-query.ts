@@ -76,7 +76,7 @@ export const baseQueryWithReauth: BaseQueryFn<
         refreshData.access_token,
         refreshData.refresh_token,
         refreshData.expires_in
-      )
+      );
       api.dispatch({
         type: SET_CREDENTIALS,
         payload: {

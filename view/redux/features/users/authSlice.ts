@@ -92,7 +92,7 @@ export const initializeAuth = createAsyncThunk<AuthPayload | null>(
               refreshResult.access_token,
               refreshResult.refresh_token,
               refreshResult.expires_in
-            )
+            );
             return {
               user: userResult,
               token: refreshResult.access_token,

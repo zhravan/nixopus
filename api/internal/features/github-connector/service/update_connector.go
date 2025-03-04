@@ -1,16 +1,20 @@
 package service
 
-import "github.com/raghavyuva/nixopus-api/internal/features/github-connector/types"
+import "fmt"
 
-func (c *GithubConnectorService) UpdateGithubConnectorRequest(ConnectorID string, InstallationID string) error {
-	connector, err := c.storage.GetConnector(ConnectorID)
+func (c *GithubConnectorService) UpdateGithubConnectorRequest(InstallationID string,UserID string) error {
+	connector, err := c.storage.GetAllConnectors(UserID)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
-	if connector == nil {
-		return types.ErrConnectorDoesNotExist
+
+	if len(connector) == 0 {
+		fmt.Println("no connector found")
+		return nil
 	}
-	err = c.storage.UpdateConnector(InstallationID)
+
+	err = c.storage.UpdateConnector(connector[0].ID.String(), InstallationID)
 	if err != nil {
 		return err
 	}

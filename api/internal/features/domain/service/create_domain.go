@@ -50,4 +50,3 @@ func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID stri
 
 	return types.CreateDomainResponse{}, nil
 }
-

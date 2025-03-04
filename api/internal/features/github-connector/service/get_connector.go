@@ -11,11 +11,13 @@ import (
 // it returns an error.
 //
 // Parameters:
-//   ConnectorID - the unique identifier of the GitHub connector to retrieve.
+//
+//	ConnectorID - the unique identifier of the GitHub connector to retrieve.
 //
 // Returns:
-//   *shared_types.GithubConnector - a pointer to the GitHub connector object if found.
-//   error - an error if the connector cannot be retrieved or does not exist.
+//
+//	*shared_types.GithubConnector - a pointer to the GitHub connector object if found.
+//	error - an error if the connector cannot be retrieved or does not exist.
 func (c *GithubConnectorService) GetConnector(ConnectorID string) (*shared_types.GithubConnector, error) {
 	connector, err := c.storage.GetConnector(ConnectorID)
 	return connector, err
@@ -28,11 +30,13 @@ func (c *GithubConnectorService) GetConnector(ConnectorID string) (*shared_types
 // otherwise, it returns an error.
 //
 // Parameters:
-//   UserID - the unique identifier of the user whose connectors to retrieve.
+//
+//	UserID - the unique identifier of the user whose connectors to retrieve.
 //
 // Returns:
-//   []shared_types.GithubConnector - a slice of GitHub connector objects if found.
-//   error - an error if the connectors cannot be retrieved or do not exist.
+//
+//	[]shared_types.GithubConnector - a slice of GitHub connector objects if found.
+//	error - an error if the connectors cannot be retrieved or do not exist.
 func (c *GithubConnectorService) GetAllConnectors(UserID string) ([]shared_types.GithubConnector, error) {
 	connectors, err := c.storage.GetAllConnectors(UserID)
 	return connectors, err

@@ -11,7 +11,7 @@ import "fmt"
 // associated GitHub app ID with the provided InstallationID.
 //
 // If any errors occur during the update process, the method returns the error.
-func (c *GithubConnectorService) UpdateGithubConnectorRequest(InstallationID string,UserID string) error {
+func (c *GithubConnectorService) UpdateGithubConnectorRequest(InstallationID string, UserID string) error {
 	connector, err := c.storage.GetAllConnectors(UserID)
 	if err != nil {
 		fmt.Println(err)

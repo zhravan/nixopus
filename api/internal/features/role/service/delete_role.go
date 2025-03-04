@@ -6,7 +6,6 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/role/types"
 )
 
-
 // DeleteRole deletes a role in the application.
 //
 // It first checks if the role exists using the provided ID.

@@ -10,8 +10,8 @@ import (
 // It returns the list of domains or an error if fetching fails.
 //
 // Returns:
-// 
-// 	([]shared_types.Domain, error) - A slice of Domain objects and an error if any occurred.
+//
+//	([]shared_types.Domain, error) - A slice of Domain objects and an error if any occurred.
 func (s *DomainsService) GetDomains() ([]shared_types.Domain, error) {
 	return s.storage.GetDomains()
 }

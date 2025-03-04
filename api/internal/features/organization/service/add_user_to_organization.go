@@ -4,10 +4,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/organization/types"
-	role_storage "github.com/raghavyuva/nixopus-api/internal/features/role/storage"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
@@ -42,11 +40,7 @@ func (o *OrganizationService) AddUserToOrganization(request types.AddUserToOrgan
 		return types.ErrOrganizationDoesNotExist
 	}
 
-	user_storage := user_storage.UserStorage{
-		DB:  o.storage.DB,
-		Ctx: o.storage.Ctx,
-	}
-	existingUser, err := user_storage.FindUserByID(request.UserID)
+	existingUser, err := o.user_storage.FindUserByID(request.UserID)
 	if err != nil {
 		o.logger.Log(logger.Error, types.ErrUserDoesNotExist.Error(), err.Error())
 		return err
@@ -57,11 +51,7 @@ func (o *OrganizationService) AddUserToOrganization(request types.AddUserToOrgan
 		return types.ErrUserDoesNotExist
 	}
 
-	role_storage := role_storage.RoleStorage{
-		DB:  o.storage.DB,
-		Ctx: o.storage.Ctx,
-	}
-	existingRole, err := role_storage.GetRole(roleId.String())
+	existingRole, err := o.role_storage.GetRole(roleId.String())
 	if err != nil {
 		o.logger.Log(logger.Error, types.ErrRoleDoesNotExist.Error(), err.Error())
 		return err

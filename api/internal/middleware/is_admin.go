@@ -15,10 +15,10 @@ import (
 // to the next handler.
 //
 // Parameters:
-//  - next: the next http.Handler to be called if the user is an admin.
+//   - next: the next http.Handler to be called if the user is an admin.
 //
 // Returns:
-//  - http.Handler: a handler that checks the user's admin status before proceeding.
+//   - http.Handler: a handler that checks the user's admin status before proceeding.
 func IsAdmin(next http.Handler) http.Handler {
 	fmt.Println("IsAdmin middleware")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

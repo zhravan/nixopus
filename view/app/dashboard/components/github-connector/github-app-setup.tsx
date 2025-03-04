@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { GitHubAppCredentials } from '@/redux/types/github';
@@ -7,27 +7,22 @@ import GithubInstaller from './github-app-installer';
 
 interface GitHubAppSetupProps {
     organization?: string;
-    onSetupComplete?: (credentials: GitHubAppCredentials, installationId: string) => void;
+    GetGithubConnectors: () => void;
 }
 
-const GitHubAppSetup: React.FC<GitHubAppSetupProps> = ({ organization, onSetupComplete }) => {
+const GitHubAppSetup: React.FC<GitHubAppSetupProps> = ({ organization, GetGithubConnectors }) => {
     const [setupStage, setSetupStage] = useState<'registration' | 'installation'>('registration');
     const [credentials, setCredentials] = useState<GitHubAppCredentials | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const handleRegistrationSuccess = (creds: GitHubAppCredentials) => {
+    const handleRegistrationSuccess = async (creds: GitHubAppCredentials) => {
         setCredentials(creds);
         setSetupStage('installation');
+        await GetGithubConnectors();
     };
 
     const handleRegistrationError = (error: Error) => {
         setError(`Registration failed: ${error.message}`);
-    };
-
-    const handleInstallationSuccess = (installationId: string) => {
-        if (credentials) {
-            onSetupComplete?.(credentials, installationId);
-        }
     };
 
     const handleInstallationError = (error: Error) => {
@@ -43,20 +38,8 @@ const GitHubAppSetup: React.FC<GitHubAppSetupProps> = ({ organization, onSetupCo
                     onError={handleRegistrationError}
                 />
             ) : credentials ? (
-                <GithubInstaller
-                    appSlug={credentials.slug}
-                    organization={organization}
-                    callbackUrl={''}
-                />
+                <GithubInstaller appSlug={credentials.slug} organization={organization} callbackUrl={''} />
             ) : null}
-
-            {error && (
-                <Card className="w-[400px] bg-red-50">
-                    <CardContent className="pt-6">
-                        <p className="text-red-600">{error}</p>
-                    </CardContent>
-                </Card>
-            )}
         </div>
     );
 };

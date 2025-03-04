@@ -3,7 +3,7 @@ package types
 import "errors"
 
 type CreateGithubConnectorRequest struct {
-	AppID         int    `json:"app_id"`
+	AppID         string    `json:"app_id"`
 	Slug          string `json:"slug"`
 	Pem           string `json:"pem"`
 	ClientID      string `json:"client_id"`
@@ -13,7 +13,6 @@ type CreateGithubConnectorRequest struct {
 
 type UpdateGithubConnectorRequest struct {
 	InstallationID string `json:"installation_id"`
-	ID             string `json:"id"`
 }
 
 var (

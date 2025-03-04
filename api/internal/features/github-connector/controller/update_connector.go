@@ -27,7 +27,16 @@ func (c *GithubConnectorController) UpdateGithubConnectorRequest(w http.Response
 		return
 	}
 
-	err = c.service.UpdateGithubConnectorRequest(UpdateConnectorRequest.ID, UpdateConnectorRequest.InstallationID)
+	userAny := r.Context().Value(shared_types.UserContextKey)
+	user, ok := userAny.(*shared_types.User)
+
+	if !ok {
+		c.logger.Log(logger.Error, shared_types.ErrFailedToGetUserFromContext.Error(), shared_types.ErrFailedToGetUserFromContext.Error())
+		utils.SendErrorResponse(w, shared_types.ErrFailedToGetUserFromContext.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = c.service.UpdateGithubConnectorRequest(UpdateConnectorRequest.InstallationID,user.ID.String())
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)

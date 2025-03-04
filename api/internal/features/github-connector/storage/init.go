@@ -2,8 +2,6 @@ package storage
 
 import (
 	"context"
-	"time"
-
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
 )
@@ -32,7 +30,7 @@ func (s *GithubConnectorStorage) CreateConnector(connector *shared_types.GithubC
 	return nil
 }
 
-func (s *GithubConnectorStorage) UpdateConnector(InstallationID string) error {
+func (s *GithubConnectorStorage) UpdateConnector(ConnectorID, InstallationID string) error {
 	tx, err := s.DB.BeginTx(s.Ctx, nil)
 	if err != nil {
 		return err
@@ -40,8 +38,9 @@ func (s *GithubConnectorStorage) UpdateConnector(InstallationID string) error {
 	defer tx.Rollback()
 
 	var connector shared_types.GithubConnector
-	connector.UpdatedAt = time.Now()
-	_, err = tx.NewUpdate().Model(&connector).Where("installation_id = ?", InstallationID).Exec(s.Ctx)
+	_, err = tx.NewUpdate().Model(&connector).
+		SetColumn("installation_id", InstallationID).
+		Where("id = ?", ConnectorID).Exec(s.Ctx)
 	if err != nil {
 		return err
 	}
@@ -63,4 +62,10 @@ func (s *GithubConnectorStorage) GetAllConnectors(UserID string) ([]shared_types
 	var connectors []shared_types.GithubConnector
 	err := s.DB.NewSelect().Model(&connectors).Where("user_id = ?", UserID).Scan(s.Ctx)
 	return connectors, err
+}
+
+func (s *GithubConnectorStorage) GetConnectorByAppID(AppID string) (*shared_types.GithubConnector, error) {
+	var connector shared_types.GithubConnector
+	err := s.DB.NewSelect().Model(&connector).Where("app_id = ?", AppID).Scan(s.Ctx)
+	return &connector, err
 }

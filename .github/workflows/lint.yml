@@ -5,6 +5,8 @@ on:
     paths:
       - 'api/**'
   push:
+    branches:
+      - '*'
     paths:
       - 'api/**'
 

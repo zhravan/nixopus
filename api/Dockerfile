@@ -10,6 +10,7 @@ RUN apk add --no-cache make git
 
 WORKDIR /app
 
+
 COPY --from=env-builder .env .
 
 COPY go.mod go.sum ./

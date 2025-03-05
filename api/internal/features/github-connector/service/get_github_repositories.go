@@ -13,7 +13,7 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-func (c *GithubConnectorService) GetGithubRepositories(user_id string) ([]interface{}, error) {
+func (c *GithubConnectorService) GetGithubRepositories(user_id string) ([]shared_types.GithubRepository, error) {
 	connectors, err := c.storage.GetAllConnectors(user_id)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
@@ -60,7 +60,7 @@ func (c *GithubConnectorService) GetGithubRepositories(user_id string) ([]interf
 	}
 
 	var response struct {
-		Repositories []interface{} `json:"repositories"`
+		Repositories []shared_types.GithubRepository `json:"repositories"`
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&response)

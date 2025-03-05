@@ -136,5 +136,3 @@ export const GithubRepositoriesSkeletonLoader: React.FC = () => {
     </div>
   );
 };
-
-

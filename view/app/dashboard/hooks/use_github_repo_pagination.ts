@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -33,7 +33,6 @@ import { SortOption } from '@/components/sort-selector';
  * - paginatedApplications: An array of the paginated filtered and sorted repositories.
  */
 function useGithubRepoPagination() {
-  const { data: connectors, refetch: GetGithubConnectors } = useGetAllGithubConnectorQuery();
   const searchParams = useSearchParams();
   const [updateGithubConnector] = useUpdateGithubConnectorMutation();
   const { data: githubRepositories, isLoading } = useGetAllGithubRepositoriesQuery();
@@ -105,8 +104,6 @@ function useGithubRepoPagination() {
   );
 
   return {
-    connectors,
-    GetGithubConnectors,
     githubRepositories,
     selectedRepository,
     setSelectedRepository,

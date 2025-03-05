@@ -55,13 +55,20 @@ export const GithubConnectorApi = createApi({
       transformResponse: (response: { data: null }) => {
         return response.data;
       }
+    }),
+    getAllGithubRepositories: builder.query<any[], void>({
+      query: () => ({
+        url: GITHUB_CONNECTOR.ALL_REPOSITORIES,
+        method: 'GET'
+      }),
     })
-  })
+  }),
 });
 
 export const {
   useCreateGithubConnectorMutation,
   useUpdateGithubConnectorMutation,
   useDeleteGithubConnectorMutation,
-  useGetAllGithubConnectorQuery
+  useGetAllGithubConnectorQuery,
+  useGetAllGithubRepositoriesQuery
 } = GithubConnectorApi;

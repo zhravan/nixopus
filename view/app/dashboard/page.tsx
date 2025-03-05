@@ -6,6 +6,7 @@ import React, { useEffect } from 'react';
 import GitHubAppSetup from './components/github-connector/github-app-setup';
 import {
   useGetAllGithubConnectorQuery,
+  useGetAllGithubRepositoriesQuery,
   useUpdateGithubConnectorMutation
 } from '@/redux/services/connector/githubConnectorApi';
 
@@ -15,7 +16,7 @@ function page() {
   const { data: connectors, refetch: GetGithubConnectors } = useGetAllGithubConnectorQuery();
   const searchParams = useSearchParams();
   const [updateGithubConnector] = useUpdateGithubConnectorMutation();
-
+  const {data} = useGetAllGithubRepositoriesQuery();
   const router = useRouter();
 
   useEffect(() => {

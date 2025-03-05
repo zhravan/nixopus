@@ -1,54 +1,76 @@
 'use client';
-import DashboardPageHeader from '@/components/dashboard-page-header';
-import { useAppSelector } from '@/redux/hooks';
-import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect } from 'react';
+import { DahboardUtilityHeader } from '@/components/dashboard-page-header';
+import React from 'react';
 import GitHubAppSetup from './components/github-connector/github-app-setup';
-import {
-  useGetAllGithubConnectorQuery,
-  useGetAllGithubRepositoriesQuery,
-  useUpdateGithubConnectorMutation
-} from '@/redux/services/connector/githubConnectorApi';
+import GithubRepositories, { GithubRepositoriesSkeletonLoader } from './components/github-repositories/repository-card';
+import { GithubRepository } from '@/redux/types/github';
+import PaginationWrapper from '@/components/pagination';
+import useGithubRepoPagination from './hooks/use_github_repo_pagination';
 
 function page() {
-  const user = useAppSelector((state) => state.auth.user);
-  const authenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const { data: connectors, refetch: GetGithubConnectors } = useGetAllGithubConnectorQuery();
-  const searchParams = useSearchParams();
-  const [updateGithubConnector] = useUpdateGithubConnectorMutation();
-  const {data} = useGetAllGithubRepositoriesQuery();
-  const router = useRouter();
+  const {
+    isLoading,
+    connectors,
+    GetGithubConnectors,
+    setSelectedRepository,
+    searchTerm,
+    handleSearchChange,
+    onSortChange,
+    sortOptions,
+    sortConfig,
+    handlePageChange,
+    currentPage,
+    totalPages,
+    paginatedApplications
+  } = useGithubRepoPagination();
 
-  useEffect(() => {
-    const installationId = searchParams.get('installation_id');
-    if (installationId) {
-      const githubConnector = async () => {
-        await updateGithubConnector({
-          installation_id: installationId,
-        });
-      }
-      githubConnector();
-      router.push('/dashboard');
+  const renderGithubRepositories = () => {
+    if (isLoading) {
+      return <GithubRepositoriesSkeletonLoader />;
     }
-  }, [searchParams, router]);
 
-  if (!user || !authenticated) {
-    router.push('/login');
-    return null;
-  }
+    if (paginatedApplications.length === 0 && !isLoading) {
+      return <div className="text-center">No repositories found</div>;
+    }
+    return (
+      <>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {paginatedApplications &&
+            paginatedApplications?.map((repo: any) => (
+              <GithubRepositories
+                key={repo.id}
+                {...repo}
+                setSelectedRepository={setSelectedRepository}
+              />
+            ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <PaginationWrapper
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl">
-      <DashboardPageHeader label="Dashboard" description={`Welcome, ${user.username}`} />
-      {
-        connectors?.length === 0 ? (
-          <GitHubAppSetup GetGithubConnectors={GetGithubConnectors} />
-        ) : (
-          <div className="flex flex-col h-full justify-center items-center gap-4">
-            <h2 className="text-xl font-medium text-center text-foreground">Github already connected</h2>
-          </div>
-        )
-      }
+      <DahboardUtilityHeader<GithubRepository>
+        searchTerm={searchTerm}
+        handleSearchChange={handleSearchChange}
+        sortConfig={sortConfig}
+        onSortChange={onSortChange}
+        sortOptions={sortOptions}
+        label="Github Repositories"
+        className="mt-5 mb-5"
+      />
+      {connectors?.length === 0 ? (
+        <GitHubAppSetup GetGithubConnectors={GetGithubConnectors} />
+      ) : (
+        renderGithubRepositories()
+      )}
     </div>
   );
 }

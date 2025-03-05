@@ -4,9 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 )
 
 type Application struct {
+	bun.BaseModel        `bun:"table:applications,alias:a" swaggerignore:"true"`
 	ID                   uuid.UUID   `json:"id" bun:"id,pk,type:uuid"`
 	Name                 string      `json:"name" bun:"name,notnull"`
 	Port                 int         `json:"port" bun:"port,notnull"`

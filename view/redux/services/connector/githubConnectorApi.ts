@@ -5,6 +5,7 @@ import {
   CreateGithubConnectorRequest,
   GitHubAppCredentials,
   GithubConnector,
+  GithubRepository,
   UpdateGithubConnectorRequest
 } from '@/redux/types/github';
 
@@ -56,13 +57,17 @@ export const GithubConnectorApi = createApi({
         return response.data;
       }
     }),
-    getAllGithubRepositories: builder.query<any[], void>({
+    getAllGithubRepositories: builder.query<GithubRepository[], void>({
       query: () => ({
         url: GITHUB_CONNECTOR.ALL_REPOSITORIES,
         method: 'GET'
       }),
+      providesTags: [{ type: 'GithubConnector', id: 'LIST' }],
+      transformResponse: (response: { data: any[] }) => {
+        return response.data;
+      }
     })
-  }),
+  })
 });
 
 export const {

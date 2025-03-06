@@ -48,7 +48,7 @@ export const WebSocketProvider = ({
     };
 
     socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      console.log("WebSocket error:", error);
     };
 
     wsRef.current = socket;

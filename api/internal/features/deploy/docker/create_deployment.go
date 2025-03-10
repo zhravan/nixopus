@@ -15,6 +15,15 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
+// buildImageFromDockerfile builds a Docker image from a Dockerfile in the
+// contextPath directory. The Dockerfile is specified by the dockerfile
+// parameter, which is relative to the contextPath directory. If force is true,
+// the build will be forced, even if the image already exists. The buildArgs
+// parameter is a map of build arguments, which are passed to the Dockerfile as
+// environment variables. The labels parameter is a map of labels, which are
+// applied to the built image. The image_name parameter is the name of the
+// built image. The function returns the ID of the built image, or an error if
+// the build fails.
 func (s *DockerService) buildImageFromDockerfile(contextPath string, dockerfile string, force bool, buildArgs map[string]*string, labels map[string]string, image_name string) (string, error) {
 	buildContextTar, err := archive.TarWithOptions(contextPath, &archive.TarOptions{})
 	if err != nil {
@@ -39,30 +48,21 @@ func (s *DockerService) buildImageFromDockerfile(contextPath string, dockerfile 
 	return s.BuildImage(buildOptions, buildContextTar)
 }
 
-// RunImage creates and runs a Docker container using the specified image name.
-//
-// This function sets up a container configuration, host configuration, and networking
-// configuration to create and run a container based on the provided image name. It exposes
-// port 8080 and assigns default environment variables and labels. If the image name is empty,
-// it returns an error.
-//
-// Parameters:
-//
-//	imageName - the name of the Docker image to run.
-//
-// Returns:
-//
-//	error - an error if the image name is empty or if the container creation fails.
+// RunImage runs a Docker container from the specified image, maps the
+// specified port from the container to the host, and sets the specified
+// environment variables. The function returns an error if the container
+// cannot be started.
 func (s *DockerService) RunImage(imageName string, environment_variables map[string]string, port_str string) error {
 	if imageName == "" {
 		return fmt.Errorf("image name is empty")
 	}
+
 	port, _ := nat.NewPort("tcp", port_str)
 	var env_vars []string
-
 	for k, v := range environment_variables {
 		env_vars = append(env_vars, fmt.Sprintf("%s=%s", k, v))
 	}
+
 	container_config := container.Config{
 		Image:    imageName,
 		Hostname: "nixopus",
@@ -75,8 +75,9 @@ func (s *DockerService) RunImage(imageName string, environment_variables map[str
 			"com.docker.compose.version": "0.0.1",
 		},
 	}
+
 	host_config := container.HostConfig{
-		NetworkMode: "host",
+		NetworkMode: "bridge",
 		PortBindings: map[nat.Port][]nat.PortBinding{
 			port: {
 				{
@@ -89,11 +90,16 @@ func (s *DockerService) RunImage(imageName string, environment_variables map[str
 
 	network_config := network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			"default": {},
+			"bridge": {}, 
 		},
 	}
 
-	_, err := s.Cli.ContainerCreate(s.Ctx, &container_config, &host_config, &network_config, nil, imageName)
+	resp, err := s.Cli.ContainerCreate(s.Ctx, &container_config, &host_config, &network_config, nil, imageName)
+	if err != nil {
+		return err
+	}
+
+	err = s.Cli.ContainerStart(s.Ctx, resp.ID, container.StartOptions{})
 	if err != nil {
 		return err
 	}
@@ -101,7 +107,12 @@ func (s *DockerService) RunImage(imageName string, environment_variables map[str
 	return nil
 }
 
-// CreateDeployment creates a new deployment based on the given request.
+// CreateDeployment creates a new Docker deployment for the given
+// deployment request. It creates a new Docker image based on the specified
+// build pack and environment variables, and then starts a new container from
+// the image. The container is configured to listen on the specified port and
+// to use the specified domain. The function returns an error if the
+// deployment cannot be created.
 func (s *DockerService) CreateDeployment(deployment *deploy_types.CreateDeploymentRequest, userID uuid.UUID, contextPath string) error {
 	s.logger.Log(logger.Info, "Creating deployment", contextPath)
 

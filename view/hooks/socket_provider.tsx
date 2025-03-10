@@ -33,57 +33,80 @@ export const WebSocketProvider = ({
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  const isConnectingRef = useRef(false);
 
   const connectWebSocket = () => {
+    if (isConnectingRef.current) {
+      console.log("Connection already in progress, skipping");
+      return;
+    }
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
 
+
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       console.log("WebSocket connection already active, skipping connection attempt");
       return;
     }
-    
-    if (wsRef.current) {
-      wsRef.current.close();
+
+    if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
+      try {
+        wsRef.current.close();
+      } catch (e) {
+        console.warn("Error closing existing WebSocket:", e);
+      }
+      wsRef.current = null;
     }
 
-    const socket = new WebSocket(url);
+    isConnectingRef.current = true;
+    console.log("Initiating WebSocket connection...");
 
-    socket.onopen = () => {
-      console.log("WebSocket connection established");
-      setIsReady(true);
-      reconnectAttemptsRef.current = 0; 
-    };
+    try {
+      const socket = new WebSocket(url);
 
-    socket.onclose = (event) => {
-      console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
-      setIsReady(false);
+      socket.onopen = () => {
+        console.log("WebSocket connection established");
+        setIsReady(true);
+        reconnectAttemptsRef.current = 0;
+        isConnectingRef.current = false;
+      };
 
-      if (!event.wasClean) {
-        handleReconnect();
-      }
-    };
+      socket.onclose = (event) => {
+        console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
+        setIsReady(false);
+        isConnectingRef.current = false;
 
-    socket.onmessage = (event) => {
-      console.log("WebSocket message received:", event.data);
-      setMessage(event.data);
-    };
+        if (!event.wasClean) {
+          handleReconnect();
+        }
+      };
 
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+      socket.onmessage = (event) => {
+        // console.log("WebSocket message received:", event.data);
+        setMessage(event.data);
+      };
 
-    wsRef.current = socket;
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        isConnectingRef.current = false;
+      };
+
+      wsRef.current = socket;
+    } catch (error) {
+      console.error("Error creating WebSocket:", error);
+      isConnectingRef.current = false;
+      handleReconnect();
+    }
   };
 
   const handleReconnect = () => {
     if (reconnectAttemptsRef.current < maxReconnectAttempts) {
       console.log(`Attempting to reconnect (${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})...`);
       reconnectAttemptsRef.current += 1;
-      
-      // Set timeout for reconnection
+
       reconnectTimeoutRef.current = setTimeout(() => {
         connectWebSocket();
       }, reconnectInterval);
@@ -92,17 +115,19 @@ export const WebSocketProvider = ({
     }
   };
 
-  // Initial connection
   useEffect(() => {
     connectWebSocket();
 
     return () => {
       console.log("Cleaning up WebSocket");
+      isConnectingRef.current = false;
+      
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      
+
       if (wsRef.current) {
+        wsRef.current.onclose = null; 
         wsRef.current.close();
       }
     };

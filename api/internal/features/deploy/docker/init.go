@@ -3,11 +3,16 @@ package docker
 import (
 	"context"
 	"io"
+	"os"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/google/uuid"
+	"github.com/moby/term"
+	deploy_types "github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 )
 
@@ -18,8 +23,8 @@ type DockerService struct {
 }
 
 type DockerRepository interface {
-	ListAllContainers() []container.Summary
-	ListAllImages() []image.Summary
+	ListAllContainers() ([]container.Summary, error)
+	ListAllImages(opts image.ListOptions) []image.Summary
 
 	StopContainer(containerID string, opts container.StopOptions) error
 	RemoveContainer(containerID string, opts container.RemoveOptions) error
@@ -28,7 +33,8 @@ type DockerRepository interface {
 	GetContainerById(containerID string) (container.InspectResponse, error)
 	GetImageById(imageID string, opts client.ImageInspectOption) (image.InspectResponse, error)
 
-	BuildImage(opts types.ImageBuildOptions) (types.ImageBuildResponse, error)
+	BuildImage(opts types.ImageBuildOptions, buildContext io.Reader) (string, error)
+	CreateDeployment(deployment *deploy_types.CreateDeploymentRequest, userID uuid.UUID,contextPath string) error
 }
 
 // NewDockerService creates a new instance of DockerService using the default docker client.
@@ -177,6 +183,18 @@ func (s *DockerService) GetImageById(imageID string, opts client.ImageInspectOpt
 //
 //	types.ImageBuildResponse - the response containing the build details.
 //	error - an error if the build fails.
-func (s *DockerService) BuildImage(opts types.ImageBuildOptions) (types.ImageBuildResponse, error) {
-	return s.Cli.ImageBuild(s.Ctx, nil, opts)
+func (s *DockerService) BuildImage(opts types.ImageBuildOptions, buildContext io.Reader) (string, error) {
+    resp, err := s.Cli.ImageBuild(s.Ctx, buildContext, opts)
+    if err != nil {
+        return "", err
+    }
+    defer resp.Body.Close()
+
+    termFd, isTerm := term.GetFdInfo(os.Stdout)
+	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, os.Stdout, termFd, isTerm, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return resp.OSType, nil
 }

@@ -11,35 +11,59 @@ type WebSocketContextValue = {
 const WebSocketContext = createContext<WebSocketContextValue>({
   isReady: false,
   message: null,
-  sendMessage: () => { },
-  sendJsonMessage: () => { },
+  sendMessage: () => {},
+  sendJsonMessage: () => {},
 });
 
 interface WebSocketProviderProps {
   children: ReactNode;
   url?: string;
+  reconnectInterval?: number;
+  maxReconnectAttempts?: number;
 }
 
 export const WebSocketProvider = ({
   children,
   url = WEBSOCKET_URL + "?token=" + localStorage.getItem("token"),
+  reconnectInterval = 3000,
+  maxReconnectAttempts = 5,
 }: WebSocketProviderProps) => {
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
-  useEffect(() => {
+  const connectWebSocket = () => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      console.log("WebSocket connection already active, skipping connection attempt");
+      return;
+    }
+    
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+
     const socket = new WebSocket(url);
 
     socket.onopen = () => {
       console.log("WebSocket connection established");
       setIsReady(true);
+      reconnectAttemptsRef.current = 0; 
     };
 
-
-    socket.onclose = () => {
-      console.log("WebSocket connection closed");
+    socket.onclose = (event) => {
+      console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
       setIsReady(false);
+
+      if (!event.wasClean) {
+        handleReconnect();
+      }
     };
 
     socket.onmessage = (event) => {
@@ -48,18 +72,41 @@ export const WebSocketProvider = ({
     };
 
     socket.onerror = (error) => {
-      console.log("WebSocket error:", error);
+      console.error("WebSocket error:", error);
     };
 
     wsRef.current = socket;
+  };
 
+  const handleReconnect = () => {
+    if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+      console.log(`Attempting to reconnect (${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})...`);
+      reconnectAttemptsRef.current += 1;
+      
+      // Set timeout for reconnection
+      reconnectTimeoutRef.current = setTimeout(() => {
+        connectWebSocket();
+      }, reconnectInterval);
+    } else {
+      console.error(`Failed to reconnect after ${maxReconnectAttempts} attempts`);
+    }
+  };
+
+  // Initial connection
+  useEffect(() => {
+    connectWebSocket();
 
     return () => {
-      console.log("Closing WebSocket connection");
-      socket.close();
+      console.log("Cleaning up WebSocket");
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
     };
   }, [url]);
-
 
   const sendMessage = (data: string) => {
     if (wsRef.current && isReady) {
@@ -90,7 +137,6 @@ export const WebSocketProvider = ({
     </WebSocketContext.Provider>
   );
 };
-
 
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);

@@ -28,12 +28,12 @@ func NewValidator(storage storage.GithubConnectorRepository) *Validator {
 //
 // If the request object is not of one of the above types, it returns
 // types.ErrInvalidRequestType.
-func (v *Validator) ValidateRequest(req interface{},user *shared_types.User) error {
+func (v *Validator) ValidateRequest(req interface{}, user *shared_types.User) error {
 	switch r := req.(type) {
 	case *types.CreateGithubConnectorRequest:
 		return v.validateCreateGithubConnectorRequest(*r)
 	case *types.UpdateGithubConnectorRequest:
-		return v.validateUpdateGithubConnectorRequest(*r,user.ID.String())
+		return v.validateUpdateGithubConnectorRequest(*r, *user)
 	default:
 		return types.ErrInvalidRequestType
 	}
@@ -43,11 +43,11 @@ func (v *Validator) ValidateRequest(req interface{},user *shared_types.User) err
 //
 // It checks the following fields for emptiness:
 //
-// 	- Slug
-// 	- Pem
-// 	- ClientID
-// 	- ClientSecret
-// 	- WebhookSecret
+//   - Slug
+//   - Pem
+//   - ClientID
+//   - ClientSecret
+//   - WebhookSecret
 //
 // If any of these fields are empty, an error specific to the missing field
 // is returned. Otherwise, nil is returned.
@@ -81,12 +81,12 @@ func (v *Validator) validateCreateGithubConnectorRequest(req types.CreateGithubC
 // If not, it returns a permission denied error.
 //
 // Finally, it returns nil if the validation is successful.
-func (v *Validator) validateUpdateGithubConnectorRequest(req types.UpdateGithubConnectorRequest,userID string) error {
+func (v *Validator) validateUpdateGithubConnectorRequest(req types.UpdateGithubConnectorRequest, user shared_types.User) error {
 	if req.InstallationID == "" {
 		return types.ErrMissingInstallationID
 	}
 
-	connectors, err:= v.storage.GetAllConnectors(userID)
+	connectors, err := v.storage.GetAllConnectors(user.ID.String())
 
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (v *Validator) validateUpdateGithubConnectorRequest(req types.UpdateGithubC
 		return types.ErrNoConnectors
 	}
 
-	if string(connectors[0].UserID.String()) != userID {
+	if string(connectors[0].UserID.String()) != user.ID.String() || user.Type != "admin" {
 		return types.ErrPermissionDenied
 	}
 
@@ -103,10 +103,10 @@ func (v *Validator) validateUpdateGithubConnectorRequest(req types.UpdateGithubC
 }
 
 // ParseRequestBody parses a request body into the provided interface.
-// 
+//
 // The method decodes the body of the request using the provided io.ReadCloser,
 // and stores the result in the provided interface.
-// 
+//
 // If the decoding fails, it returns an error.
 func (v *Validator) ParseRequestBody(req interface{}, body io.ReadCloser, decoded interface{}) error {
 	return json.NewDecoder(body).Decode(decoded)

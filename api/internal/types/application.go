@@ -60,6 +60,10 @@ const (
 	Running Status = "running"
 	Stopped Status = "stopped"
 	Failed  Status = "failed"
+	Cloning Status = "cloning"
+	Building Status = "building"
+	Deploying Status = "deploying"
+	Deployed Status = "deployed"
 )
 
 type Environment string

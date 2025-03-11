@@ -3,18 +3,12 @@ package docker
 import (
 	"context"
 	"io"
-	"os"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/jsonmessage"
-	"github.com/google/uuid"
-	"github.com/moby/term"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
-	deploy_types "github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 )
 
@@ -35,8 +29,10 @@ type DockerRepository interface {
 	GetContainerById(containerID string) (container.InspectResponse, error)
 	GetImageById(imageID string, opts client.ImageInspectOption) (image.InspectResponse, error)
 
-	BuildImage(opts types.ImageBuildOptions, buildContext io.Reader) (string, error)
-	CreateDeployment(deployment *deploy_types.CreateDeploymentRequest, userID uuid.UUID, contextPath string) error
+	BuildImage(opts types.ImageBuildOptions, buildContext io.Reader) (types.ImageBuildResponse, error)
+	CreateContainer(config container.Config, hostConfig container.HostConfig, networkConfig network.NetworkingConfig, containerName string) (container.CreateResponse, error)
+	// CreateDeployment(deployment *deploy_types.CreateDeploymentRequest, userID uuid.UUID, contextPath string) error
+	ContainerLogs(ctx context.Context, containerID string, opts container.LogsOptions) (io.ReadCloser, error)
 }
 
 // NewDockerService creates a new instance of DockerService using the default docker client.
@@ -185,20 +181,8 @@ func (s *DockerService) GetImageById(imageID string, opts client.ImageInspectOpt
 //
 //	types.ImageBuildResponse - the response containing the build details.
 //	error - an error if the build fails.
-func (s *DockerService) BuildImage(opts types.ImageBuildOptions, buildContext io.Reader) (string, error) {
-	resp, err := s.Cli.ImageBuild(s.Ctx, buildContext, opts)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	termFd, isTerm := term.GetFdInfo(os.Stdout)
-	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, os.Stdout, termFd, isTerm, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return resp.OSType, nil
+func (s *DockerService) BuildImage(opts types.ImageBuildOptions, buildContext io.Reader) (types.ImageBuildResponse, error) {
+	return s.Cli.ImageBuild(s.Ctx, buildContext, opts)
 }
 
 // CreateContainer creates a new Docker container with the specified configurations.
@@ -217,5 +201,9 @@ func (s *DockerService) BuildImage(opts types.ImageBuildOptions, buildContext io
 //   container.CreateResponse - the response containing details of the created container.
 //   error - an error if the container creation fails.
 func (s *DockerService) CreateContainer(config container.Config, hostConfig container.HostConfig, networkConfig network.NetworkingConfig, containerName string) (container.CreateResponse, error){
-	return s.Cli.ContainerCreate(s.Ctx, &config, &hostConfig, &networkConfig, &v1.Platform{Architecture: "amd64", OS: "linux"}, containerName)
+	return s.Cli.ContainerCreate(s.Ctx, &config, &hostConfig, &networkConfig, &v1.Platform{}, containerName)
+}
+
+func (s *DockerService) ContainerLogs(Ctx context.Context, containerID string, opts container.LogsOptions) (io.ReadCloser, error) {
+	return s.Cli.ContainerLogs(Ctx, containerID, opts)
 }

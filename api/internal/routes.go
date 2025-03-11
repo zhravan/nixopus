@@ -178,5 +178,6 @@ func (router *Router) Routes() *mux.Router {
 	deployApiValidator.HandleFunc("/port", deployController.IsPortAlreadyTaken).Methods("POST", "OPTIONS")
 
 	deployApi.HandleFunc("/applications", deployController.GetApplications).Methods("GET", "OPTIONS")
+	deployApi.HandleFunc("/application", deployController.HandleDeploy).Methods("POST", "OPTIONS")
 	return r
 }

@@ -72,12 +72,6 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 
 			s.sendError(conn, "Invalid topic unsubscription format")
 
-		case "deploy":
-			if user == nil {
-				s.sendError(conn, "Authentication required")
-				continue
-			}
-
 		case "authenticate":
 			token, ok := msg.Data.(string)
 			if !ok {

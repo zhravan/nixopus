@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useGetAllDomainsQuery } from '@/redux/services/settings/domainsApi';
 import { useWebSocket } from '@/hooks/socket_provider';
+import { useRouter } from 'next/navigation';
 
 interface DeploymentFormValues {
   application_name: string;
@@ -35,6 +36,7 @@ function useCreateDeployment({
 }: DeploymentFormValues) {
   const { data: domains } = useGetAllDomainsQuery();
   const { isReady, message, sendJsonMessage } = useWebSocket();
+  const router = useRouter();
 
   const deploymentFormSchema = z.object({
     application_name: z
@@ -139,6 +141,7 @@ function useCreateDeployment({
         post_run_commands: values.post_run_commands
       }
     })
+    router.push('/self-host/application/123')
   }
 
   const validateEnvVar = (

@@ -18,6 +18,7 @@ import (
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
 	user "github.com/raghavyuva/nixopus-api/internal/features/user/controller"
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
+	"github.com/raghavyuva/nixopus-api/internal/realtime"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
@@ -74,7 +75,7 @@ func (router *Router) Routes() *mux.Router {
 	notificationManager.Start()
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
 
-	wsServer, err := NewSocketServer(deployController, router.app.Store.DB, router.app.Ctx)
+	wsServer, err := realtime.NewSocketServer(deployController, router.app.Store.DB, router.app.Ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

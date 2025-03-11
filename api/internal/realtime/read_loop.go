@@ -36,14 +36,12 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 			}
 
 			if msg.Topic != "" && msg.Data != nil {
-				resourceID, ok := msg.Data.(string)
-				if !ok {
-					if dataMap, ok := msg.Data.(map[string]interface{}); ok {
-						resourceID, ok = dataMap["resourceId"].(string)
-						if !ok {
-							s.sendError(conn, "Invalid topic subscription format. Requires resourceId")
-							continue
-						}
+				var resourceID string
+				if dataMap, ok := msg.Data.(map[string]interface{}); ok {
+					resourceID, ok = dataMap["resource_id"].(string)
+					if !ok {
+						s.sendError(conn, "Invalid topic subscription format. Requires resourceId")
+						continue
 					}
 				}
 
@@ -59,14 +57,12 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 			}
 
 			if msg.Topic != "" && msg.Data != nil {
-				resourceID, ok := msg.Data.(string)
-				if !ok {
-					if dataMap, ok := msg.Data.(map[string]interface{}); ok {
-						resourceID, ok = dataMap["resourceId"].(string)
-						if !ok {
-							s.sendError(conn, "Invalid topic unsubscription format. Requires resourceId")
-							continue
-						}
+				var resourceID string
+				if dataMap, ok := msg.Data.(map[string]interface{}); ok {
+					resourceID, ok = dataMap["resource_id"].(string)
+					if !ok {
+						s.sendError(conn, "Invalid topic unsubscription format. Requires resourceId")
+						continue
 					}
 				}
 

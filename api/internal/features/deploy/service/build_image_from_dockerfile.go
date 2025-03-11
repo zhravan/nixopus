@@ -77,7 +77,6 @@ func (s *DeployService) buildImageFromDockerfile(applicationID uuid.UUID, contex
 	return image_name, nil
 }
 
-
 // LogReader is a custom io.Reader that captures logs from Docker operations and adds them to application logs
 type LogReader struct {
 	Reader        io.Reader

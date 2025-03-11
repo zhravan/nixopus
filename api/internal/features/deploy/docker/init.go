@@ -2,7 +2,6 @@ package docker
 
 import (
 	"context"
-	"io"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -10,6 +9,7 @@ import (
 	"github.com/docker/docker/client"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	"io"
 )
 
 type DockerService struct {
@@ -192,15 +192,17 @@ func (s *DockerService) BuildImage(opts types.ImageBuildOptions, buildContext io
 // on the "amd64" architecture and "linux" OS platform.
 //
 // Parameters:
-//   config - the configuration for the container, including environment variables, commands, etc.
-//   hostConfig - the host-specific configuration for the container, such as resource limits.
-//   networkConfig - the networking configuration for the container, specifying network settings.
-//   containerName - the name to assign to the new container.
+//
+//	config - the configuration for the container, including environment variables, commands, etc.
+//	hostConfig - the host-specific configuration for the container, such as resource limits.
+//	networkConfig - the networking configuration for the container, specifying network settings.
+//	containerName - the name to assign to the new container.
 //
 // Returns:
-//   container.CreateResponse - the response containing details of the created container.
-//   error - an error if the container creation fails.
-func (s *DockerService) CreateContainer(config container.Config, hostConfig container.HostConfig, networkConfig network.NetworkingConfig, containerName string) (container.CreateResponse, error){
+//
+//	container.CreateResponse - the response containing details of the created container.
+//	error - an error if the container creation fails.
+func (s *DockerService) CreateContainer(config container.Config, hostConfig container.HostConfig, networkConfig network.NetworkingConfig, containerName string) (container.CreateResponse, error) {
 	return s.Cli.ContainerCreate(s.Ctx, &config, &hostConfig, &networkConfig, &v1.Platform{}, containerName)
 }
 

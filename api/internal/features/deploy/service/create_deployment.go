@@ -63,42 +63,54 @@ func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentReque
 		return shared_types.Application{}, err
 	}
 
-	// Start the deployment process
-	go func() {
-		s.updateStatus(application.ID, shared_types.Cloning, appStatus.ID)
-
-		repoID, err := strconv.ParseInt(application.Repository, 10, 64)
-		if err != nil {
-			s.logger.Log(logger.Error, "Failed to parse repository ID: "+err.Error(), "")
-			s.updateStatus(application.ID, shared_types.Failed, appStatus.ID)
-			s.addLog(application.ID, "Failed to parse repository ID: "+err.Error())
-			return
-		}
-
-		repoPath, err := s.github_service.CloneRepository(uint64(repoID), string(userID.String()), string(application.Environment))
-		if err != nil {
-			s.logger.Log(logger.Error, "Failed to clone repository: "+err.Error(), "")
-			s.updateStatus(application.ID, shared_types.Failed, appStatus.ID)
-			s.addLog(application.ID, "Failed to clone repository: "+err.Error())
-			return
-		}
-
-		s.logger.Log(logger.Info, "Repository cloned successfully", repoPath)
-
-		s.updateStatus(application.ID, shared_types.Building, appStatus.ID)
-
-		err = s.Deployer(application.ID, deployment, userID, repoPath, appStatus.ID)
-		if err != nil {
-			s.logger.Log(logger.Error, "Failed to create deployment: "+err.Error(), "")
-			s.updateStatus(application.ID, shared_types.Failed, appStatus.ID)
-			s.addLog(application.ID, "Failed to create deployment: "+err.Error())
-			return
-		}
-
-		s.updateStatus(application.ID, shared_types.Deployed, appStatus.ID)
-		s.addLog(application.ID, "Deployment completed successfully")
-	}()
+	go s.StartDeploymentInBackground(application, deployment, userID, appStatus)
 
 	s.logger.Log(logger.Info, "Deployment created successfully", "")
 	return application, nil
+}
+
+// StartDeploymentInBackground handles the deployment process in a separate goroutine.
+// It updates the application status through various phases such as cloning, building,
+// and deploying. The repository is cloned from the given repository ID, and the deployment
+// strategy is executed. Logs are added to track the process and errors are handled by
+// updating the status to failed and logging the error message.
+//
+// Parameters:
+//   - application: The application to be deployed.
+//   - deployment: The deployment request details.
+//   - userID: The ID of the user initiating the deployment.
+//   - appStatus: The current application status information.
+func (s *DeployService) StartDeploymentInBackground(application shared_types.Application, deployment *types.CreateDeploymentRequest, userID uuid.UUID, appStatus shared_types.ApplicationStatus) {
+	s.updateStatus(application.ID, shared_types.Cloning, appStatus.ID)
+
+	repoID, err := strconv.ParseInt(application.Repository, 10, 64)
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to parse repository ID: "+err.Error(), "")
+		s.updateStatus(application.ID, shared_types.Failed, appStatus.ID)
+		s.addLog(application.ID, "Failed to parse repository ID: "+err.Error())
+		return
+	}
+
+	repoPath, err := s.github_service.CloneRepository(uint64(repoID), string(userID.String()), string(application.Environment))
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to clone repository: "+err.Error(), "")
+		s.updateStatus(application.ID, shared_types.Failed, appStatus.ID)
+		s.addLog(application.ID, "Failed to clone repository: "+err.Error())
+		return
+	}
+
+	s.logger.Log(logger.Info, "Repository cloned successfully", repoPath)
+
+	s.updateStatus(application.ID, shared_types.Building, appStatus.ID)
+
+	err = s.Deployer(application.ID, deployment, userID, repoPath, appStatus.ID)
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to create deployment: "+err.Error(), "")
+		s.updateStatus(application.ID, shared_types.Failed, appStatus.ID)
+		s.addLog(application.ID, "Failed to create deployment: "+err.Error())
+		return
+	}
+
+	s.updateStatus(application.ID, shared_types.Deployed, appStatus.ID)
+	s.addLog(application.ID, "Deployment completed successfully")
 }

@@ -25,7 +25,6 @@ function AppItem({
   status
 }: Application) {
   const router = useRouter();
-  
   const formattedDate = updated_at 
     ? new Date(updated_at).toLocaleString('en-US', {
         day: 'numeric',
@@ -46,7 +45,7 @@ function AppItem({
       case Environment.Development.toLowerCase():
         return 'bg-yellow-500 text-white font-medium';
       case Environment.Staging.toLowerCase():
-        return 'bg-orange-500 text-white font-medium';
+        return 'bg-orange-400 text-black font-medium';
       default:
         return 'bg-primary text-primary-foreground font-medium';
     }
@@ -62,8 +61,8 @@ function AppItem({
   
   return (
     <Card
-      className={`relative w-full cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-xl  group`}
-      onClick={() => {}}
+      className={`relative w-full bg-secondary cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-xl  group`}
+      onClick={() => {router.push(`/self-host/application/${id}`)}}
     >
       {/* <div className="absolute inset-0 bg-gradient-to-br from-transparent to-muted opacity-50"></div> */}
       

@@ -24,4 +24,11 @@ else
     exit 1
 fi
 
+# once the application is up, we should create a default user, 
+# ideally we will call the api here and register the user, if no users found on the table then register should work, else it should fail
+# we will take the email in the second argument
+# we will generate the random password and print it out for the user
+# and also we should setup proxy for this application
+# print out the application url for the user
+
 echo "Application installed successfully"

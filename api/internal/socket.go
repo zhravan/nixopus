@@ -1,21 +1,21 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
-	"strings"
-	"context"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
-	"github.com/golang-jwt/jwt"
+	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
 	"github.com/raghavyuva/nixopus-api/internal/types"
-	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	"github.com/uptrace/bun"
 )
 
@@ -34,7 +34,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type SocketServer struct {
-	conns            *sync.Map 
+	conns            *sync.Map
 	shutdown         chan struct{}
 	deployController *deploy.DeployController
 	db               *bun.DB
@@ -57,7 +57,6 @@ func NewSocketServer(deployController *deploy.DeployController, db *bun.DB, ctx 
 
 	return server, nil
 }
-
 
 func (s *SocketServer) verifyToken(tokenString string) (*types.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -82,12 +81,12 @@ func (s *SocketServer) verifyToken(tokenString string) (*types.User, error) {
 		if !ok {
 			return nil, fmt.Errorf("invalid token claims")
 		}
-		
+
 		userStorage := user_storage.UserStorage{
 			DB:  s.db,
 			Ctx: s.ctx,
 		}
-		
+
 		user, err := userStorage.FindUserByEmail(email)
 		if err != nil {
 			return nil, err
@@ -106,15 +105,15 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error upgrading connection: %v", err)
 		return
 	}
-	
+
 	fmt.Printf("New connection from client: %s\n", conn.RemoteAddr())
 	conn.SetReadLimit(maxMessageSize)
-	
+
 	if token != "" {
 		if len(token) > 7 && strings.HasPrefix(token, "Bearer ") {
 			token = token[7:]
 		}
-		
+
 		user, err := s.verifyToken(token)
 		if err != nil {
 			log.Printf("Auth error: %v", err)
@@ -122,20 +121,20 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 			conn.Close()
 			return
 		}
-		
+
 		log.Printf("User authenticated via URL token. ID: %s, Email: %s", user.ID, user.Email)
 		s.conns.Store(conn, user.ID)
 		defer s.handleDisconnect(conn)
 		s.readLoop(conn, user)
 		return
 	}
-	
+
 	s.conns.Store(conn, "")
 	defer s.handleDisconnect(conn)
-	
+
 	authTimer := time.NewTimer(30 * time.Second)
 	authChan := make(chan *types.User)
-	
+
 	go func() {
 		select {
 		case user := <-authChan:
@@ -148,7 +147,7 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 			conn.Close()
 		}
 	}()
-	
+
 	s.waitForAuth(conn, authChan)
 }
 
@@ -192,7 +191,7 @@ func (s *SocketServer) waitForAuth(conn *websocket.Conn, authChan chan<- *types.
 
 	s.conns.Store(conn, user.ID)
 	log.Printf("User authenticated. ID: %s, Email: %s", user.ID, user.Email)
-	
+
 	conn.WriteJSON(types.Payload{
 		Action: "authenticated",
 		Data:   user.ID,
@@ -224,28 +223,27 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 				s.sendError(conn, "Authentication required")
 				continue
 			}
-			s.deployController.HandleDeploy(conn, msg.Data,user)
 		case "authenticate":
 			token, ok := msg.Data.(string)
 			if !ok {
 				s.sendError(conn, "Invalid authentication token format")
 				continue
 			}
-			
+
 			newUser, err := s.verifyToken(token)
 			if err != nil {
 				s.sendError(conn, "Invalid authorization token")
 				continue
 			}
-			
+
 			user = newUser
 			s.conns.Store(conn, user.ID)
-			
+
 			conn.WriteJSON(types.Payload{
 				Action: "authenticated",
 				Data:   user.ID,
 			})
-			
+
 			log.Printf("User re-authenticated. ID: %s, Email: %s", user.ID, user.Email)
 		default:
 			s.sendError(conn, "Unknown message action")

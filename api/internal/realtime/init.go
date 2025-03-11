@@ -39,8 +39,7 @@ var upgrader = websocket.Upgrader{
 type SocketServer struct {
 	conns            *sync.Map
 	topicsMu         sync.RWMutex
-	topics           map[topics]map[*websocket.Conn]bool
-	resourceTopics   map[string]map[*websocket.Conn]bool
+	topics           map[string]map[*websocket.Conn]bool
 	shutdown         chan struct{}
 	deployController *deploy.DeployController
 	db               *bun.DB
@@ -59,8 +58,7 @@ func NewSocketServer(deployController *deploy.DeployController, db *bun.DB, ctx 
 		deployController: deployController,
 		db:               db,
 		ctx:              ctx,
-		topics:           make(map[topics]map[*websocket.Conn]bool),
-		resourceTopics:   make(map[string]map[*websocket.Conn]bool),
+		topics:           make(map[string]map[*websocket.Conn]bool),
 	}
 
 	return server, nil
@@ -133,14 +131,6 @@ func (s *SocketServer) handleDisconnect(conn *websocket.Conn) {
 		}
 	}
 
-	for topic, connections := range s.resourceTopics {
-		if _, exists := connections[conn]; exists {
-			delete(connections, conn)
-			if len(connections) == 0 {
-				delete(s.resourceTopics, topic)
-			}
-		}
-	}
 	s.topicsMu.Unlock()
 
 	conn.Close()

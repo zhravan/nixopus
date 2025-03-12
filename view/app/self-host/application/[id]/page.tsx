@@ -7,10 +7,12 @@ import Configuration from '../../components/application-details/configuration';
 import DeploymentsList from '../../components/application-details/deploymentsList';
 import { useWebSocket } from '@/hooks/socket_provider';
 import { useParams } from 'next/navigation';
+import { useGetApplicationByIdQuery } from '@/redux/services/deploy/applicationsApi';
 
 function Page() {
   const { isReady, message, sendJsonMessage } = useWebSocket();
   const { id } = useParams()
+  const { data: application, isLoading, error } = useGetApplicationByIdQuery({ id: id as string }, { skip: !id })
 
   useEffect(() => {
     sendJsonMessage({
@@ -21,7 +23,6 @@ function Page() {
       }
     })
   }, [])
-
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl mt-10">

@@ -22,6 +22,7 @@ type DeployRepository interface {
 	AddApplicationStatus(applicationStatus *shared_types.ApplicationStatus) error
 	GetApplications(page int, pageSize int) ([]shared_types.Application, int, error)
 	UpdateApplicationStatus(applicationStatus *shared_types.ApplicationStatus) error
+	GetApplicationById(id string) (shared_types.Application, error)
 }
 
 func (s *DeployStorage) IsNameAlreadyTaken(name string) (bool, error) {
@@ -122,4 +123,23 @@ func (s *DeployStorage) GetApplications(page, pageSize int) ([]shared_types.Appl
 	}
 
 	return applications, totalCount, nil
+}
+
+func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application, error) {
+	var application shared_types.Application
+
+	err := s.DB.NewSelect().
+		Model(&application).
+		Relation("Domain").
+		Relation("User").
+		Relation("Status").
+		Relation("Logs").
+		Where("application_id = ?", id).
+		Scan(s.Ctx)
+
+	if err != nil {
+		return shared_types.Application{}, err
+	}
+
+	return application, nil
 }

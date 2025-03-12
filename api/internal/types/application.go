@@ -31,6 +31,16 @@ type Application struct {
 	Logs   []*ApplicationLogs `json:"logs,omitempty" bun:"rel:has-many,join:id=application_id"`
 }
 
+type ApplicationDeployment struct {
+	bun.BaseModel `bun:"table:application_deployment,alias:ad" swaggerignore:"true"`
+	ID            uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
+	ApplicationID uuid.UUID `json:"application_id" bun:"application_id,notnull,type:uuid"`
+	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt     time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
+
+	Application *Application `json:"-" bun:"rel:belongs-to,join:application_id=id"`
+}
+
 type ApplicationStatus struct {
 	bun.BaseModel `bun:"table:application_status,alias:as" swaggerignore:"true"`
 	ID            uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
@@ -42,15 +52,28 @@ type ApplicationStatus struct {
 	Application *Application `json:"-" bun:"rel:belongs-to,join:application_id=id"`
 }
 
-type ApplicationLogs struct {
-	bun.BaseModel `bun:"table:application_logs,alias:al" swaggerignore:"true"`
-	ID            uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
-	ApplicationID uuid.UUID `json:"application_id" bun:"application_id,notnull,type:uuid"`
-	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
-	UpdatedAt     time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
-	Log           string    `json:"log" bun:"log,notnull"`
+type ApplicationDeploymentStatus struct {
+	bun.BaseModel           `bun:"table:application_deployment_status,alias:as" swaggerignore:"true"`
+	ID                      uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
+	ApplicationDeploymentID uuid.UUID `json:"application_deployment_id" bun:"application_deployment_id,notnull,type:uuid"`
+	Status                  Status    `json:"status" bun:"status,notnull"`
+	CreatedAt               time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt               time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
 
-	Application *Application `json:"-" bun:"rel:belongs-to,join:application_id=id"`
+	ApplicationDeployment *ApplicationDeployment `json:"-" bun:"rel:belongs-to,join:application_deployment_id=id"`
+}
+
+type ApplicationLogs struct {
+	bun.BaseModel           `bun:"table:application_logs,alias:al" swaggerignore:"true"`
+	ID                      uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
+	ApplicationID           uuid.UUID `json:"application_id" bun:"application_id,notnull,type:uuid"`
+	CreatedAt               time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt               time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
+	Log                     string    `json:"log" bun:"log,notnull"`
+	ApplicationDeploymentID uuid.UUID `json:"application_deployment_id" bun:"application_deployment_id,notnull,type:uuid"`
+
+	ApplicationDeployment *ApplicationDeployment `json:"-" bun:"rel:belongs-to,join:application_deployment_id=id"`
+	Application           *Application           `json:"-" bun:"rel:belongs-to,join:application_id=id"`
 }
 
 type Status string

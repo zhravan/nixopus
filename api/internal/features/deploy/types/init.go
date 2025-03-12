@@ -38,30 +38,43 @@ type CreateDeploymentRequest struct {
 }
 
 var (
-	ErrInvalidRequestType = errors.New("invalid request type")
-	ErrMissingName        = errors.New("name is required")
-	ErrMissingDomainID    = errors.New("domain_id is required")
-	ErrMissingRepository  = errors.New("repository is required")
-	ErrMissingBranch      = errors.New("branch is required")
-	ErrMissingPort        = errors.New("port is required")
-	ErrInvalidEnvironment = errors.New("invalid environment")
-	ErrInvalidBuildPack   = errors.New("invalid build pack")
+	ErrInvalidRequestType           = errors.New("invalid request type")
+	ErrMissingName                  = errors.New("name is required")
+	ErrMissingDomainID              = errors.New("domain_id is required")
+	ErrMissingRepository            = errors.New("repository is required")
+	ErrMissingBranch                = errors.New("branch is required")
+	ErrMissingPort                  = errors.New("port is required")
+	ErrInvalidEnvironment           = errors.New("invalid environment")
+	ErrInvalidBuildPack             = errors.New("invalid build pack")
 	ErrFailedToCreateTarFromContext = errors.New("failed to create tar from context")
-	ErrProcessingBuildOutput = errors.New("failed to process build output")
+	ErrProcessingBuildOutput        = errors.New("failed to process build output")
+	ErrBuildDockerImage             = errors.New("failed to build Docker image")
+	ErrRunDockerImage               = errors.New("failed to run Docker image")
+	ErrDockerComposeNotImplemented  = errors.New("docker compose deployment not implemented yet")
 )
 
-var (
-	LogDeploymentStarted = "Deployment started"
-	LogFailedToCreateApplicationRecord = "Failed to create application record"
-	LogFailedToCreateApplicationStatus = "Failed to create application status: "
-	LogFailedToCreateApplicationDeployment = "Failed to create application deployment: "
-	LogFailedToCreateApplicationDeploymentStatus = "Failed to create application deployment status: "
-	LogFailedToCreateApplicationLogs = "Failed to create application logs: "
-	LogFailedToParseRepositoryID = "Failed to parse repository ID: "
-	LogFailedToCloneRepository = "Failed to clone repository: "
-	LogRepositoryClonedSuccessfully = "Repository cloned successfully"
-	LogFailedToCreateDeployment = "Failed to create deployment: "
-	LogDeploymentCompletedSuccessfully = "Deployment completed successfully"
-	LogDockerImageBuiltSuccessfully = "Docker image built successfully"
-	LogStartingDockerImageBuild = "Starting Docker image build from Dockerfile"
+const (
+	LogDeploymentStarted                         = "Deployment started"
+	LogRepositoryClonedSuccessfully              = "Repository cloned successfully"
+	LogDeploymentCompletedSuccessfully           = "Deployment completed successfully"
+	LogDockerImageBuiltSuccessfully              = "Docker image built successfully"
+	LogStartingDockerImageBuild                  = "Starting Docker image build from Dockerfile"
+	LogUsingDockerfileStrategy                   = "Using Dockerfile build strategy"
+	LogUsingDockerComposeStrategy                = "Docker Compose deployment strategy selected"
+	LogContainerRunning                          = "Container is running with ID: %s"
+	LogApplicationExposed                        = "Application exposed on port: %d"
+	LogBuildContextPath                          = "Build context path: %s"
+	LogUsingBuildArgs                            = "Using %d build arguments"
+	LogFailedToCreateApplicationRecord           = "Failed to create application record"
+	LogFailedToCreateApplicationStatus           = "Failed to create application status: %s"
+	LogFailedToCreateApplicationDeployment       = "Failed to create application deployment: %s"
+	LogFailedToCreateApplicationDeploymentStatus = "Failed to create application deployment status: %s"
+	LogFailedToCreateApplicationLogs             = "Failed to create application logs: %s"
+	LogFailedToParseRepositoryID                 = "Failed to parse repository ID: %s"
+	LogFailedToCloneRepository                   = "Failed to clone repository: %s"
+	LogFailedToCreateDeployment                  = "Failed to create deployment: %s"
+	LogFailedToBuildDockerImage                  = "Failed to build Docker image: %s"
+	LogFailedToRunDockerImage                    = "Failed to run Docker image: %s"
+	LogDockerComposeNotImplemented               = "Docker compose deployment not implemented yet"
+	LogDeploymentBuildPack                       = "Starting deployment process for build pack: %s"
 )

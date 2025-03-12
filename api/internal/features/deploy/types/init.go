@@ -51,6 +51,7 @@ var (
 	ErrBuildDockerImage             = errors.New("failed to build Docker image")
 	ErrRunDockerImage               = errors.New("failed to run Docker image")
 	ErrDockerComposeNotImplemented  = errors.New("docker compose deployment not implemented yet")
+	ErrMissingImageName             = errors.New("image name is required")
 )
 
 const (
@@ -77,4 +78,14 @@ const (
 	LogFailedToRunDockerImage                    = "Failed to run Docker image: %s"
 	LogDockerComposeNotImplemented               = "Docker compose deployment not implemented yet"
 	LogDeploymentBuildPack                       = "Starting deployment process for build pack: %s"
+	LogRunningContainerFromImage                 = "Running container from image"
+	LogPreparingToRunContainer                   = "Preparing to run container from image %s"
+	LogEnvironmentVariables                      = "Environment variables: %v"
+	LogContainerExposingPort                     = "Container will expose port %s"
+	LogCreatingContainer                         = "Creating container..."
+	LogContainerCreated                          = "Container created with ID: %s"
+	LogStartingContainer                         = "Starting container..."
+	LogContainerStartedSuccessfully              = "Container started successfully"
+	LogFailedToCreateContainer                   = "Failed to create container: %s"
+	LogFailedToStartContainer                    = "Failed to start container: %s"
 )

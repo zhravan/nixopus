@@ -47,3 +47,17 @@ var (
 	ErrInvalidEnvironment = errors.New("invalid environment")
 	ErrInvalidBuildPack   = errors.New("invalid build pack")
 )
+
+var (
+	LogDeploymentStarted = "Deployment started"
+	LogFailedToCreateApplicationRecord = "Failed to create application record"
+	LogFailedToCreateApplicationStatus = "Failed to create application status: "
+	LogFailedToCreateApplicationDeployment = "Failed to create application deployment: "
+	LogFailedToCreateApplicationDeploymentStatus = "Failed to create application deployment status: "
+	LogFailedToCreateApplicationLogs = "Failed to create application logs: "
+	LogFailedToParseRepositoryID = "Failed to parse repository ID: "
+	LogFailedToCloneRepository = "Failed to clone repository: "
+	LogRepositoryClonedSuccessfully = "Repository cloned successfully"
+	LogFailedToCreateDeployment = "Failed to create deployment: "
+	LogDeploymentCompletedSuccessfully = "Deployment completed successfully"
+)

@@ -19,7 +19,6 @@ require (
 	github.com/swaggo/swag v1.16.4
 	github.com/uptrace/bun v1.2.10
 	github.com/uptrace/bun/dialect/pgdialect v1.2.10
-	github.com/uptrace/bun/driver/pgdriver v1.2.10
 	github.com/uptrace/bun/extra/bundebug v1.2.10
 	golang.org/x/crypto v0.33.0
 	golang.org/x/net v0.35.0
@@ -77,5 +76,4 @@ require (
 	golang.org/x/tools v0.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
-	mellium.im/sasl v0.3.2 // indirect
 )

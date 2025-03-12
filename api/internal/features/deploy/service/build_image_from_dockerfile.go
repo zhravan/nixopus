@@ -25,20 +25,20 @@ import (
 // applied to the built image. The image_name parameter is the name of the
 // built image. The function returns the ID of the built image, or an error if
 // the build fails.
-func (s *DeployService) buildImageFromDockerfile(applicationID uuid.UUID, contextPath string, dockerfile string, force bool, buildArgs map[string]*string, labels map[string]string, image_name string, statusID uuid.UUID) (string, error) {
-	s.addLog(applicationID, "Starting Docker image build from Dockerfile")
+func (s *DeployService) buildImageFromDockerfile(applicationID uuid.UUID, contextPath string, dockerfile string, force bool, buildArgs map[string]*string, labels map[string]string, image_name string, statusID uuid.UUID, deployment_config *shared_types.ApplicationDeployment) (string, error) {
+	s.addLog(applicationID, "Starting Docker image build from Dockerfile", deployment_config.ID)
 	s.updateStatus(applicationID, shared_types.Building, statusID)
 
 	buildContextTar, err := archive.TarWithOptions(contextPath, &archive.TarOptions{})
 	if err != nil {
 		errMsg := fmt.Sprintf("failed to create tar from build context: %s", err.Error())
-		s.addLog(applicationID, errMsg)
+		s.addLog(applicationID, errMsg, deployment_config.ID)
 		return "", errors.New(errMsg)
 	}
-	s.addLog(applicationID, "Created build context archive for Docker build")
+	s.addLog(applicationID, "Created build context archive for Docker build", deployment_config.ID)
 
 	dockerfile_path := filepath.Base(dockerfile)
-	s.addLog(applicationID, fmt.Sprintf("Using Dockerfile: %s", dockerfile_path))
+	s.addLog(applicationID, fmt.Sprintf("Using Dockerfile: %s", dockerfile_path), deployment_config.ID)
 
 	buildOptions := docker_types.ImageBuildOptions{
 		Dockerfile:  dockerfile_path,
@@ -54,35 +54,37 @@ func (s *DeployService) buildImageFromDockerfile(applicationID uuid.UUID, contex
 	resp, err := s.dockerRepo.BuildImage(buildOptions, buildContextTar)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to start image build: %s", err.Error())
-		s.addLog(applicationID, errMsg)
+		s.addLog(applicationID, errMsg, deployment_config.ID)
 		return "", errors.New(errMsg)
 	}
 	defer resp.Body.Close()
 
 	logReader := &LogReader{
-		Reader:        resp.Body,
-		ApplicationID: applicationID,
-		DeployService: s,
+		Reader:            resp.Body,
+		ApplicationID:     applicationID,
+		DeployService:     s,
+		deployment_config: deployment_config,
 	}
 
 	termFd, isTerm := term.GetFdInfo(os.Stdout)
 	err = jsonmessage.DisplayJSONMessagesStream(logReader, os.Stdout, termFd, isTerm, nil)
 	if err != nil {
 		errMsg := fmt.Sprintf("Error processing build output: %s", err.Error())
-		s.addLog(applicationID, errMsg)
+		s.addLog(applicationID, errMsg, deployment_config.ID)
 		return "", errors.New(errMsg)
 	}
 
-	s.addLog(applicationID, "Docker image build completed successfully")
+	s.addLog(applicationID, "Docker image build completed successfully", deployment_config.ID)
 	return image_name, nil
 }
 
 // LogReader is a custom io.Reader that captures logs from Docker operations and adds them to application logs
 type LogReader struct {
-	Reader        io.Reader
-	ApplicationID uuid.UUID
-	DeployService *DeployService
-	buffer        []byte
+	Reader            io.Reader
+	ApplicationID     uuid.UUID
+	DeployService     *DeployService
+	buffer            []byte
+	deployment_config *shared_types.ApplicationDeployment
 }
 
 func (r *LogReader) Read(p []byte) (n int, err error) {
@@ -108,18 +110,18 @@ func (r *LogReader) Read(p []byte) (n int, err error) {
 			var jsonMsg jsonmessage.JSONMessage
 			if err := json.Unmarshal(line, &jsonMsg); err == nil {
 				if jsonMsg.Stream != "" {
-					r.DeployService.addLog(r.ApplicationID, "Build: "+jsonMsg.Stream)
+					r.DeployService.addLog(r.ApplicationID, "Build: "+jsonMsg.Stream, r.deployment_config.ID)
 				} else if jsonMsg.Status != "" {
 					status := jsonMsg.Status
 					if jsonMsg.Progress != nil {
 						status += " " + jsonMsg.Progress.String()
 					}
-					r.DeployService.addLog(r.ApplicationID, "Build: "+status)
+					r.DeployService.addLog(r.ApplicationID, "Build: "+status, r.deployment_config.ID)
 				} else if jsonMsg.Error != nil {
-					r.DeployService.addLog(r.ApplicationID, "Build error: "+jsonMsg.Error.Message)
+					r.DeployService.addLog(r.ApplicationID, "Build error: "+jsonMsg.Error.Message, r.deployment_config.ID)
 				}
 			} else {
-				r.DeployService.addLog(r.ApplicationID, "Build: "+string(line))
+				r.DeployService.addLog(r.ApplicationID, "Build: "+string(line), r.deployment_config.ID)
 			}
 		}
 	}

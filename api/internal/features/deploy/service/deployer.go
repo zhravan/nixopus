@@ -28,13 +28,13 @@ import (
 // Returns:
 //
 //	error - an error if the deployment process fails at any step, otherwise nil.
-func (s *DeployService) Deployer(applicationID uuid.UUID, deployment *types.CreateDeploymentRequest, userID uuid.UUID, contextPath string, statusID uuid.UUID) error {
+func (s *DeployService) Deployer(applicationID uuid.UUID, deployment *types.CreateDeploymentRequest, userID uuid.UUID, contextPath string, statusID uuid.UUID, deployment_config *shared_types.ApplicationDeployment) error {
 	s.logger.Log(logger.Info, "Creating deployment", contextPath)
-	s.addLog(applicationID, fmt.Sprintf("Starting deployment process for build pack: %s", deployment.BuildPack))
+	s.addLog(applicationID, fmt.Sprintf("Starting deployment process for build pack: %s", deployment.BuildPack), deployment_config.ID)
 
 	switch deployment.BuildPack {
 	case shared_types.DockerFile:
-		s.addLog(applicationID, "Using Dockerfile build strategy")
+		s.addLog(applicationID, "Using Dockerfile build strategy", deployment_config.ID)
 		s.logger.Log(logger.Info, "Dockerfile building", "")
 
 		buildArgs := make(map[string]*string)
@@ -42,7 +42,7 @@ func (s *DeployService) Deployer(applicationID uuid.UUID, deployment *types.Crea
 			value := v
 			buildArgs[k] = &value
 		}
-		s.addLog(applicationID, fmt.Sprintf("Using %d build arguments", len(buildArgs)))
+		s.addLog(applicationID, fmt.Sprintf("Using %d build arguments", len(buildArgs)), deployment_config.ID)
 
 		labels := make(map[string]string)
 		for k, v := range deployment.EnvironmentVariables {
@@ -52,7 +52,7 @@ func (s *DeployService) Deployer(applicationID uuid.UUID, deployment *types.Crea
 		dockerfilePath := "Dockerfile"
 
 		s.logger.Log(logger.Info, "Build context path", contextPath)
-		s.addLog(applicationID, fmt.Sprintf("Build context path: %s", contextPath))
+		s.addLog(applicationID, fmt.Sprintf("Build context path: %s", contextPath), deployment_config.ID)
 		s.logger.Log(logger.Info, "Using Dockerfile", dockerfilePath)
 
 		_, err := s.buildImageFromDockerfile(
@@ -64,28 +64,29 @@ func (s *DeployService) Deployer(applicationID uuid.UUID, deployment *types.Crea
 			labels,
 			deployment.Name,
 			statusID,
+			deployment_config,
 		)
 		if err != nil {
-			s.addLog(applicationID, fmt.Sprintf("Failed to build Docker image: %s", err.Error()))
+			s.addLog(applicationID, fmt.Sprintf("Failed to build Docker image: %s", err.Error()), deployment_config.ID)
 			return fmt.Errorf("failed to build Docker image: %w", err)
 		}
 
 		s.logger.Log(logger.Info, "Dockerfile built successfully", deployment.Name)
-		s.addLog(applicationID, "Docker image built successfully")
+		s.addLog(applicationID, "Docker image built successfully", deployment_config.ID)
 
-		containerID, err := s.RunImage(applicationID, deployment.Name, deployment.EnvironmentVariables, fmt.Sprintf("%d", deployment.Port), statusID)
+		containerID, err := s.RunImage(applicationID, deployment.Name, deployment.EnvironmentVariables, fmt.Sprintf("%d", deployment.Port), statusID,deployment_config)
 		if err != nil {
-			s.addLog(applicationID, fmt.Sprintf("Failed to run Docker image: %s", err.Error()))
+			s.addLog(applicationID, fmt.Sprintf("Failed to run Docker image: %s", err.Error()), deployment_config.ID)
 			return fmt.Errorf("failed to run Docker image: %w", err)
 		}
 
-		s.addLog(applicationID, fmt.Sprintf("Container is running with ID: %s", containerID))
-		s.addLog(applicationID, fmt.Sprintf("Application exposed on port: %d", deployment.Port))
+		s.addLog(applicationID, fmt.Sprintf("Container is running with ID: %s", containerID), deployment_config.ID)
+		s.addLog(applicationID, fmt.Sprintf("Application exposed on port: %d", deployment.Port), deployment_config.ID)
 
 	case shared_types.DockerCompose:
 		s.logger.Log(logger.Info, "Docker compose building", "")
-		s.addLog(applicationID, "Docker Compose deployment strategy selected")
-		s.addLog(applicationID, "Docker Compose deployment not implemented yet")
+		s.addLog(applicationID, "Docker Compose deployment strategy selected", deployment_config.ID)
+		s.addLog(applicationID, "Docker Compose deployment not implemented yet", deployment_config.ID)
 		return nil
 	}
 

@@ -25,10 +25,11 @@ type Application struct {
 	CreatedAt            time.Time   `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	UpdatedAt            time.Time   `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
 
-	Domain *Domain            `json:"domain,omitempty" bun:"rel:belongs-to,join:domain_id=id"`
-	User   *User              `json:"user,omitempty" bun:"rel:belongs-to,join:user_id=id"`
-	Status *ApplicationStatus `json:"status,omitempty" bun:"rel:has-one,join:id=application_id"`
-	Logs   []*ApplicationLogs `json:"logs,omitempty" bun:"rel:has-many,join:id=application_id"`
+	Domain      *Domain                  `json:"domain,omitempty" bun:"rel:belongs-to,join:domain_id=id"`
+	User        *User                    `json:"user,omitempty" bun:"rel:belongs-to,join:user_id=id"`
+	Status      *ApplicationStatus       `json:"status,omitempty" bun:"rel:has-one,join:id=application_id"`
+	Logs        []*ApplicationLogs       `json:"logs,omitempty" bun:"rel:has-many,join:id=application_id"`
+	Deployments []*ApplicationDeployment `json:"deployments,omitempty" bun:"rel:has-many,join:id=application_id"`
 }
 
 type ApplicationDeployment struct {
@@ -38,7 +39,9 @@ type ApplicationDeployment struct {
 	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	UpdatedAt     time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
 
-	Application *Application `json:"-" bun:"rel:belongs-to,join:application_id=id"`
+	Application *Application                 `json:"application,omitempty" bun:"rel:belongs-to,join:application_id=id"`
+	Status      *ApplicationDeploymentStatus `json:"status,omitempty" bun:"rel:has-one,join:id=application_deployment_id"`
+	Logs        []*ApplicationLogs           `json:"logs,omitempty" bun:"rel:has-many,join:id=application_deployment_id"`
 }
 
 type ApplicationStatus struct {
@@ -49,18 +52,18 @@ type ApplicationStatus struct {
 	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	UpdatedAt     time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
 
-	Application *Application `json:"-" bun:"rel:belongs-to,join:application_id=id"`
+	Application *Application `json:"application,omitempty" bun:"rel:belongs-to,join:application_id=id"`
 }
 
 type ApplicationDeploymentStatus struct {
-	bun.BaseModel           `bun:"table:application_deployment_status,alias:as" swaggerignore:"true"`
+	bun.BaseModel           `bun:"table:application_deployment_status,alias:ads" swaggerignore:"true"`
 	ID                      uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
 	ApplicationDeploymentID uuid.UUID `json:"application_deployment_id" bun:"application_deployment_id,notnull,type:uuid"`
 	Status                  Status    `json:"status" bun:"status,notnull"`
 	CreatedAt               time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	UpdatedAt               time.Time `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`
 
-	ApplicationDeployment *ApplicationDeployment `json:"-" bun:"rel:belongs-to,join:application_deployment_id=id"`
+	ApplicationDeployment *ApplicationDeployment `json:"application_deployment,omitempty" bun:"rel:belongs-to,join:application_deployment_id=id"`
 }
 
 type ApplicationLogs struct {
@@ -72,8 +75,8 @@ type ApplicationLogs struct {
 	Log                     string    `json:"log" bun:"log,notnull"`
 	ApplicationDeploymentID uuid.UUID `json:"application_deployment_id" bun:"application_deployment_id,notnull,type:uuid"`
 
-	ApplicationDeployment *ApplicationDeployment `json:"-" bun:"rel:belongs-to,join:application_deployment_id=id"`
-	Application           *Application           `json:"-" bun:"rel:belongs-to,join:application_id=id"`
+	ApplicationDeployment *ApplicationDeployment `json:"application_deployment,omitempty" bun:"rel:belongs-to,join:application_deployment_id=id"`
+	Application           *Application           `json:"application,omitempty" bun:"rel:belongs-to,join:application_id=id"`
 }
 
 type Status string

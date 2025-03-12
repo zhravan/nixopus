@@ -23,6 +23,9 @@ type DeployRepository interface {
 	GetApplications(page int, pageSize int) ([]shared_types.Application, int, error)
 	UpdateApplicationStatus(applicationStatus *shared_types.ApplicationStatus) error
 	GetApplicationById(id string) (shared_types.Application, error)
+	AddApplicationDeployment(deployment *shared_types.ApplicationDeployment) error
+	AddApplicationDeploymentStatus(deployment_status *shared_types.ApplicationDeploymentStatus) error
+	UpdateApplicationDeploymentStatus(applicationStatus *shared_types.ApplicationDeploymentStatus) error
 }
 
 func (s *DeployStorage) IsNameAlreadyTaken(name string) (bool, error) {
@@ -64,6 +67,30 @@ func (s *DeployStorage) IsDomainValid(domain string) (bool, error) {
 
 func (s *DeployStorage) AddApplication(application *shared_types.Application) error {
 	_, err := s.DB.NewInsert().Model(application).Exec(s.Ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeployStorage) AddApplicationDeployment(deployment *shared_types.ApplicationDeployment) error {
+	_, err := s.DB.NewInsert().Model(deployment).Exec(s.Ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeployStorage) AddApplicationDeploymentStatus(deployment_status *shared_types.ApplicationDeploymentStatus) error {
+	_, err := s.DB.NewInsert().Model(deployment_status).Exec(s.Ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeployStorage) UpdateApplicationDeploymentStatus(applicationStatus *shared_types.ApplicationDeploymentStatus) error {
+	_, err := s.DB.NewUpdate().Model(applicationStatus).Where("id = ?", applicationStatus.ID).Exec(s.Ctx)
 	if err != nil {
 		return err
 	}

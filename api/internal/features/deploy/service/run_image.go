@@ -16,12 +16,12 @@ import (
 // specified port from the container to the host, and sets the specified
 // environment variables. The function returns an error if the container
 // cannot be started.
-func (s *DeployService) RunImage(applicationID uuid.UUID, imageName string, environment_variables map[string]string, port_str string, statusID uuid.UUID) (string, error) {
+func (s *DeployService) RunImage(applicationID uuid.UUID, imageName string, environment_variables map[string]string, port_str string, statusID uuid.UUID, deployment_config *shared_types.ApplicationDeployment) (string, error) {
 	if imageName == "" {
 		return "", fmt.Errorf("image name is empty")
 	}
 	s.logger.Log(logger.Info, "Running container from image", imageName)
-	s.addLog(applicationID, fmt.Sprintf("Preparing to run container from image %s", imageName))
+	s.addLog(applicationID, fmt.Sprintf("Preparing to run container from image %s", imageName), deployment_config.ID)
 	s.updateStatus(applicationID, shared_types.Deploying, statusID)
 
 	port, _ := nat.NewPort("tcp", port_str)
@@ -38,8 +38,8 @@ func (s *DeployService) RunImage(applicationID uuid.UUID, imageName string, envi
 			logEnvVars = append(logEnvVars, fmt.Sprintf("%s=%s", k, v))
 		}
 	}
-	s.addLog(applicationID, fmt.Sprintf("Environment variables: %v", logEnvVars))
-	s.addLog(applicationID, fmt.Sprintf("Container will expose port %s", port_str))
+	s.addLog(applicationID, fmt.Sprintf("Environment variables: %v", logEnvVars), deployment_config.ID)
+	s.addLog(applicationID, fmt.Sprintf("Container will expose port %s", port_str), deployment_config.ID)
 
 	// images := s.dockerRepo.ListAllImages(image.ListOptions{})
 	// var targetImage string
@@ -84,25 +84,25 @@ func (s *DeployService) RunImage(applicationID uuid.UUID, imageName string, envi
 		},
 	}
 
-	s.addLog(applicationID, "Creating container...")
+	s.addLog(applicationID, "Creating container...", deployment_config.ID)
 	resp, err := s.dockerRepo.CreateContainer(container_config, host_config, network_config, imageName)
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to create container: %s", err.Error())
-		s.addLog(applicationID, errMsg)
+		s.addLog(applicationID, errMsg, deployment_config.ID)
 		return "", errors.New(errMsg)
 	}
-	s.addLog(applicationID, fmt.Sprintf("Container created with ID: %s", resp.ID))
+	s.addLog(applicationID, fmt.Sprintf("Container created with ID: %s", resp.ID), deployment_config.ID)
 
-	s.addLog(applicationID, "Starting container...")
+	s.addLog(applicationID, "Starting container...", deployment_config.ID)
 	err = s.dockerRepo.StartContainer(resp.ID, container.StartOptions{})
 	if err != nil {
 		errMsg := fmt.Sprintf("Failed to start container: %s", err.Error())
-		s.addLog(applicationID, errMsg)
+		s.addLog(applicationID, errMsg, deployment_config.ID)
 		return "", errors.New(errMsg)
 	}
-	s.addLog(applicationID, "Container started successfully")
+	s.addLog(applicationID, "Container started successfully", deployment_config.ID)
 
-	go s.collectContainerLogs(applicationID, resp.ID)
+	go s.collectContainerLogs(applicationID, resp.ID, deployment_config)
 
 	return resp.ID, nil
 }

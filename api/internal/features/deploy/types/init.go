@@ -46,6 +46,8 @@ var (
 	ErrMissingPort        = errors.New("port is required")
 	ErrInvalidEnvironment = errors.New("invalid environment")
 	ErrInvalidBuildPack   = errors.New("invalid build pack")
+	ErrFailedToCreateTarFromContext = errors.New("failed to create tar from context")
+	ErrProcessingBuildOutput = errors.New("failed to process build output")
 )
 
 var (
@@ -60,4 +62,6 @@ var (
 	LogRepositoryClonedSuccessfully = "Repository cloned successfully"
 	LogFailedToCreateDeployment = "Failed to create deployment: "
 	LogDeploymentCompletedSuccessfully = "Deployment completed successfully"
+	LogDockerImageBuiltSuccessfully = "Docker image built successfully"
+	LogStartingDockerImageBuild = "Starting Docker image build from Dockerfile"
 )

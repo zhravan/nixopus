@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ApplicationLogs from '../../components/application-details/logs';
 import Monitor from '../../components/application-details/monitor';
@@ -13,7 +13,7 @@ function Page() {
   const { isReady, message, sendJsonMessage } = useWebSocket();
   const { id } = useParams()
   const { data: application, isLoading, error } = useGetApplicationByIdQuery({ id: id as string }, { skip: !id })
-
+  const [crurrentPage,setCurrentPage] = useState(1)
   useEffect(() => {
     sendJsonMessage({
       action: 'subscribe',
@@ -42,7 +42,7 @@ function Page() {
         </TabsContent>
 
         <TabsContent value="logs" className="mt-6">
-          <ApplicationLogs />
+          <ApplicationLogs logs={application?.logs} onRefresh={()=>{}} currentPage={crurrentPage} setCurrentPage={setCurrentPage} />
         </TabsContent>
 
         <TabsContent value="monitoring" className="mt-6">

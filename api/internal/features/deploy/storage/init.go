@@ -137,7 +137,6 @@ func (s *DeployStorage) GetApplications(page, pageSize int) ([]shared_types.Appl
 	err = s.DB.NewSelect().
 		Model(&applications).
 		Relation("Domain").
-		Relation("User").
 		Relation("Status").
 		Relation("Logs").
 		Order("created_at DESC").
@@ -157,10 +156,9 @@ func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application,
 
 	err := s.DB.NewSelect().
 		Model(&application).
-		Relation("Domain").
-		Relation("User").
 		Relation("Status").
 		Relation("Logs").
+		Relation("Deployments").
 		Where("application_id = ?", id).
 		Scan(s.Ctx)
 

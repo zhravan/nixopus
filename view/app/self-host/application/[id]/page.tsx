@@ -19,7 +19,7 @@ function Page() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="deployments" className="mt-6">
-          <DeploymentsList />
+          <DeploymentsList deployments={application?.deployments} />
         </TabsContent>
 
         <TabsContent value="configuration" className="mt-6">

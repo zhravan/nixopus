@@ -43,3 +43,11 @@ export enum DEPLOY {
   CREATE_APPLICATION = 'v1/deploy/application',
   GET_APPLICATION = 'v1/deploy/application'
 }
+
+export enum SOCKET_EVENTS {
+  MONITOR_APPLICATION_DEPLOYMENT = 'monitor_application_deployment'
+}
+
+export enum SOCKET_ACTIONS {
+  SUBSCRIBE = 'subscribe'
+}

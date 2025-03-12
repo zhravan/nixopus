@@ -40,5 +40,6 @@ export enum GITHUB_CONNECTOR {
 
 export enum DEPLOY {
   GET_APPLICATIONS = 'v1/deploy/applications',
-  CREATE_APPLICATION = 'v1/deploy/application'
+  CREATE_APPLICATION = 'v1/deploy/application',
+  GET_APPLICATION = 'v1/deploy/application'
 }

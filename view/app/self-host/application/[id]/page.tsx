@@ -1,11 +1,28 @@
-import React from 'react';
+"use client"
+import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ApplicationLogs from '../../components/application-details/logs';
 import Monitor from '../../components/application-details/monitor';
 import Configuration from '../../components/application-details/configuration';
 import DeploymentsList from '../../components/application-details/deploymentsList';
+import { useWebSocket } from '@/hooks/socket_provider';
+import { useParams } from 'next/navigation';
 
 function Page() {
+  const { isReady, message, sendJsonMessage } = useWebSocket();
+  const { id } = useParams()
+
+  useEffect(() => {
+    sendJsonMessage({
+      action: 'subscribe',
+      topic: 'monitor_application_deployment',
+      data: {
+        "resource_id": id
+      }
+    })
+  }, [])
+
+
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl mt-10">
       <Tabs defaultValue="monitoring" className="w-full">

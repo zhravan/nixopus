@@ -40,13 +40,12 @@ export const deployApi = createApi({
         method: 'GET'
       }),
       providesTags: [{ type: 'Deploy', id: 'LIST' }],
-      transformResponse: (response: {
-        data: Application;
-      }) => {
+      transformResponse: (response: { data: Application }) => {
         return response.data;
       }
     })
   })
 });
 
-export const { useGetApplicationsQuery, useCreateDeploymentMutation,useGetApplicationByIdQuery } = deployApi;
+export const { useGetApplicationsQuery, useCreateDeploymentMutation, useGetApplicationByIdQuery } =
+  deployApi;

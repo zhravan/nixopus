@@ -136,7 +136,16 @@ func (s *DeployService) StartDeploymentInBackground(
 
 	s.updateStatus(deployment_config.ID, shared_types.Building, appStatus.ID)
 
-	err = s.Deployer(application.ID, deployment, userID, repoPath, appStatus.ID, deployment_config)
+	deployer_config := DeployerConfig{
+		application.ID,
+		deployment,
+		userID,
+		repoPath,
+		appStatus.ID,
+		deployment_config,
+	}
+
+	err = s.Deployer(deployer_config)
 	if err != nil {
 		s.logger.Log(logger.Error, "Failed to create deployment: "+err.Error(), "")
 		s.updateStatus(deployment_config.ID, shared_types.Failed, appStatus.ID)

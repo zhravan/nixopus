@@ -33,7 +33,8 @@ function page() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [updateGithubConnector, { isLoading: isUpdatingConnector }] = useUpdateGithubConnectorMutation();
+  const [updateGithubConnector, { isLoading: isUpdatingConnector }] =
+    useUpdateGithubConnectorMutation();
   const [installationSuccess, setInstallationSuccess] = useState(false);
   const [inGitHubFlow, setInGitHubFlow] = useState(false);
   const code = searchParams.get('code');
@@ -125,11 +126,7 @@ function page() {
     }
   };
 
-  return (
-    <div className="container mx-auto py-6 space-y-8 max-w-4xl">
-      {renderContent()}
-    </div>
-  );
+  return <div className="container mx-auto py-6 space-y-8 max-w-4xl">{renderContent()}</div>;
 }
 
 export default page;

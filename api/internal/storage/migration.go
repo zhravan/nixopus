@@ -412,7 +412,6 @@ func RunMigrations(db *bun.DB, migrationsPath string) error {
 	return nil
 }
 
-
 // MigrateDownAll drops all tables in the database, effectively rolling back all migrations
 func MigrateDownAll(db *bun.DB, migrationsPath string) error {
 	log.Println("Dropping all tables from the database")
@@ -422,7 +421,6 @@ func MigrateDownAll(db *bun.DB, migrationsPath string) error {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer tx.Rollback()
-
 
 	var schema string
 	err = tx.QueryRow("SELECT current_schema()").Scan(&schema)

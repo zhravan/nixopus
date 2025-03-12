@@ -9,7 +9,7 @@ const ApplicationLogs = ({
   logs,
   onRefresh,
   currentPage,
-  setCurrentPage,
+  setCurrentPage
 }: {
   logs?: ApplicationLogsType[];
   onRefresh: () => void;
@@ -21,22 +21,21 @@ const ApplicationLogs = ({
       logs={
         logs && logs.length > 0
           ? logs
-            .slice()
-            .reverse()
-            .map((logEntry) => {
-              if (!logEntry || !logEntry.log) {
-                return '';
-              }
+              .slice()
+              .map((logEntry) => {
+                if (!logEntry || !logEntry.log) {
+                  return '';
+                }
 
-              const timestamp = logEntry.created_at
-                ? new Date(logEntry.created_at).toLocaleString()
-                : '';
+                const timestamp = logEntry.created_at
+                  ? new Date(logEntry.created_at).toLocaleString()
+                  : '';
 
-              const containerInfo = logEntry.application_id || '';
+                const containerInfo = logEntry.application_id || '';
 
-              return `${timestamp} ${containerInfo}: ${logEntry.log}`.trim();
-            })
-            .join('\n')
+                return `${timestamp} ${containerInfo}: ${logEntry.log}`.trim();
+              })
+              .join('\n')
           : ''
       }
       onRefresh={onRefresh}

@@ -1,9 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 function DeploymentsList() {
-  return (
-    <div>DeploymentsList</div>
-  )
+  return <div>DeploymentsList</div>;
 }
 
-export default DeploymentsList
+export default DeploymentsList;

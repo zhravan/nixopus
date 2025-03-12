@@ -1,4 +1,4 @@
-"use client"
+'use client';
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ApplicationLogs from '../../components/application-details/logs';
@@ -11,18 +11,22 @@ import { useGetApplicationByIdQuery } from '@/redux/services/deploy/applications
 
 function Page() {
   const { isReady, message, sendJsonMessage } = useWebSocket();
-  const { id } = useParams()
-  const { data: application, isLoading, error } = useGetApplicationByIdQuery({ id: id as string }, { skip: !id })
-  const [crurrentPage,setCurrentPage] = useState(1)
+  const { id } = useParams();
+  const {
+    data: application,
+    isLoading,
+    error
+  } = useGetApplicationByIdQuery({ id: id as string }, { skip: !id });
+  const [crurrentPage, setCurrentPage] = useState(1);
   useEffect(() => {
     sendJsonMessage({
       action: 'subscribe',
       topic: 'monitor_application_deployment',
       data: {
-        "resource_id": id
+        resource_id: id
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl mt-10">
@@ -42,7 +46,12 @@ function Page() {
         </TabsContent>
 
         <TabsContent value="logs" className="mt-6">
-          <ApplicationLogs logs={application?.logs} onRefresh={()=>{}} currentPage={crurrentPage} setCurrentPage={setCurrentPage} />
+          <ApplicationLogs
+            logs={application?.logs}
+            onRefresh={() => {}}
+            currentPage={crurrentPage}
+            setCurrentPage={setCurrentPage}
+          />
         </TabsContent>
 
         <TabsContent value="monitoring" className="mt-6">

@@ -171,7 +171,7 @@ func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application,
 		Relation("Logs").
 		Relation("Domain").
 		Relation("Deployments").
-		Where("application_id = ?", id).
+		Where("a.id = ?", id).
 		Scan(s.Ctx)
 
 	if err != nil {

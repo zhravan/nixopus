@@ -15,7 +15,7 @@ import (
 func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
 	application := createApplicationFromDeploymentRequest(deployment, userID, nil)
 
-	app, deployRequest, deployStatus, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeCreate)
+	deployRequest, deployStatus,deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeCreate)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -26,13 +26,13 @@ func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentReque
 		userID:            userID,
 		contextPath:       "",
 		appStatus:         deployStatus,
-		deployment_config: nil,
+		deployment_config: &deployment_config,
 	}
 
 	go s.StartDeploymentInBackground(deploy_config)
 
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
-	return app, nil
+	return application, nil
 }
 
 // UpdateDeployment updates an existing application deployment
@@ -45,7 +45,7 @@ func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentReque
 
 	application = createApplicationFromExistingApplicationAndUpdateRequest(application, deployment)
 
-	app, deployRequest, deployStatus, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeUpdate)
+	deployRequest, deployStatus,deployment_config,err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeUpdate)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -56,13 +56,13 @@ func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentReque
 		userID:            userID,
 		contextPath:       "",
 		appStatus:         deployStatus,
-		deployment_config: nil,
+		deployment_config: &deployment_config,
 	}
 
 	go s.StartDeploymentInBackground(deploy_config)
 
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
-	return app, nil
+	return application, nil
 }
 
 // ReDeployApplication redeploys an existing application
@@ -72,7 +72,7 @@ func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployAppli
 		return shared_types.Application{}, err
 	}
 
-	app, deployRequest, deployStatus, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeReDeploy)
+	deployRequest, deployStatus,deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeReDeploy)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -83,13 +83,13 @@ func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployAppli
 		userID:            userID,
 		contextPath:       "",
 		appStatus:         deployStatus,
-		deployment_config: nil,
+		deployment_config: &deployment_config,
 	}
 
 	go s.StartDeploymentInBackground(deploy_config)
 
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
-	return app, nil
+	return application, nil
 }
 
 // StartDeploymentInBackground starts the deployment process in a separate goroutine.

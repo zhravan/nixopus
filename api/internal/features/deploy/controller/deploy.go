@@ -32,7 +32,6 @@ func (c *DeployController) HandleDeploy(w http.ResponseWriter, r *http.Request) 
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	utils.SendJSONResponse(w, "success", "Deployment created successfully", application)
 }
 

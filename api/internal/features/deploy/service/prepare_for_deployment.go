@@ -117,7 +117,7 @@ func createDeploymentStatus(ApplicationDeploymentID uuid.UUID) shared_types.Appl
 
 // createAndPrepareDeployment handles the common logic for creating, updating, and redeploying applications
 // It creates or updates application records, deployment configs, logs, and statuses
-func (s *DeployService) createAndPrepareDeployment(application shared_types.Application, deployType shared_types.DeploymentType) (shared_types.Application, *shared_types.DeploymentRequestConfig, shared_types.ApplicationDeploymentStatus, error) {
+func (s *DeployService) createAndPrepareDeployment(application shared_types.Application, deployType shared_types.DeploymentType) (*shared_types.DeploymentRequestConfig, shared_types.ApplicationDeploymentStatus, shared_types.ApplicationDeployment, error) {
 	deployment_config := createDeploymentConfig(application)
 	appLogs := createAppLogs(application, deployment_config.ID)
 	deployment_status := createDeploymentStatus(deployment_config.ID)
@@ -158,7 +158,7 @@ func (s *DeployService) createAndPrepareDeployment(application shared_types.Appl
 
 	for _, op := range operations {
 		if err := s.executeDBOperations(op.operation, op.errMessage); err != nil {
-			return shared_types.Application{}, nil, shared_types.ApplicationDeploymentStatus{}, err
+			return &shared_types.DeploymentRequestConfig{}, shared_types.ApplicationDeploymentStatus{}, shared_types.ApplicationDeployment{}, err
 		}
 	}
 
@@ -168,7 +168,7 @@ func (s *DeployService) createAndPrepareDeployment(application shared_types.Appl
 		ForceWithoutCache: false,
 	}
 
-	return application, &deploymentRequest, deployment_status, nil
+	return &deploymentRequest, deployment_status, deployment_config, nil
 }
 
 // executeDBOperations executes a database operation and logs an error if it fails.

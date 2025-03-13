@@ -116,7 +116,7 @@ func (s *DeployService) RunImage(r RunImageConfig) (string, error) {
 
 	s.logger.Log(logger.Info, types.LogRunningContainerFromImage, r.imageName)
 	s.formatLog(r.applicationID, r.deployment_config.ID, types.LogPreparingToRunContainer, r.imageName)
-	s.updateStatus(r.applicationID, shared_types.Deploying, r.statusID)
+	s.updateStatus(r.deployment_config.ID, shared_types.Deploying, r.statusID)
 
 	port, _ := nat.NewPort("tcp", r.port_str)
 

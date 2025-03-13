@@ -15,7 +15,11 @@ import (
 func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
 	application := createApplicationFromDeploymentRequest(deployment, userID, nil)
 
-	deployRequest, deployStatus,deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeCreate)
+	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
+		Type:              shared_types.DeploymentTypeReDeploy,
+		Force:             false,
+		ForceWithoutCache: false,
+	})
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -45,7 +49,11 @@ func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentReque
 
 	application = createApplicationFromExistingApplicationAndUpdateRequest(application, deployment)
 
-	deployRequest, deployStatus,deployment_config,err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeUpdate)
+	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
+		Type:              shared_types.DeploymentTypeReDeploy,
+		Force:             false,
+		ForceWithoutCache: false,
+	})
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -72,7 +80,11 @@ func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployAppli
 		return shared_types.Application{}, err
 	}
 
-	deployRequest, deployStatus,deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentTypeReDeploy)
+	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
+		Type:              shared_types.DeploymentTypeReDeploy,
+		Force:             redeployRequest.Force,
+		ForceWithoutCache: redeployRequest.ForceWithoutCache,
+	})
 	if err != nil {
 		return shared_types.Application{}, err
 	}

@@ -70,18 +70,10 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig) (strin
 		c.DeploymentType = "create"
 	}
 
-	if c.DeploymentType == "redeploy" {
-		err = s.gitClient.Pull(authenticatedURL, clonePath)
-		if err != nil {
-			s.logger.Log(logger.Error, fmt.Sprintf("Failed to pull repository: %s", err.Error()), "")
-			return "", err
-		}
-	} else {
-		err = s.gitClient.Clone(authenticatedURL, clonePath)
-		if err != nil {
-			s.logger.Log(logger.Error, fmt.Sprintf("Failed to clone repository: %s", err.Error()), "")
-			return "", err
-		}
+	err = s.gitClient.Clone(authenticatedURL, clonePath)
+	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("Failed to clone repository: %s", err.Error()), "")
+		return "", err
 	}
 
 	s.logger.Log(logger.Info, fmt.Sprintf("Successfully cloned repository %s", repo_url), c.UserID)

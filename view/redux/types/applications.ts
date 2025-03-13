@@ -96,3 +96,9 @@ export interface UpdateDeploymentRequest {
   id?: string;
   force?: boolean;
 }
+
+export interface ReDeployApplicationRequest {
+  id: string;
+  force: boolean;
+  force_without_cache: boolean;
+}

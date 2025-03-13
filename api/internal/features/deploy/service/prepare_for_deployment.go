@@ -117,7 +117,7 @@ func createDeploymentStatus(ApplicationDeploymentID uuid.UUID) shared_types.Appl
 
 // createAndPrepareDeployment handles the common logic for creating, updating, and redeploying applications
 // It creates or updates application records, deployment configs, logs, and statuses
-func (s *DeployService) createAndPrepareDeployment(application shared_types.Application, deployType shared_types.DeploymentType) (*shared_types.DeploymentRequestConfig, shared_types.ApplicationDeploymentStatus, shared_types.ApplicationDeployment, error) {
+func (s *DeployService) createAndPrepareDeployment(application shared_types.Application,d shared_types.DeploymentRequestConfig) (*shared_types.DeploymentRequestConfig, shared_types.ApplicationDeploymentStatus, shared_types.ApplicationDeployment, error) {
 	deployment_config := createDeploymentConfig(application)
 	appLogs := createAppLogs(application, deployment_config.ID)
 	deployment_status := createDeploymentStatus(deployment_config.ID)
@@ -129,7 +129,7 @@ func (s *DeployService) createAndPrepareDeployment(application shared_types.Appl
 		{
 			operation: func() error {
 				// if the deployment type is create, add the application to the database else we will update the application in case of redeploy or update or any other type
-				if deployType == shared_types.DeploymentTypeCreate {
+				if d.Type == shared_types.DeploymentTypeCreate {
 					return s.storage.AddApplication(&application)
 				}
 				return s.storage.UpdateApplication(&application)
@@ -163,9 +163,9 @@ func (s *DeployService) createAndPrepareDeployment(application shared_types.Appl
 	}
 
 	deploymentRequest := shared_types.DeploymentRequestConfig{
-		Type:              deployType,
-		Force:             false,
-		ForceWithoutCache: false,
+		Type:              d.Type,
+		Force:             d.Force,
+		ForceWithoutCache: d.ForceWithoutCache,
 	}
 
 	return &deploymentRequest, deployment_status, deployment_config, nil

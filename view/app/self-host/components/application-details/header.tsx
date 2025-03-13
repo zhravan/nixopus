@@ -11,12 +11,15 @@ import {
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Application } from '@/redux/types/applications';
 import { DeleteDialog } from '@/components/delete-dialog';
+import { useRedeployApplicationMutation } from '@/redux/services/deploy/applicationsApi';
 
 const ApplicationDetailsHeader = ({
     application
 }: {
     application?: Application
 }) => {
+    const [redeployApplication, { isLoading }] = useRedeployApplicationMutation()
+
     return (
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-start">
@@ -55,7 +58,7 @@ const ApplicationDetailsHeader = ({
                 </TooltipProvider>
                 <DeleteDialog
                     jobName={application?.name || ''}
-                    onDelete={() => {}}
+                    onDelete={() => { }}
                     showButton={false}
                     isDeleting={false}
                 />
@@ -71,10 +74,24 @@ const ApplicationDetailsHeader = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
+                            onClick={() => {
+                                redeployApplication({
+                                    id: application?.id || '',
+                                    force: true,
+                                    force_without_cache: false
+                                })
+                            }}
                         >
                             Force Deploy Without Cache
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                            onClick={() => {
+                                redeployApplication({
+                                    id: application?.id || '',
+                                    force: true,
+                                    force_without_cache: true
+                                })
+                            }}
                         >
                             Force Deploy
                         </DropdownMenuItem>

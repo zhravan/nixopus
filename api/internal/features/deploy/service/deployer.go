@@ -9,9 +9,25 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
+type DeploymentRequestConfig struct {
+	BuildPack            shared_types.BuildPack `json:"build_pack"`
+	BuildVariables       map[string]string      `json:"build_variables"`
+	EnvironmentVariables map[string]string      `json:"environment_variables"`
+	Name                 string                 `json:"name"`
+	Port                 int                    `json:"port"`
+	Type                 DeploymentType         `json:"type"`
+}
+
+type DeploymentType string
+
+const (
+	DeploymentTypeCreate = "create"
+	DeploymentTypeUpdate = "update"
+)
+
 type DeployerConfig struct {
 	applicationID     uuid.UUID
-	deployment        *types.CreateDeploymentRequest
+	deployment        *DeploymentRequestConfig
 	userID            uuid.UUID
 	contextPath       string
 	statusID          uuid.UUID
@@ -108,7 +124,7 @@ func (s *DeployService) buildAndRunDockerImage(d DeployerConfig, buildArgs map[s
 
 	runImageConfig := RunImageConfig{
 		applicationID:         d.applicationID,
-		imageName:             d.deployment.Name,
+		imageName:             fmt.Sprintf("%s-%s", d.deployment.Name, d.deployment_config.ID),
 		environment_variables: d.deployment.EnvironmentVariables,
 		port_str:              fmt.Sprintf("%d", d.deployment.Port),
 		statusID:              d.statusID,

@@ -47,7 +47,7 @@ type BuildImageFromDockerFile struct {
 //	error - an error if the build process fails at any step, otherwise nil.
 func (s *DeployService) buildImageFromDockerfile(b BuildImageFromDockerFile) (string, error) {
 	s.addLog(b.applicationID, types.LogStartingDockerImageBuild, b.deployment_config.ID)
-	s.updateStatus(b.applicationID, shared_types.Building, b.statusID)
+	s.updateStatus(b.deployment_config.ID, shared_types.Building, b.statusID)
 
 	archive, err := s.createBuildContextArchive(b.contextPath)
 	if err != nil {
@@ -116,7 +116,7 @@ func (s *DeployService) createBuildOptions(b BuildImageFromDockerFile, dockerfil
 	return docker_types.ImageBuildOptions{
 		Dockerfile:  dockerfile_path,
 		Remove:      true,
-		Tags:        []string{fmt.Sprintf("%s:latest", b.image_name)},
+		Tags:        []string{fmt.Sprintf("%s:latest", b.image_name), fmt.Sprintf("%s-%s", b.image_name, b.deployment_config.ID)},
 		NoCache:     b.force,
 		ForceRemove: b.force,
 		BuildArgs:   b.buildArgs,

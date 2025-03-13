@@ -19,7 +19,7 @@ import (
 //
 // If any errors occur during the process, the method logs the error and
 // returns the error.
-func (s *GithubConnectorService) CloneRepository(repo_id uint64, userID string, environment string) (string, error) {
+func (s *GithubConnectorService) CloneRepository(repo_id uint64, userID string, environment string,deploymentID string) (string, error) {
 	_, repo_url, err := s.GetRepositoryDetailsFromId(repo_id, userID)
 	if err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to get repository details: %s", err.Error()), "")
@@ -55,7 +55,7 @@ func (s *GithubConnectorService) CloneRepository(repo_id uint64, userID string, 
 		return "", err
 	}
 
-	clonePath := s.getClonePath(userID, environment, repo_url)
+	clonePath := s.getClonePath(userID, environment, repo_url,deploymentID)
 
 	err = s.gitClient.Clone(authenticatedURL, clonePath)
 	if err != nil {

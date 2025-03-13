@@ -15,8 +15,7 @@ import (
 // and returns the created Application struct and an error.
 // If the deployment process fails, it returns an error.
 func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
-	application := createApplicationFromDeploymentRequest(deployment, userID)
-	appStatus := createAppStatus(application)
+	application := createApplicationFromDeploymentRequest(deployment, userID, nil)
 	deployment_config := createDeploymentConfig(application)
 	appLogs := createAppLogs(application, deployment_config)
 	deployment_status := createDeploymentStatus(deployment_config)
@@ -30,12 +29,6 @@ func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentReque
 				return s.storage.AddApplication(&application)
 			},
 			errMessage: types.LogFailedToCreateApplicationRecord,
-		},
-		{
-			operation: func() error {
-				return s.storage.AddApplicationStatus(&appStatus)
-			},
-			errMessage: types.LogFailedToCreateApplicationStatus,
 		},
 		{
 			operation: func() error {
@@ -63,7 +56,82 @@ func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentReque
 		}
 	}
 
-	go s.StartDeploymentInBackground(application, deployment, userID, appStatus, &deployment_config)
+	deployment_request := DeploymentRequestConfig{
+		BuildPack:            deployment.BuildPack,
+		BuildVariables:       deployment.BuildVariables,
+		EnvironmentVariables: deployment.EnvironmentVariables,
+		Name:                 deployment.Name,
+		Port:                 deployment.Port,
+		Type:                 DeploymentTypeCreate,
+	}
+
+	go s.StartDeploymentInBackground(application, &deployment_request, userID, deployment_status, &deployment_config)
+
+	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
+	return application, nil
+}
+
+// UpdateDeployment updates an existing application deployment
+// in the database and starts the deployment process in a separate goroutine.
+// It takes a pointer to a CreateDeploymentRequest and a user ID as parameters,
+// and returns the updated Application struct and an error.
+// If the deployment process fails, it returns an error.
+func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
+	application, err := s.storage.GetApplicationById(deployment.ID.String())
+	if err != nil {
+		return shared_types.Application{}, err
+	}
+	application = createApplicationFromExistingApplicationAndUpdateRequest(application, deployment)
+	deployment_config := createDeploymentConfig(application)
+	appLogs := createAppLogs(application, deployment_config)
+	deployment_status := createDeploymentStatus(deployment_config)
+
+	operations := []struct {
+		operation  func() error
+		errMessage string
+	}{
+		{
+			operation: func() error {
+				return s.storage.UpdateApplication(&application)
+			},
+			errMessage: types.LogFailedToCreateApplicationRecord,
+		},
+		{
+			operation: func() error {
+				return s.storage.AddApplicationDeployment(&deployment_config)
+			},
+			errMessage: types.LogFailedToCreateApplicationDeployment,
+		},
+		{
+			operation: func() error {
+				return s.storage.AddApplicationLogs(&appLogs)
+			},
+			errMessage: types.LogFailedToCreateApplicationLogs,
+		},
+		{
+			operation: func() error {
+				return s.storage.AddApplicationDeploymentStatus(&deployment_status)
+			},
+			errMessage: types.LogFailedToCreateApplicationDeploymentStatus,
+		},
+	}
+
+	for _, op := range operations {
+		if err := s.executeDBOperations(op.operation, op.errMessage); err != nil {
+			return shared_types.Application{}, err
+		}
+	}
+
+	deployment_request := DeploymentRequestConfig{
+		BuildPack:            application.BuildPack,
+		BuildVariables:       GetMapFromString(application.BuildVariables),
+		EnvironmentVariables: GetMapFromString(application.EnvironmentVariables),
+		Name:                 application.Name,
+		Port:                 application.Port,
+		Type:                 DeploymentTypeUpdate,
+	}
+
+	go s.StartDeploymentInBackground(application, &deployment_request, userID, deployment_status, &deployment_config)
 
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
 	return application, nil
@@ -92,9 +160,9 @@ func (s *DeployService) executeDBOperations(fn func() error, errMessage string) 
 // the application.
 func (s *DeployService) StartDeploymentInBackground(
 	application shared_types.Application,
-	deployment *types.CreateDeploymentRequest,
+	deployment *DeploymentRequestConfig,
 	userID uuid.UUID,
-	appStatus shared_types.ApplicationStatus,
+	appStatus shared_types.ApplicationDeploymentStatus,
 	deployment_config *shared_types.ApplicationDeployment,
 ) {
 	handleError := func(errorMessage string, err error) {
@@ -113,7 +181,7 @@ func (s *DeployService) StartDeploymentInBackground(
 		return
 	}
 
-	repoPath, err := s.github_service.CloneRepository(uint64(repoID), string(userID.String()), string(application.Environment))
+	repoPath, err := s.github_service.CloneRepository(uint64(repoID), string(userID.String()), string(application.Environment), deployment_config.ID.String())
 	if err != nil {
 		handleError(types.LogFailedToCloneRepository, err)
 		return
@@ -124,7 +192,14 @@ func (s *DeployService) StartDeploymentInBackground(
 
 	deployer_config := DeployerConfig{
 		application.ID,
-		deployment,
+		&DeploymentRequestConfig{
+			BuildVariables:       deployment.BuildVariables,
+			EnvironmentVariables: deployment.EnvironmentVariables,
+			BuildPack:            deployment.BuildPack,
+			Name:                 deployment.Name,
+			Port:                 deployment.Port,
+			Type:                 deployment.Type,
+		},
 		userID,
 		repoPath,
 		appStatus.ID,
@@ -145,7 +220,12 @@ func (s *DeployService) StartDeploymentInBackground(
 // and a user ID. It populates the application's fields with the corresponding
 // values from the request, and sets the CreatedAt and UpdatedAt fields to the
 // current time.
-func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRequest, userID uuid.UUID) shared_types.Application {
+func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRequest, userID uuid.UUID, createdAt *time.Time) shared_types.Application {
+	timeValue := time.Now()
+	if createdAt != nil {
+		timeValue = *createdAt
+	}
+
 	application := shared_types.Application{
 		ID:                   uuid.New(),
 		Name:                 deployment.Name,
@@ -160,26 +240,41 @@ func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRe
 		Port:                 deployment.Port,
 		DomainID:             deployment.DomainID,
 		UserID:               userID,
-		CreatedAt:            time.Now(),
+		CreatedAt:            timeValue,
 		UpdatedAt:            time.Now(),
 	}
 
 	return application
 }
 
-// createAppStatus creates an ApplicationStatus from an Application.
-// It sets the Status to Started and populates the CreatedAt and UpdatedAt fields
-// with the current time.
-func createAppStatus(application shared_types.Application) shared_types.ApplicationStatus {
-	appStatus := shared_types.ApplicationStatus{
-		ID:            uuid.New(),
-		ApplicationID: application.ID,
-		Status:        shared_types.Started,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
+func createApplicationFromExistingApplicationAndUpdateRequest(application shared_types.Application, deployment *types.UpdateDeploymentRequest) shared_types.Application {
+	if deployment.Name != "" {
+		application.Name = deployment.Name
 	}
 
-	return appStatus
+	if deployment.BuildVariables != nil {
+		application.BuildVariables = GetStringFromMap(deployment.BuildVariables)
+	}
+
+	if deployment.EnvironmentVariables != nil {
+		application.EnvironmentVariables = GetStringFromMap(deployment.EnvironmentVariables)
+	}
+
+	if deployment.PreRunCommand != "" {
+		application.PreRunCommand = deployment.PreRunCommand
+	}
+
+	if deployment.PostRunCommand != "" {
+		application.PostRunCommand = deployment.PostRunCommand
+	}
+
+	if deployment.Port != 0 {
+		application.Port = deployment.Port
+	}
+
+	application.UpdatedAt = time.Now()
+
+	return application
 }
 
 // createDeploymentConfig creates an ApplicationDeployment from an Application.

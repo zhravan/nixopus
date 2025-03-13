@@ -37,7 +37,23 @@ type CreateDeploymentRequest struct {
 	Port                 int                      `json:"port"`
 }
 
+type UpdateDeploymentRequest struct {
+	Name                 string                   `json:"name,omitempty"`
+	PreRunCommand        string                   `json:"pre_run_command,omitempty"`
+	PostRunCommand       string                   `json:"post_run_command,omitempty"`
+	BuildVariables       map[string]string        `json:"build_variables,omitempty"`
+	EnvironmentVariables map[string]string        `json:"environment_variables,omitempty"`
+	Port                 int                      `json:"port,omitempty"`
+	ID                   uuid.UUID                `json:"id,omitempty"`
+	Force                bool                     `json:"force,omitempty"`
+}
+
+type DeleteDeploymentRequest struct {
+	ID uuid.UUID `json:"id"`
+}
+
 var (
+	ErrMissingID                    = errors.New("id is required")
 	ErrInvalidRequestType           = errors.New("invalid request type")
 	ErrMissingName                  = errors.New("name is required")
 	ErrMissingDomainID              = errors.New("domain_id is required")

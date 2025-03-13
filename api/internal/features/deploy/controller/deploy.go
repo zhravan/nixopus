@@ -98,3 +98,27 @@ func (c *DeployController) UpdateApplication(w http.ResponseWriter, r *http.Requ
 
 // 	utils.SendJSONResponse(w, "success", "Application deleted successfully", application)
 // }
+
+func (c *DeployController) ReDeployApplication(w http.ResponseWriter, r *http.Request) {
+	c.logger.Log(logger.Info, "redeploying application", "")
+	var data types.ReDeployApplicationRequest
+
+	if !c.parseAndValidate(w, r, &data) {
+		return
+	}
+
+	user := c.GetUser(w, r)
+
+	if user == nil {
+		return
+	}
+
+	application, err := c.service.ReDeployApplication(&data, user.ID)
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to redeploy application", err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendJSONResponse(w, "success", "Application redeployed successfully", application)
+}

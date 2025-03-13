@@ -28,6 +28,8 @@ func (v *Validator) ValidateRequest(req interface{}) error {
 		return validateUpdateDeploymentRequest(*r)
 	case *types.DeleteDeploymentRequest:
 		return validateDeleteDeploymentRequest(*r)
+	case *types.ReDeployApplicationRequest:
+		return validateRedeployApplicationRequest(*r)
 	default:
 		return types.ErrInvalidRequestType
 	}
@@ -70,6 +72,13 @@ func validateUpdateDeploymentRequest(req types.UpdateDeploymentRequest) error {
 
 func validateDeleteDeploymentRequest(req types.DeleteDeploymentRequest) error {
 	// 	// here we need to validate whether user has access to delete the deployment
+	if req.ID == uuid.Nil {
+		return types.ErrMissingID
+	}
+	return nil
+}
+
+func validateRedeployApplicationRequest(req types.ReDeployApplicationRequest) error {
 	if req.ID == uuid.Nil {
 		return types.ErrMissingID
 	}

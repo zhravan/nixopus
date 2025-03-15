@@ -72,7 +72,7 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig) (strin
 		return "", err
 	}
 
-	clonePath, _, should_pull, err := s.getClonePath(c.UserID, c.Environment, c.DeploymentID, latestCommitHash)
+	clonePath, should_pull, err := s.getClonePath(c.UserID, c.Environment, c.DeploymentID, latestCommitHash)
 
 	if err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to get clone path: %s", err.Error()), "")

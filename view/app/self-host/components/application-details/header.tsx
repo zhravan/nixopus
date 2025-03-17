@@ -12,6 +12,8 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 import { Application } from '@/redux/types/applications';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { useRedeployApplicationMutation } from '@/redux/services/deploy/applicationsApi';
+import { useDeleteApplicationMutation } from '@/redux/services/deploy/applicationsApi';
+import { useRouter } from 'next/navigation';
 
 const ApplicationDetailsHeader = ({
     application
@@ -19,6 +21,8 @@ const ApplicationDetailsHeader = ({
     application?: Application
 }) => {
     const [redeployApplication, { isLoading }] = useRedeployApplicationMutation()
+    const [deleteApplication, { isLoading: isDeleting }] = useDeleteApplicationMutation();
+    const router = useRouter();
 
     return (
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -58,9 +62,14 @@ const ApplicationDetailsHeader = ({
                 </TooltipProvider>
                 <DeleteDialog
                     jobName={application?.name || ''}
-                    onDelete={() => { }}
+                    onDelete={() => {
+                        deleteApplication({
+                            id: application?.id || ''
+                        })
+                        router.push('/self-host')
+                    }}
                     showButton={false}
-                    isDeleting={false}
+                    isDeleting={isDeleting}
                 />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

@@ -163,3 +163,7 @@ func (s *DeployService) StartDeploymentInBackground(
 func (s *DeployService) GetDeploymentById(deploymentID string) (shared_types.ApplicationDeployment, error) {
 	return s.storage.GetApplicationDeploymentById(deploymentID)
 }
+
+func (s *DeployService) DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID) error {
+	return s.storage.DeleteDeployment(deployment, userID)
+}

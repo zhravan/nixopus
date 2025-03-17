@@ -75,9 +75,20 @@ export const deployApi = createApi({
       transformResponse: (response: { data: Application }) => {
         return response.data;
       }
+    }),
+    deleteApplication: builder.mutation<null, { id: string }>({
+      query: ({ id }) => ({
+        url: `${DEPLOY.DELETE_APPLICATION}`,
+        body: { id },
+        method: 'DELETE'
+      }),
+      invalidatesTags: [{ type: 'Deploy', id: 'LIST' }],
+      transformResponse: (response: { data: null }) => {
+        return response.data;
+      }
     })
   })
 });
 
-export const { useGetApplicationsQuery, useCreateDeploymentMutation, useGetApplicationByIdQuery, useUpdateDeploymentMutation, useRedeployApplicationMutation, useGetApplicationDeploymentByIdQuery } =
+export const { useGetApplicationsQuery, useCreateDeploymentMutation, useGetApplicationByIdQuery, useUpdateDeploymentMutation, useRedeployApplicationMutation, useGetApplicationDeploymentByIdQuery, useDeleteApplicationMutation } =
   deployApi;

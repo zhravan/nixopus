@@ -59,7 +59,7 @@ func (s *DeployService) prepareContainerConfig(
 			"com.docker.compose.project": "nixopus",
 			"com.docker.compose.version": "0.0.1",
 			"com.project.name":           imageName,
-			"application.id":             applicationID,
+			"com.application.id":         applicationID,
 		},
 	}
 }
@@ -88,30 +88,24 @@ func (s *DeployService) prepareNetworkConfig() network.NetworkingConfig {
 	}
 }
 
-// AtomicUpdateContainer performs a zero-downtime update of a running container
-func (s *DeployService) AtomicUpdateContainer(r DeployerConfig) (string, error) {
-	if r.application.Name == "" {
-		return "", types.ErrMissingImageName
-	}
-
-	s.logger.Log(logger.Info, types.LogUpdatingContainer, r.application.Name)
-	s.formatLog(r.application.ID, r.deployment_config.ID, types.LogPreparingToUpdateContainer, r.application.Name)
-	s.updateStatus(r.deployment_config.ID, shared_types.Deploying, r.appStatus.ID)
-
+func (s *DeployService) getRunningContainers(r DeployerConfig) ([]container.Summary, error) {
 	all_containers, err := s.dockerRepo.ListAllContainers()
 	if err != nil {
-		return "", types.ErrFailedToListContainers
+		return nil, types.ErrFailedToListContainers
 	}
 
 	var currentContainers []container.Summary
 	for _, ctr := range all_containers {
-		if ctr.Labels["application.id"] == r.application.ID.String() {
+		if ctr.Labels["com.application.id"] == r.application.ID.String() {
 			currentContainers = append(currentContainers, ctr)
 		}
 	}
 
 	s.formatLog(r.application.ID, r.deployment_config.ID, "Found %d running containers", len(currentContainers))
+	return currentContainers, nil
+}
 
+func (s *DeployService) createContainerConfigs(r DeployerConfig) (container.Config, container.HostConfig, network.NetworkingConfig) {
 	port_str := fmt.Sprintf("%d", r.application.Port)
 	port, _ := nat.NewPort("tcp", port_str)
 
@@ -132,6 +126,26 @@ func (s *DeployService) AtomicUpdateContainer(r DeployerConfig) (string, error) 
 	)
 	host_config := s.prepareHostConfig(port, port_str)
 	network_config := s.prepareNetworkConfig()
+
+	return container_config, host_config, network_config
+}
+
+// AtomicUpdateContainer performs a zero-downtime update of a running container
+func (s *DeployService) AtomicUpdateContainer(r DeployerConfig) (string, error) {
+	if r.application.Name == "" {
+		return "", types.ErrMissingImageName
+	}
+
+	s.logger.Log(logger.Info, types.LogUpdatingContainer, r.application.Name)
+	s.formatLog(r.application.ID, r.deployment_config.ID, types.LogPreparingToUpdateContainer, r.application.Name)
+	s.updateStatus(r.deployment_config.ID, shared_types.Deploying, r.appStatus.ID)
+
+	currentContainers, err := s.getRunningContainers(r)
+	if err != nil {
+		return "", err
+	}
+
+	container_config, host_config, network_config := s.createContainerConfigs(r)
 
 	s.formatLog(r.application.ID, r.deployment_config.ID, types.LogCreatingNewContainer)
 	resp, err := s.dockerRepo.CreateContainer(container_config, host_config, network_config, "")

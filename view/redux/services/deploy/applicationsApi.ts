@@ -1,7 +1,12 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '@/redux/base-query';
 import { DEPLOY } from '@/redux/api-conf';
-import { Application, CreateApplicationRequest, ReDeployApplicationRequest, UpdateDeploymentRequest } from '@/redux/types/applications';
+import {
+  Application,
+  CreateApplicationRequest,
+  ReDeployApplicationRequest,
+  UpdateDeploymentRequest
+} from '@/redux/types/applications';
 
 export const deployApi = createApi({
   reducerPath: 'deployApi',
@@ -90,5 +95,12 @@ export const deployApi = createApi({
   })
 });
 
-export const { useGetApplicationsQuery, useCreateDeploymentMutation, useGetApplicationByIdQuery, useUpdateDeploymentMutation, useRedeployApplicationMutation, useGetApplicationDeploymentByIdQuery, useDeleteApplicationMutation } =
-  deployApi;
+export const {
+  useGetApplicationsQuery,
+  useCreateDeploymentMutation,
+  useGetApplicationByIdQuery,
+  useUpdateDeploymentMutation,
+  useRedeployApplicationMutation,
+  useGetApplicationDeploymentByIdQuery,
+  useDeleteApplicationMutation
+} = deployApi;

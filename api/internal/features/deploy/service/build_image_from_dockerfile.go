@@ -52,7 +52,6 @@ func (s *DeployService) buildImageFromDockerfile(b DeployerConfig) (string, erro
 	return b.application.Name, nil
 }
 
-
 // createBuildContextArchive creates a tar archive of the build context at the provided path.
 // It returns the archive as an io.Reader and an error if the archive creation fails.
 func (s *DeployService) createBuildContextArchive(contextPath string) (io.Reader, error) {

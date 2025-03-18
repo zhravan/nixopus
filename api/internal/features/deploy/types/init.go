@@ -58,6 +58,10 @@ type ReDeployApplicationRequest struct {
 	ForceWithoutCache bool      `json:"force_without_cache"`
 }
 
+type RollbackDeploymentRequest struct {
+	ID uuid.UUID `json:"id"`
+}
+
 var (
 	ErrMissingID                    = errors.New("id is required")
 	ErrInvalidRequestType           = errors.New("invalid request type")

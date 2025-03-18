@@ -121,4 +121,5 @@ const (
 	DeploymentTypeCreate   = "create"
 	DeploymentTypeUpdate   = "update"
 	DeploymentTypeReDeploy = "redeploy"
+	DeploymentTypeRollback = "rollback"
 )

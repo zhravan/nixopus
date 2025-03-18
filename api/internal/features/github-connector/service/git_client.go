@@ -17,6 +17,7 @@ type GitClient interface {
 	Clone(repoURL, destinationPath string) error
 	Pull(repoURL, destinationPath string) error
 	GetLatestCommitHash(repoURL string,accessToken string) (string, error)
+	SetHeadToCommitHash(repoURL, destinationPath, commitHash string) error
 }
 
 // DefaultGitClient is the default implementation of GitClient
@@ -95,4 +96,14 @@ func (g *DefaultGitClient) GetLatestCommitHash(repoURL string,accessToken string
 	g.logger.Log(logger.Info, fmt.Sprintf("Latest commit hash: %s", response.SHA), "")
 	
 	return response.SHA, nil
+}
+
+func (g *DefaultGitClient) SetHeadToCommitHash(repoURL, destinationPath, commitHash string) error {
+	cmd := exec.Command("git", "checkout", commitHash)
+	cmd.Dir = destinationPath
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("git checkout failed: %s, output: %s", err.Error(), string(output))
+	}
+	return nil
 }

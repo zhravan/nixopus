@@ -136,3 +136,27 @@ func (c *DeployController) GetDeploymentById(w http.ResponseWriter, r *http.Requ
 
 	utils.SendJSONResponse(w, "success", "Deployment Retrieved successfully", deployment)
 }
+
+func (c *DeployController) HandleRollback(w http.ResponseWriter, r *http.Request) {
+	c.logger.Log(logger.Info, "rolling back application", "")
+	var data types.RollbackDeploymentRequest
+
+	if !c.parseAndValidate(w, r, &data) {
+		return
+	}
+
+	user := c.GetUser(w, r)
+
+	if user == nil {
+		return
+	}
+
+	err := c.service.RollbackDeployment(&data, user.ID)
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to rollback application", err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendJSONResponse(w, "success", "Application rolled back successfully", nil)
+}

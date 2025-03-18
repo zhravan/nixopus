@@ -178,7 +178,7 @@ func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application,
 			return q.Order("created_at DESC").Limit(100)
 		}).
 		Relation("Domain").
-		Relation("Deployments").
+		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
 		Where("a.id = ?", id).
 		Scan(s.Ctx)
 

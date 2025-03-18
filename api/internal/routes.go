@@ -187,6 +187,6 @@ func (router *Router) Routes() *mux.Router {
 	deployApplicationApi.HandleFunc("", deployController.UpdateApplication).Methods("PUT", "OPTIONS")
 	deployApplicationApi.HandleFunc("/redeploy", deployController.ReDeployApplication).Methods("POST", "OPTIONS")
 	deployApplicationApi.HandleFunc("/deployments/{deployment_id}", deployController.GetDeploymentById).Methods("GET", "OPTIONS")
-
+	deployApplicationApi.HandleFunc("/rollback", deployController.HandleRollback).Methods("POST", "OPTIONS")
 	return r
 }

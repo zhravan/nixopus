@@ -60,7 +60,7 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 		return "", err
 	}
 
-	authenticatedURL, err := s.createAuthenticatedRepoURL(repo_url, accessToken)
+	authenticatedURL, err := s.CreateAuthenticatedRepoURL(repo_url, accessToken)
 	if err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to create authenticated URL: %s", err.Error()), "")
 		return "", err
@@ -78,7 +78,7 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 		return "", err
 	}
 
-	clonePath, should_pull, err := s.getClonePath(c.UserID, c.Environment)
+	clonePath, should_pull, err := s.GetClonePath(c.UserID, c.Environment)
 
 	if err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to get clone path: %s", err.Error()), "")

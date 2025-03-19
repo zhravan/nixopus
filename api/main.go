@@ -20,6 +20,7 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = ""
 	docs.SwaggerInfo.Schemes = []string{"http"}
+	
 	store := config.Init()
 	ctx := context.Background()
 	app := storage.NewApp(&types.Config{}, store, ctx)

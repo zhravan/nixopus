@@ -9,7 +9,7 @@ import (
 )
 
 // createAuthenticatedRepoURL creates an authenticated URL for repository access
-func (s *GithubConnectorService) createAuthenticatedRepoURL(repoURL, accessToken string) (string, error) {
+func (s *GithubConnectorService) CreateAuthenticatedRepoURL(repoURL, accessToken string) (string, error) {
 
 	if strings.HasPrefix(repoURL, "https://") {
 		parsedURL, err := url.Parse(repoURL)
@@ -34,7 +34,7 @@ func (s *GithubConnectorService) createAuthenticatedRepoURL(repoURL, accessToken
 	return "", fmt.Errorf("unsupported repository URL format")
 }
 
-// getClonePath generates a path to clone a repository to.
+// GetClonePath generates a path to clone a repository to.
 //
 // Parameters:
 //
@@ -48,7 +48,7 @@ func (s *GithubConnectorService) createAuthenticatedRepoURL(repoURL, accessToken
 //	string - the path to which to clone the repository.
 //	string - the context information path.
 //	bool - whether to pull the repository instead of cloning.
-func (s *GithubConnectorService) getClonePath(userID, environment string) (string, bool, error) {
+func (s *GithubConnectorService) GetClonePath(userID, environment string) (string, bool, error) {
 	repoBaseURL := os.Getenv("MOUNT_PATH")
 	clonePath := filepath.Join(repoBaseURL, userID, environment)
 	var shouldPull bool

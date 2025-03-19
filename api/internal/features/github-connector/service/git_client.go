@@ -43,7 +43,7 @@ func (g *DefaultGitClient) Clone(repoURL, destinationPath string) error {
 	defer client.Close()
 
 	cmd := fmt.Sprintf("git clone %s %s", repoURL, destinationPath)
-	output, err := client.Command(cmd)
+	output, err := client.Run(cmd)
 	if err != nil {
 		return fmt.Errorf("git clone failed: %s, output: %s", err.Error(),output)
 	}
@@ -61,7 +61,7 @@ func (g *DefaultGitClient) Pull(repoURL, destinationPath string) error {
 	defer client.Close()
 
 	cmd := fmt.Sprintf("cd %s && git pull %s", destinationPath, repoURL)
-	output, err := client.Command(cmd)
+	output, err := client.Run(cmd)
 	if err != nil {
 		return fmt.Errorf("git pull failed: %s, output: %s", err.Error(),output)
 	}
@@ -126,7 +126,7 @@ func (g *DefaultGitClient) SetHeadToCommitHash(repoURL, destinationPath, commitH
 	defer client.Close()
 
 	cmd := fmt.Sprintf("cd %s && git checkout %s", destinationPath, commitHash)
-	output, err := client.Command(cmd)
+	output, err := client.Run(cmd)
 	if err != nil {
 		return fmt.Errorf("git checkout failed: %s, output: %s", err.Error(),output)
 	}

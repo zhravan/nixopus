@@ -2,6 +2,8 @@ package ssh
 
 import (
 	"log"
+	"os"
+	"strconv"
 
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
@@ -18,7 +20,14 @@ type SSH struct {
 }
 
 func NewSSH() *SSH {
-	return &SSH{}
+	return &SSH{
+		PrivateKey:          os.Getenv("SSH_PRIVATE_KEY"),
+		Host:                os.Getenv("SSH_HOST"),
+		User:                os.Getenv("SSH_USER"),
+		Port:                uint(parsePort(os.Getenv("SSH_PORT"))),
+		Password:            os.Getenv("SSH_PASSWORD"),
+		PrivateKeyProtected: os.Getenv("SSH_PRIVATE_KEY_PROTECTED"),
+	}
 }
 
 func (s *SSH) ConnectWithPassword() (*goph.Client, error) {
@@ -35,8 +44,18 @@ func (s *SSH) ConnectWithPassword() (*goph.Client, error) {
 		log.Fatalf("SSH connection failed: %v", err)
 	}
 
-	defer client.Close()
 	return client, nil
+}
+
+func parsePort(port string) uint64 {
+	if port == "" {
+		return 22
+	}
+	p, err := strconv.ParseUint(port, 10, 32)
+	if err != nil {
+		return 22
+	}
+	return p
 }
 
 func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {

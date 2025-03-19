@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
+	"log"
+	"net/http"
+
+	"github.com/joho/godotenv"
 	"github.com/raghavyuva/nixopus-api/docs"
 	"github.com/raghavyuva/nixopus-api/internal"
 	"github.com/raghavyuva/nixopus-api/internal/config"
 	_ "github.com/raghavyuva/nixopus-api/internal/log"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
-	"log"
-	"net/http"
 )
 
 func main() {
@@ -19,6 +21,12 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = ""
 	docs.SwaggerInfo.Schemes = []string{"http"}
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	store := config.Init()
 	ctx := context.Background()
 	app := storage.NewApp(&types.Config{}, store, ctx)

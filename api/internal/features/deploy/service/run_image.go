@@ -190,6 +190,15 @@ func (s *DeployService) AtomicUpdateContainer(r DeployerConfig) (string, error) 
 	s.formatLog(r.application.ID, r.deployment_config.ID, types.LogContainerUpdateCompleted)
 	s.updateStatus(r.deployment_config.ID, shared_types.Deployed, r.appStatus.ID)
 
+	r.deployment_config.ContainerID = resp.ID
+	r.deployment_config.ContainerName = containerInfo.Name
+	r.deployment_config.ContainerImage = containerInfo.Image
+	r.deployment_config.ContainerStatus = "running"
+	r.deployment_config.UpdatedAt = time.Now()
+
+	// here we update the deployment with the container informations
+	s.updateDeployment(r.deployment_config)
+
 	log_collection_config := ContainerLogCollection{
 		r.application.ID,
 		resp.ID,

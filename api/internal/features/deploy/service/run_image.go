@@ -214,3 +214,27 @@ func (s *DeployService) AtomicUpdateContainer(r DeployerConfig) (string, error) 
 func intPtr(i int) *int {
 	return &i
 }
+
+func (s *DeployService) RestartContainer(r DeployerConfig) error {
+	if r.application.Name == "" {
+		return types.ErrMissingImageName
+	}
+
+	s.logger.Log(logger.Info, types.LogRestartingContainer, r.application.Name)
+
+	containerInfo, err := s.dockerRepo.GetContainerById(r.deployment_config.ContainerID)
+	if err != nil {
+		return err
+	}
+
+	if containerInfo.State.Status != "running" {
+		return types.ErrContainerNotRunning
+	}
+
+	err = s.dockerRepo.RestartContainer(r.deployment_config.ContainerID, container.StopOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -42,6 +42,11 @@ export type ApplicationDeployment = {
   application?: Application;
   status?: ApplicationDeploymentStatus;
   logs?: ApplicationLogs[];
+  commit_hash?: string;
+  container_id?: string;
+  container_name?: string;
+  container_image?: string;
+  container_status?: string;
 };
 
 export type ApplicationDeploymentStatus = {

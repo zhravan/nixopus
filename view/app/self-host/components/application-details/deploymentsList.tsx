@@ -13,12 +13,12 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
   const formatDate = (created_at: string) =>
     deployments
       ? new Date(created_at).toLocaleString('en-US', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
       : 'N/A';
 
   const calculateRunTime = (updated_at: string, created_at: string) => {
@@ -45,7 +45,7 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle className="text-lg font-medium">
-                      #{deployment.id.slice(0, 6)}
+                      {deployment.container_name?.startsWith("/") ? deployment.container_name.slice(1) : deployment.container_name}
                     </CardTitle>
                     <CardDescription>
                       <span className="text-xs">
@@ -53,8 +53,8 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
                       </span>
                     </CardDescription>
                   </div>
-                  <Button 
-                    size="icon" 
+                  <Button
+                    size="icon"
                     onClick={() => rollBackApplication({ id: deployment.id })}
                     disabled={isLoading}
                     title="Rollback deployment"
@@ -72,14 +72,14 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
                     </span>
                     <span className="font-medium">
                       {calculateRunTime(
-                        deployment.status?.updated_at as string, 
+                        deployment.status?.updated_at as string,
                         deployment.status?.created_at as string
                       )}
                     </span>
                   </div>
                 </div>
-                <Button 
-                  className="w-full mt-3 cursor-pointer" 
+                <Button
+                  className="w-full mt-3 cursor-pointer"
                   variant="secondary"
                   onClick={() => {
                     router.push(

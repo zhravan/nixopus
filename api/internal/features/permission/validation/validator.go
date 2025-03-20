@@ -4,14 +4,19 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/google/uuid"
+	"github.com/raghavyuva/nixopus-api/internal/features/permission/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/permission/types"
 )
 
 type Validator struct {
+	storage storage.PermissionRepository
 }
 
-func NewValidator() *Validator {
-	return &Validator{}
+func NewValidator(storage storage.PermissionRepository) *Validator {
+	return &Validator{
+		storage: storage,
+	}
 }
 
 func validateCreatePermissionRequest(permission types.CreatePermissionRequest) error {
@@ -31,10 +36,24 @@ func validateGetPermissionRequest(id string) error {
 	return nil
 }
 
-func validateUpdatePermissionRequest(permission types.UpdatePermissionRequest) error {
+func (v *Validator) validateUpdatePermissionRequest(permission types.UpdatePermissionRequest) error {
 	if permission.Name == "" && permission.Description == "" {
 		return types.ErrPermissionEmptyFields
 	}
+
+	if permission.ID == "" {
+		return types.ErrPermissionIDRequired
+	}
+
+	existing_permission, err := v.storage.GetPermission(permission.ID)
+	if err != nil {
+		return err
+	}
+
+	if existing_permission.ID == uuid.Nil {
+		return types.ErrPermissionDoesNotExist
+	}
+
 	return nil
 }
 
@@ -64,18 +83,18 @@ func (v *Validator) ParseRequestBody(req interface{}, body io.ReadCloser, decode
 
 func (v *Validator) ValidateRequest(req interface{}) error {
 	switch r := req.(type) {
-	case types.CreatePermissionRequest:
-		return validateCreatePermissionRequest(r)
-	case types.GetPermissionRequest:
+	case *types.CreatePermissionRequest:
+		return validateCreatePermissionRequest(*r)
+	case *types.GetPermissionRequest:
 		return validateGetPermissionRequest(r.ID)
-	case types.DeletePermissionRequest:
+	case *types.DeletePermissionRequest:
 		return validateGetPermissionRequest(r.ID)
-	case types.UpdatePermissionRequest:
-		return validateUpdatePermissionRequest(r)
-	case types.AddPermissionToRoleRequest:
-		return validateAddPermissionToRoleRequest(r)
-	case types.RemovePermissionFromRoleRequest:
-		return validateRemovePermissionFromRoleRequest(r)
+	case *types.UpdatePermissionRequest:
+		return v.validateUpdatePermissionRequest(*r)
+	case *types.AddPermissionToRoleRequest:
+		return validateAddPermissionToRoleRequest(*r)
+	case *types.RemovePermissionFromRoleRequest:
+		return validateRemovePermissionFromRoleRequest(*r)
 	default:
 		return types.ErrInvalidRequestType
 	}

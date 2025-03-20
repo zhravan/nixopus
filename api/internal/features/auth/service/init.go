@@ -5,24 +5,34 @@ import (
 
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
-	shared_storage "github.com/raghavyuva/nixopus-api/internal/storage"
+	organization_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
+	permissions_service "github.com/raghavyuva/nixopus-api/internal/features/permission/service"
+	role_service "github.com/raghavyuva/nixopus-api/internal/features/role/service"
 )
 
 type AuthService struct {
-	storage storage.UserStorage
-	Ctx     context.Context
-	store   *shared_storage.Store
-	logger  logger.Logger
+	storage              storage.AuthRepository
+	Ctx                  context.Context
+	logger               logger.Logger
+	permissions_service  *permissions_service.PermissionService
+	role_service         *role_service.RoleService
+	organization_service *organization_service.OrganizationService
 }
 
-func NewAuthService(store *shared_storage.Store, ctx context.Context, logger logger.Logger) *AuthService {
+func NewAuthService(
+	storage storage.AuthRepository,
+	logger logger.Logger,
+	permissionService *permissions_service.PermissionService,
+	roleService *role_service.RoleService,
+	orgService *organization_service.OrganizationService,
+	ctx context.Context,
+) *AuthService {
 	return &AuthService{
-		storage: storage.UserStorage{
-			DB:  store.DB,
-			Ctx: ctx,
-		},
-		store:  store,
-		Ctx:    ctx,
-		logger: logger,
+		storage:              storage,
+		logger:               logger,
+		Ctx:                  ctx,
+		permissions_service:  permissionService,
+		role_service:         roleService,
+		organization_service: orgService,
 	}
 }

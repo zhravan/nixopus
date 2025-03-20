@@ -6,6 +6,9 @@ import (
 
 	"github.com/gorilla/mux"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
+	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
+	domain "github.com/raghavyuva/nixopus-api/internal/features/domain/controller"
+	githubConnector "github.com/raghavyuva/nixopus-api/internal/features/github-connector/controller"
 	health "github.com/raghavyuva/nixopus-api/internal/features/health"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
@@ -15,6 +18,7 @@ import (
 	role "github.com/raghavyuva/nixopus-api/internal/features/role/controller"
 	user "github.com/raghavyuva/nixopus-api/internal/features/user/controller"
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
+	"github.com/raghavyuva/nixopus-api/internal/realtime"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
@@ -67,7 +71,11 @@ func (router *Router) Routes() *mux.Router {
 		http.ServeFile(w, r, "./docs/swagger.json")
 	})
 
-	wsServer, err := NewSocketServer()
+	notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), router.app.Store.DB)
+	notificationManager.Start()
+	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
+
+	wsServer, err := realtime.NewSocketServer(deployController, router.app.Store.DB, router.app.Ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,9 +83,6 @@ func (router *Router) Routes() *mux.Router {
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		wsServer.HandleHTTP(w, r)
 	})
-
-	notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), router.app.Store.DB)
-	notificationManager.Start()
 
 	u := r.PathPrefix("/api/v1").Subrouter()
 
@@ -148,6 +153,41 @@ func (router *Router) Routes() *mux.Router {
 	notificationApi.HandleFunc("/smtp", notificationController.GetSmtp).Methods("GET", "OPTIONS")
 	notificationApi.HandleFunc("/smtp", notificationController.UpdateSmtp).Methods("PUT", "OPTIONS")
 	notificationApi.HandleFunc("/smtp", notificationController.DeleteSmtp).Methods("DELETE", "OPTIONS")
+	notificationApi.HandleFunc("/preferences", notificationController.UpdatePreference).Methods("POST", "OPTIONS")
+	notificationApi.HandleFunc("/preferences", notificationController.GetPreferences).Methods("GET", "OPTIONS")
 
+	domainApi := api.PathPrefix("/domain").Subrouter()
+	domainController := domain.NewDomainsController(router.app.Store, router.app.Ctx, l, notificationManager)
+	domainApi.HandleFunc("", domainController.CreateDomain).Methods("POST", "OPTIONS")
+	domainApi.HandleFunc("", domainController.UpdateDomain).Methods("PUT", "OPTIONS")
+	domainApi.HandleFunc("", domainController.DeleteDomain).Methods("DELETE", "OPTIONS")
+	domainApi.HandleFunc("/all", domainController.GetDomains).Methods("GET", "OPTIONS")
+
+	githubConnectorApi := api.PathPrefix("/github-connector").Subrouter()
+	githubConnectorApi.Use(middleware.IsAdmin)
+	githubConnectorController := githubConnector.NewGithubConnectorController(router.app.Store, router.app.Ctx, l, notificationManager)
+	githubConnectorApi.HandleFunc("", githubConnectorController.CreateGithubConnector).Methods("POST", "OPTIONS")
+	githubConnectorApi.HandleFunc("", githubConnectorController.UpdateGithubConnectorRequest).Methods("PUT", "OPTIONS")
+	githubConnectorApi.HandleFunc("/all", githubConnectorController.GetGithubConnectors).Methods("GET", "OPTIONS")
+	githubConnectorApi.HandleFunc("/repositories", githubConnectorController.GetGithubRepositories).Methods("GET", "OPTIONS")
+
+	deployApi := api.PathPrefix("/deploy").Subrouter()
+	deployApi.Use(middleware.IsAdmin)
+	deployApiValidator := deployApi.PathPrefix("/validate").Subrouter()
+	deployApiValidator.HandleFunc("/name", deployController.IsNameAlreadyTaken).Methods("POST", "OPTIONS")
+	deployApiValidator.HandleFunc("/domain", deployController.IsDomainAlreadyTaken).Methods("POST", "OPTIONS")
+	deployApiValidator.HandleFunc("/port", deployController.IsPortAlreadyTaken).Methods("POST", "OPTIONS")
+
+	deployApi.HandleFunc("/applications", deployController.GetApplications).Methods("GET", "OPTIONS")
+
+	deployApplicationApi := deployApi.PathPrefix("/application").Subrouter()
+	deployApplicationApi.HandleFunc("", deployController.HandleDeploy).Methods("POST", "OPTIONS")
+	deployApplicationApi.HandleFunc("", deployController.GetApplicationById).Methods("GET", "OPTIONS")
+	deployApplicationApi.HandleFunc("", deployController.DeleteApplication).Methods("DELETE", "OPTIONS")
+	deployApplicationApi.HandleFunc("", deployController.UpdateApplication).Methods("PUT", "OPTIONS")
+	deployApplicationApi.HandleFunc("/redeploy", deployController.ReDeployApplication).Methods("POST", "OPTIONS")
+	deployApplicationApi.HandleFunc("/deployments/{deployment_id}", deployController.GetDeploymentById).Methods("GET", "OPTIONS")
+	deployApplicationApi.HandleFunc("/rollback", deployController.HandleRollback).Methods("POST", "OPTIONS")
+	deployApplicationApi.HandleFunc("/restart", deployController.HandleRestart).Methods("POST", "OPTIONS")
 	return r
 }

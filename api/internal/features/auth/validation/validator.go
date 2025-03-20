@@ -2,7 +2,9 @@ package validation
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -11,6 +13,14 @@ import (
 
 const (
 	MaxUserNameLength = 50
+)
+
+var (
+	NumberPattern      = regexp.MustCompile(`[0-9]`)
+	SpecialCharPattern = regexp.MustCompile(`[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]`)
+	UppercasePattern   = regexp.MustCompile(`[A-Z]`)
+	LowercasePattern   = regexp.MustCompile(`[a-z]`)
+	EmailPattern       = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 )
 
 type Validator struct{}
@@ -39,16 +49,16 @@ func (v *Validator) IsValidPassword(password string) error {
 	if len(password) < 8 {
 		return types.ErrPasswordMustHaveAtLeast8Chars
 	}
-	if !containsNumber(password) {
+	if !NumberPattern.MatchString(password) {
 		return types.ErrPasswordMustHaveAtLeast1Number
 	}
-	if !containsSpecialChar(password) {
+	if !SpecialCharPattern.MatchString(password) {
 		return types.ErrPasswordMustHaveAtLeast1SpecialChar
 	}
-	if !containsUppercaseLetter(password) {
+	if !UppercasePattern.MatchString(password) {
 		return types.ErrPasswordMustHaveAtLeast1UppercaseLetter
 	}
-	if !containsLowercaseLetter(password) {
+	if !LowercasePattern.MatchString(password) {
 		return types.ErrPasswordMustHaveAtLeast1LowercaseLetter
 	}
 	return nil
@@ -59,51 +69,11 @@ func (v *Validator) ValidateEmail(email string) error {
 		return types.ErrMissingRequiredFields
 	}
 
-	if !strings.Contains(email, "@") {
-		return types.ErrInvalidEmail
-	}
-
-	if !strings.Contains(email, ".") {
+	if !EmailPattern.MatchString(email) {
 		return types.ErrInvalidEmail
 	}
 
 	return nil
-}
-
-func containsNumber(password string) bool {
-	for _, char := range password {
-		if char >= '0' && char <= '9' {
-			return true
-		}
-	}
-	return false
-}
-
-func containsSpecialChar(password string) bool {
-	for _, char := range password {
-		if char >= '!' && char <= '/' || char >= ':' && char <= '@' || char >= '[' && char <= '`' || char >= '{' && char <= '~' {
-			return true
-		}
-	}
-	return false
-}
-
-func containsUppercaseLetter(password string) bool {
-	for _, char := range password {
-		if char >= 'A' && char <= 'Z' {
-			return true
-		}
-	}
-	return false
-}
-
-func containsLowercaseLetter(password string) bool {
-	for _, char := range password {
-		if char >= 'a' && char <= 'z' {
-			return true
-		}
-	}
-	return false
 }
 
 func (v *Validator) ParseRequestBody(req interface{}, body io.ReadCloser, decoded interface{}) error {
@@ -112,17 +82,18 @@ func (v *Validator) ParseRequestBody(req interface{}, body io.ReadCloser, decode
 
 func (v *Validator) ValidateRequest(req interface{}) error {
 	switch r := req.(type) {
-	case types.LoginRequest:
-		return v.validateLoginRequest(r)
-	case types.RegisterRequest:
-		return v.validateRegisterRequest(r)
-	case types.LogoutRequest:
-		return v.validateLogoutRequest(r)
-	case types.RefreshTokenRequest:
-		return v.validateRefreshTokenRequest(r)
-	case types.ChangePasswordRequest:
-		return v.validateResetPasswordRequest(r)
+	case *types.LoginRequest:
+		return v.validateLoginRequest(*r)
+	case *types.RegisterRequest:
+		return v.validateRegisterRequest(*r)
+	case *types.LogoutRequest:
+		return v.validateLogoutRequest(*r)
+	case *types.RefreshTokenRequest:
+		return v.validateRefreshTokenRequest(*r)
+	case *types.ChangePasswordRequest:
+		return v.validateResetPasswordRequest(*r)
 	default:
+		fmt.Printf("invalid request type: %T\n", req)
 		return types.ErrInvalidRequestType
 	}
 }
@@ -147,11 +118,13 @@ func (v *Validator) validateRegisterRequest(req types.RegisterRequest) error {
 	if err := v.ValidateName(req.Username); err != nil {
 		return err
 	}
-	if req.Type == "" {
-		req.Type = "app_user"
+
+	userType := req.Type
+	if userType == "" {
+		userType = "app_user"
 	}
 
-	if req.Type != "app_user" && req.Type != "admin" {
+	if userType != "app_user" && userType != "admin" {
 		return types.ErrInvalidUserType
 	}
 
@@ -172,14 +145,14 @@ func (v *Validator) validateRefreshTokenRequest(req types.RefreshTokenRequest) e
 	return nil
 }
 
-func (v *Validator) validateResetPasswordRequest(reset_password_request types.ChangePasswordRequest) error {
-	if reset_password_request.NewPassword == "" || reset_password_request.OldPassword == "" {
+func (v *Validator) validateResetPasswordRequest(resetPasswordRequest types.ChangePasswordRequest) error {
+	if resetPasswordRequest.NewPassword == "" || resetPasswordRequest.OldPassword == "" {
 		return types.ErrEmptyPassword
 	}
 
-	if reset_password_request.NewPassword == reset_password_request.OldPassword {
+	if resetPasswordRequest.NewPassword == resetPasswordRequest.OldPassword {
 		return types.ErrSamePassword
 	}
 
-	return nil
+	return v.IsValidPassword(resetPasswordRequest.NewPassword)
 }

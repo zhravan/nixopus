@@ -13,6 +13,14 @@ import { CreateTeam } from './create-team';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import use_bread_crumbs from '@/hooks/use_bread_crumbs';
 import React from 'react';
+// import { IntegratedTerminal } from '@/app/terminal/terminal';
+// import { FitAddon } from '@xterm/addon-fit';
+import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
+
+enum TERMINAL_POSITION {
+  BOTTOM = 'bottom',
+  RIGHT = 'right',
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -29,6 +37,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   } = useTeamSwitcher();
   const { getBreadcrumbs } = use_bread_crumbs();
   const breadcrumbs = React.useMemo(() => getBreadcrumbs(), [getBreadcrumbs]);
+  const router = useRouter();
+  const { isTerminalOpen, toggleTerminal } = useTerminalState();
+  const [TerminalPosition, setTerminalPosition] = React.useState(TERMINAL_POSITION.BOTTOM);
+  const [fitAddonRef, setFitAddonRef] = React.useState<any | null>(null);
 
   return (
     <SidebarProvider>
@@ -72,6 +84,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               isLoading={isLoading}
             />
           )}
+          {/* <IntegratedTerminal
+            isOpen={false}
+            isTerminalOpen={isTerminalOpen}
+            toggleTerminal={toggleTerminal}
+            setFitAddonRef={setFitAddonRef}
+          /> */}
         </div>
       </SidebarInset>
     </SidebarProvider>

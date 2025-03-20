@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRollbackApplicationMutation } from '@/redux/services/deploy/applicationsApi';
 import { ApplicationDeployment } from '@/redux/types/applications';
-import { Redo, Undo } from 'lucide-react';
+import { Undo, Eye, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -13,12 +13,12 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
   const formatDate = (created_at: string) =>
     deployments
       ? new Date(created_at).toLocaleString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
       : 'N/A';
 
   const calculateRunTime = (updated_at: string, created_at: string) => {
@@ -39,20 +39,26 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
           {deployments.map((deployment) => (
             <Card
               key={deployment.id}
-              className="w-full hover:shadow-md transition-shadow">
+              className="w-full hover:shadow-md transition-shadow"
+            >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <div className='flex flex-col items-center'>
+                  <div>
                     <CardTitle className="text-lg font-medium">
                       #{deployment.id.slice(0, 6)}
                     </CardTitle>
                     <CardDescription>
-                      <span className="text-xs px-2 py-1 rounded-full">
+                      <span className="text-xs">
                         {deployment.status?.status || 'Completed'}
                       </span>
                     </CardDescription>
                   </div>
-                  <Button size={"icon"} onClick={() => rollBackApplication({ id: deployment.id })}>
+                  <Button 
+                    size="icon" 
+                    onClick={() => rollBackApplication({ id: deployment.id })}
+                    disabled={isLoading}
+                    title="Rollback deployment"
+                  >
                     <Undo className="h-4 w-4" />
                   </Button>
                 </div>
@@ -61,24 +67,35 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
               <CardContent>
                 <div className="flex flex-col space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="">Run Time:</span>
+                    <span className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" /> Run Time:
+                    </span>
                     <span className="font-medium">
-                      {calculateRunTime(deployment.updated_at, deployment.created_at)}
+                      {calculateRunTime(
+                        deployment.status?.updated_at as string, 
+                        deployment.status?.created_at as string
+                      )}
                     </span>
                   </div>
                 </div>
-                <Button className='w-full mt-3 cursor-pointer' variant={"secondary"} onClick={() => {
-                  router.push(
-                    `/self-host/application/${deployment.application_id}/deployments/${deployment.id}`
-                  );
-                }}>View</Button>
+                <Button 
+                  className="w-full mt-3 cursor-pointer" 
+                  variant="secondary"
+                  onClick={() => {
+                    router.push(
+                      `/self-host/application/${deployment.application_id}/deployments/${deployment.id}`
+                    );
+                  }}
+                >
+                  <Eye className="h-4 w-4 mr-2" /> View
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       ) : (
-        <div className="text-center py-8  rounded-lg">
-          <p className="">No deployments found</p>
+        <div className="text-center py-8 rounded-lg border border-gray-200">
+          <p>No deployments found</p>
         </div>
       )}
     </div>

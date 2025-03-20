@@ -70,7 +70,7 @@ export type ApplicationLogs = {
   application?: Application;
 };
 
-export type Status = 'started' | 'running' | 'stopped' | 'failed';
+export type Status = 'failed' | 'cloning' | 'building' | 'deploying' | 'deployed';
 
 export type Environment = 'development' | 'staging' | 'production';
 

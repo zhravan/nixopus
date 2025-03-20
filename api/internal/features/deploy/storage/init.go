@@ -179,6 +179,7 @@ func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application,
 		}).
 		Relation("Domain").
 		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
+		Relation("Deployments.Status").
 		Where("a.id = ?", id).
 		Scan(s.Ctx)
 

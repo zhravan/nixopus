@@ -4,12 +4,10 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  // BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { useAppSelector } from '@/redux/hooks';
 import { useRouter } from 'next/navigation';
 import { CreateTeam } from './create-team';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
@@ -25,7 +23,7 @@ enum TERMINAL_POSITION {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const user = useAppSelector((state) => state.auth.user);
+  const router = useRouter();
   const {
     addTeamModalOpen,
     setAddTeamModalOpen,
@@ -44,10 +42,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [TerminalPosition, setTerminalPosition] = React.useState(TERMINAL_POSITION.BOTTOM);
   const [fitAddonRef, setFitAddonRef] = React.useState<any | null>(null);
 
-  if (!user) {
-    router.push('/login');
-    return <>Loading...</>;
-  }
   return (
     <SidebarProvider>
       <AppSidebar toggleAddTeamModal={toggleAddTeamModal} />

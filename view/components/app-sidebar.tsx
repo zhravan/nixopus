@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Home, Package, Settings2, SettingsIcon } from 'lucide-react';
+import { Folder, Home, LockIcon, Package, SettingsIcon } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -20,14 +20,24 @@ const data = {
   navMain: [
     {
       title: 'Dashboard',
-      url: '/',
+      url: '/dashboard',
       icon: Home,
       isActive: true
     },
     {
       title: 'Self Host',
-      url: '#',
+      url: '/self-host',
       icon: Package
+    },
+    {
+      title: 'File Manager',
+      url: '/file-manager',
+      icon: Folder
+    },
+    {
+      title: "Secret Manager",
+      url: "/secret-manager",
+      icon: LockIcon
     },
     {
       title: 'Settings',
@@ -47,12 +57,8 @@ const data = {
           url: '/settings/teams'
         },
         {
-          title: 'Billing',
-          url: '#'
-        },
-        {
-          title: 'Servers',
-          url: '/settings/servers'
+          title: 'Domains',
+          url: '/settings/domains'
         }
       ]
     }

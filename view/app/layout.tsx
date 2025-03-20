@@ -6,8 +6,12 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '@/redux/store';
 import { Toaster } from '@/components/ui/sonner';
-import { useAppSelector } from '@/redux/hooks';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import DashboardLayout from '@/components/dashboard-layout';
+import { useEffect } from 'react';
+import { initializeAuth } from '@/redux/features/users/authSlice';
+import AuthWrapper from '@/components/auth-wrapper';
+import { usePathname } from 'next/navigation';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -45,12 +49,21 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 const ChildrenWrapper = ({ children }: { children: React.ReactNode }) => {
-  const authenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const user = useAppSelector((state) => state.auth.user);
+  const dispatch = useAppDispatch();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    dispatch(initializeAuth() as any);
+  }, [dispatch]);
+
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        {authenticated && user ? <DashboardLayout>{children}</DashboardLayout> : children}
+        {pathname === '/' || pathname === '/login' ? (
+          <>{children}</>
+        ) : (
+          <AuthWrapper>{children}</AuthWrapper>
+        )}
       </ThemeProvider>
       <Toaster />
     </>

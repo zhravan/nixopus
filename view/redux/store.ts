@@ -14,7 +14,11 @@ import { authApi } from '@/redux/services/users/authApi';
 import authReducer from '@/redux/features/users/authSlice';
 import { userApi } from '@/redux/services/users/userApi';
 import userSlice from '@/redux/features/users/userSlice';
-import { notificationApi } from '@/redux/services/settings/notification';
+import { notificationApi } from '@/redux/services/settings/notificationApi';
+import { domainsApi } from '@/redux/services/settings/domainsApi';
+import { GithubConnectorApi } from '@/redux/services/connector/githubConnectorApi';
+import githubConnector from './features/github-connector/githubConnectorSlice';
+import { deployApi } from './services/deploy/applicationsApi';
 
 const persistConfig = {
   key: 'root',
@@ -27,6 +31,10 @@ const rootReducer = combineReducers({
   auth: authReducer,
   [userApi.reducerPath]: userApi.reducer,
   notificationApi: notificationApi.reducer,
+  [domainsApi.reducerPath]: domainsApi.reducer,
+  [GithubConnectorApi.reducerPath]: GithubConnectorApi.reducer,
+  githubConnector: githubConnector,
+  [deployApi.reducerPath]: deployApi.reducer,
   user: userSlice
 });
 
@@ -39,7 +47,14 @@ const storeOptions: ConfigureStoreOptions = {
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
       }
-    }).concat(authApi.middleware, userApi.middleware, notificationApi.middleware)
+    }).concat(
+      authApi.middleware,
+      userApi.middleware,
+      notificationApi.middleware,
+      domainsApi.middleware,
+      GithubConnectorApi.middleware,
+      deployApi.middleware
+    )
 };
 
 export const store = configureStore(storeOptions);

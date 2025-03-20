@@ -3,6 +3,7 @@ module github.com/raghavyuva/nixopus-api
 go 1.23.1
 
 require (
+	github.com/creack/pty v1.1.24
 	github.com/docker/docker v28.0.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -11,6 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
+	github.com/melbahja/goph v1.4.0
 	github.com/moby/term v0.5.2
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/sirupsen/logrus v1.9.3
@@ -23,6 +25,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.10
 	golang.org/x/crypto v0.33.0
 	golang.org/x/net v0.35.0
+	golang.org/x/term v0.29.0
 	golang.org/x/time v0.10.0
 )
 
@@ -54,7 +57,6 @@ require (
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/melbahja/goph v1.4.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect

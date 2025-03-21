@@ -2,7 +2,7 @@ import { useState, useLayoutEffect } from 'react';
 
 export const useContainerReady = (
     isTerminalOpen: boolean,
-    terminalRef: React.RefObject<HTMLDivElement>,
+    terminalRef?: React.RefObject<HTMLDivElement> | null,
 ) => {
     const [isContainerReady, setIsContainerReady] = useState(false);
 
@@ -12,7 +12,7 @@ export const useContainerReady = (
 
         const checkSize = () => {
             timeoutId = setTimeout(() => {
-                if (terminalRef.current && isTerminalOpen) {
+                if (terminalRef?.current && isTerminalOpen) {
                     const { offsetHeight, offsetWidth } = terminalRef.current;
                     if (offsetHeight > 0 && offsetWidth > 0) {
                         setIsContainerReady(true);

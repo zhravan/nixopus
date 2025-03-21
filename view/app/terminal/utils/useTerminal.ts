@@ -1,23 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { StopExecution } from './stopExecution';
-import { useTheme } from 'next-themes';
-import {
-    handleBackspaceKey,
-    handleControlKey,
-    handleEnterKey,
-    handlePrintableKey,
-    handleTabKey,
-    specialKeyCodeMappings,
-} from './utils';
+import { useWebSocket } from '@/hooks/socket_provider';
 
-// what are the type of output that possible from the backend
-enum outputType {
+const CTRL_C = "\x03";
+
+enum OutputType {
     STDOUT = 'stdout',
     STDERR = 'stderr',
     EXIT = 'exit',
 }
 
-// this is the response type that we get from the backend
 type TerminalOutput = {
     data: {
         output_type: string;
@@ -28,162 +20,92 @@ type TerminalOutput = {
 export const useTerminal = () => {
     const terminalRef = useRef<HTMLDivElement | null>(null);
     const fitAddonRef = useRef<any | null>(null);
-    const [terminalInstance, setTerminalInstance] = useState<any | null>(null);
     const { isStopped, setIsStopped } = StopExecution();
-    const { resolvedTheme } = useTheme();
+    const { sendJsonMessage, message, isReady } = useWebSocket();
+    const [isTerminalReady, setIsTerminalReady] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(false);
+    const [terminalInstance, setTerminalInstance] = useState<any | null>(null);
 
-    // // websocket hooks and initialization
-    // const { lastMessage, sendJsonMessage } = useWebSocket(WS_URL, {
-    //     shouldReconnect: () => true,
-    //     onOpen: () => console.log('WebSocket connection established.'),
-    //     onClose: () => console.log('WebSocket connection closed.'),
-    //     onError: (event) => console.error('WebSocket error:', event),
-    // });
-
-    // this will be triggered to stop the execution of the terminal
     useEffect(() => {
         if (isStopped && terminalInstance) {
-            console.log('Sending SIGINT');
-            // sendJsonMessage({
-            //     TerminalCommand: {
-            //         command: '\x03',
-            //     },
-            // });
+            sendJsonMessage({ action: "terminal", data: CTRL_C });
             setIsStopped(false);
         }
-    }, [isStopped, terminalInstance, setIsStopped]);
+    }, [isStopped, sendJsonMessage, setIsStopped]);
 
-    // // this will be triggered whenever there is a new message and it will update the terminal
-    // useEffect(() => {
-    //     if (lastMessage !== null && terminalInstance) {
-    //         try {
-    //             const parsedMessage: TerminalOutput = JSON.parse(lastMessage.data);
-    //             if (parsedMessage.data.output_type === outputType.EXIT) {
-    //                 setTerminalInstance(null);
-    //                 return;
-    //             }
-    //             if (parsedMessage.data.output_type === outputType.STDERR) {
-    //                 terminalInstance.writeln('\x1B[31m' + parsedMessage.data.content + '\x1B[0m');
-    //                 return;
-    //             }
-
-    //             const output = parsedMessage.data.content;
-    //             console.log(output);
-    //             terminalInstance.write(output);
-    //         } catch (error) {
-    //             console.error('Error parsing WebSocket message:', error);
-    //             if (terminalInstance) {
-    //                 terminalInstance.writeln('\r\nError: Failed to parse server response');
-    //             }
-    //         }
-    //     }
-    // }, [lastMessage, terminalInstance]);
-
-    // this will be triggered whenever the theme changes
     useEffect(() => {
-        if (resolvedTheme && terminalInstance) {
-            const newColors = {
-                foreground: "red",
-                background: "green",
-                cursor: "red",
-            };
-            terminalInstance.options.theme = { ...newColors };
+        if (!message || !terminalInstance) return;
+
+        try {
+            const parsedMessage: TerminalOutput = typeof message === 'string' && message.startsWith('{')
+                ? JSON.parse(message)
+                : message;
+
+            if (!parsedMessage.data) {
+                // terminalInstance.write(message);
+                return;
+            }
+
+            const { output_type, content } = parsedMessage.data;
+
+            if (output_type === OutputType.EXIT) {
+                terminalInstance.dispose();
+                setTerminalInstance(null);
+                setIsTerminalReady(false);
+            } else {
+                const formattedContent = output_type === OutputType.STDERR
+                    ? `\x1B[31m${content}\x1B[0m`
+                    : content;
+                terminalInstance.write(formattedContent);
+            }
+        } catch (error) {
+            console.error('Error processing WebSocket message:', error);
         }
-    }, [resolvedTheme]);
+    }, [message, terminalInstance]);
 
     const initializeTerminal = useCallback(async () => {
         if (!terminalRef.current || terminalInstance) return;
-        // lazy load xterm and related plugins
-        const { Terminal } = await import('@xterm/xterm');
-        const { FitAddon } = await import('xterm-addon-fit');
-        const { WebLinksAddon } = await import('xterm-addon-web-links');
+        try {
+            const { Terminal } = await import('@xterm/xterm');
+            const { FitAddon } = await import('xterm-addon-fit');
+            const { WebLinksAddon } = await import('xterm-addon-web-links');
 
-        // initialize xterm
-        const term = new Terminal({
-            cursorBlink: true,
-            fontFamily: '"Menlo", "DejaVu Sans Mono", "Consolas", monospace',
-            fontSize: 14,
-            theme: {
-                foreground: "red",
-                background: `black`,
-                cursor: "red",
-            },
-            allowTransparency: true,
-            rightClickSelectsWord: true,
-            // logLevel: 'debug',
-        });
+            const term = new Terminal({
+                cursorBlink: true,
+                fontFamily: '"Menlo", "DejaVu Sans Mono", "Consolas", monospace',
+                fontSize: 14,
+                theme: { foreground: "hsl(142.1 71% 45%)", background: "hsl(240 4% 16%)", cursor: "red" },
+                allowTransparency: true,
+                rightClickSelectsWord: true,
+                disableStdin: false,
+                convertEol: false
+            });
 
-        // initialize addons
-        const fitAddon = new FitAddon();
-        const webLinksAddon = new WebLinksAddon();
+            const fitAddon = new FitAddon();
+            const webLinksAddon = new WebLinksAddon();
 
-        // load addons and activate it
-        term.loadAddon(fitAddon);
-        term.loadAddon(webLinksAddon);
-        fitAddonRef.current = fitAddon;
-        term.open(terminalRef.current);
-        fitAddon.activate(term);
-        fitAddon.fit();
+            term.loadAddon(fitAddon);
+            term.loadAddon(webLinksAddon);
+            fitAddonRef.current = fitAddon;
+            term.open(terminalRef.current);
+            fitAddon.activate(term);
+            fitAddon.fit();
 
-        // set padding for the terminal
-        if (terminalRef.current) {
-            terminalRef.current.style.padding = '10px';
+            if (terminalRef.current) {
+                terminalRef.current.style.padding = '5px';
+            }
+
+            term.onData((data) => {
+                sendJsonMessage({ action: "terminal", data });
+            });
+
+            setTerminalInstance(term);
+        } catch (error) {
+            console.error('Error initializing terminal:', error);
+            setIsInitializing(false);
         }
-        let currentLine = '';
+    }, [sendJsonMessage, isInitializing, terminalRef]);
 
-        // whenever there is something written onto the terminal this will be called and updates the currentline
-        term.onData((data) => {
-            currentLine += data;
-        });
-
-        term.onKey(({ key, domEvent }) => {
-            const printable = !domEvent.altKey && !domEvent.ctrlKey && !domEvent.metaKey;
-
-            if (domEvent.keyCode === 13) {
-                handleEnterKey(term, currentLine, (data: any) => {
-                    
-                });
-                return;
-            } else if (domEvent.keyCode === 9) {
-                handleTabKey(currentLine, (data: any) => {}, term);
-                return;
-            } else if (domEvent.keyCode === 8) {
-                currentLine = handleBackspaceKey(term, currentLine);
-                return;
-            }
-            // these keys are for special keys, like arrow up down left right home delete escape
-            else if (
-                domEvent.keyCode === 38 ||
-                domEvent.keyCode === 40 ||
-                domEvent.keyCode === 37 ||
-                domEvent.keyCode === 39
-            ) {
-                // sendJsonMessage({
-                //     TerminalCommand: {
-                //         command: specialKeyCodeMappings[domEvent.keyCode],
-                //     },
-                // });
-            } else if (printable) {
-                handlePrintableKey(term, currentLine, key);
-            } else {
-                let command = '';
-                if (domEvent.ctrlKey) {
-                    command = handleControlKey(domEvent.key.toLowerCase());
-                }
-                if (command) {
-                    // sendJsonMessage({
-                    //     TerminalCommand: {
-                    //         command: command,
-                    //     },
-                    // });
-                }
-            }
-        });
-
-        setTerminalInstance(term);
-    }, [terminalInstance]);
-
-    // clean up terminal
     const destroyTerminal = useCallback(() => {
         if (terminalInstance) {
             terminalInstance.dispose();
@@ -191,12 +113,16 @@ export const useTerminal = () => {
         }
     }, [terminalInstance]);
 
-    // this will be triggered for destroying the terminal
     useEffect(() => {
-        return () => {
-            destroyTerminal();
-        };
+        return destroyTerminal;
     }, [destroyTerminal]);
 
-    return { terminalRef, fitAddonRef, initializeTerminal, destroyTerminal, terminalInstance };
+    return {
+        terminalRef,
+        initializeTerminal,
+        destroyTerminal,
+        fitAddonRef,
+        terminalInstance,
+        isTerminalReady,
+    };
 };

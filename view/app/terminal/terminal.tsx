@@ -4,7 +4,6 @@ import '@xterm/xterm/css/xterm.css';
 import { useTerminal } from './utils/useTerminal';
 import { useContainerReady } from './utils/isContainerReady';
 import { X } from 'lucide-react';
-import { FitAddon } from '@xterm/addon-fit';
 
 type terminalProps = {
     isOpen: boolean;
@@ -19,7 +18,11 @@ export const IntegratedTerminal: React.FC<terminalProps> = ({
     isTerminalOpen,
     setFitAddonRef,
 }) => {
-    const { terminalRef, fitAddonRef, initializeTerminal } = useTerminal();
+    const { terminalRef, fitAddonRef, initializeTerminal } = useTerminal() as {
+        terminalRef: React.RefObject<HTMLDivElement>;
+        fitAddonRef: any;
+        initializeTerminal: () => void;
+    };
     const isContainerReady = useContainerReady(isTerminalOpen, terminalRef);
 
     useEffect(() => {
@@ -29,7 +32,6 @@ export const IntegratedTerminal: React.FC<terminalProps> = ({
     }, [isTerminalOpen, isContainerReady, initializeTerminal]);
 
     useEffect(() => {
-        console.log(fitAddonRef);
         if (fitAddonRef) {
             setFitAddonRef(fitAddonRef);
         }
@@ -37,7 +39,7 @@ export const IntegratedTerminal: React.FC<terminalProps> = ({
 
     return (
         <div className="flex h-full flex-col border border-t-0">
-            <div className="flex h-5 items-center justify-between bg-secondary px-1 py-2">
+            <div className="flex h-5 items-center justify-between bg-secondary px-1 py-2 border-b-2 opacity-50">
                 <span className="text-xs">
                     Terminal <span className="text-xs">⌘</span>J
                 </span>
@@ -45,7 +47,7 @@ export const IntegratedTerminal: React.FC<terminalProps> = ({
             </div>
             <div
                 ref={terminalRef}
-                className="flex-grow overflow-hidden"
+                className="flex-grow overflow-hidden bg-secondary"
                 style={{
                     height: isTerminalOpen ? 'calc(100% - 32px)' : '0',
                     visibility: isTerminalOpen ? 'visible' : 'hidden',

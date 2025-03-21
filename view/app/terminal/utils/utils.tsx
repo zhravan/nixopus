@@ -22,11 +22,9 @@ export const specialKeyCodeMappings = {
 };
 
 export const handleEnterKey = (term: any, currentLine: string, sendJsonMessage: any) => {
-    console.log(`Sending command:${currentLine.trim()}`);
     sendJsonMessage({
-        TerminalCommand: {
-            command: currentLine,
-        },
+       "action": "terminal",
+       "data": currentLine
     });
     return;
 };

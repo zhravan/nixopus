@@ -74,22 +74,22 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
                 redeployApplication({
                   id: application?.id || '',
                   force: true,
-                  force_without_cache: false
+                  force_without_cache: true
                 });
               }}
             >
-              Force Deploy Without Cache
+              Re-Deploy
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 redeployApplication({
                   id: application?.id || '',
                   force: true,
-                  force_without_cache: true
+                  force_without_cache: false
                 });
               }}
             >
-              Force Deploy
+              Force Deploy Without Cache
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

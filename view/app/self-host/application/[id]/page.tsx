@@ -28,7 +28,7 @@ function Page() {
         <TabsContent value="configuration" className="mt-6">
           <DeployConfigureForm
             application_name={application?.name}
-            domain={application?.domain?.id}
+            domain={application?.domain}
             environment={application?.environment as Environment | undefined}
             env_variables={envVariables}
             build_variables={buildVariables}

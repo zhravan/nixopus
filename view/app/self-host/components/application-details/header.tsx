@@ -30,7 +30,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => window.open('https://' + application?.domain?.name, '_blank')}
+              onClick={() => window.open('https://' + application?.domain, '_blank')}
               aria-label="Open application in new tab"
             >
               <ExternalLink className="h-5 w-5" />

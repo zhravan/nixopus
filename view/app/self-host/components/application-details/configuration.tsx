@@ -144,7 +144,7 @@ export const DeployConfigureForm = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Domain</label>
             <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
-              {domains?.find((dm: Domain) => dm.id === domain)?.name}
+              {domain}
             </div>
             <p className="text-sm text-muted-foreground">
               Domain on which your application is available

@@ -1,4 +1,3 @@
-import { Domain } from './domain';
 import { User } from './user';
 
 export type Application = {
@@ -17,7 +16,7 @@ export type Application = {
   user_id: string;
   created_at: Date;
   updated_at: Date;
-  domain?: Domain;
+  domain?: string;
   user?: User;
   status?: ApplicationStatus;
   logs?: ApplicationLogs[];
@@ -82,7 +81,7 @@ export interface CreateApplicationRequest {
   environment: Environment;
   branch: string;
   port: number;
-  domain_id: string;
+  domain: string;
   repository: string;
   build_pack: BuildPack;
   env_variables: Record<string, string>;

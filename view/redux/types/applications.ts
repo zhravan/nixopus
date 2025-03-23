@@ -22,6 +22,7 @@ export type Application = {
   status?: ApplicationStatus;
   logs?: ApplicationLogs[];
   deployments?: ApplicationDeployment[];
+  dockerfile_path?: string;
 };
 
 export type ApplicationStatus = {
@@ -88,7 +89,7 @@ export interface CreateApplicationRequest {
   build_variables: Record<string, string>;
   pre_run_commands: string;
   post_run_commands: string;
-  DockerfilePath: string;
+  dockerfile_path: string;
 }
 
 export interface UpdateDeploymentRequest {
@@ -100,7 +101,7 @@ export interface UpdateDeploymentRequest {
   port?: number;
   id?: string;
   force?: boolean;
-  DockerfilePath?: string;
+  dockerfile_path?: string;
 }
 
 export interface ReDeployApplicationRequest {

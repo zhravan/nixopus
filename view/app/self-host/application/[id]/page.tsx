@@ -39,6 +39,7 @@ function Page() {
             pre_run_commands={application?.pre_run_command}
             post_run_commands={application?.post_run_command}
             application_id={application?.id}
+            dockerFilePath={application?.dockerfile_path}
           />
         </TabsContent>
         <TabsContent value="logs" className="mt-6">

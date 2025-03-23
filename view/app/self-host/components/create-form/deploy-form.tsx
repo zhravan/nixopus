@@ -87,7 +87,7 @@ export const DeployForm = ({
           <FormInputField
             form={form}
             label="Dockerfile Path"
-            name="dockerfile_path"
+            name="DockerfilePath"
             description="Path of the dockerfile in case of mono repo"
             placeholder="Dockerfile"
             required={false}

@@ -146,7 +146,7 @@ function useCreateDeployment({
         build_variables: values.build_variables,
         pre_run_commands: values.pre_run_commands as string,
         post_run_commands: values.post_run_commands as string,
-        DockerfilePath: values.DockerfilePath
+        dockerfile_path: values.DockerfilePath
       }).unwrap();
       router.push('/self-host/application/' + data?.id);
     } catch (error) {

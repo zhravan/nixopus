@@ -8,6 +8,7 @@ import (
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
 	domain "github.com/raghavyuva/nixopus-api/internal/features/domain/controller"
+	file_manager "github.com/raghavyuva/nixopus-api/internal/features/file-manager/controller"
 	githubConnector "github.com/raghavyuva/nixopus-api/internal/features/github-connector/controller"
 	health "github.com/raghavyuva/nixopus-api/internal/features/health"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
@@ -162,7 +163,7 @@ func (router *Router) Routes() *mux.Router {
 	domainApi.HandleFunc("", domainController.UpdateDomain).Methods("PUT", "OPTIONS")
 	domainApi.HandleFunc("", domainController.DeleteDomain).Methods("DELETE", "OPTIONS")
 	domainApi.HandleFunc("/all", domainController.GetDomains).Methods("GET", "OPTIONS")
-	domainApi.HandleFunc("/generate",domainController.GenerateRandomSubDomain).Methods("GET","OPTIONS")
+	domainApi.HandleFunc("/generate", domainController.GenerateRandomSubDomain).Methods("GET", "OPTIONS")
 
 	githubConnectorApi := api.PathPrefix("/github-connector").Subrouter()
 	githubConnectorApi.Use(middleware.IsAdmin)
@@ -190,5 +191,12 @@ func (router *Router) Routes() *mux.Router {
 	deployApplicationApi.HandleFunc("/deployments/{deployment_id}", deployController.GetDeploymentById).Methods("GET", "OPTIONS")
 	deployApplicationApi.HandleFunc("/rollback", deployController.HandleRollback).Methods("POST", "OPTIONS")
 	deployApplicationApi.HandleFunc("/restart", deployController.HandleRestart).Methods("POST", "OPTIONS")
+
+	file_manager_api := api.PathPrefix("/file-manager").Subrouter()
+	file_manager_api.Use(middleware.IsAdmin)
+	file_manager_controller := file_manager.NewFileManagerController(router.app.Ctx, l, notificationManager)
+	file_manager_api.HandleFunc("", file_manager_controller.ListFiles).Methods("GET", "OPTIONS")
+	file_manager_api.HandleFunc("/create-directory", file_manager_controller.CreateDirectory).Methods("POST", "OPTIONS")
+	file_manager_api.HandleFunc("/delete-file", file_manager_controller.DeleteFile).Methods("DELETE", "OPTIONS")
 	return r
 }

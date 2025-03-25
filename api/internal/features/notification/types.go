@@ -104,12 +104,13 @@ type NotificationPayload struct {
 }
 
 type CreateSMTPConfigRequest struct {
-	Host      string `json:"host"`
-	Port      int    `json:"port"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	FromName  string `json:"from_name"`
-	FromEmail string `json:"from_email"`
+	Host           string    `json:"host"`
+	Port           int       `json:"port"`
+	Username       string    `json:"username"`
+	Password       string    `json:"password"`
+	FromName       string    `json:"from_name"`
+	FromEmail      string    `json:"from_email"`
+	OrganizationID uuid.UUID `json:"organization_id"`
 }
 
 type UpdateSMTPConfigRequest struct {
@@ -141,6 +142,9 @@ var (
 	ErrMissingType        = errors.New("type is required")
 	ErrPermissionDenied   = errors.New("permission denied")
 	ErrSMTPConfigNotFound = errors.New("smtp config not found")
+	ErrAccessDenied       = errors.New("access denied")
+	ErrUserDoesNotBelongToOrganization = errors.New("user does not belong to organization")
+	ErrUserDoesNotHavePermissionForTheResource = errors.New("user does not have permission for the resource")
 )
 
 func NewSMTPConfig(c *CreateSMTPConfigRequest, userID uuid.UUID) *shared_types.SMTPConfigs {

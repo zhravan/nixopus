@@ -58,59 +58,59 @@ func (router *Router) Routes() *mux.Router {
 	r.Use(middleware.LoggingMiddleware)
 	r.Use(middleware.RateLimiter)
 
-	router.setupBasicRoutes(r)
+	router.BasicRoutes(r)
 
-	router.setupSwaggerRoutes(r)
+	router.SwaggerRoutes(r)
 
 	notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), router.app.Store.DB)
 	notificationManager.Start()
 
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
 
-	router.setupWebSocketServer(r, deployController)
+	router.WebSocketServer(r, deployController)
 
 	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l, notificationManager)
-	router.setupAuthRoutes(r, authController)
+	router.AuthRoutes(r, authController)
 
 	api := r.PathPrefix("/api/v1").Subrouter()
 	api.Use(func(next http.Handler) http.Handler {
 		return middleware.AuthMiddleware(next, router.app)
 	})
 
-	router.setupAuthenticatedAuthRoutes(api, authController)
+	router.AuthenticatedAuthRoutes(api, authController)
 
 	roleController := role.NewRolesController(router.app.Store, router.app.Ctx, l)
-	router.setupRoleRoutes(api, roleController)
+	router.RoleRoutes(api, roleController)
 
 	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l, notificationManager)
-	router.setupOrganizationRoutes(api, organizationController)
+	router.OrganizationRoutes(api, organizationController)
 
 	permissionController := permission.NewPermissionController(router.app.Store, router.app.Ctx, l)
-	router.setupPermissionRoutes(api, permissionController)
-	router.setupRolePermissionRoutes(api, permissionController)
+	router.PermissionRoutes(api, permissionController)
+	router.RolePermissionRoutes(api, permissionController)
 
 	userController := user.NewUserController(router.app.Store, router.app.Ctx, l)
-	router.setupUserRoutes(api, userController)
+	router.UserRoutes(api, userController)
 
 	notifController := notificationController.NewNotificationController(router.app.Store, router.app.Ctx, l, notificationManager)
-	router.setupNotificationRoutes(api, notifController)
+	router.NotificationRoutes(api, notifController)
 
 	domainController := domain.NewDomainsController(router.app.Store, router.app.Ctx, l, notificationManager)
-	router.setupDomainRoutes(api, domainController)
+	router.DomainRoutes(api, domainController)
 
 	githubConnectorController := githubConnector.NewGithubConnectorController(router.app.Store, router.app.Ctx, l, notificationManager)
-	router.setupGithubConnectorRoutes(api, githubConnectorController)
+	router.GithubConnectorRoutes(api, githubConnectorController)
 
-	router.setupDeployRoutes(api, deployController)
+	router.DeployRoutes(api, deployController)
 
 	return r
 }
 
-func (router *Router) setupBasicRoutes(r *mux.Router) {
+func (router *Router) BasicRoutes(r *mux.Router) {
 	r.HandleFunc("/health", health.HealthCheck).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupSwaggerRoutes(r *mux.Router) {
+func (router *Router) SwaggerRoutes(r *mux.Router) {
 	r.PathPrefix("/docs/").Handler(httpSwagger.Handler(
 		httpSwagger.URL("/swagger/doc.json"),
 		httpSwagger.DeepLinking(true),
@@ -124,7 +124,7 @@ func (router *Router) setupSwaggerRoutes(r *mux.Router) {
 	})
 }
 
-func (router *Router) setupWebSocketServer(r *mux.Router, deployController *deploy.DeployController) {
+func (router *Router) WebSocketServer(r *mux.Router, deployController *deploy.DeployController) {
 	wsServer, err := realtime.NewSocketServer(deployController, router.app.Store.DB, router.app.Ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -136,7 +136,7 @@ func (router *Router) setupWebSocketServer(r *mux.Router, deployController *depl
 }
 
 // these routes are public routes
-func (router *Router) setupAuthRoutes(r *mux.Router, authController *auth.AuthController) {
+func (router *Router) AuthRoutes(r *mux.Router, authController *auth.AuthController) {
 	authApi := r.PathPrefix("/api/v1/auth").Subrouter()
 
 	//register route is disabled for now (we do not have register seperately either the one who installs it, or the one who is added by admin)
@@ -144,7 +144,7 @@ func (router *Router) setupAuthRoutes(r *mux.Router, authController *auth.AuthCo
 	authApi.HandleFunc("/login", authController.Login).Methods("POST", "OPTIONS")
 }
 
-func (router *Router) setupAuthenticatedAuthRoutes(api *mux.Router, authController *auth.AuthController) {
+func (router *Router) AuthenticatedAuthRoutes(api *mux.Router, authController *auth.AuthController) {
 	authApi := api.PathPrefix("/auth").Subrouter()
 	authApi.HandleFunc("/request-password-reset", authController.GeneratePasswordResetLink).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/reset-password", authController.ResetPassword).Methods("POST", "OPTIONS")
@@ -155,7 +155,14 @@ func (router *Router) setupAuthenticatedAuthRoutes(api *mux.Router, authControll
 	authApi.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST", "OPTIONS")
 }
 
-func (router *Router) setupRoleRoutes(api *mux.Router, roleController *role.RolesController) {
+func (router *Router) UserRoutes(api *mux.Router, userController *user.UserController) {
+	userApi := api.PathPrefix("/user").Subrouter()
+	userApi.HandleFunc("", userController.GetUserDetails).Methods("GET", "OPTIONS")
+	userApi.HandleFunc("/name", userController.UpdateUserName).Methods("PATCH", "OPTIONS")
+	userApi.HandleFunc("/organizations", userController.GetUserOrganizations).Methods("GET", "OPTIONS")
+}
+
+func (router *Router) RoleRoutes(api *mux.Router, roleController *role.RolesController) {
 	roleApi := api.PathPrefix("/roles").Subrouter()
 	roleApi.Use(middleware.IsAdmin)
 	roleApi.HandleFunc("", roleController.CreateRole).Methods("POST", "OPTIONS")
@@ -165,7 +172,7 @@ func (router *Router) setupRoleRoutes(api *mux.Router, roleController *role.Role
 	roleApi.HandleFunc("/all", roleController.GetRoles).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupOrganizationRoutes(api *mux.Router, organizationController *organization.OrganizationsController) {
+func (router *Router) OrganizationRoutes(api *mux.Router, organizationController *organization.OrganizationsController) {
 	orgApi := api.PathPrefix("/organizations").Subrouter()
 	orgApi.Use(middleware.IsAdmin)
 	orgApi.HandleFunc("", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
@@ -178,7 +185,7 @@ func (router *Router) setupOrganizationRoutes(api *mux.Router, organizationContr
 	orgApi.HandleFunc("/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupPermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
+func (router *Router) PermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
 	permApi := api.PathPrefix("/permissions").Subrouter()
 	permApi.Use(middleware.IsAdmin)
 	permApi.HandleFunc("", permissionController.CreatePermission).Methods("POST", "OPTIONS")
@@ -188,7 +195,7 @@ func (router *Router) setupPermissionRoutes(api *mux.Router, permissionControlle
 	permApi.HandleFunc("/all", permissionController.GetPermissions).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupRolePermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
+func (router *Router) RolePermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
 	rolePermApi := api.PathPrefix("/roles/permission").Subrouter()
 	rolePermApi.Use(middleware.IsAdmin)
 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
@@ -196,14 +203,7 @@ func (router *Router) setupRolePermissionRoutes(api *mux.Router, permissionContr
 	rolePermApi.HandleFunc("", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupUserRoutes(api *mux.Router, userController *user.UserController) {
-	userApi := api.PathPrefix("/user").Subrouter()
-	userApi.HandleFunc("", userController.GetUserDetails).Methods("GET", "OPTIONS")
-	userApi.HandleFunc("/name", userController.UpdateUserName).Methods("PATCH", "OPTIONS")
-	userApi.HandleFunc("/organizations", userController.GetUserOrganizations).Methods("GET", "OPTIONS")
-}
-
-func (router *Router) setupNotificationRoutes(api *mux.Router, notificationController *notificationController.NotificationController) {
+func (router *Router) NotificationRoutes(api *mux.Router, notificationController *notificationController.NotificationController) {
 	notificationApi := api.PathPrefix("/notification").Subrouter()
 	notificationApi.HandleFunc("/smtp", notificationController.AddSmtp).Methods("POST", "OPTIONS")
 	notificationApi.HandleFunc("/smtp", notificationController.GetSmtp).Methods("GET", "OPTIONS")
@@ -213,7 +213,7 @@ func (router *Router) setupNotificationRoutes(api *mux.Router, notificationContr
 	notificationApi.HandleFunc("/preferences", notificationController.GetPreferences).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupDomainRoutes(api *mux.Router, domainController *domain.DomainsController) {
+func (router *Router) DomainRoutes(api *mux.Router, domainController *domain.DomainsController) {
 	domainApi := api.PathPrefix("/domain").Subrouter()
 	domainApi.HandleFunc("", domainController.CreateDomain).Methods("POST", "OPTIONS")
 	domainApi.HandleFunc("", domainController.UpdateDomain).Methods("PUT", "OPTIONS")
@@ -222,7 +222,7 @@ func (router *Router) setupDomainRoutes(api *mux.Router, domainController *domai
 	domainApi.HandleFunc("/generate", domainController.GenerateRandomSubDomain).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupGithubConnectorRoutes(api *mux.Router, githubConnectorController *githubConnector.GithubConnectorController) {
+func (router *Router) GithubConnectorRoutes(api *mux.Router, githubConnectorController *githubConnector.GithubConnectorController) {
 	githubConnectorApi := api.PathPrefix("/github-connector").Subrouter()
 	githubConnectorApi.Use(middleware.IsAdmin)
 	githubConnectorApi.HandleFunc("", githubConnectorController.CreateGithubConnector).Methods("POST", "OPTIONS")
@@ -231,22 +231,22 @@ func (router *Router) setupGithubConnectorRoutes(api *mux.Router, githubConnecto
 	githubConnectorApi.HandleFunc("/repositories", githubConnectorController.GetGithubRepositories).Methods("GET", "OPTIONS")
 }
 
-func (router *Router) setupDeployRoutes(api *mux.Router, deployController *deploy.DeployController) {
+func (router *Router) DeployRoutes(api *mux.Router, deployController *deploy.DeployController) {
 	deployApi := api.PathPrefix("/deploy").Subrouter()
 	deployApi.Use(middleware.IsAdmin)
-	router.setupDeployValidatorRoutes(deployApi, deployController)
+	router.DeployValidatorRoutes(deployApi, deployController)
 	deployApi.HandleFunc("/applications", deployController.GetApplications).Methods("GET", "OPTIONS")
-	router.setupDeployApplicationRoutes(deployApi, deployController)
+	router.DeployApplicationRoutes(deployApi, deployController)
 }
 
-func (router *Router) setupDeployValidatorRoutes(deployApi *mux.Router, deployController *deploy.DeployController) {
+func (router *Router) DeployValidatorRoutes(deployApi *mux.Router, deployController *deploy.DeployController) {
 	deployApiValidator := deployApi.PathPrefix("/validate").Subrouter()
 	deployApiValidator.HandleFunc("/name", deployController.IsNameAlreadyTaken).Methods("POST", "OPTIONS")
 	deployApiValidator.HandleFunc("/domain", deployController.IsDomainAlreadyTaken).Methods("POST", "OPTIONS")
 	deployApiValidator.HandleFunc("/port", deployController.IsPortAlreadyTaken).Methods("POST", "OPTIONS")
 }
 
-func (router *Router) setupDeployApplicationRoutes(deployApi *mux.Router, deployController *deploy.DeployController) {
+func (router *Router) DeployApplicationRoutes(deployApi *mux.Router, deployController *deploy.DeployController) {
 	deployApplicationApi := deployApi.PathPrefix("/application").Subrouter()
 	deployApplicationApi.HandleFunc("", deployController.HandleDeploy).Methods("POST", "OPTIONS")
 	deployApplicationApi.HandleFunc("", deployController.GetApplicationById).Methods("GET", "OPTIONS")

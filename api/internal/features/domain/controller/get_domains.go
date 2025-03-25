@@ -18,6 +18,18 @@ import (
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /domain/all [get]
 func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
+	user := c.GetUser(w, r)
+
+	if user == nil {
+		return
+	}
+
+	if err := c.validator.AccessValidator(w, r, user); err != nil {
+		c.logger.Log(logger.Error, err.Error(), err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	domains, err := c.service.GetDomains()
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")

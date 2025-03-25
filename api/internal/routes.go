@@ -66,7 +66,7 @@ func (router *Router) Routes() *mux.Router {
 	notificationManager.Start()
 
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
-
+     
 	router.setupWebSocketServer(r, deployController)
 
 	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l, notificationManager)

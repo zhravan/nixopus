@@ -45,18 +45,18 @@ func (c *DomainsController) GenerateRandomSubDomain(w http.ResponseWriter, r *ht
 	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 	const prefixLength = 8
 	randomPrefix := make([]byte, prefixLength)
-	
+
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
-	
+
 	for i := range randomPrefix {
 		randomPrefix[i] = charset[random.Intn(len(charset))]
 	}
-	
+
 	randomDomain := domains[random.Intn(len(domains))]
-	
+
 	subdomain := string(randomPrefix) + "." + randomDomain.Name
-	
+
 	response := struct {
 		Subdomain string `json:"subdomain"`
 		Domain    string `json:"domain"`
@@ -66,6 +66,6 @@ func (c *DomainsController) GenerateRandomSubDomain(w http.ResponseWriter, r *ht
 	}
 
 	c.logger.Log(logger.Info, "Generated random subdomain", subdomain)
-	
+
 	utils.SendJSONResponse(w, "success", "RandomSubdomain", response)
 }

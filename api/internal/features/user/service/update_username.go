@@ -31,6 +31,6 @@ func (s *UserService) UpdateUsername(id string, req *types.UpdateUserNameRequest
 		s.logger.Log(logger.Error, types.ErrFailedToUpdateUser.Error(), "")
 		return types.ErrFailedToUpdateUser
 	}
- 
+
 	return nil
 }

@@ -37,7 +37,7 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 		registrationRequest.Email,
 		hashedPassword,
 		registrationRequest.Username,
-		"", 
+		"",
 		"",
 		false,
 	)

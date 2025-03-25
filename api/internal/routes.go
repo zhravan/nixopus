@@ -66,7 +66,7 @@ func (router *Router) Routes() *mux.Router {
 	notificationManager.Start()
 
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
-     
+
 	router.setupWebSocketServer(r, deployController)
 
 	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l, notificationManager)
@@ -135,11 +135,13 @@ func (router *Router) setupWebSocketServer(r *mux.Router, deployController *depl
 	})
 }
 
+// these routes are public routes
 func (router *Router) setupAuthRoutes(r *mux.Router, authController *auth.AuthController) {
-	authCB := r.PathPrefix("/api/v1/auth").Subrouter()
-	authCB.HandleFunc("/register", authController.Register).Methods("POST", "OPTIONS")
-	authCB.HandleFunc("/login", authController.Login).Methods("POST", "OPTIONS")
-	authCB.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST", "OPTIONS")
+	authApi := r.PathPrefix("/api/v1/auth").Subrouter()
+
+	//register route is disabled for now (we do not have register seperately either the one who installs it, or the one who is added by admin)
+	// authApi.HandleFunc("/register", authController.Register).Methods("POST", "OPTIONS")
+	authApi.HandleFunc("/login", authController.Login).Methods("POST", "OPTIONS")
 }
 
 func (router *Router) setupAuthenticatedAuthRoutes(api *mux.Router, authController *auth.AuthController) {
@@ -150,6 +152,7 @@ func (router *Router) setupAuthenticatedAuthRoutes(api *mux.Router, authControll
 	authApi.HandleFunc("/send-verification-email", authController.SendVerificationEmail).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/verify-email", authController.VerifyEmail).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/create-user", authController.CreateUser).Methods("POST", "OPTIONS")
+	authApi.HandleFunc("/refresh-token", authController.RefreshToken).Methods("POST", "OPTIONS")
 }
 
 func (router *Router) setupRoleRoutes(api *mux.Router, roleController *role.RolesController) {

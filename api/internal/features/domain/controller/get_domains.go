@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Success 200 {object} types.Response "Success response with domains"
 // @Failure 500 {object} types.Response "Internal server error"
-// @Router /domain [get]
+// @Router /domain/all [get]
 func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
 	domains, err := c.service.GetDomains()
 	if err != nil {

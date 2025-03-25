@@ -123,6 +123,8 @@ definitions:
     properties:
       name:
         type: string
+      organization_id:
+        type: string
     type: object
   types.CreateDomainResponse:
     properties:
@@ -746,27 +748,6 @@ paths:
       summary: Update a domain
       tags:
       - domain
-  /domain/all:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a list of all domains.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success response with domains
-          schema:
-            $ref: '#/definitions/types.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/types.Response'
-      security:
-      - BearerAuth: []
-      summary: Get all domains
-      tags:
-      - domain
   /domain/generate:
     get:
       consumes:
@@ -791,6 +772,27 @@ paths:
       security:
       - BearerAuth: []
       summary: Generate a random subdomain
+      tags:
+      - domain
+  /domains:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all domains.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with domains
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all domains
       tags:
       - domain
   /github-connector:

@@ -18,7 +18,7 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} types.Response "Success response with domains"
 // @Failure 500 {object} types.Response "Internal server error"
-// @Router /domain/all [get]
+// @Router /domains [get]
 func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
 	user := c.GetUser(w, r)
 
@@ -26,7 +26,7 @@ func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.validator.AccessValidator(w, r, user); err != nil {
+	if err := c.validator.AccessValidator(w, r, user, nil); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
 		utils.SendErrorResponse(w, err.Error(), http.StatusForbidden)
 		return

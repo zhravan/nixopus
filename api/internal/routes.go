@@ -162,8 +162,9 @@ func (router *Router) DomainRoutes(api *mux.Router, domainController *domain.Dom
 	domainApi.HandleFunc("", domainController.CreateDomain).Methods("POST", "OPTIONS")
 	domainApi.HandleFunc("", domainController.UpdateDomain).Methods("PUT", "OPTIONS")
 	domainApi.HandleFunc("", domainController.DeleteDomain).Methods("DELETE", "OPTIONS")
-	domainApi.HandleFunc("/all", domainController.GetDomains).Methods("GET", "OPTIONS")
 	domainApi.HandleFunc("/generate", domainController.GenerateRandomSubDomain).Methods("GET", "OPTIONS")
+
+	api.HandleFunc("/domains", domainController.GetDomains).Methods("GET", "OPTIONS")
 }
 
 func (router *Router) GithubConnectorRoutes(api *mux.Router, githubConnectorController *githubConnector.GithubConnectorController) {

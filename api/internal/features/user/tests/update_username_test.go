@@ -64,9 +64,9 @@ func TestUpdateUsername(t *testing.T) {
 			mockUpdateErr: errors.New("storage error"),
 		},
 		{
-			name: "Empty request",
-			id:   validUUID.String(),
-			req:  &types.UpdateUserNameRequest{},
+			name:          "Empty request",
+			id:            validUUID.String(),
+			req:           &types.UpdateUserNameRequest{},
 			wantErr:       nil,
 			mockUser:      &shared_types.User{ID: validUUID},
 			mockGetErr:    nil,
@@ -90,7 +90,7 @@ func TestUpdateUsername(t *testing.T) {
 			if tt.req != nil {
 				storage.On("GetUserById", tt.id).Return(tt.mockUser, tt.mockGetErr)
 			}
-			
+
 			if tt.req != nil && tt.mockUser.ID != uuid.Nil && tt.mockGetErr == nil {
 				storage.On("UpdateUserName", tt.mockUser.ID.String(), tt.req.Name, mock.Anything).Return(tt.mockUpdateErr)
 			}

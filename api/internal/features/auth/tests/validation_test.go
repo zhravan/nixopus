@@ -233,43 +233,6 @@ func TestValidateLoginRequestWithInvalidData(t *testing.T) {
 	}
 }
 
-func TestValidateRegisterRequestWithInvalidData(t *testing.T) {
-	validator := validation.NewValidator()
-	
-	// Invalid user type
-	registerReq := &types.RegisterRequest{
-		Email:    "test@example.com",
-		Password: "Password1!",
-		Username: "testuser",
-		Type:     "invalid_type",
-	}
-	if err := validator.ValidateRequest(registerReq); err != types.ErrInvalidUserType {
-		t.Errorf("Expected invalid user type error, got %v", err)
-	}
-	
-	// Default type
-	registerReq = &types.RegisterRequest{
-		Email:    "test@example.com",
-		Password: "Password1!",
-		Username: "testuser",
-		Type:     "", // Empty should default to "app_user"
-	}
-	if err := validator.ValidateRequest(registerReq); err != nil {
-		t.Errorf("Expected no error after defaulting type, got %v", err)
-	}
-	
-	// Valid admin type
-	registerReq = &types.RegisterRequest{
-		Email:    "test@example.com",
-		Password: "Password1!",
-		Username: "testuser",
-		Type:     "admin",
-	}
-	if err := validator.ValidateRequest(registerReq); err != nil {
-		t.Errorf("Expected no error for admin type, got %v", err)
-	}
-}
-
 func TestChangePasswordRequestValidation(t *testing.T) {
 	validator := validation.NewValidator()
 	

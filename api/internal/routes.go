@@ -149,6 +149,7 @@ func (router *Router) setupAuthenticatedAuthRoutes(api *mux.Router, authControll
 	authApi.HandleFunc("/logout", authController.Logout).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/send-verification-email", authController.SendVerificationEmail).Methods("POST", "OPTIONS")
 	authApi.HandleFunc("/verify-email", authController.VerifyEmail).Methods("POST", "OPTIONS")
+	authApi.HandleFunc("/create-user", authController.CreateUser).Methods("POST", "OPTIONS")
 }
 
 func (router *Router) setupRoleRoutes(api *mux.Router, roleController *role.RolesController) {

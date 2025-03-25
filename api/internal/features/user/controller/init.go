@@ -14,7 +14,6 @@ import (
 )
 
 type UserController struct {
-	store     *shared_storage.Store
 	validator *validation.Validator
 	service   *service.UserService
 	ctx       context.Context
@@ -27,7 +26,6 @@ func NewUserController(
 	l logger.Logger,
 ) *UserController {
 	return &UserController{
-		store:     store,
 		validator: validation.NewValidator(),
 		service:   service.NewUserService(store, ctx, l, &storage.UserStorage{DB: store.DB, Ctx: ctx}),
 		ctx:       ctx,

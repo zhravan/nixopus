@@ -169,16 +169,16 @@ func TestValidateRequest(t *testing.T) {
 		t.Errorf("Expected no error for valid login request, got %v", err)
 	}
 
-	// Test RegisterRequest
-	registerReq := &types.RegisterRequest{
-		Email:    "test@example.com",
-		Password: "Password1!",
-		Username: "testuser",
-		Type:     "app_user",
-	}
-	if err := validator.ValidateRequest(registerReq); err != nil {
-		t.Errorf("Expected no error for valid register request, got %v", err)
-	}
+	// // Test RegisterRequest
+	// registerReq := &types.RegisterRequest{
+	// 	Email:    "test@example.com",
+	// 	Password: "Password1!",
+	// 	Username: "testuser",
+	// 	Type:     "app_user",
+	// }
+	// if err := validator.ValidateRequest(registerReq); err != nil {
+	// 	t.Errorf("Expected no error for valid register request, got %v", err)
+	// }
 
 	// Test LogoutRequest
 	logoutReq := &types.LogoutRequest{

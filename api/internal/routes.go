@@ -162,55 +162,17 @@ func (router *Router) UserRoutes(api *mux.Router, userController *user.UserContr
 	userApi.HandleFunc("/organizations", userController.GetUserOrganizations).Methods("GET", "OPTIONS")
 }
 
-// func (router *Router) RoleRoutes(api *mux.Router, roleController *role.RolesController) {
-// 	roleApi := api.PathPrefix("/roles").Subrouter()
-// 	roleApi.Use(middleware.IsAdmin)
-// 	roleApi.HandleFunc("", roleController.CreateRole).Methods("POST", "OPTIONS")
-// 	roleApi.HandleFunc("", roleController.GetRole).Methods("GET", "OPTIONS")
-// 	roleApi.HandleFunc("", roleController.UpdateRole).Methods("PUT", "OPTIONS")
-// 	roleApi.HandleFunc("", roleController.DeleteRole).Methods("DELETE", "OPTIONS")
-// 	roleApi.HandleFunc("/all", roleController.GetRoles).Methods("GET", "OPTIONS")
-// }
-
-// func (router *Router) OrganizationRoutes(api *mux.Router, organizationController *organization.OrganizationsController) {
-// 	orgApi := api.PathPrefix("/organizations").Subrouter()
-// 	orgApi.Use(middleware.IsAdmin)
-// 	orgApi.HandleFunc("", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
-// 	orgApi.HandleFunc("", organizationController.GetOrganization).Methods("GET", "OPTIONS")
-// 	orgApi.HandleFunc("", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
-// 	orgApi.HandleFunc("", organizationController.DeleteOrganization).Methods("DELETE", "OPTIONS")
-// 	orgApi.HandleFunc("/all", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
-// 	orgApi.HandleFunc("/user", organizationController.AddUserToOrganization).Methods("POST", "OPTIONS")
-// 	orgApi.HandleFunc("/user", organizationController.RemoveUserFromOrganization).Methods("DELETE", "OPTIONS")
-// 	orgApi.HandleFunc("/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
-// }
-
-// func (router *Router) PermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
-// 	permApi := api.PathPrefix("/permissions").Subrouter()
-// 	permApi.Use(middleware.IsAdmin)
-// 	permApi.HandleFunc("", permissionController.CreatePermission).Methods("POST", "OPTIONS")
-// 	permApi.HandleFunc("", permissionController.GetPermission).Methods("GET", "OPTIONS")
-// 	permApi.HandleFunc("", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
-// 	permApi.HandleFunc("", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
-// 	permApi.HandleFunc("/all", permissionController.GetPermissions).Methods("GET", "OPTIONS")
-// }
-
-// func (router *Router) RolePermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
-// 	rolePermApi := api.PathPrefix("/roles/permission").Subrouter()
-// 	rolePermApi.Use(middleware.IsAdmin)
-// 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
-// 	rolePermApi.HandleFunc("", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
-// 	rolePermApi.HandleFunc("", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
-// }
-
 func (router *Router) NotificationRoutes(api *mux.Router, notificationController *notificationController.NotificationController) {
 	notificationApi := api.PathPrefix("/notification").Subrouter()
-	notificationApi.HandleFunc("/smtp", notificationController.AddSmtp).Methods("POST", "OPTIONS")
-	notificationApi.HandleFunc("/smtp", notificationController.GetSmtp).Methods("GET", "OPTIONS")
-	notificationApi.HandleFunc("/smtp", notificationController.UpdateSmtp).Methods("PUT", "OPTIONS")
-	notificationApi.HandleFunc("/smtp", notificationController.DeleteSmtp).Methods("DELETE", "OPTIONS")
-	notificationApi.HandleFunc("/preferences", notificationController.UpdatePreference).Methods("POST", "OPTIONS")
-	notificationApi.HandleFunc("/preferences", notificationController.GetPreferences).Methods("GET", "OPTIONS")
+	notificationSmtpApi := notificationApi.PathPrefix("/smtp").Subrouter()
+	notificationSmtpApi.HandleFunc("", notificationController.AddSmtp).Methods("POST", "OPTIONS")
+	notificationSmtpApi.HandleFunc("", notificationController.GetSmtp).Methods("GET", "OPTIONS")
+	notificationSmtpApi.HandleFunc("", notificationController.UpdateSmtp).Methods("PUT", "OPTIONS")
+	notificationSmtpApi.HandleFunc("", notificationController.DeleteSmtp).Methods("DELETE", "OPTIONS")
+
+	notificationPreferencesApi := notificationApi.PathPrefix("/preferences").Subrouter()
+	notificationPreferencesApi.HandleFunc("", notificationController.UpdatePreference).Methods("POST", "OPTIONS")
+	notificationPreferencesApi.HandleFunc("", notificationController.GetPreferences).Methods("GET", "OPTIONS")
 }
 
 func (router *Router) DomainRoutes(api *mux.Router, domainController *domain.DomainsController) {
@@ -257,3 +219,46 @@ func (router *Router) DeployApplicationRoutes(deployApi *mux.Router, deployContr
 	deployApplicationApi.HandleFunc("/rollback", deployController.HandleRollback).Methods("POST", "OPTIONS")
 	deployApplicationApi.HandleFunc("/restart", deployController.HandleRestart).Methods("POST", "OPTIONS")
 }
+
+// these routes are admin routes (disabled for now)
+
+// func (router *Router) RoleRoutes(api *mux.Router, roleController *role.RolesController) {
+// 	roleApi := api.PathPrefix("/roles").Subrouter()
+// 	roleApi.Use(middleware.IsAdmin)
+// 	roleApi.HandleFunc("", roleController.CreateRole).Methods("POST", "OPTIONS")
+// 	roleApi.HandleFunc("", roleController.GetRole).Methods("GET", "OPTIONS")
+// 	roleApi.HandleFunc("", roleController.UpdateRole).Methods("PUT", "OPTIONS")
+// 	roleApi.HandleFunc("", roleController.DeleteRole).Methods("DELETE", "OPTIONS")
+// 	roleApi.HandleFunc("/all", roleController.GetRoles).Methods("GET", "OPTIONS")
+// }
+
+// func (router *Router) OrganizationRoutes(api *mux.Router, organizationController *organization.OrganizationsController) {
+// 	orgApi := api.PathPrefix("/organizations").Subrouter()
+// 	orgApi.Use(middleware.IsAdmin)
+// 	orgApi.HandleFunc("", organizationController.CreateOrganization).Methods("POST", "OPTIONS")
+// 	orgApi.HandleFunc("", organizationController.GetOrganization).Methods("GET", "OPTIONS")
+// 	orgApi.HandleFunc("", organizationController.UpdateOrganization).Methods("PUT", "OPTIONS")
+// 	orgApi.HandleFunc("", organizationController.DeleteOrganization).Methods("DELETE", "OPTIONS")
+// 	orgApi.HandleFunc("/all", organizationController.GetOrganizations).Methods("GET", "OPTIONS")
+// 	orgApi.HandleFunc("/user", organizationController.AddUserToOrganization).Methods("POST", "OPTIONS")
+// 	orgApi.HandleFunc("/user", organizationController.RemoveUserFromOrganization).Methods("DELETE", "OPTIONS")
+// 	orgApi.HandleFunc("/users", organizationController.GetOrganizationUsers).Methods("GET", "OPTIONS")
+// }
+
+// func (router *Router) PermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
+// 	permApi := api.PathPrefix("/permissions").Subrouter()
+// 	permApi.Use(middleware.IsAdmin)
+// 	permApi.HandleFunc("", permissionController.CreatePermission).Methods("POST", "OPTIONS")
+// 	permApi.HandleFunc("", permissionController.GetPermission).Methods("GET", "OPTIONS")
+// 	permApi.HandleFunc("", permissionController.UpdatePermission).Methods("PUT", "OPTIONS")
+// 	permApi.HandleFunc("", permissionController.DeletePermission).Methods("DELETE", "OPTIONS")
+// 	permApi.HandleFunc("/all", permissionController.GetPermissions).Methods("GET", "OPTIONS")
+// }
+
+// func (router *Router) RolePermissionRoutes(api *mux.Router, permissionController *permission.PermissionController) {
+// 	rolePermApi := api.PathPrefix("/roles/permission").Subrouter()
+// 	rolePermApi.Use(middleware.IsAdmin)
+// 	rolePermApi.HandleFunc("", permissionController.AddPermissionToRole).Methods("POST", "OPTIONS")
+// 	rolePermApi.HandleFunc("", permissionController.RemovePermissionFromRole).Methods("DELETE", "OPTIONS")
+// 	rolePermApi.HandleFunc("", permissionController.GetPermissionsByRole).Methods("GET", "OPTIONS")
+// }

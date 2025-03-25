@@ -9,7 +9,15 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://nixopus.com/terms/",
+        "contact": {
+            "name": "API Support",
+            "email": "raghav@nixopus.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -625,100 +633,114 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/add-smtp": {
-            "post": {
-                "description": "Add SMTP configuration",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notification"
-                ],
-                "summary": "Add SMTP configuration",
-                "parameters": [
-                    {
-                        "description": "SMTP configuration",
-                        "name": "SMTPConfigs",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/notification.CreateSMTPConfigRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "SMTP added successfully",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/notification/delete-smtp": {
-            "post": {
-                "description": "Delete SMTP configuration",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "notification"
-                ],
-                "summary": "Delete SMTP configuration",
-                "parameters": [
-                    {
-                        "description": "SMTP configuration",
-                        "name": "SMTPConfigs",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/notification.DeleteSMTPConfigRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "SMTP deleted successfully",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/notification/get-smtp": {
+        "/notification/preferences": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the notification preferences for the current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Get notification preferences",
+                "responses": {
+                    "200": {
+                        "description": "Success response with preferences",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/notification.GetPreferencesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update notification preference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Update notification preference",
+                "parameters": [
+                    {
+                        "description": "Notification preference",
+                        "name": "preference",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/notification.UpdatePreferenceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification preferences updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/notification/smtp": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get SMTP configuration",
                 "consumes": [
                     "application/json"
@@ -750,10 +772,13 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/notification/update-smtp": {
+            },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update SMTP configuration",
                 "consumes": [
                     "application/json"
@@ -779,6 +804,55 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "SMTP updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete SMTP configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Delete SMTP configuration",
+                "parameters": [
+                    {
+                        "description": "SMTP configuration",
+                        "name": "SMTPConfigs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/notification.DeleteSMTPConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SMTP deleted successfully",
                         "schema": {
                             "$ref": "#/definitions/types.Response"
                         }
@@ -1973,6 +2047,74 @@ const docTemplate = `{
                 }
             }
         },
+        "notification.GetPreferencesResponse": {
+            "type": "object",
+            "properties": {
+                "activity": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/notification.PreferenceType"
+                    }
+                },
+                "security": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/notification.PreferenceType"
+                    }
+                },
+                "update": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/notification.PreferenceType"
+                    }
+                }
+            }
+        },
+        "notification.PreferenceType": {
+            "type": "object",
+            "required": [
+                "description",
+                "id",
+                "label"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            }
+        },
+        "notification.UpdatePreferenceRequest": {
+            "type": "object",
+            "required": [
+                "category",
+                "type"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "enum": [
+                        "activity",
+                        "security",
+                        "update"
+                    ]
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "notification.UpdateSMTPConfigRequest": {
             "type": "object",
             "properties": {
@@ -2554,12 +2696,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Nixopus Documentation",
+	Description:      "Api for Nixopus",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,3 +1,4 @@
+basePath: /api/v1
 definitions:
   notification.CreateSMTPConfigRequest:
     properties:
@@ -20,6 +21,52 @@ definitions:
     properties:
       id:
         type: string
+    type: object
+  notification.GetPreferencesResponse:
+    properties:
+      activity:
+        items:
+          $ref: '#/definitions/notification.PreferenceType'
+        type: array
+      security:
+        items:
+          $ref: '#/definitions/notification.PreferenceType'
+        type: array
+      update:
+        items:
+          $ref: '#/definitions/notification.PreferenceType'
+        type: array
+    type: object
+  notification.PreferenceType:
+    properties:
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: string
+      label:
+        type: string
+    required:
+    - description
+    - id
+    - label
+    type: object
+  notification.UpdatePreferenceRequest:
+    properties:
+      category:
+        enum:
+        - activity
+        - security
+        - update
+        type: string
+      enabled:
+        type: boolean
+      type:
+        type: string
+    required:
+    - category
+    - type
     type: object
   notification.UpdateSMTPConfigRequest:
     properties:
@@ -401,8 +448,18 @@ definitions:
       username:
         type: string
     type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: raghav@nixopus.com
+    name: API Support
+  description: Api for Nixopus
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://nixopus.com/terms/
+  title: Nixopus Documentation
+  version: "1.0"
 paths:
   /auth/login:
     post:
@@ -793,23 +850,52 @@ paths:
       summary: Check if the server is up
       tags:
       - health
-  /notification/add-smtp:
-    post:
+  /notification/preferences:
+    get:
       consumes:
       - application/json
-      description: Add SMTP configuration
-      parameters:
-      - description: SMTP configuration
-        in: body
-        name: SMTPConfigs
-        required: true
-        schema:
-          $ref: '#/definitions/notification.CreateSMTPConfigRequest'
+      description: Retrieves the notification preferences for the current user
       produces:
       - application/json
       responses:
         "200":
-          description: SMTP added successfully
+          description: Success response with preferences
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/notification.GetPreferencesResponse'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Get notification preferences
+      tags:
+      - notification
+    put:
+      consumes:
+      - application/json
+      description: Update notification preference
+      parameters:
+      - description: Notification preference
+        in: body
+        name: preference
+        required: true
+        schema:
+          $ref: '#/definitions/notification.UpdatePreferenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification preferences updated successfully
           schema:
             $ref: '#/definitions/types.Response'
         "400":
@@ -820,11 +906,13 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/types.Response'
-      summary: Add SMTP configuration
+      security:
+      - BearerAuth: []
+      summary: Update notification preference
       tags:
       - notification
-  /notification/delete-smtp:
-    post:
+  /notification/smtp:
+    delete:
       consumes:
       - application/json
       description: Delete SMTP configuration
@@ -850,10 +938,11 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
       summary: Delete SMTP configuration
       tags:
       - notification
-  /notification/get-smtp:
     get:
       consumes:
       - application/json
@@ -873,10 +962,11 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
       summary: Get SMTP configuration
       tags:
       - notification
-  /notification/update-smtp:
     post:
       consumes:
       - application/json
@@ -903,6 +993,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
       summary: Update SMTP configuration
       tags:
       - notification

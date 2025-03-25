@@ -57,6 +57,23 @@ func (c *UserController) parseAndValidate(w http.ResponseWriter, r *http.Request
 		utils.SendErrorResponse(w, shared_types.ErrFailedToDecodeRequest.Error(), http.StatusBadRequest)
 		return false
 	}
+	user := c.GetUser(w, r)
+
+	if user == nil {
+		return false
+	}
+
+	if err := c.validator.ValidateRequest(req, *user); err != nil {
+		c.logger.Log(logger.Error, err.Error(), err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return false
+	}
+
+	if err := c.validator.AccessValidator(w, r, user); err != nil {
+		c.logger.Log(logger.Error, err.Error(), err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
+		return false
+	}
 
 	return true
 }

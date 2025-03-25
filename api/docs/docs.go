@@ -464,40 +464,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/domain/all": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves a list of all domains.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "domain"
-                ],
-                "summary": "Get all domains",
-                "responses": {
-                    "200": {
-                        "description": "Success response with domains",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/domain/generate": {
             "get": {
                 "security": [
@@ -525,6 +491,40 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "No domains available",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/domains": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of all domains.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "domain"
+                ],
+                "summary": "Get all domains",
+                "responses": {
+                    "200": {
+                        "description": "Success response with domains",
                         "schema": {
                             "$ref": "#/definitions/types.Response"
                         }
@@ -2293,6 +2293,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
+                    "type": "string"
+                },
+                "organization_id": {
                     "type": "string"
                 }
             }

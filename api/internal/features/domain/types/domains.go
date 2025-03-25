@@ -38,3 +38,8 @@ type DeleteDomainRequest struct {
 type CreateDomainResponse struct {
 	ID string `json:"id"`
 }
+
+type RandomSubdomainResponse struct {
+	Subdomain string `json:"subdomain"`
+	Domain    string `json:"domain"`
+}

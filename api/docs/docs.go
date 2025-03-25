@@ -12,6 +12,7 @@ const docTemplate = `{
         "termsOfService": "http://nixopus.com/terms/",
         "contact": {
             "name": "API Support",
+            "url": "http://www.swagger.io/support",
             "email": "raghav@nixopus.com"
         },
         "license": {
@@ -315,6 +316,55 @@ const docTemplate = `{
             }
         },
         "/domain": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates an existing domain in the application.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "domain"
+                ],
+                "summary": "Update a domain",
+                "parameters": [
+                    {
+                        "description": "Domain update request",
+                        "name": "domain",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateDomainRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response with updated domain",
+                        "schema": {
+                            "$ref": "#/definitions/types.Domain"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -412,59 +462,15 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "patch": {
+            }
+        },
+        "/domain/all": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates an existing domain in the application.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "domain"
-                ],
-                "summary": "Update a domain",
-                "parameters": [
-                    {
-                        "description": "Domain update request",
-                        "name": "domain",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.UpdateDomainRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response with updated domain",
-                        "schema": {
-                            "$ref": "#/definitions/types.Domain"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/types.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/domain/all": {
-            "get": {
                 "description": "Retrieves a list of all domains.",
                 "consumes": [
                     "application/json"
@@ -479,6 +485,46 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Success response with domains",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/domain/generate": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Generates a random subdomain by taking a random domain from the list of all domains and appending a random string to it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "domain"
+                ],
+                "summary": "Generate a random subdomain",
+                "responses": {
+                    "200": {
+                        "description": "Success response with random subdomain",
+                        "schema": {
+                            "$ref": "#/definitions/types.RandomSubdomainResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No domains available",
                         "schema": {
                             "$ref": "#/definitions/types.Response"
                         }
@@ -684,7 +730,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -773,7 +819,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -804,6 +850,55 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "SMTP updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add SMTP configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "Add SMTP configuration",
+                "parameters": [
+                    {
+                        "description": "SMTP configuration",
+                        "name": "SMTPConfigs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/notification.CreateSMTPConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SMTP added successfully",
                         "schema": {
                             "$ref": "#/definitions/types.Response"
                         }
@@ -2475,6 +2570,17 @@ const docTemplate = `{
                 }
             }
         },
+        "types.RandomSubdomainResponse": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "subdomain": {
+                    "type": "string"
+                }
+            }
+        },
         "types.RefreshTokenRequest": {
             "type": "object",
             "properties": {
@@ -2690,6 +2796,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter your bearer token in the format **Bearer \u0026lt;token\u0026gt;**",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

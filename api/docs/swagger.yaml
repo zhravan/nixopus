@@ -301,6 +301,13 @@ definitions:
       updated_at:
         type: string
     type: object
+  types.RandomSubdomainResponse:
+    properties:
+      domain:
+        type: string
+      subdomain:
+        type: string
+    type: object
   types.RefreshTokenRequest:
     properties:
       refresh_token:
@@ -453,6 +460,7 @@ info:
   contact:
     email: raghav@nixopus.com
     name: API Support
+    url: http://www.swagger.io/support
   description: Api for Nixopus
   license:
     name: Apache 2.0
@@ -676,37 +684,6 @@ paths:
       summary: Delete a domain
       tags:
       - domain
-    patch:
-      consumes:
-      - application/json
-      description: Updates an existing domain in the application.
-      parameters:
-      - description: Domain update request
-        in: body
-        name: domain
-        required: true
-        schema:
-          $ref: '#/definitions/types.UpdateDomainRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success response with updated domain
-          schema:
-            $ref: '#/definitions/types.Domain'
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/types.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/types.Response'
-      security:
-      - BearerAuth: []
-      summary: Update a domain
-      tags:
-      - domain
     post:
       consumes:
       - application/json
@@ -738,6 +715,37 @@ paths:
       summary: Create a new domain
       tags:
       - domain
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing domain in the application.
+      parameters:
+      - description: Domain update request
+        in: body
+        name: domain
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateDomainRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with updated domain
+          schema:
+            $ref: '#/definitions/types.Domain'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Update a domain
+      tags:
+      - domain
   /domain/all:
     get:
       consumes:
@@ -754,7 +762,35 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
       summary: Get all domains
+      tags:
+      - domain
+  /domain/generate:
+    get:
+      consumes:
+      - application/json
+      description: Generates a random subdomain by taking a random domain from the
+        list of all domains and appending a random string to it.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response with random subdomain
+          schema:
+            $ref: '#/definitions/types.RandomSubdomainResponse'
+        "404":
+          description: No domains available
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Generate a random subdomain
       tags:
       - domain
   /github-connector:
@@ -880,7 +916,7 @@ paths:
       summary: Get notification preferences
       tags:
       - notification
-    put:
+    post:
       consumes:
       - application/json
       description: Update notification preference
@@ -968,6 +1004,37 @@ paths:
       tags:
       - notification
     post:
+      consumes:
+      - application/json
+      description: Add SMTP configuration
+      parameters:
+      - description: SMTP configuration
+        in: body
+        name: SMTPConfigs
+        required: true
+        schema:
+          $ref: '#/definitions/notification.CreateSMTPConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: SMTP added successfully
+          schema:
+            $ref: '#/definitions/types.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/types.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/types.Response'
+      security:
+      - BearerAuth: []
+      summary: Add SMTP configuration
+      tags:
+      - notification
+    put:
       consumes:
       - application/json
       description: Update SMTP configuration
@@ -1711,4 +1778,10 @@ paths:
       summary: Get user organizations
       tags:
       - user
+securityDefinitions:
+  BearerAuth:
+    description: Enter your bearer token in the format **Bearer &lt;token&gt;**
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

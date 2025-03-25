@@ -18,7 +18,7 @@ import (
 // @Success 200 {object} types.Response "Notification preferences updated successfully"
 // @Failure 400 {object} types.Response "Bad request"
 // @Failure 500 {object} types.Response "Internal server error"
-// @Router /notification/preferences [put]
+// @Router /notification/preferences [post]
 func (c *NotificationController) UpdatePreference(w http.ResponseWriter, r *http.Request) {
 	var prefRequest notification.UpdatePreferenceRequest
 	if !c.parseAndValidate(w, r, &prefRequest) {

@@ -8,6 +8,7 @@ import (
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
 	domain "github.com/raghavyuva/nixopus-api/internal/features/domain/controller"
+	file_manager "github.com/raghavyuva/nixopus-api/internal/features/file-manager/controller"
 	githubConnector "github.com/raghavyuva/nixopus-api/internal/features/github-connector/controller"
 	health "github.com/raghavyuva/nixopus-api/internal/features/health"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"

@@ -134,22 +134,22 @@ func TestValidateCreateDomainRequest(t *testing.T) {
 	}{
 		{
 			name:    "Valid Request",
-			req:     types.CreateDomainRequest{Name: "example.com"},
+			req:     types.CreateDomainRequest{Name: "example.com",OrganizationID: uuid.New()},
 			wantErr: nil,
 		},
 		{
 			name:    "Empty Name",
-			req:     types.CreateDomainRequest{Name: ""},
+			req:     types.CreateDomainRequest{Name: "",OrganizationID: uuid.New()},
 			wantErr: types.ErrMissingDomainName,
 		},
 		{
 			name:    "Name Too Short",
-			req:     types.CreateDomainRequest{Name: "ab"},
+			req:     types.CreateDomainRequest{Name: "ab",OrganizationID: uuid.New()},
 			wantErr: types.ErrDomainNameTooShort,
 		},
 		{
 			name:    "Name Too Long",
-			req:     types.CreateDomainRequest{Name: strings.Repeat("a", 256)},
+			req:     types.CreateDomainRequest{Name: strings.Repeat("a", 256),OrganizationID: uuid.New()},
 			wantErr: types.ErrDomainNameTooLong,
 		},
 	}
@@ -168,24 +168,14 @@ func TestValidateUpdateDomainRequest(t *testing.T) {
 
 	validID := "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 	validUUID, _ := uuid.Parse(validID)
-	
+
 	nonExistentID := "a47ac10b-58cc-4372-a567-0e02b2c3d480"
-	
+
 	errorID := "b47ac10b-58cc-4372-a567-0e02b2c3d481"
 
 	adminUser := shared_types.User{
 		ID:   validUUID,
 		Type: "admin",
-	}
-
-	ownerUser := shared_types.User{
-		ID:   validUUID,
-		Type: "regular",
-	}
-
-	otherUser := shared_types.User{
-		ID:   uuid.New(),
-		Type: "regular",
 	}
 
 	mockDomain := &shared_types.Domain{
@@ -212,18 +202,6 @@ func TestValidateUpdateDomainRequest(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:    "Valid Request by Owner",
-			req:     types.UpdateDomainRequest{ID: validID, Name: "example.com"},
-			user:    ownerUser,
-			wantErr: nil,
-		},
-		{
-			name:    "Not Allowed - Not Owner or Admin",
-			req:     types.UpdateDomainRequest{ID: validID, Name: "example.com"},
-			user:    otherUser,
-			wantErr: types.ErrNotAllowed,
-		},
-		{
 			name:    "Invalid ID",
 			req:     types.UpdateDomainRequest{ID: "not-a-uuid", Name: "example.com"},
 			user:    adminUser,
@@ -235,23 +213,11 @@ func TestValidateUpdateDomainRequest(t *testing.T) {
 			user:    adminUser,
 			wantErr: types.ErrMissingDomainName,
 		},
-		{
-			name:    "Domain Not Found",
-			req:     types.UpdateDomainRequest{ID: nonExistentID, Name: "example.com"},
-			user:    adminUser,
-			wantErr: types.ErrDomainNotFound,
-		},
-		{
-			name:    "Storage Error",
-			req:     types.UpdateDomainRequest{ID: errorID, Name: "example.com"},
-			user:    adminUser,
-			wantErr: assert.AnError,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validator.ValidateUpdateDomainRequest(tt.req, tt.user)
+			err := validator.ValidateUpdateDomainRequest(tt.req)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}
@@ -263,32 +229,22 @@ func TestValidateDeleteDomainRequest(t *testing.T) {
 
 	validID := "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 	validUUID, _ := uuid.Parse(validID)
-	
+
 	nonExistentID := "a47ac10b-58cc-4372-a567-0e02b2c3d480"
-	
+
 	errorID := "b47ac10b-58cc-4372-a567-0e02b2c3d481"
-	
+
 	adminUser := shared_types.User{
 		ID:   validUUID,
 		Type: "admin",
-	}
-	
-	ownerUser := shared_types.User{
-		ID:   validUUID,
-		Type: "regular",
-	}
-	
-	otherUser := shared_types.User{
-		ID:   uuid.New(),
-		Type: "regular",
 	}
 
 	mockDomain := &shared_types.Domain{
 		ID:     validUUID,
 		Name:   "example.com",
-		UserID: validUUID, 
+		UserID: validUUID,
 	}
-	
+
 	mockStorage.WithGetDomain(mockDomain.ID.String(), mockDomain, nil)
 	mockStorage.WithGetDomain(nonExistentID, nil, nil)
 	mockStorage.WithGetDomain(errorID, nil, assert.AnError)
@@ -306,40 +262,16 @@ func TestValidateDeleteDomainRequest(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:    "Valid Request by Owner",
-			req:     types.DeleteDomainRequest{ID: validID},
-			user:    ownerUser,
-			wantErr: nil,
-		},
-		{
-			name:    "Not Allowed - Not Owner or Admin",
-			req:     types.DeleteDomainRequest{ID: validID},
-			user:    otherUser,
-			wantErr: types.ErrNotAllowed,
-		},
-		{
 			name:    "Invalid ID",
 			req:     types.DeleteDomainRequest{ID: "not-a-uuid"},
 			user:    adminUser,
 			wantErr: types.ErrInvalidDomainID,
 		},
-		{
-			name:    "Domain Not Found",
-			req:     types.DeleteDomainRequest{ID: nonExistentID},
-			user:    adminUser,
-			wantErr: types.ErrDomainNotFound,
-		},
-		{
-			name:    "Storage Error",
-			req:     types.DeleteDomainRequest{ID: errorID},
-			user:    adminUser,
-			wantErr: assert.AnError,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validator.ValidateDeleteDomainRequest(tt.req, tt.user)
+			err := validator.ValidateDeleteDomainRequest(tt.req)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}
@@ -399,7 +331,7 @@ func TestValidateRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validator.ValidateRequest(tt.req, tt.user)
+			err := validator.ValidateRequest(tt.req)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}

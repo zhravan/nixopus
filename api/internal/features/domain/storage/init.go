@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/domain/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
@@ -21,7 +22,7 @@ type DomainStorageInterface interface {
 	GetDomain(id string) (*shared_types.Domain, error)
 	UpdateDomain(ID string, Name string) error
 	DeleteDomain(domain *shared_types.Domain) error
-	GetDomains() ([]shared_types.Domain, error)
+	GetDomains(OrganizationID string, UserID uuid.UUID) ([]shared_types.Domain, error)
 	GetDomainByName(name string) (*shared_types.Domain, error)
 	IsDomainExists(ID string) (bool, error)
 	GetDomainOwnerByID(ID string) (string, error)
@@ -70,13 +71,25 @@ func (s *DomainStorage) DeleteDomain(domain *shared_types.Domain) error {
 	return nil
 }
 
-func (s *DomainStorage) GetDomains() ([]shared_types.Domain, error) {
+func (s *DomainStorage) GetDomains(OrganizationID string, UserID uuid.UUID) ([]shared_types.Domain, error) {
 	var domains []shared_types.Domain
-	err := s.DB.NewSelect().Model(&domains).Scan(s.Ctx)
+	err := s.DB.NewSelect().Model(&domains).
+		Where("organization_id = ?", OrganizationID).
+		WhereOr("user_id = ?", UserID).
+		Scan(s.Ctx)
 	if err != nil {
 		return nil, err
 	}
-	return domains, nil
+
+	m := make(map[string]bool)
+	var result []shared_types.Domain
+	for _, domain := range domains {
+		if !m[domain.ID.String()] {
+			m[domain.ID.String()] = true
+			result = append(result, domain)
+		}
+	}
+	return result, nil
 }
 
 func (s *DomainStorage) GetDomainByName(name string) (*shared_types.Domain, error) {

@@ -8,9 +8,9 @@ export const domainsApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ['Domains'],
   endpoints: (builder) => ({
-    getAllDomains: builder.query<Domain[], void>({
-      query: () => ({
-        url: DOMAIN_SETTINGS.GET_DOMAINS,
+    getAllDomains: builder.query<Domain[], { organizationId: string }>({
+      query: ({ organizationId }) => ({
+        url: DOMAIN_SETTINGS.GET_DOMAINS + `?id=${organizationId}`,
         method: 'GET'
       }),
       providesTags: [{ type: 'Domains', id: 'LIST' }],

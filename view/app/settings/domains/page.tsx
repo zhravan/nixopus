@@ -9,10 +9,10 @@ import { useAppSelector } from '@/redux/hooks';
 import { useResourcePermissions } from '@/lib/permission';
 
 const Page = () => {
-  const { data: domains } = useGetAllDomainsQuery();
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
+  const { data: domains } = useGetAllDomainsQuery({ organizationId: activeOrg?.id || '' }, { skip: !activeOrg });
   const [addDomainDialogOpen, setAddDomainDialogOpen] = React.useState(false);
   const user = useAppSelector((state) => state.auth.user);
-  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const { canCreate, canRead } = useResourcePermissions(
     user,
     "organization",

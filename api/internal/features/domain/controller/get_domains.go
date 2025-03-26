@@ -26,13 +26,15 @@ func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	organization_id := r.URL.Query().Get("id")
+
 	if err := c.validator.AccessValidator(w, r, user, nil); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
 		utils.SendErrorResponse(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
-	domains, err := c.service.GetDomains()
+	domains, err := c.service.GetDomains(organization_id, user.ID)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
@@ -53,7 +55,8 @@ func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /domain/generate [get]
 func (c *DomainsController) GenerateRandomSubDomain(w http.ResponseWriter, r *http.Request) {
-	domains, err := c.service.GetDomains()
+	organization_id := r.URL.Query().Get("id")
+	domains, err := c.service.GetDomains(organization_id, c.GetUser(w, r).ID)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)

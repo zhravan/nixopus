@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/domain/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	"github.com/raghavyuva/nixopus-api/internal/utils"
 )
 
 // RequestInfo encapsulates parsed request details
@@ -141,13 +142,13 @@ func (v *Validator) validateReadDomainAccess(req *RequestInfo, user *shared_type
 	}
 
 	// Check if the user belongs to the domain's organization
-	err = v.checkIfUserBelongsToOrganization(user.Organizations, domain.OrganizationID)
+	err = utils.CheckIfUserBelongsToOrganization(user.Organizations, domain.OrganizationID)
 	if err != nil {
 		return err
 	}
 
 	// Check user's role in the organization
-	role, err := v.getUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
+	role, err := utils.GetUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
 	if err != nil {
 		return err
 	}
@@ -162,13 +163,13 @@ func (v *Validator) validateReadDomainAccess(req *RequestInfo, user *shared_type
 // validateListDomainsAccess checks if user can list domains
 func (v *Validator) validateListDomainsAccess(req *RequestInfo, user *shared_types.User) error {
 	// Check if the user belongs to the domain's organization
-	err := v.checkIfUserBelongsToOrganization(user.Organizations, uuid.MustParse(req.OrganizationID))
+	err := utils.CheckIfUserBelongsToOrganization(user.Organizations, uuid.MustParse(req.OrganizationID))
 	if err != nil {
 		return err
 	}
 
 	// Check user's role in the organization
-	role, err := v.getUserRoleInOrganization(user.OrganizationUsers, uuid.MustParse(req.OrganizationID))
+	role, err := utils.GetUserRoleInOrganization(user.OrganizationUsers, uuid.MustParse(req.OrganizationID))
 	if err != nil {
 		return err
 	}
@@ -199,13 +200,13 @@ func (v *Validator) validateUpdateDomainAccess(req *RequestInfo, user *shared_ty
 	}
 
 	// If not creator, check if user is in the same organization
-	err = v.checkIfUserBelongsToOrganization(user.Organizations, domain.OrganizationID)
+	err = utils.CheckIfUserBelongsToOrganization(user.Organizations, domain.OrganizationID)
 	if err != nil {
 		return err
 	}
 
 	// Check user's role in the organization
-	role, err := v.getUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
+	role, err := utils.GetUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
 	if err != nil {
 		return err
 	}
@@ -236,13 +237,13 @@ func (v *Validator) validateDeleteDomainAccess(req *RequestInfo, user *shared_ty
 	}
 
 	// If not creator, check if user is in the same organization
-	err = v.checkIfUserBelongsToOrganization(user.Organizations, domain.OrganizationID)
+	err = utils.CheckIfUserBelongsToOrganization(user.Organizations, domain.OrganizationID)
 	if err != nil {
 		return err
 	}
 
 	// Check user's role in the organization
-	role, err := v.getUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
+	role, err :=utils.GetUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
 	if err != nil {
 		return err
 	}
@@ -253,29 +254,4 @@ func (v *Validator) validateDeleteDomainAccess(req *RequestInfo, user *shared_ty
 	}
 
 	return types.ErrPermissionDenied
-}
-
-// checkIfUserBelongsToOrganization verifies if a user belongs to a specific organization
-func (v *Validator) checkIfUserBelongsToOrganization(userOrgs []shared_types.Organization, orgID uuid.UUID) error {
-	for _, org := range userOrgs {
-		if org.ID == orgID {
-			return nil
-		}
-	}
-	return types.ErrUserDoesNotBelongToOrganization
-}
-
-// getUserRoleInOrganization determines the user's role in an organization
-func (v *Validator) getUserRoleInOrganization(userOrgs []shared_types.OrganizationUsers, orgID uuid.UUID) (string, error) {
-	for _, userOrg := range userOrgs {
-		if userOrg.OrganizationID == orgID {
-			if userOrg.Role == nil {
-				return "", types.ErrNoRoleAssigned
-			}
-
-			return userOrg.Role.Name, nil
-		}
-	}
-
-	return "", types.ErrUserDoesNotBelongToOrganization
 }

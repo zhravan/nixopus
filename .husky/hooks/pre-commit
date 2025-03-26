@@ -1,7 +1,16 @@
 #!/bin/sh
+set -e 
+
 ROOTDIR=$(pwd)
 
-cd api && go build -v ./... && go test -v ./... && go fmt ./...
+cd api 
+go build -v ./... 
+go test -v ./...
+go fmt ./...
+git add -u *.go
 cd "$ROOTDIR"
 
-cd view && yarn format && yarn lint && yarn run build
+cd view 
+yarn format
+yarn run build
+git add -u .

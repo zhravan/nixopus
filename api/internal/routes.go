@@ -207,9 +207,12 @@ func (router *Router) DeployApplicationRoutes(deployApi *mux.Router, deployContr
 
 func (router *Router) FileManagerRoutes(api *mux.Router, fileManagerController *file_manager.FileManagerController) {
 	file_manager_api := api.PathPrefix("/file-manager").Subrouter()
+	// we will expose these routes only for admin
+	file_manager_api.Use(middleware.IsAdmin)
 	file_manager_api.HandleFunc("", fileManagerController.ListFiles).Methods("GET", "OPTIONS")
 	file_manager_api.HandleFunc("/create-directory", fileManagerController.CreateDirectory).Methods("POST", "OPTIONS")
-	file_manager_api.HandleFunc("/delete-file", fileManagerController.DeleteFile).Methods("DELETE", "OPTIONS")
+	// Removed for now (security reasons)
+	// file_manager_api.HandleFunc("/delete-file", fileManagerController.DeleteFile).Methods("DELETE", "OPTIONS")
 }
 
 // these routes are admin routes (disabled for now)

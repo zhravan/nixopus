@@ -3,14 +3,6 @@ set -e
 
 ROOTDIR=$(pwd)
 
-cd api 
-go build -v ./... 
-go test -v ./...
-go fmt ./...
-git add -u *.go
-cd "$ROOTDIR"
+cd api && go build -v ./... &&  go test -v ./... && go fmt ./...
 
-cd view 
-yarn format
-yarn run build
-git add -u .
+cd ../view && yarn format && yarn lint && yarn run build

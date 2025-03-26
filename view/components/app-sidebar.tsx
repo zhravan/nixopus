@@ -35,11 +35,6 @@ const data = {
       icon: Folder
     },
     {
-      title: "Secret Manager",
-      url: "/secret-manager",
-      icon: LockIcon
-    },
-    {
       title: 'Settings',
       url: '/settings/general',
       icon: SettingsIcon,

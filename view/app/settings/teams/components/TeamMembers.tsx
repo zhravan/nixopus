@@ -39,11 +39,11 @@ interface TeamMembersProps {
 
 function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembersProps) {
   const loggedInUser = useAppSelector((state) => state.auth.user);
-
+  const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
   const {
     canUpdate: canUpdateUser,
     canDelete: canDeleteUser
-  } = useResourcePermissions(loggedInUser, "user");
+  } = useResourcePermissions(loggedInUser, "user", activeOrganization?.id);
 
   return (
     <Card>

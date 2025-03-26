@@ -18,7 +18,7 @@ export const domainsApi = createApi({
         return response.data;
       }
     }),
-    createDomain: builder.mutation<null, { name: string }>({
+    createDomain: builder.mutation<null, { name: string, organization_id: string }>({
       query: (data) => ({
         url: DOMAIN_SETTINGS.ADD_DOMAIN,
         method: 'POST',

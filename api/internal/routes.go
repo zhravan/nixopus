@@ -84,6 +84,9 @@ func (router *Router) Routes() *mux.Router {
 	githubConnectorController := githubConnector.NewGithubConnectorController(router.app.Store, router.app.Ctx, l, notificationManager)
 	router.GithubConnectorRoutes(api, githubConnectorController)
 
+	file_managerController := file_manager.NewFileManagerController(router.app.Ctx, l, notificationManager)
+	router.FileManagerRoutes(api, file_managerController)
+
 	router.DeployRoutes(api, deployController)
 
 	return r
@@ -170,7 +173,6 @@ func (router *Router) DomainRoutes(api *mux.Router, domainController *domain.Dom
 
 func (router *Router) GithubConnectorRoutes(api *mux.Router, githubConnectorController *githubConnector.GithubConnectorController) {
 	githubConnectorApi := api.PathPrefix("/github-connector").Subrouter()
-	githubConnectorApi.Use(middleware.IsAdmin)
 	githubConnectorApi.HandleFunc("", githubConnectorController.CreateGithubConnector).Methods("POST", "OPTIONS")
 	githubConnectorApi.HandleFunc("", githubConnectorController.UpdateGithubConnectorRequest).Methods("PUT", "OPTIONS")
 	githubConnectorApi.HandleFunc("/all", githubConnectorController.GetGithubConnectors).Methods("GET", "OPTIONS")
@@ -179,7 +181,6 @@ func (router *Router) GithubConnectorRoutes(api *mux.Router, githubConnectorCont
 
 func (router *Router) DeployRoutes(api *mux.Router, deployController *deploy.DeployController) {
 	deployApi := api.PathPrefix("/deploy").Subrouter()
-	deployApi.Use(middleware.IsAdmin)
 	router.DeployValidatorRoutes(deployApi, deployController)
 	deployApi.HandleFunc("/applications", deployController.GetApplications).Methods("GET", "OPTIONS")
 	router.DeployApplicationRoutes(deployApi, deployController)
@@ -202,6 +203,13 @@ func (router *Router) DeployApplicationRoutes(deployApi *mux.Router, deployContr
 	deployApplicationApi.HandleFunc("/deployments/{deployment_id}", deployController.GetDeploymentById).Methods("GET", "OPTIONS")
 	deployApplicationApi.HandleFunc("/rollback", deployController.HandleRollback).Methods("POST", "OPTIONS")
 	deployApplicationApi.HandleFunc("/restart", deployController.HandleRestart).Methods("POST", "OPTIONS")
+}
+
+func (router *Router) FileManagerRoutes(api *mux.Router, fileManagerController *file_manager.FileManagerController) {
+	file_manager_api := api.PathPrefix("/file-manager").Subrouter()
+	file_manager_api.HandleFunc("", fileManagerController.ListFiles).Methods("GET", "OPTIONS")
+	file_manager_api.HandleFunc("/create-directory", fileManagerController.CreateDirectory).Methods("POST", "OPTIONS")
+	file_manager_api.HandleFunc("/delete-file", fileManagerController.DeleteFile).Methods("DELETE", "OPTIONS")
 }
 
 // these routes are admin routes (disabled for now)

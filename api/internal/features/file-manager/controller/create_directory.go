@@ -16,12 +16,12 @@ func (c *FileManagerController) CreateDirectory(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	files, err := c.service.CreateDirectory(path)
+	err := c.service.CreateDirectory(path)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	utils.SendJSONResponse(w, "success", "Directory created successfully", files)
+	utils.SendJSONResponse(w, "success", "Directory created successfully", nil)
 }

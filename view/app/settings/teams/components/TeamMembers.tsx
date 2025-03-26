@@ -58,9 +58,9 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Permissions</TableHead>
-              {(canUpdateUser || canDeleteUser) && (
+              {/* {(canUpdateUser || canDeleteUser) && (
                 <TableHead className="text-right">Actions</TableHead>
-              )}
+              )} */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -95,7 +95,7 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
                     ))}
                   </div>
                 </TableCell>
-                {(canUpdateUser || canDeleteUser) && loggedInUser.id !== user.id && (
+                {/* {(canUpdateUser || canDeleteUser) && loggedInUser.id !== user.id && (
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -124,7 +124,7 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                )}
+                )} */}
               </TableRow>
             ))}
           </TableBody>

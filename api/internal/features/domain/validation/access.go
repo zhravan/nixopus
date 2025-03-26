@@ -17,7 +17,7 @@ type RequestInfo struct {
 	ResourceType   string
 	Action         string
 	DomainID       string
-	OrganizationID uuid.UUID
+	OrganizationID string
 }
 
 // AccessValidator is the main entry point for access validation
@@ -68,6 +68,7 @@ func parseRequest(r *http.Request) (*RequestInfo, error) {
 		info.ResourceType = "domain"
 		if r.Method == http.MethodGet {
 			info.Action = "list"
+			info.OrganizationID = r.URL.Query().Get("id")
 		}
 	}
 
@@ -106,7 +107,7 @@ func (v *Validator) validateDomainAcess(req *RequestInfo, user *shared_types.Use
 	case "read":
 		return v.validateReadDomainAccess(req, user)
 	case "list":
-		return v.validateListDomainsAccess(user)
+		return v.validateListDomainsAccess(req, user)
 	case "update":
 		return v.validateUpdateDomainAccess(req, user)
 	case "delete":
@@ -132,7 +133,7 @@ func (v *Validator) validateReadDomainAccess(req *RequestInfo, user *shared_type
 	if err != nil {
 		return err
 	}
-	req.OrganizationID = domain.OrganizationID
+	req.OrganizationID = domain.OrganizationID.String()
 
 	// User can read domain if they created it
 	if domain.UserID == user.ID {
@@ -146,19 +147,38 @@ func (v *Validator) validateReadDomainAccess(req *RequestInfo, user *shared_type
 	}
 
 	// Check user's role in the organization
-	_, err = v.getUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
+	role, err := v.getUserRoleInOrganization(user.OrganizationUsers, domain.OrganizationID)
+	if err != nil {
+		return err
+	}
+	// Any role (viewer, member, admin) can list domains in their organization
+	if role == shared_types.RoleViewer || role == shared_types.RoleMember || role == shared_types.RoleAdmin {
+		return nil
+	}
+
+	return types.ErrPermissionDenied
+}
+
+// validateListDomainsAccess checks if user can list domains
+func (v *Validator) validateListDomainsAccess(req *RequestInfo, user *shared_types.User) error {
+	// Check if the user belongs to the domain's organization
+	err := v.checkIfUserBelongsToOrganization(user.Organizations, uuid.MustParse(req.OrganizationID))
 	if err != nil {
 		return err
 	}
 
-	// Any role (viewer, member, admin) can read domains in their organization
-	return nil
-}
+	// Check user's role in the organization
+	role, err := v.getUserRoleInOrganization(user.OrganizationUsers, uuid.MustParse(req.OrganizationID))
+	if err != nil {
+		return err
+	}
 
-// validateListDomainsAccess checks if user can list domains
-func (v *Validator) validateListDomainsAccess(user *shared_types.User) error {
-	// We'll allow the request but expect the storage layer to filter results
-	return nil
+	// Any role (viewer, member, admin) can list domains in their organization
+	if role == shared_types.RoleViewer || role == shared_types.RoleMember || role == shared_types.RoleAdmin {
+		return nil
+	}
+
+	return types.ErrPermissionDenied
 }
 
 // validateUpdateDomainAccess checks if user can update a domain
@@ -171,7 +191,7 @@ func (v *Validator) validateUpdateDomainAccess(req *RequestInfo, user *shared_ty
 	if err != nil {
 		return err
 	}
-	req.OrganizationID = domain.OrganizationID
+	req.OrganizationID = domain.OrganizationID.String()
 
 	// User can always update domains they created
 	if domain.UserID == user.ID {
@@ -208,7 +228,7 @@ func (v *Validator) validateDeleteDomainAccess(req *RequestInfo, user *shared_ty
 	if err != nil {
 		return err
 	}
-	req.OrganizationID = domain.OrganizationID
+	req.OrganizationID = domain.OrganizationID.String()
 
 	// User can always delete domains they created
 	if domain.UserID == user.ID {

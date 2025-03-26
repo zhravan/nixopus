@@ -75,21 +75,11 @@ func (s *DomainStorage) GetDomains(OrganizationID string, UserID uuid.UUID) ([]s
 	var domains []shared_types.Domain
 	err := s.DB.NewSelect().Model(&domains).
 		Where("organization_id = ?", OrganizationID).
-		WhereOr("user_id = ?", UserID).
 		Scan(s.Ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	m := make(map[string]bool)
-	var result []shared_types.Domain
-	for _, domain := range domains {
-		if !m[domain.ID.String()] {
-			m[domain.ID.String()] = true
-			result = append(result, domain)
-		}
-	}
-	return result, nil
+	return domains, nil
 }
 
 func (s *DomainStorage) GetDomainByName(name string) (*shared_types.Domain, error) {

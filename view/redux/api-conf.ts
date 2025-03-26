@@ -10,7 +10,8 @@ export enum USERURLS {
   ADD_USER_TO_ORGANIZATION = 'v1/organizations/user',
   UPDATE_USER_NAME = 'v1/user/name',
   REQUEST_PASSWORD_RESET_LINK = 'v1/auth/request-password-reset',
-  ORGANIZATION_USERS = 'v1/organizations/users'
+  ORGANIZATION_USERS = 'v1/organizations/users',
+  CREATE_USER = 'v1/auth/create-user',
 }
 
 export enum USER_NOTIFICATION_SETTINGS {
@@ -25,7 +26,7 @@ export enum USER_NOTIFICATION_SETTINGS {
 
 export enum DOMAIN_SETTINGS {
   ADD_DOMAIN = 'v1/domain',
-  GET_DOMAINS = 'v1/domain/all',
+  GET_DOMAINS = 'v1/domains',
   UPDATE_DOMAIN = 'v1/domain',
   DELETE_DOMAIN = 'v1/domain',
   GENERATE_RANDOM_SUBDOMAIN= "v1/domain/generate"

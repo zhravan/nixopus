@@ -43,12 +43,12 @@ type DashboardMonitor struct {
 }
 
 type SystemStats struct {
-	OSType     string      `json:"os_type"`
-	CPUInfo    string      `json:"cpu_info"`
-	Memory     MemoryStats `json:"memory"`
-	Load       LoadStats   `json:"load"`
-	Disk       DiskStats   `json:"disk"`
-	Timestamp  time.Time   `json:"timestamp"`
+	OSType    string      `json:"os_type"`
+	CPUInfo   string      `json:"cpu_info"`
+	Memory    MemoryStats `json:"memory"`
+	Load      LoadStats   `json:"load"`
+	Disk      DiskStats   `json:"disk"`
+	Timestamp time.Time   `json:"timestamp"`
 }
 
 type MemoryStats struct {
@@ -75,10 +75,10 @@ type DiskMount struct {
 }
 
 type DiskStats struct {
-	Total      float64    `json:"total"`
-	Used       float64    `json:"used"`
-	Available  float64    `json:"available"`
-	Percentage float64    `json:"percentage"`
-	MountPoint string     `json:"mountPoint"`
+	Total      float64     `json:"total"`
+	Used       float64     `json:"used"`
+	Available  float64     `json:"available"`
+	Percentage float64     `json:"percentage"`
+	MountPoint string      `json:"mountPoint"`
 	AllMounts  []DiskMount `json:"allMounts"`
 }

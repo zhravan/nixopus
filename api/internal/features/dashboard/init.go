@@ -103,19 +103,19 @@ func (m *DashboardMonitor) SetOperations(operations []DashboardOperation) {
 }
 
 func (m *DashboardMonitor) Close() {
-    if m.client != nil {
-        m.client.Close()
-        m.client = nil
-    }
-    
-    if m.conn != nil {
-        m.connMutex.Lock()
-        _ = m.conn.WriteMessage(
-            websocket.CloseMessage, 
-            websocket.FormatCloseMessage(websocket.CloseNormalClosure, "closing connection"),
-        )
-        _ = m.conn.Close()
-        m.conn = nil
-        m.connMutex.Unlock()
-    }
+	if m.client != nil {
+		m.client.Close()
+		m.client = nil
+	}
+
+	if m.conn != nil {
+		m.connMutex.Lock()
+		_ = m.conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseNormalClosure, "closing connection"),
+		)
+		_ = m.conn.Close()
+		m.conn = nil
+		m.connMutex.Unlock()
+	}
 }

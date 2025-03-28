@@ -20,7 +20,7 @@ import (
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /domains [get]
 func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return
@@ -56,7 +56,7 @@ func (c *DomainsController) GetDomains(w http.ResponseWriter, r *http.Request) {
 // @Router /domain/generate [get]
 func (c *DomainsController) GenerateRandomSubDomain(w http.ResponseWriter, r *http.Request) {
 	organization_id := r.URL.Query().Get("id")
-	domains, err := c.service.GetDomains(organization_id, c.GetUser(w, r).ID)
+	domains, err := c.service.GetDomains(organization_id, utils.GetUser(w, r).ID)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)

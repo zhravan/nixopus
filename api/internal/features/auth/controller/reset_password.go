@@ -27,7 +27,7 @@ func (c *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (c *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /auth/request-password-reset [post]
 func (c *AuthController) GeneratePasswordResetLink(w http.ResponseWriter, r *http.Request) {
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return
 	}

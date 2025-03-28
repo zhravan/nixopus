@@ -17,7 +17,7 @@ func (c *DeployController) HandleDeploy(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return
@@ -40,7 +40,7 @@ func (c *DeployController) UpdateApplication(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return
@@ -64,7 +64,7 @@ func (c *DeployController) DeleteApplication(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return
@@ -88,7 +88,7 @@ func (c *DeployController) ReDeployApplication(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return
@@ -126,7 +126,7 @@ func (c *DeployController) HandleRollback(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return
@@ -150,7 +150,7 @@ func (c *DeployController) HandleRestart(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

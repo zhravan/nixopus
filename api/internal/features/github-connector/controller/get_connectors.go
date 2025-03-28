@@ -16,7 +16,7 @@ import (
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /github-connectors [get]
 func (c *GithubConnectorController) GetGithubConnectors(w http.ResponseWriter, r *http.Request) {
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

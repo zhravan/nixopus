@@ -19,7 +19,7 @@ func (c *DeployController) GetApplications(w http.ResponseWriter, r *http.Reques
 		pageSize = "10"
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		c.logger.Log(logger.Error, "user not found", "")

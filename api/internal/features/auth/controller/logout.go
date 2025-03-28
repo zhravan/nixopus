@@ -26,7 +26,7 @@ func (c *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return
 	}

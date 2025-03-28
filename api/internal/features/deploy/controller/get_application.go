@@ -10,7 +10,7 @@ import (
 func (c *DeployController) GetApplicationById(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		c.logger.Log(logger.Error, "user not found", "")

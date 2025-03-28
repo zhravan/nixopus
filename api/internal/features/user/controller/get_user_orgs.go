@@ -21,7 +21,7 @@ import (
 func (u *UserController) GetUserOrganizations(w http.ResponseWriter, r *http.Request) {
 	u.logger.Log(logger.Info, "getting user organizations", "")
 
-	user := u.GetUser(w, r)
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return
 	}

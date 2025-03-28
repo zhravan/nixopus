@@ -17,7 +17,7 @@ import (
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /user [get]
 func (u *UserController) GetUserDetails(w http.ResponseWriter, r *http.Request) {
-	user := u.GetUser(w, r)
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return
 	}

@@ -29,7 +29,7 @@ func (u *UserController) UpdateUserName(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user := u.GetUser(w, r)
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return
 	}

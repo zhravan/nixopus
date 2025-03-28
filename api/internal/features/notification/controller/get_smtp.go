@@ -18,7 +18,7 @@ import (
 // @Router /notification/smtp [get]
 func (c *NotificationController) GetSmtp(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

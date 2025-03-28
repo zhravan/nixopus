@@ -8,7 +8,7 @@ import (
 )
 
 func (c *GithubConnectorController) GetGithubRepositories(w http.ResponseWriter, r *http.Request) {
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

@@ -25,7 +25,7 @@ func (c *NotificationController) UpdatePreference(w http.ResponseWriter, r *http
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

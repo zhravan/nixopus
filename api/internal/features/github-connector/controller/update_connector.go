@@ -26,7 +26,7 @@ func (c *GithubConnectorController) UpdateGithubConnectorRequest(w http.Response
 		return
 	}
 
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

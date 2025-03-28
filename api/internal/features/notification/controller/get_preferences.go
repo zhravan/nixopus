@@ -18,7 +18,7 @@ import (
 // @Failure 500 {object} types.Response "Internal server error"
 // @Router /notification/preferences [get]
 func (c *NotificationController) GetPreferences(w http.ResponseWriter, r *http.Request) {
-	user := c.GetUser(w, r)
+	user := utils.GetUser(w, r)
 
 	if user == nil {
 		return

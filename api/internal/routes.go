@@ -7,7 +7,6 @@ import (
 	"github.com/go-fuego/fuego"
 	"github.com/go-fuego/fuego/option"
 	"github.com/go-fuego/fuego/param"
-	"github.com/gorilla/mux"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
 	domain "github.com/raghavyuva/nixopus-api/internal/features/domain/controller"
@@ -34,8 +33,7 @@ func NewRouter(app *storage.App) *Router {
 	}
 }
 
-func (router *Router) Routes() *mux.Router {
-	r := mux.NewRouter()
+func (router *Router) Routes() {
 	l := logger.NewLogger()
 	server := fuego.NewServer(
 		fuego.WithAddr("localhost:8080"),
@@ -51,6 +49,8 @@ func (router *Router) Routes() *mux.Router {
 
 	notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), router.app.Store.DB)
 	notificationManager.Start()
+	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
+	router.WebSocketServer(server, deployController)
 
 	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l, notificationManager)
 	authGroup := fuego.Group(server, "/api/v1/auth")
@@ -92,29 +92,30 @@ func (router *Router) Routes() *mux.Router {
 	fuego.Use(fileManagerGroup, middleware.IsAdmin)
 	router.FileManagerRoutes(fileManagerGroup, fileManagerController)
 
-	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
 	deployGroup := fuego.Group(s, "/deploy")
 	router.DeployRoutes(deployGroup, deployController)
 
-	router.WebSocketServer(r, deployController)
-
 	server.Run()
-	return r
 }
 
 func (s *Router) BasicRoutes(fs *fuego.Server) {
 	fuego.Get(fs, "", health.HealthCheck)
 }
 
-func (router *Router) WebSocketServer(r *mux.Router, deployController *deploy.DeployController) {
+// This is a special adapter that allows using a raw http.Handler with Fuego
+func (router *Router) WebSocketServer(f *fuego.Server, deployController *deploy.DeployController) {
 	wsServer, err := realtime.NewSocketServer(deployController, router.app.Store.DB, router.app.Ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+	wsHandler := func(c fuego.ContextNoBody) (interface{}, error) {
+		log.Printf("WebSocket connection attempt from: %s", c.Request().RemoteAddr)
 
-	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		wsServer.HandleHTTP(w, r)
-	})
+		wsServer.HandleHTTP(c.Response(), c.Request())
+		return nil, nil
+	}
+
+	fuego.Get(f, "/ws", wsHandler)
 }
 
 // these routes are public routes

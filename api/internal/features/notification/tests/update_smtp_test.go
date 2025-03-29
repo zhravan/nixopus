@@ -26,8 +26,8 @@ func TestUpdateSmtp(t *testing.T) {
 				return mockStorage
 			},
 			SMTPConfigs: notification.UpdateSMTPConfigRequest{
-				Host: "smtp.example.com",
-				Port: 587,
+				Host: stringToPointer("smtp.example.com"),
+				Port: intToPointer(587),
 			},
 			wantErr: false,
 		},
@@ -39,8 +39,8 @@ func TestUpdateSmtp(t *testing.T) {
 				return mockStorage
 			},
 			SMTPConfigs: notification.UpdateSMTPConfigRequest{
-				Host: "smtp.example.com",
-				Port: 587,
+				Host: stringToPointer("smtp.example.com"),
+				Port: intToPointer(587),
 			},
 			wantErr: true,
 		},
@@ -50,8 +50,8 @@ func TestUpdateSmtp(t *testing.T) {
 				return new(MockNotificationStorage)
 			},
 			SMTPConfigs: notification.UpdateSMTPConfigRequest{
-				Host: "",
-				Port: 587,
+				Host: stringToPointer(""),
+				Port: intToPointer(587),
 			},
 			wantErr: true,
 		},
@@ -77,4 +77,12 @@ func TestUpdateSmtp(t *testing.T) {
 			}
 		})
 	}
+}
+
+func stringToPointer(s string) *string {
+	return &s
+}
+
+func intToPointer(i int) *int {
+	return &i
 }

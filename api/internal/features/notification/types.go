@@ -114,14 +114,14 @@ type CreateSMTPConfigRequest struct {
 }
 
 type UpdateSMTPConfigRequest struct {
-	ID        uuid.UUID `json:"id"`
-	Host      *string    `json:"host,omitempty"`
-	Port      *int       `json:"port,omitempty"`
-	Username  *string    `json:"username,omitempty"`
-	Password  *string    `json:"password,omitempty"`
-	FromName  *string    `json:"from_name,omitempty"`
-	FromEmail *string    `json:"from_email,omitempty"`
-	OrganizationID   uuid.UUID `json:"organization_id"`
+	ID             uuid.UUID `json:"id"`
+	Host           *string   `json:"host,omitempty"`
+	Port           *int      `json:"port,omitempty"`
+	Username       *string   `json:"username,omitempty"`
+	Password       *string   `json:"password,omitempty"`
+	FromName       *string   `json:"from_name,omitempty"`
+	FromEmail      *string   `json:"from_email,omitempty"`
+	OrganizationID uuid.UUID `json:"organization_id"`
 }
 
 type DeleteSMTPConfigRequest struct {

@@ -5,6 +5,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"golang.org/x/crypto/bcrypt"
 	"time"
+	"github.com/raghavyuva/nixopus-api/internal/features/auth/utils"
 )
 
 // Login authenticates a user and returns an authentication token and user information.
@@ -34,7 +35,7 @@ func (u *AuthService) Login(email string, password string) (types.AuthResponse, 
 		return types.AuthResponse{}, types.ErrFailedToCreateRefreshToken
 	}
 
-	accessToken, err := CreateToken(user.Email, time.Minute*15)
+	accessToken, err := utils.CreateToken(user.Email, time.Minute*15)
 	if err != nil {
 		u.logger.Log(logger.Error, types.ErrFailedToCreateAccessToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateAccessToken

@@ -162,39 +162,39 @@ func (v *Validator) validateReadSMTPAccess(req *RequestInfo, user *shared_types.
 
 // validateUpdateSMTPAccess checks if user can update an SMTP config
 func (v *Validator) validateUpdateSMTPAccess(req *RequestInfo, user *shared_types.User) error {
-    if req.SMTPID == "" {
-        return notification.ErrMissingID
-    }
+	if req.SMTPID == "" {
+		return notification.ErrMissingID
+	}
 
-    smtp, err := v.storage.GetSmtp(req.SMTPID)
-    if err != nil {
-        return err
-    }
-    req.OrganizationID = smtp.OrganizationID
+	smtp, err := v.storage.GetSmtp(req.SMTPID)
+	if err != nil {
+		return err
+	}
+	req.OrganizationID = smtp.OrganizationID
 
-    // If user is the creator, they can update
-    if smtp.UserID == user.ID {
-        return nil
-    }
+	// If user is the creator, they can update
+	if smtp.UserID == user.ID {
+		return nil
+	}
 
-    // Check if user is in the same organization
-    err = utils.CheckIfUserBelongsToOrganization(user.Organizations, smtp.OrganizationID)
-    if err != nil {
-        return err
-    }
+	// Check if user is in the same organization
+	err = utils.CheckIfUserBelongsToOrganization(user.Organizations, smtp.OrganizationID)
+	if err != nil {
+		return err
+	}
 
-    // Check user's role in the organization
-    role, err := utils.GetUserRoleInOrganization(user.OrganizationUsers, smtp.OrganizationID)
-    if err != nil {
-        return err
-    }
+	// Check user's role in the organization
+	role, err := utils.GetUserRoleInOrganization(user.OrganizationUsers, smtp.OrganizationID)
+	if err != nil {
+		return err
+	}
 
-    // Only admin or member roles can update
-    if role == shared_types.RoleAdmin || role == shared_types.RoleMember {
-        return nil
-    }
+	// Only admin or member roles can update
+	if role == shared_types.RoleAdmin || role == shared_types.RoleMember {
+		return nil
+	}
 
-    return notification.ErrPermissionDenied
+	return notification.ErrPermissionDenied
 }
 
 // validateDeleteSMTPAccess checks if user can delete an SMTP config

@@ -41,7 +41,7 @@ func (router *Router) Routes() {
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
 			middleware.RateLimiter),
-		// fuego.WithoutLogger(),
+		fuego.WithoutLogger(),
 	)
 
 	healthGroup := fuego.Group(server, "/api/v1/health")
@@ -84,7 +84,7 @@ func (router *Router) Routes() {
 	router.NotificationRoutes(notificationGroup, notifController)
 
 	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l, notificationManager)
-	organizationGroup := fuego.Group(s, "/organization")
+	organizationGroup := fuego.Group(s, "/organizations")
 	router.OrganizationRoutes(organizationGroup, organizationController)
 
 	fileManagerController := file_manager.NewFileManagerController(router.app.Ctx, l, notificationManager)

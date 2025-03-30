@@ -30,7 +30,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/realtime"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 )
-
+ 
 type Router struct {
 	app *storage.App
 }
@@ -44,12 +44,10 @@ func NewRouter(app *storage.App) *Router {
 func (router *Router) Routes() {
 	l := logger.NewLogger()
 	server := fuego.NewServer(
-		fuego.WithAddr("localhost:8080"),
 		fuego.WithGlobalMiddlewares(
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
 			middleware.RateLimiter),
-		fuego.WithoutLogger(),
 	)
 
 	healthGroup := fuego.Group(server, "/api/v1/health")

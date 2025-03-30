@@ -22,7 +22,6 @@ func main() {
 	store := config.Init()
 	ctx := context.Background()
 	app := storage.NewApp(&types.Config{}, store, ctx)
-	log.Printf("Server starting on port %s", config.AppConfig.Port)
 	router := internal.NewRouter(app)
 	router.Routes()
 	log.Printf("Server starting on port %s", config.AppConfig.Port)

@@ -3,10 +3,12 @@ package internal
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-fuego/fuego"
 	"github.com/go-fuego/fuego/option"
 	"github.com/go-fuego/fuego/param"
+	"github.com/joho/godotenv"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	authService "github.com/raghavyuva/nixopus-api/internal/features/auth/service"
 	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
@@ -42,12 +44,21 @@ func NewRouter(app *storage.App) *Router {
 }
 
 func (router *Router) Routes() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	PORT := os.Getenv("PORT")
+
+	log.Printf("open port %s", PORT)
+
 	l := logger.NewLogger()
 	server := fuego.NewServer(
 		fuego.WithGlobalMiddlewares(
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
 			middleware.RateLimiter),
+			fuego.WithAddr(":" + PORT),
 	)
 
 	healthGroup := fuego.Group(server, "/api/v1/health")

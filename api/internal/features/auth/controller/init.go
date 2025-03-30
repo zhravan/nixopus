@@ -55,6 +55,9 @@ func (c *AuthController) parseAndValidate(w http.ResponseWriter, r *http.Request
 }
 
 func (c *AuthController) Notify(payloadType notification.NotificationPayloadType, user *shared_types.User, r *http.Request) {
+	if r == nil {
+		return
+	}
 	notificationData := notification.NotificationAuthenticationData{
 		Email: user.Email,
 		NotificationBaseData: notification.NotificationBaseData{

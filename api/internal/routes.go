@@ -8,6 +8,8 @@ import (
 	"github.com/go-fuego/fuego/option"
 	"github.com/go-fuego/fuego/param"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
+	authService "github.com/raghavyuva/nixopus-api/internal/features/auth/service"
+	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
 	domain "github.com/raghavyuva/nixopus-api/internal/features/domain/controller"
 	file_manager "github.com/raghavyuva/nixopus-api/internal/features/file-manager/controller"
@@ -17,6 +19,12 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	notificationController "github.com/raghavyuva/nixopus-api/internal/features/notification/controller"
 	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
+	organization_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
+	organization_storage "github.com/raghavyuva/nixopus-api/internal/features/organization/storage"
+	permissions_service "github.com/raghavyuva/nixopus-api/internal/features/permission/service"
+	permissions_storage "github.com/raghavyuva/nixopus-api/internal/features/permission/storage"
+	role_service "github.com/raghavyuva/nixopus-api/internal/features/role/service"
+	role_storage "github.com/raghavyuva/nixopus-api/internal/features/role/storage"
 	user "github.com/raghavyuva/nixopus-api/internal/features/user/controller"
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
 	"github.com/raghavyuva/nixopus-api/internal/realtime"
@@ -52,7 +60,15 @@ func (router *Router) Routes() {
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
 	router.WebSocketServer(server, deployController)
 
-	authController := auth.NewAuthController(router.app.Store, router.app.Ctx, l, notificationManager)
+	userStorage := &user_storage.UserStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	permStorage := &permissions_storage.PermissionStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	roleStorage := &role_storage.RoleStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	orgStorage := &organization_storage.OrganizationStore{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	permService := permissions_service.NewPermissionService(router.app.Store, router.app.Ctx, l, permStorage)
+	roleService := role_service.NewRoleService(router.app.Store, router.app.Ctx, l, roleStorage)
+	orgService := organization_service.NewOrganizationService(router.app.Store, router.app.Ctx, l, orgStorage)
+	authService := authService.NewAuthService(userStorage, l, permService, roleService, orgService, router.app.Ctx)
+	authController := auth.NewAuthController(router.app.Ctx, l, notificationManager, *authService)
 	authGroup := fuego.Group(server, "/api/v1/auth")
 	router.AuthRoutes(authController, authGroup)
 

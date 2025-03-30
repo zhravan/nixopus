@@ -127,3 +127,21 @@ func TestLogin(t *testing.T) {
 		})
 	}
 }
+
+func TestLoginEndpoint(t *testing.T) {
+	// l := logger.NewLogger()
+	// notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), nil)
+	// userStorage := &MockAuthStorage{}
+	// permStorage := &MockPermissionStorage{}
+	// roleStorage := &role_storage.RoleStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	// orgStorage := &organization_storage.OrganizationStore{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	// permService := permissions_service.NewPermissionService(router.app.Store, router.app.Ctx, l, permStorage)
+	// roleService := role_service.NewRoleService(router.app.Store, router.app.Ctx, l, roleStorage)
+	// orgService := organization_service.NewOrganizationService(router.app.Store, router.app.Ctx, l, orgStorage)
+	// authService := authService.NewAuthService(userStorage, l, permService, roleService, orgService, router.app.Ctx)
+	// authController := auth.NewAuthController(router.app.Ctx, l, notificationManager, *authService)
+
+	t.Run("TestLoginEndpoint", func(t *testing.T) {
+		
+	})
+}

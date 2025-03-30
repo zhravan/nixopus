@@ -2,10 +2,10 @@ package service
 
 import (
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/types"
+	"github.com/raghavyuva/nixopus-api/internal/features/auth/utils"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"golang.org/x/crypto/bcrypt"
 	"time"
-	"github.com/raghavyuva/nixopus-api/internal/features/auth/utils"
 )
 
 // Login authenticates a user and returns an authentication token and user information.

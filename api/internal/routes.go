@@ -58,7 +58,7 @@ func (router *Router) Routes() {
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
 			middleware.RateLimiter),
-			fuego.WithAddr(":" + PORT),
+		fuego.WithAddr(":"+PORT),
 	)
 
 	healthGroup := fuego.Group(server, "/api/v1/health")

@@ -30,7 +30,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/realtime"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 )
- 
+
 type Router struct {
 	app *storage.App
 }

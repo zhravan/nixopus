@@ -142,6 +142,6 @@ func TestLoginEndpoint(t *testing.T) {
 	// authController := auth.NewAuthController(router.app.Ctx, l, notificationManager, *authService)
 
 	t.Run("TestLoginEndpoint", func(t *testing.T) {
-		
+
 	})
 }

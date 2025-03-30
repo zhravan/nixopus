@@ -10,17 +10,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ContainerData } from '../hooks/use_monitor';
-
-const getStatusColor = (status: string) => {
-  if (status?.toLowerCase().includes('running')) return 'bg-green-100 text-green-800';
-  if (status?.toLowerCase().includes('exited')) return 'bg-red-100 text-red-800';
-  if (status?.toLowerCase().includes('created')) return 'bg-blue-100 text-blue-800';
-  return 'bg-gray-100 text-gray-800';
-};
-
-const truncateId = (id: string) => {
-  return id?.substring(0, 12) || '';
-};
+import getStatusColor from '../utils/getStatusColor';
+import truncateId from '../utils/truncateId';
 
 const ContainersTable = ({ containersData }: { containersData: ContainerData[] }) => {
   return (

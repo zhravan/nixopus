@@ -29,7 +29,7 @@ RUN make build
 
 FROM alpine:3.18
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates bash
 
 WORKDIR /app
 
@@ -38,5 +38,7 @@ COPY --from=builder /app/bin/nixopus-api .
 COPY --from=builder /app/migrations ./migrations
 
 COPY --from=env-builder .env .
+
+EXPOSE ${PORT}
 
 ENTRYPOINT ["./nixopus-api"]

@@ -57,8 +57,7 @@ services:
       - "${NEXT_PUBLIC_PORT:-3000}:${NEXT_PUBLIC_PORT:-3000}"
     restart: unless-stopped
     environment:
-      - PORT=${NEXT_PUBLIC_PORT:-3000}
-      - API_URL=${API_URL:-http://nixopus-api:8080}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://api.nixopus.com}
     volumes:
       - ./logs:/app/logs
     networks:

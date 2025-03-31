@@ -183,7 +183,9 @@ func (t *Terminal) flushBuffer() {
 			"data": map[string]interface{}{
 				"output_type": "stdout",
 				"content":     string(t.outputBuf),
+				"timestamp":   time.Now().Unix(),
 			},
+			"topic":       "terminal",
 		})
 
 		if err != nil {

@@ -143,6 +143,24 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 
 				go newTerminal.Start()
 			}
+		case "terminal_resize":
+			if user == nil {
+				s.sendError(conn, "Authentication required")
+				continue
+			}
+			s.terminalMutex.Lock()
+			term, exists := s.terminals[conn]
+			s.terminalMutex.Unlock()
+
+			if exists {
+				s.terminalMutex.Lock()
+				rows := uint16(msg.Data.(map[string]interface{})["rows"].(float64))
+				cols := uint16(msg.Data.(map[string]interface{})["cols"].(float64))
+				term.ResizeTerminal(rows, cols)
+				s.terminalMutex.Unlock()
+			}else{
+				s.sendError(conn, "Terminal not started")
+			}
 
 		case "dashboard_monitor":
 			if user == nil {

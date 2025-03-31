@@ -14,7 +14,7 @@ import { CreateTeam } from './create-team';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import use_bread_crumbs from '@/hooks/use_bread_crumbs';
 import React, { useEffect } from 'react';
-import { IntegratedTerminal } from '@/app/terminal/terminal';
+import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
@@ -105,10 +105,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <ResizablePanel defaultSize={80} minSize={30} className="overflow-auto scrollbar-hide">
               <div className="h-full overflow-y-auto scrollbar-hide">{children}</div>
             </ResizablePanel>
-            <ResizableHandle />
+            {isTerminalOpen && <ResizableHandle draggable withHandle />}
             <ResizablePanel
-              defaultSize={20}
-              minSize={2}
               hidden={!isTerminalOpen}
               onResize={() => {
                 if (fitAddonRef?.current) {
@@ -116,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }
               }}
             >
-              <IntegratedTerminal
+              <Terminal
                 isOpen={false}
                 isTerminalOpen={isTerminalOpen}
                 toggleTerminal={toggleTerminal}

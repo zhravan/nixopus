@@ -51,13 +51,13 @@ services:
       context: ./view
       dockerfile: Dockerfile
       args:
-        - PORT=${NEXT_PUBLIC_PORT:-3000}
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://api.nixopus.com/api}
     container_name: nixopus-view-container
     ports:
       - "${NEXT_PUBLIC_PORT:-3000}:${NEXT_PUBLIC_PORT:-3000}"
     restart: unless-stopped
     environment:
-      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://api.nixopus.com}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://api.nixopus.com/api}
     volumes:
       - ./logs:/app/logs
     networks:

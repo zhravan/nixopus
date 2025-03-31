@@ -57,7 +57,8 @@ func (router *Router) Routes() {
 		fuego.WithGlobalMiddlewares(
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
-			middleware.RateLimiter),
+			// middleware.RateLimiter
+		),
 		fuego.WithAddr(":"+PORT),
 	)
 

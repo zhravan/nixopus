@@ -123,8 +123,6 @@ func (t *Terminal) Start() {
 		}
 
 		session.Wait()
-
-		close(t.done)
 	}()
 }
 

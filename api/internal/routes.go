@@ -146,7 +146,7 @@ func (router *Router) WebSocketServer(f *fuego.Server, deployController *deploy.
 // these routes are public routes
 func (router *Router) AuthRoutes(authController *auth.AuthController, s *fuego.Server) {
 	//register route is disabled for now (we do not have register seperately either the one who installs it, or the one who is added by admin)
-	// authApi.HandleFunc("/register", authController.Register).Methods("POST", "OPTIONS")
+	fuego.Post(s, "/register", authController.Register)
 	fuego.Post(s, "/login", authController.Login)
 }
 
@@ -213,6 +213,7 @@ func (router *Router) DeployApplicationRoutes(f *fuego.Server, deployController 
 func (router *Router) FileManagerRoutes(f *fuego.Server, fileManagerController *file_manager.FileManagerController) {
 	fuego.Get(f, "", fileManagerController.ListFiles)
 	fuego.Post(f, "/create-directory", fileManagerController.CreateDirectory)
+	fuego.Post(f, "/move-directory", fileManagerController.MoveDirectory)
 }
 
 func (router *Router) OrganizationRoutes(f *fuego.Server, organizationController *organization.OrganizationsController) {

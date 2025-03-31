@@ -39,7 +39,7 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 		hashedPassword,
 		registrationRequest.Username,
 		"",
-		"",
+		"admin",
 		false,
 	)
 

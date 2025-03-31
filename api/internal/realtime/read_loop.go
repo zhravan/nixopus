@@ -158,7 +158,7 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 				cols := uint16(msg.Data.(map[string]interface{})["cols"].(float64))
 				term.ResizeTerminal(rows, cols)
 				s.terminalMutex.Unlock()
-			}else{
+			} else {
 				s.sendError(conn, "Terminal not started")
 			}
 

@@ -185,7 +185,7 @@ func (t *Terminal) flushBuffer() {
 				"content":     string(t.outputBuf),
 				"timestamp":   time.Now().Unix(),
 			},
-			"topic":       "terminal",
+			"topic": "terminal",
 		})
 
 		if err != nil {

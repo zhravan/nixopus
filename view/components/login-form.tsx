@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Image from 'next/image';
 
 export interface LoginFormProps {
   email: string;
@@ -58,19 +59,21 @@ export function LoginForm({ ...props }: LoginFormProps) {
               >
                 {props.isLoading ? 'Loading...' : 'Login'}
               </Button>
-              <div className="text-center text-sm">
+              {/* <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
                 <a href="#" className="underline underline-offset-4">
                   Sign up
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="bg-muted relative hidden md:block">
             <img
-              src="/login.png"
+              src="https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              width={200}
+              height={200}
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.5] "
             />
           </div>
         </CardContent>

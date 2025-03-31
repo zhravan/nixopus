@@ -9,8 +9,9 @@ import { Toaster } from '@/components/ui/sonner';
 import { useAppDispatch } from '@/redux/hooks';
 import { useEffect } from 'react';
 import { initializeAuth } from '@/redux/features/users/authSlice';
-import AuthWrapper from '@/components/auth-wrapper';
 import { usePathname } from 'next/navigation';
+import { WebSocketProvider } from '@/hooks/socket_provider';
+import DashboardLayout from '@/components/dashboard-layout';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -61,7 +62,9 @@ const ChildrenWrapper = ({ children }: { children: React.ReactNode }) => {
         {pathname === '/' || pathname === '/login' ? (
           <>{children}</>
         ) : (
-          <AuthWrapper>{children}</AuthWrapper>
+          <WebSocketProvider>
+            <DashboardLayout>{children}</DashboardLayout>
+          </WebSocketProvider>
         )}
       </ThemeProvider>
       <Toaster />

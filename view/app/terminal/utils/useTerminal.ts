@@ -15,15 +15,14 @@ type TerminalOutput = {
     output_type: string;
     content: string;
   };
+  topic: string;
 };
 
-export const useTerminal = () => {
+export const useTerminal = (isTerminalOpen: boolean, width: number, height: number) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const fitAddonRef = useRef<any | null>(null);
   const { isStopped, setIsStopped } = StopExecution();
   const { sendJsonMessage, message, isReady } = useWebSocket();
-  const [isTerminalReady, setIsTerminalReady] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(false);
   const [terminalInstance, setTerminalInstance] = useState<any | null>(null);
 
   useEffect(() => {
@@ -31,7 +30,13 @@ export const useTerminal = () => {
       sendJsonMessage({ action: 'terminal', data: CTRL_C });
       setIsStopped(false);
     }
-  }, [isStopped, sendJsonMessage, setIsStopped]);
+  }, [isStopped, sendJsonMessage, setIsStopped, terminalInstance]);
+
+  useEffect(() => {
+    if (!isTerminalOpen) {
+      destroyTerminal();
+    }
+  }, [isTerminalOpen]);
 
   useEffect(() => {
     if (!message || !terminalInstance) return;
@@ -39,18 +44,12 @@ export const useTerminal = () => {
     try {
       const parsedMessage: TerminalOutput =
         typeof message === 'string' && message.startsWith('{') ? JSON.parse(message) : message;
-
-      if (!parsedMessage.data) {
-        // terminalInstance.write(message);
-        return;
-      }
+      if (parsedMessage.topic !== 'terminal') return;
 
       const { output_type, content } = parsedMessage.data;
 
       if (output_type === OutputType.EXIT) {
-        terminalInstance.dispose();
-        setTerminalInstance(null);
-        setIsTerminalReady(false);
+        destroyTerminal();
       } else {
         const formattedContent =
           output_type === OutputType.STDERR ? `\x1B[31m${content}\x1B[0m` : content;
@@ -100,9 +99,8 @@ export const useTerminal = () => {
       setTerminalInstance(term);
     } catch (error) {
       console.error('Error initializing terminal:', error);
-      setIsInitializing(false);
     }
-  }, [sendJsonMessage, isInitializing, terminalRef]);
+  }, [sendJsonMessage, isReady, terminalRef, terminalInstance]);
 
   const destroyTerminal = useCallback(() => {
     if (terminalInstance) {
@@ -111,16 +109,13 @@ export const useTerminal = () => {
     }
   }, [terminalInstance]);
 
-  useEffect(() => {
-    return destroyTerminal;
-  }, [destroyTerminal]);
+  useEffect(() => destroyTerminal, []);
 
   return {
     terminalRef,
     initializeTerminal,
     destroyTerminal,
     fitAddonRef,
-    terminalInstance,
-    isTerminalReady
+    terminalInstance
   };
 };

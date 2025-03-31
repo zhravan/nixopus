@@ -14,7 +14,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 			"https://app.nixopus.com",
 			"https://nixopus.com",
 		}
-		
+
 		originAllowed := false
 		for _, allowed := range allowedOrigins {
 			if origin == allowed {
@@ -22,7 +22,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 				break
 			}
 		}
-		
+
 		if originAllowed {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 		} else if origin != "" {
@@ -30,7 +30,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 				w.Header().Set("Access-Control-Allow-Origin", allowedOrigins[0])
 			}
 		}
-		
+
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token, Sec-WebSocket-Extensions, Sec-WebSocket-Key, Sec-WebSocket-Version")
 		w.Header().Set("Access-Control-Expose-Headers", "Authorization")

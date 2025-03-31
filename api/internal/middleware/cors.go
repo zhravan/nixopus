@@ -13,6 +13,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 		allowedOrigins := []string{
 			"https://app.nixopus.com",
 			"https://nixopus.com",
+			"http://localhost:3000",
 		}
 
 		originAllowed := false

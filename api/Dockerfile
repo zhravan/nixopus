@@ -39,8 +39,6 @@ COPY --from=builder /app/migrations ./migrations
 
 COPY --from=env-builder .env .
 
-VOLUME /root/.docker/certs
-
 EXPOSE ${PORT}
 
 ENTRYPOINT ["./nixopus-api"]

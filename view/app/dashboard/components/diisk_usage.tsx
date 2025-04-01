@@ -34,9 +34,9 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{disk.used} GB used</span>
-            <span>{disk.percentage}%</span>
-            <span>{disk.total} GB total</span>
+            <span>{disk.used.toFixed(2)} GB used</span>
+            <span>{disk.percentage.toFixed(2)}%</span>
+            <span>{disk.total.toFixed(2)} GB total</span>
           </div>
           <div className="text-xs font-mono text-muted-foreground mt-1 sm:mt-2">
             <table className="min-w-full">
@@ -52,7 +52,7 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
                 {disk.allMounts.map((mount, index) => (
                   <tr key={index}>
                     <td className="text-left pr-1 sm:pr-2 truncate max-w-[60px] sm:max-w-none">
-                      {mount.filesystem}
+                      {mount.mountPoint}
                     </td>
                     <td className="text-right pr-1 sm:pr-2">{mount.size}</td>
                     <td className="text-right pr-1 sm:pr-2">{mount.used}</td>

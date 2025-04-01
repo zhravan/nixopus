@@ -108,8 +108,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             direction={TERMINAL_POSITION.BOTTOM === TerminalPosition ? 'vertical' : 'horizontal'}
             className="flex-grow h-full"
           >
-            <ResizablePanel defaultSize={80} minSize={30} className="overflow-auto scrollbar-hide">
-              <div className="h-full overflow-y-auto scrollbar-hide">{children}</div>
+            <ResizablePanel defaultSize={80} minSize={30} className="overflow-auto no-scrollbar">
+              <div className="h-full overflow-y-auto no-scrollbar">{children}</div>
             </ResizablePanel>
             {isTerminalOpen && <ResizableHandle draggable withHandle />}
             <ResizablePanel

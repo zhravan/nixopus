@@ -52,7 +52,7 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
                 {disk.allMounts.map((mount, index) => (
                   <tr key={index}>
                     <td className="text-left pr-1 sm:pr-2 truncate max-w-[60px] sm:max-w-none">
-                      {mount.mountPoint}
+                      {mount.filesystem}
                     </td>
                     <td className="text-right pr-1 sm:pr-2">{mount.size}</td>
                     <td className="text-right pr-1 sm:pr-2">{mount.used}</td>

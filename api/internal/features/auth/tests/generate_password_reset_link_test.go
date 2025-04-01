@@ -58,7 +58,7 @@ func TestGeneratePasswordResetLink(t *testing.T) {
 				mockStorage.ExpectedCalls = nil
 				mockStorage.On("UpdateUser", test.user).Return(test.updateErr)
 			}
-			err := authService.GeneratePasswordResetLink(test.user)
+			_, _, err := authService.GeneratePasswordResetLink(test.user)
 			assert.Equal(t, test.expectedErr, err)
 		})
 	}

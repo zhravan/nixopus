@@ -38,9 +38,8 @@ type DeleteUserRequest struct {
 	Password string `json:"password"`
 }
 
-type ChangePasswordRequest struct {
-	OldPassword string `json:"old_password"`
-	NewPassword string `json:"new_password"`
+type ResetPasswordRequest struct {
+	Password string `json:"password"`
 }
 
 type LogoutRequest struct {

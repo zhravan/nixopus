@@ -23,7 +23,7 @@ func TestResetPasswordBasic(t *testing.T) {
 		name           string
 		setupUser      *shared_types.User
 		inputUser      *shared_types.User
-		request        types.ChangePasswordRequest
+		request        types.ResetPasswordRequest
 		storageError   error
 		expectedError  error
 		updateErrorSet bool
@@ -32,7 +32,7 @@ func TestResetPasswordBasic(t *testing.T) {
 			name:           "empty reset token",
 			setupUser:      nil,
 			inputUser:      &shared_types.User{ResetToken: "", Email: "user@example.com"},
-			request:        types.ChangePasswordRequest{OldPassword: "old", NewPassword: "new"},
+			request:        types.ResetPasswordRequest{Password: "new"},
 			storageError:   nil,
 			expectedError:  types.ErrInvalidResetToken,
 			updateErrorSet: false,
@@ -41,7 +41,7 @@ func TestResetPasswordBasic(t *testing.T) {
 			name:           "storage error on GetResetToken",
 			setupUser:      nil,
 			inputUser:      &shared_types.User{ResetToken: "some-token", Email: "user@example.com"},
-			request:        types.ChangePasswordRequest{OldPassword: "old", NewPassword: "new"},
+			request:        types.ResetPasswordRequest{Password: "new"},
 			storageError:   errors.New("database error"),
 			expectedError:  types.ErrInvalidResetToken,
 			updateErrorSet: false,

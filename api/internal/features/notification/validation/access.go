@@ -49,7 +49,31 @@ func ParseResourceAndAction(r *http.Request) (string, string) {
 
 // validateSMTPAccess handles validation for SMTP endpoints with type safety
 func (v *Validator) validateSMTPAccess(action string, user *shared_types.User) error {
-	return nil
+	if user == nil {
+		return notification.ErrAccessDenied
+	}
+
+	switch action {
+	case "read":
+		return nil
+	case "create":
+		if len(user.Organizations) == 0 {
+			return notification.ErrUserDoesNotBelongToOrganization
+		}
+		return nil
+	case "update":
+		if len(user.Organizations) == 0 {
+			return notification.ErrUserDoesNotBelongToOrganization
+		}
+		return nil
+	case "delete":
+		if len(user.Organizations) == 0 {
+			return notification.ErrUserDoesNotBelongToOrganization
+		}
+		return nil
+	default:
+		return notification.ErrInvalidRequestType
+	}
 }
 
 // validateCreateSMTPAccess checks if user can create SMTP configs

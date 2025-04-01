@@ -204,10 +204,8 @@ func TestValidateRequest(t *testing.T) {
 		t.Errorf("Expected no error for valid refresh token request, got %v", err)
 	}
 
-	// Test ChangePasswordRequest
-	changePassReq := &types.ChangePasswordRequest{
-		OldPassword: "OldPass1!",
-		NewPassword: "NewPass1!",
+	changePassReq := &types.ResetPasswordRequest{
+		Password: "Password1!",
 	}
 	if err := validator.ValidateRequest(changePassReq); err != nil {
 		t.Errorf("Expected no error for valid change password request, got %v", err)
@@ -245,39 +243,24 @@ func TestValidateLoginRequestWithInvalidData(t *testing.T) {
 func TestChangePasswordRequestValidation(t *testing.T) {
 	validator := validation.NewValidator()
 
-	// Same password
-	changePassReq := &types.ChangePasswordRequest{
-		OldPassword: "Password1!",
-		NewPassword: "Password1!",
+	changePassReq := &types.ResetPasswordRequest{
+		Password: "",
 	}
-	if err := validator.ValidateRequest(changePassReq); err != types.ErrSamePassword {
-		t.Errorf("Expected same password error, got %v", err)
+	if err := validator.ValidateRequest(changePassReq); err != types.ErrMissingRequiredFields {
+		t.Errorf("Expected missing required fields error, got %v", err)
 	}
 
-	// Empty passwords
-	changePassReq = &types.ChangePasswordRequest{
-		OldPassword: "",
-		NewPassword: "",
-	}
-	if err := validator.ValidateRequest(changePassReq); err != types.ErrEmptyPassword {
-		t.Errorf("Expected empty password error, got %v", err)
-	}
-
-	// Invalid new password
-	changePassReq = &types.ChangePasswordRequest{
-		OldPassword: "OldPassword1!",
-		NewPassword: "weak", // Too short, missing uppercase, number, special char
+	changePassReq = &types.ResetPasswordRequest{
+		Password: "weak",
 	}
 	if err := validator.ValidateRequest(changePassReq); err != types.ErrPasswordMustHaveAtLeast8Chars {
-		t.Errorf("Expected password validation error, got %v", err)
+		t.Errorf("Expected password too short error, got %v", err)
 	}
 
-	// Valid passwords
-	changePassReq = &types.ChangePasswordRequest{
-		OldPassword: "OldPassword1!",
-		NewPassword: "NewPassword2@",
+	changePassReq = &types.ResetPasswordRequest{
+		Password: "StrongP@ss1",
 	}
 	if err := validator.ValidateRequest(changePassReq); err != nil {
-		t.Errorf("Expected no error for valid passwords, got %v", err)
+		t.Errorf("Expected no error for valid password, got %v", err)
 	}
 }

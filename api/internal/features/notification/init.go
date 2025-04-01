@@ -44,8 +44,12 @@ func (m *NotificationManager) Start() {
 				case NotificationCategoryAuthentication:
 					fmt.Printf("Authentication Notification - %+v", payload)
 					// m.SendEmail(payload.UserID, "login successfully")
-				case NotificationCategoryOrganization:
-					fmt.Printf("Organization Notification - %+v", payload)
+					if payload.Type == NotificationPayloadTypePasswordReset {
+						fmt.Printf("Password Reset Notification - %+v", payload)
+						if data, ok := payload.Data.(NotificationPasswordResetData); ok {
+							m.SendPasswordResetEmail(payload.UserID, data.Token)
+						}
+					}
 				}
 			case <-m.ctx.Done():
 				return
@@ -98,6 +102,48 @@ func (m *NotificationManager) SendEmail(userId string, body string) {
 		return
 	}
 	log.Println("Successfully sended to " + to)
+}
+
+func (m *NotificationManager) SendPasswordResetEmail(userID string, token string) {
+	smtpConfig, err := m.GetSmtp(userID)
+	if err != nil {
+		log.Printf("smtp error: %s", err)
+		return
+	}
+
+	from := smtpConfig.Username
+	to := []string{smtpConfig.FromEmail}
+	subject := "Password Reset Request"
+
+	body := fmt.Sprintf(`
+		Hello,
+		
+		You have requested to reset your password. Click the link below to reset it:
+		
+		%s/reset-password?token=%s
+		
+		If you didn't request this, please ignore this email.
+		
+		Best regards,
+		Nixopus Team
+	`, "http://localhost:3000", token)
+
+	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
+		"From: %s\r\n"+
+		"To: %s\r\n"+
+		"Content-Type: text/plain; charset=UTF-8\r\n"+
+		"\r\n"+
+		"%s", subject, from, smtpConfig.FromEmail, body))
+
+	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
+	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
+
+	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+		log.Printf("Failed to send password reset email: %s", err)
+		return
+	}
+
+	log.Printf("Password reset email sent successfully to %s", smtpConfig.FromEmail)
 }
 
 func (s *NotificationManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, error) {

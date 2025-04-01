@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/raghavyuva/nixopus-api/internal/features/dashboard"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
+	"github.com/raghavyuva/nixopus-api/internal/features/deploy/realtime"
 	"github.com/raghavyuva/nixopus-api/internal/features/terminal"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
@@ -52,6 +53,8 @@ type SocketServer struct {
 	terminals         map[*websocket.Conn]*terminal.Terminal
 	dashboardMonitors map[*websocket.Conn]*dashboard.DashboardMonitor
 	dashboardMutex    sync.Mutex
+	applicationMonitors map[*websocket.Conn]*realtime.ApplicationMonitor
+	applicationMutex    sync.Mutex
 }
 
 // NewSocketServer initializes and returns a new instance of SocketServer.
@@ -80,6 +83,7 @@ func NewSocketServer(deployController *deploy.DeployController, db *bun.DB, ctx 
 		postgres_listener: *pgListener,
 		terminals:         make(map[*websocket.Conn]*terminal.Terminal),
 		dashboardMonitors: make(map[*websocket.Conn]*dashboard.DashboardMonitor),
+		applicationMonitors: make(map[*websocket.Conn]*realtime.ApplicationMonitor),
 	}
 
 	notificationChan, err := pgListener.ListenToApplicationChanges(ctx)

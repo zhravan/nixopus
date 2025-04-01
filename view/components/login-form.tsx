@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import Image from 'next/image';
 
 export interface LoginFormProps {
   email: string;
@@ -69,7 +68,7 @@ export function LoginForm({ ...props }: LoginFormProps) {
           </div>
           <div className="bg-muted relative hidden md:block">
             <img
-              src="https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="/nixopus_logo_transparent.png"
               alt="Image"
               width={200}
               height={200}

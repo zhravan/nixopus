@@ -2,6 +2,7 @@ import { AUTHURLS } from '@/redux/api-conf';
 import { baseQueryWithReauth } from '@/redux/base-query';
 import { AuthResponse, LoginPayload, RefreshTokenPayload, User } from '@/redux/types/user';
 import { createApi } from '@reduxjs/toolkit/query/react';
+import { fetchBaseQuery } from '@reduxjs/toolkit/query';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -40,8 +41,22 @@ export const authApi = createApi({
       transformResponse: (response: { data: AuthResponse }) => {
         return { ...response.data };
       }
+    }),
+    resetPassword: builder.mutation<void, { token: string; password: string }>({
+      query({ token, password }) {
+        return {
+          url: `${AUTHURLS.RESET_PASSWORD}?token=${token}`,
+          method: 'POST',
+          body: { password }
+        };
+      }
     })
   })
 });
 
-export const { useLoginUserMutation, useGetUserDetailsQuery, useRefreshTokenMutation } = authApi;
+export const {
+  useLoginUserMutation,
+  useGetUserDetailsQuery,
+  useRefreshTokenMutation,
+  useResetPasswordMutation
+} = authApi;

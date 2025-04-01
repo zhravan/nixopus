@@ -11,7 +11,7 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-func (c *AuthController) ResetPassword(s fuego.ContextWithBody[types.ChangePasswordRequest]) (shared_types.Response, error) {
+func (c *AuthController) ResetPassword(s fuego.ContextWithBody[types.ResetPasswordRequest]) (shared_types.Response, error) {
 	reset_password_request, err := s.Body()
 	if err != nil {
 		return shared_types.Response{}, fuego.HTTPError{
@@ -28,11 +28,19 @@ func (c *AuthController) ResetPassword(s fuego.ContextWithBody[types.ChangePassw
 		}
 	}
 
-	user := utils.GetUser(w, r)
-	if user == nil {
+	token := r.URL.Query().Get("token")
+	if token == "" {
 		return shared_types.Response{}, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+			Err:    types.ErrInvalidResetToken,
+			Status: http.StatusBadRequest,
+		}
+	}
+
+	user, err := c.service.GetUserByResetToken(token)
+	if err != nil {
+		return shared_types.Response{}, fuego.HTTPError{
+			Err:    err,
+			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -55,20 +63,23 @@ func (c *AuthController) ResetPassword(s fuego.ContextWithBody[types.ChangePassw
 }
 
 func (c *AuthController) GeneratePasswordResetLink(s fuego.ContextNoBody) (shared_types.Response, error) {
-	user := utils.GetUser(s.Response(), s.Request())
+	w, r := s.Response(), s.Request()
+	user := utils.GetUser(w, r)
 	if user == nil {
 		return shared_types.Response{}, fuego.HTTPError{
 			Err:    nil,
 			Status: http.StatusUnauthorized,
 		}
 	}
-	err := c.service.GeneratePasswordResetLink(user)
+	user, token, err := c.service.GeneratePasswordResetLink(user)
 	if err != nil {
 		return shared_types.Response{}, fuego.HTTPError{
 			Err:    err,
 			Status: http.StatusInternalServerError,
 		}
 	}
+
+	c.NotifyPasswordReset(user, token, r)
 
 	return shared_types.Response{
 		Status:  "success",

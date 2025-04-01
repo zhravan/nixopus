@@ -3,6 +3,7 @@ package notification
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -71,6 +72,12 @@ type NotificationManager struct {
 	db          *bun.DB
 }
 
+type NotificationPasswordResetData struct {
+	NotificationBaseData
+	Email string
+	Token string
+}
+
 type NotificationPayloadType string
 
 const (
@@ -111,6 +118,11 @@ type CreateSMTPConfigRequest struct {
 	FromName       string    `json:"from_name"`
 	FromEmail      string    `json:"from_email"`
 	OrganizationID uuid.UUID `json:"organization_id"`
+}
+
+func (r CreateSMTPConfigRequest) String() string {
+	return fmt.Sprintf("{Host: %s, Port: %d, Username: %s, FromName: %s, FromEmail: %s, OrgID: %s}",
+		r.Host, r.Port, r.Username, r.FromName, r.FromEmail, r.OrganizationID)
 }
 
 type UpdateSMTPConfigRequest struct {

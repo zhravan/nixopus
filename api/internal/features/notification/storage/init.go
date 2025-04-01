@@ -75,6 +75,9 @@ func (s NotificationStorage) GetSmtp(ID string) (*shared_types.SMTPConfigs, erro
 	config := &shared_types.SMTPConfigs{}
 	err := s.DB.NewSelect().Model(config).Where("user_id = ?", ID).Scan(s.Ctx)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return config, nil
@@ -89,6 +92,9 @@ func (s NotificationStorage) GetOrganizationsSmtp(organizationID string) ([]shar
 	configs := []shared_types.SMTPConfigs{}
 	err := s.DB.NewSelect().Model(&configs).Where("organization_id = ?", organizationID).Scan(s.Ctx)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return []shared_types.SMTPConfigs{}, nil
+		}
 		return nil, err
 	}
 	return configs, nil

@@ -16,7 +16,11 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.searchParams.has('installation_id') ||
       request.nextUrl.searchParams.has('setup_action'));
 
-  if (isGitHubFlow) {
+  const isPasswordResetFlow =
+    request.nextUrl.pathname.startsWith('/reset-password') &&
+    request.nextUrl.searchParams.has('token');
+
+  if (isGitHubFlow || isPasswordResetFlow) {
     return NextResponse.next();
   }
 

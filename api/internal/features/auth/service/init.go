@@ -44,6 +44,7 @@ type AuthServiceInterface interface {
 	Logout(refreshToken string) error
 	RefreshToken(refreshToken types.RefreshTokenRequest) (types.AuthResponse, error)
 	Register(registrationRequest types.RegisterRequest) (types.AuthResponse, error)
-	ResetPassword(user *shared_types.User, resetPasswordRequest types.ChangePasswordRequest) error
-	GeneratePasswordResetLink(user *shared_types.User) error
+	ResetPassword(user *shared_types.User, resetPasswordRequest types.ResetPasswordRequest) error
+	GeneratePasswordResetLink(user *shared_types.User) (*shared_types.User, string, error)
+	GetUserByResetToken(token string) (*shared_types.User, error)
 }

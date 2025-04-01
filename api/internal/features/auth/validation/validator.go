@@ -92,7 +92,7 @@ func (v *Validator) ValidateRequest(req interface{}) error {
 		return v.validateLogoutRequest(*r)
 	case *types.RefreshTokenRequest:
 		return v.validateRefreshTokenRequest(*r)
-	case *types.ChangePasswordRequest:
+	case *types.ResetPasswordRequest:
 		return v.validateResetPasswordRequest(*r)
 	case *types.RegisterRequest:
 		return v.validateCreateUserRequest(*r)
@@ -137,16 +137,16 @@ func (v *Validator) validateRefreshTokenRequest(req types.RefreshTokenRequest) e
 	return nil
 }
 
-func (v *Validator) validateResetPasswordRequest(resetPasswordRequest types.ChangePasswordRequest) error {
-	if resetPasswordRequest.NewPassword == "" || resetPasswordRequest.OldPassword == "" {
-		return types.ErrEmptyPassword
+func (v *Validator) validateResetPasswordRequest(resetPasswordRequest types.ResetPasswordRequest) error {
+	if resetPasswordRequest.Password == "" {
+		return types.ErrMissingRequiredFields
 	}
 
-	if resetPasswordRequest.NewPassword == resetPasswordRequest.OldPassword {
-		return types.ErrSamePassword
+	if err := v.IsValidPassword(resetPasswordRequest.Password); err != nil {
+		return err
 	}
 
-	return v.IsValidPassword(resetPasswordRequest.NewPassword)
+	return nil
 }
 
 func (v *Validator) validateCreateUserRequest(createUserRequest types.RegisterRequest) error {

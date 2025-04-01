@@ -28,8 +28,10 @@ export function isTokenExpired(token: string | null): boolean {
     if (!token) return true;
 
     const decoded = jwtDecode<DecodedToken>(token);
-    return decoded.exp * 1000 < Date.now() + 60000;
+    // Check if token will expire in the next 5 minutes
+    return decoded.exp * 1000 < Date.now() + 5 * 60 * 1000;
   } catch (error) {
+    console.error('Error checking token expiration:', error);
     return true;
   }
 }

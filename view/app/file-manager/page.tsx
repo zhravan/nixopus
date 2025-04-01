@@ -60,15 +60,6 @@ function FileManager() {
 
   return (
     <div>
-      {/* <KeyboardShortcutsHandler
-        selectedFile={selectedFile}
-        setFileToCopy={setFileToCopy}
-        setFileToMove={setFileToMove}
-        handleFilePaste={handleFilePaste}
-        currentPath={currentPath}
-        refetch={refetch}
-        handleFileMove={handleFileMove}
-      /> */}
       <div className="mx-auto max-w-7xl p-0 lg:p-6">
         <div className="mb-6 flex items-center justify-between">
           <FileManagerHeader />

@@ -41,18 +41,18 @@ var upgrader = websocket.Upgrader{
 }
 
 type SocketServer struct {
-	conns             *sync.Map
-	topicsMu          sync.RWMutex
-	topics            map[string]map[*websocket.Conn]bool
-	shutdown          chan struct{}
-	deployController  *deploy.DeployController
-	db                *bun.DB
-	ctx               context.Context
-	postgres_listener PostgresListener
-	terminalMutex     sync.RWMutex
-	terminals         map[*websocket.Conn]*terminal.Terminal
-	dashboardMonitors map[*websocket.Conn]*dashboard.DashboardMonitor
-	dashboardMutex    sync.Mutex
+	conns               *sync.Map
+	topicsMu            sync.RWMutex
+	topics              map[string]map[*websocket.Conn]bool
+	shutdown            chan struct{}
+	deployController    *deploy.DeployController
+	db                  *bun.DB
+	ctx                 context.Context
+	postgres_listener   PostgresListener
+	terminalMutex       sync.RWMutex
+	terminals           map[*websocket.Conn]*terminal.Terminal
+	dashboardMonitors   map[*websocket.Conn]*dashboard.DashboardMonitor
+	dashboardMutex      sync.Mutex
 	applicationMonitors map[*websocket.Conn]*realtime.ApplicationMonitor
 	applicationMutex    sync.Mutex
 }
@@ -74,15 +74,15 @@ func NewSocketServer(deployController *deploy.DeployController, db *bun.DB, ctx 
 	pgListener := NewPostgresListener()
 
 	server := &SocketServer{
-		conns:             &sync.Map{},
-		shutdown:          make(chan struct{}),
-		deployController:  deployController,
-		db:                db,
-		ctx:               ctx,
-		topics:            make(map[string]map[*websocket.Conn]bool),
-		postgres_listener: *pgListener,
-		terminals:         make(map[*websocket.Conn]*terminal.Terminal),
-		dashboardMonitors: make(map[*websocket.Conn]*dashboard.DashboardMonitor),
+		conns:               &sync.Map{},
+		shutdown:            make(chan struct{}),
+		deployController:    deployController,
+		db:                  db,
+		ctx:                 ctx,
+		topics:              make(map[string]map[*websocket.Conn]bool),
+		postgres_listener:   *pgListener,
+		terminals:           make(map[*websocket.Conn]*terminal.Terminal),
+		dashboardMonitors:   make(map[*websocket.Conn]*dashboard.DashboardMonitor),
 		applicationMonitors: make(map[*websocket.Conn]*realtime.ApplicationMonitor),
 	}
 

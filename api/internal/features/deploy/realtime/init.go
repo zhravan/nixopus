@@ -27,9 +27,8 @@ type ApplicationMonitor struct {
 	Operations    []ApplicationMonitorOperation
 }
 
-
 type MonitoringConfig struct {
-	Interval   time.Duration        `json:"interval"`
+	Interval   time.Duration                 `json:"interval"`
 	Operations []ApplicationMonitorOperation `json:"operations"`
 }
 

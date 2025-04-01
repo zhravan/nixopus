@@ -5,23 +5,23 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/raghavyuva/opus/actions/workflows/lint.yaml">
-    <img src="https://github.com/raghavyuva/opus/actions/workflows/lint.yaml/badge.svg" alt="Lint Nixopus API">
+  <a href="https://github.com/raghavyuva/nixopus/actions/workflows/lint.yaml">
+    <img src="https://github.com/raghavyuva/nixopus/actions/workflows/lint.yaml/badge.svg" alt="Lint Nixopus API">
   </a>
-  <a href="https://github.com/raghavyuva/opus/actions/workflows/test.yaml">
-    <img src="https://github.com/raghavyuva/opus/actions/workflows/test.yaml/badge.svg" alt="Test Nixopus API">
+  <a href="https://github.com/raghavyuva/nixopus/actions/workflows/test.yaml">
+    <img src="https://github.com/raghavyuva/nixopus/actions/workflows/test.yaml/badge.svg" alt="Test Nixopus API">
   </a>
-  <a href="https://github.com/raghavyuva/opus/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/raghavyuva/opus" alt="License">
+  <a href="https://github.com/raghavyuva/nixopus/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/raghavyuva/nixopus" alt="License">
   </a>
-  <a href="https://github.com/raghavyuva/opus/stargazers">
-    <img src="https://img.shields.io/github/stars/raghavyuva/opus" alt="Stars">
+  <a href="https://github.com/raghavyuva/nixopus/stargazers">
+    <img src="https://img.shields.io/github/stars/raghavyuva/nixopus" alt="Stars">
   </a>
-  <a href="https://github.com/raghavyuva/opus/network/members">
-    <img src="https://img.shields.io/github/forks/raghavyuva/opus" alt="Forks">
+  <a href="https://github.com/raghavyuva/nixopus/network/members">
+    <img src="https://img.shields.io/github/forks/raghavyuva/nixopus" alt="Forks">
   </a>
-  <a href="https://github.com/raghavyuva/opus/issues">
-    <img src="https://img.shields.io/github/issues/raghavyuva/opus" alt="Issues">
+  <a href="https://github.com/raghavyuva/nixopus/issues">
+    <img src="https://img.shields.io/github/issues/raghavyuva/nixopus" alt="Issues">
   </a>
 </p>
 

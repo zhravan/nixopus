@@ -9,7 +9,7 @@ import {
   PURGE,
   REGISTER
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
 import { authApi } from '@/redux/services/users/authApi';
 import authReducer from '@/redux/features/users/authSlice';
 import { userApi } from '@/redux/services/users/userApi';
@@ -20,6 +20,22 @@ import { GithubConnectorApi } from '@/redux/services/connector/githubConnectorAp
 import githubConnector from './features/github-connector/githubConnectorSlice';
 import { deployApi } from './services/deploy/applicationsApi';
 import { fileManagersApi } from './services/file-manager/fileManagersApi';
+
+const createNoopStorage = () => {
+  return {
+    getItem(_key: string) {
+      return Promise.resolve(null);
+    },
+    setItem(_key: string, value: any) {
+      return Promise.resolve(value);
+    },
+    removeItem(_key: string) {
+      return Promise.resolve();
+    }
+  };
+};
+
+const storage = typeof window !== 'undefined' ? createWebStorage('local') : createNoopStorage();
 
 const persistConfig = {
   key: 'root',

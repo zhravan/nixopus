@@ -54,14 +54,21 @@ export async function middleware(request: NextRequest) {
 
       return response;
     } catch (error) {
-      console.error('Failed to refresh token:', error);
-      const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
+      console.error('Token refresh failed:', error);
 
+      const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
       response.cookies.delete('token');
       response.cookies.delete('refreshToken');
 
       return response;
     }
+  }
+
+  if (isTokenExpired(token)) {
+    const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
+    response.cookies.delete('token');
+    response.cookies.delete('refreshToken');
+    return response;
   }
 
   return NextResponse.next();

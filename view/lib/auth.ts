@@ -27,8 +27,17 @@ export function isTokenExpired(token: string | null): boolean {
   try {
     if (!token) return true;
 
+    if (!token.includes('.')) {
+      console.error('Invalid token format: missing separator');
+      return true;
+    }
+
     const decoded = jwtDecode<DecodedToken>(token);
-    // Check if token will expire in the next 5 minutes
+    if (!decoded.exp) {
+      console.error('Invalid token: missing expiration');
+      return true;
+    }
+
     return decoded.exp * 1000 < Date.now() + 5 * 60 * 1000;
   } catch (error) {
     console.error('Error checking token expiration:', error);
@@ -62,17 +71,33 @@ export function clearAuthTokens(ctx?: any): void {
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
-  const response = await fetch(`${BASE_URL}${AUTHURLS.REFRESH_TOKEN}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ refresh_token: refreshToken })
-  });
+  try {
+    const response = await fetch(`${BASE_URL}${AUTHURLS.REFRESH_TOKEN}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to refresh token');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Token refresh failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      });
+      throw new Error(`Failed to refresh token: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (!data.access_token) {
+      throw new Error('Invalid response: missing access token');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error during token refresh:', error);
+    throw error;
   }
-
-  return await response.json();
 }

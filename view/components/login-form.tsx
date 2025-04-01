@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import nixopusLogo from '@/public/nixopus_logo_transparent.png';
 
 export interface LoginFormProps {
   email: string;
@@ -36,12 +37,13 @@ export function LoginForm({ ...props }: LoginFormProps) {
                 />
               </div>
               <div className="grid gap-3">
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
                     Forgot your password?
                   </a>
-                </div>
+                </div> */}
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -68,18 +70,23 @@ export function LoginForm({ ...props }: LoginFormProps) {
           </div>
           <div className="bg-muted relative hidden md:block">
             <img
-              src="/nixopus_logo_transparent.png"
-              alt="Image"
-              width={200}
-              height={200}
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.5] "
+              src={nixopusLogo.src}
+              alt="Nixopus Logo"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a> and{' '}
-        <a href="#">Privacy Policy</a>.
+      <div className="text-muted-foreground text-center text-xs text-balance">
+        By clicking continue, you agree to our{' '}
+        <a href="#" className="underline underline-offset-4 hover:text-primary">
+          Terms of Service
+        </a>{' '}
+        and{' '}
+        <a href="#" className="underline underline-offset-4 hover:text-primary">
+          Privacy Policy
+        </a>
+        .
       </div>
     </div>
   );

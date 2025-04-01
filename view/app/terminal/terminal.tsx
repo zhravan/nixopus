@@ -1,9 +1,19 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import '@xterm/xterm/css/xterm.css';
 import { useTerminal } from './utils/useTerminal';
 import { useContainerReady } from './utils/isContainerReady';
 import { X } from 'lucide-react';
+
+const globalStyles = `
+  .xterm-viewport::-webkit-scrollbar {
+    display: none;
+  }
+  .xterm-viewport {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+`;
 
 type TerminalProps = {
   isOpen: boolean;
@@ -20,6 +30,7 @@ export const Terminal: React.FC<TerminalProps> = ({
 }) => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const { terminalRef, fitAddonRef, initializeTerminal, destroyTerminal } = useTerminal(
     isTerminalOpen,
@@ -34,17 +45,25 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   const isContainerReady = useContainerReady(isTerminalOpen, terminalRef);
 
-  useEffect(() => {
+  const updateDimensions = useCallback(() => {
     if (!containerRef.current) return;
 
-    const updateDimensions = () => {
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
+    }
+
+    resizeTimeoutRef.current = setTimeout(() => {
       if (containerRef.current) {
         setDimensions({
           width: containerRef.current.offsetWidth,
           height: containerRef.current.offsetHeight
         });
       }
-    };
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
 
     updateDimensions();
 
@@ -53,12 +72,15 @@ export const Terminal: React.FC<TerminalProps> = ({
 
     return () => {
       resizeObserver.disconnect();
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
     };
-  }, [isTerminalOpen]);
+  }, [isTerminalOpen, updateDimensions]);
 
   useEffect(() => {
     if (isTerminalOpen && isContainerReady) {
-      setTimeout(initializeTerminal, 0);
+      initializeTerminal();
     } else {
       destroyTerminal();
     }
@@ -70,20 +92,42 @@ export const Terminal: React.FC<TerminalProps> = ({
     }
   }, [fitAddonRef, setFitAddonRef]);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = globalStyles;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
-    <div className="flex h-full flex-col" ref={containerRef}>
-      <div className="flex h-5 items-center justify-between bg-secondary px-1 py-2 opacity-50">
-        <span className="text-xs">
-          Terminal <span className="text-xs">⌘</span>J
-        </span>
-        <X className="h-4 w-4 hover:text-destructive" onClick={toggleTerminal} />
+    <div className="flex h-full flex-col overflow-hidden bg-[#1e1e1e]" ref={containerRef}>
+      <div className="flex h-8 items-center justify-between border-b border-[#2d2d2d] px-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-[#cccccc]">Terminal</span>
+          <span className="text-xs text-[#666666]">⌘J</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="flex h-4 w-4 items-center justify-center rounded hover:bg-[#2d2d2d]"
+            onClick={toggleTerminal}
+          >
+            <X className="h-3 w-3 text-[#666666] hover:text-[#cccccc]" />
+          </button>
+        </div>
       </div>
       <div
         ref={terminalRef}
-        className="flex-grow overflow-hidden bg-secondary"
+        className="flex-1 relative"
         style={{
-          height: isTerminalOpen ? 'calc(100% - 32px)' : '0',
-          visibility: isTerminalOpen ? 'visible' : 'hidden'
+          visibility: isTerminalOpen ? 'visible' : 'hidden',
+          minHeight: '200px',
+          padding: '4px',
+          overflow: 'hidden',
+          backgroundColor: '#1e1e1e',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}
       />
     </div>

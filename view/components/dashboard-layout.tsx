@@ -113,17 +113,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </ResizablePanel>
             {isTerminalOpen && <ResizableHandle draggable withHandle />}
             <ResizablePanel
+              defaultSize={20}
+              minSize={15}
+              maxSize={50}
               hidden={!isTerminalOpen}
               onResize={() => {
                 if (fitAddonRef?.current) {
-                  fitAddonRef.current.fit();
+                  requestAnimationFrame(() => {
+                    fitAddonRef.current.fit();
+                  });
                 }
               }}
+              className="min-h-[200px] flex flex-col"
             >
               <Terminal
-                isOpen={false}
-                isTerminalOpen={isTerminalOpen}
+                isOpen={isTerminalOpen}
                 toggleTerminal={toggleTerminal}
+                isTerminalOpen={isTerminalOpen}
                 setFitAddonRef={setFitAddonRef}
               />
             </ResizablePanel>

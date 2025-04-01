@@ -54,7 +54,8 @@ export async function middleware(request: NextRequest) {
 
       return response;
     } catch (error) {
-      const response = NextResponse.redirect(new URL('/login', request.url));
+      console.error('Failed to refresh token:', error);
+      const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
 
       response.cookies.delete('token');
       response.cookies.delete('refreshToken');

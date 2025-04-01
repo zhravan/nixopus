@@ -1,5 +1,7 @@
 # Nixopus
 
+Nixopus is your all in one solution for managing your VPS. With Nixopus, you can easily manage rolling updates, monitor container statistics, and configure it to run as a CI/CD pipeline.
+
 <p align="center">
   <img src="./assets/nixopus_logo_transparent.png" alt="Nixopus Logo" width="300"/>
 </p>

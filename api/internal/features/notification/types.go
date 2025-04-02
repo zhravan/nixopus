@@ -78,6 +78,12 @@ type NotificationPasswordResetData struct {
 	Token string
 }
 
+type NotificationVerificationEmailData struct {
+	NotificationBaseData
+	Email string
+	Token string
+}
+
 type NotificationPayloadType string
 
 const (
@@ -86,6 +92,7 @@ const (
 	NotificationPayloadTypeLogout                 NotificationPayloadType = "logout"
 	NotificationPayloadTypePasswordReset          NotificationPayloadType = "password_reset"
 	NortificationPayloadTypeAddUserToOrganization NotificationPayloadType = "add_user_to_organization"
+	NotificationPayloadTypeVerificationEmail      NotificationPayloadType = "verification_email"
 )
 
 const (

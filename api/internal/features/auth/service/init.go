@@ -47,4 +47,7 @@ type AuthServiceInterface interface {
 	ResetPassword(user *shared_types.User, resetPasswordRequest types.ResetPasswordRequest) error
 	GeneratePasswordResetLink(user *shared_types.User) (*shared_types.User, string, error)
 	GetUserByResetToken(token string) (*shared_types.User, error)
+	GenerateVerificationToken(userID string) (string, error)
+	VerifyToken(token string) (string, error)
+	MarkEmailAsVerified(userID string) error
 }

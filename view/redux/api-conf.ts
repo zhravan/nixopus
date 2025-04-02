@@ -3,7 +3,9 @@ export enum AUTHURLS {
   USER_DETAILS = 'v1/user',
   REFRESH_TOKEN = 'v1/auth/refresh-token',
   REQUEST_PASSWORD_RESET = 'v1/auth/request-password-reset',
-  RESET_PASSWORD = 'v1/auth/reset-password'
+  RESET_PASSWORD = 'v1/auth/reset-password',
+  SEND_VERIFICATION = 'v1/auth/send-verification-email',
+  VERIFY_EMAIL = 'v1/auth/verify-email'
 }
 
 export enum USERURLS {

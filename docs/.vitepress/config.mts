@@ -1,5 +1,5 @@
 import { useSidebar } from 'vitepress-openapi'
-import spec from '../public/openapi.json' assert { type: 'json' }
+import spec from '../src/openapi.json' assert { type: 'json' }
 import { defineConfigWithTheme } from 'vitepress'
 
 const sidebar = useSidebar({
@@ -69,10 +69,6 @@ export default defineConfigWithTheme({
           { text: 'Terminal', link: '/terminal/index.md' },
           { text: "File Manager", link: "/file-manager/index.md" },
           { text: "Hosting Projects", link: "/self-host/index.md" },
-          { text: "Marketplace", link: "/marketplace/index.md" },
-          { text: "Cron Jobs", link: "/cron-jobs/index.md" },
-          { text: "Firewall", link: "/firewall/index.md" },
-          { text: "Mail", link: "/mail/index.md" },
         ]
       },
       {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/domain/types"
-
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
@@ -19,27 +19,36 @@ import (
 // The error is either ErrDomainAlreadyExists, or any error that occurred
 // while creating the domain in the storage layer.
 func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID string) (types.CreateDomainResponse, error) {
-	fmt.Printf("create domain request received: domain_name=%s, user_id=%s\n", req.Name, userID)
+	s.logger.Log(logger.Info, "create domain request received", fmt.Sprintf("domain_name=%s, user_id=%s", req.Name, userID))
 
 	_, err := uuid.Parse(userID)
 	if err != nil {
-		fmt.Printf("invalid user id: user_id=%s\n", userID)
+		s.logger.Log(logger.Error, "invalid user id", fmt.Sprintf("user_id=%s", userID))
 		return types.CreateDomainResponse{}, types.ErrInvalidUserID
 	}
 
 	if userID == "" {
-		fmt.Printf("invalid user id: user_id=%s\n", userID)
+		s.logger.Log(logger.Error, "invalid user id", fmt.Sprintf("user_id=%s", userID))
 		return types.CreateDomainResponse{}, types.ErrInvalidUserID
 	}
 
-	existing_domain, err := s.storage.GetDomainByName(req.Name)
+	tx, err := s.storage.BeginTx()
 	if err != nil {
-		fmt.Printf("error while retrieving domain: error=%s\n", err.Error())
+		s.logger.Log(logger.Error, "failed to start transaction", err.Error())
+		return types.CreateDomainResponse{}, types.ErrFailedToCreateDomain
+	}
+	defer tx.Rollback()
+
+	txStorage := s.storage.WithTx(tx)
+
+	existing_domain, err := txStorage.GetDomainByName(req.Name)
+	if err != nil {
+		s.logger.Log(logger.Error, "error while retrieving domain", err.Error())
 		return types.CreateDomainResponse{}, err
 	}
 
 	if existing_domain != nil {
-		fmt.Printf("domain already exists: domain_name=%s\n", req.Name)
+		s.logger.Log(logger.Error, "domain already exists", fmt.Sprintf("domain_name=%s", req.Name))
 		return types.CreateDomainResponse{}, types.ErrDomainAlreadyExists
 	}
 
@@ -53,9 +62,14 @@ func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID stri
 		OrganizationID: req.OrganizationID,
 	}
 
-	if err := s.storage.CreateDomain(domain); err != nil {
-		fmt.Printf("error while creating domain: error=%s\n", err.Error())
+	if err := txStorage.CreateDomain(domain); err != nil {
+		s.logger.Log(logger.Error, "error while creating domain", err.Error())
 		return types.CreateDomainResponse{}, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		s.logger.Log(logger.Error, "failed to commit transaction", err.Error())
+		return types.CreateDomainResponse{}, types.ErrFailedToCreateDomain
 	}
 
 	return types.CreateDomainResponse{ID: domain.ID.String()}, nil

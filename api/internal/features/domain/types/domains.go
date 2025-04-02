@@ -26,6 +26,9 @@ var (
 	ErrAccessDenied                            = errors.New("access denied")
 	ErrDomainNameInvalid                       = errors.New("invalid domain name")
 	ErrNoRoleAssigned                          = errors.New("no role assigned")
+	ErrFailedToCreateDomain                    = errors.New("failed to create domain")
+	ErrFailedToDeleteDomain                    = errors.New("failed to delete domain")
+	ErrFailedToUpdateDomain                    = errors.New("failed to update domain")
 )
 
 type CreateDomainRequest struct {

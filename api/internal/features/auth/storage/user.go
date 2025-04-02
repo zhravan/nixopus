@@ -29,7 +29,6 @@ type AuthRepository interface {
 	WithTx(tx bun.Tx) AuthRepository
 }
 
-
 func (u *UserStorage) WithTx(tx bun.Tx) AuthRepository {
 	return &UserStorage{
 		DB:  u.DB,

@@ -26,23 +26,41 @@ func (s *DomainsService) UpdateDomain(newName, userID, domainID string) (*shared
 		return nil, types.ErrInvalidDomainID
 	}
 
-	existing, err := s.storage.GetDomain(domainID)
+	tx, err := s.storage.BeginTx()
 	if err != nil {
+		s.logger.Log(logger.Error, "failed to start transaction", err.Error())
+		return nil, types.ErrFailedToUpdateDomain
+	}
+	defer tx.Rollback()
+
+	txStorage := s.storage.WithTx(tx)
+
+	existing, err := txStorage.GetDomain(domainID)
+	if err != nil {
+		s.logger.Log(logger.Error, "error while retrieving domain", err.Error())
 		return nil, err
 	}
 
 	if existing == nil {
+		s.logger.Log(logger.Error, "domain not found", domainID)
 		return nil, types.ErrDomainNotFound
 	}
 
-	err = s.storage.UpdateDomain(domainID, newName)
+	err = txStorage.UpdateDomain(domainID, newName)
 	if err != nil {
+		s.logger.Log(logger.Error, "error while updating domain", err.Error())
 		return nil, err
 	}
 
-	updated, err := s.storage.GetDomain(domainID)
+	updated, err := txStorage.GetDomain(domainID)
 	if err != nil {
+		s.logger.Log(logger.Error, "error while retrieving updated domain", err.Error())
 		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		s.logger.Log(logger.Error, "failed to commit transaction", err.Error())
+		return nil, types.ErrFailedToUpdateDomain
 	}
 
 	return updated, nil

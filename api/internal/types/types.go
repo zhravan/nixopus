@@ -11,6 +11,7 @@ type Config struct {
 	Debug       bool
 	MaxIdleConn int
 	DB_PORT     string
+	RedisURL    string
 }
 
 type ClientContext string

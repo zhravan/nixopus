@@ -1,10 +1,14 @@
 package notification
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net/smtp"
+	"os"
+	"path/filepath"
 	"time"
 
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
@@ -104,6 +108,10 @@ func (m *NotificationManager) SendEmail(userId string, body string) {
 	log.Println("Successfully sended to " + to)
 }
 
+type ResetEmailData struct {
+	ResetURL string
+}
+
 func (m *NotificationManager) SendPasswordResetEmail(userID string, token string) {
 	smtpConfig, err := m.GetSmtp(userID)
 	if err != nil {
@@ -111,29 +119,40 @@ func (m *NotificationManager) SendPasswordResetEmail(userID string, token string
 		return
 	}
 
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("error getting working directory: %s", err)
+		return
+	}
+
+	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/password_reset.html"))
+	if err != nil {
+		log.Printf("template parsing error: %s", err)
+		return
+	}
+
+	resetURL := fmt.Sprintf("http://localhost:3000/reset-password?token=%s", token)
+	data := ResetEmailData{
+		ResetURL: resetURL,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Printf("template execution error: %s", err)
+		return
+	}
+
 	from := smtpConfig.Username
 	to := []string{smtpConfig.FromEmail}
 	subject := "Password Reset Request"
 
-	body := fmt.Sprintf(`
-		Hello,
-		
-		You have requested to reset your password. Click the link below to reset it:
-		
-		%s/reset-password?token=%s
-		
-		If you didn't request this, please ignore this email.
-		
-		Best regards,
-		Nixopus Team
-	`, "http://localhost:3000", token)
-
 	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
 		"From: %s\r\n"+
 		"To: %s\r\n"+
-		"Content-Type: text/plain; charset=UTF-8\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: text/html; charset=UTF-8\r\n"+
 		"\r\n"+
-		"%s", subject, from, smtpConfig.FromEmail, body))
+		"%s", subject, from, smtpConfig.FromEmail, body.String()))
 
 	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
 	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)

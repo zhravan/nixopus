@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { StopExecution } from './stopExecution';
-import { useWebSocket } from '@/hooks/socket_provider';
+import { useWebSocket } from '@/hooks/socket-provider';
 
 const CTRL_C = '\x03';
 

@@ -4,8 +4,8 @@ import GitHubAppSetup from './components/github-connector/github-app-setup';
 import ListRepositories from './components/github-repositories/list-repositories';
 import AppItem, { AppItemSkeleton } from './components/application';
 import useGetDeployedApplications from './hooks/use_get_deployed_applications';
-import PaginationWrapper from '@/components/pagination';
-import { DahboardUtilityHeader } from '@/components/dashboard-page-header';
+import PaginationWrapper from '@/components/ui/pagination';
+import { DahboardUtilityHeader } from '@/components/layout/dashboard-page-header';
 import { Application } from '@/redux/types/applications';
 import { Button } from '@/components/ui/button';
 

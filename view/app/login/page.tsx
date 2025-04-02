@@ -1,5 +1,5 @@
 'use client';
-import { LoginForm } from '@/components/login-form';
+import { LoginForm } from '@/components/features/login-form';
 import useLogin from './hooks/use-login';
 import { ErrorBoundary } from '@/components/ui/error-handler';
 import { useAppSelector } from '@/redux/hooks';

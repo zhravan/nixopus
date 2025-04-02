@@ -10,7 +10,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { User as UserType } from '@/redux/types/user';
-import { ModeToggle } from '@/components/theme-toggler';
+import { ModeToggle } from '@/components/ui/theme-toggler';
 import { useSendVerificationEmailMutation } from '@/redux/services/users/authApi';
 
 interface AccountSectionProps {

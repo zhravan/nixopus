@@ -5,7 +5,7 @@ interface BreadcrumbItem {
   label: string;
 }
 
-function use_bread_crumbs() {
+function useBreadCrumbs() {
   const pathname = usePathname();
 
   const getBreadcrumbs = (): BreadcrumbItem[] => {
@@ -24,4 +24,4 @@ function use_bread_crumbs() {
   return { getBreadcrumbs };
 }
 
-export default use_bread_crumbs;
+export default useBreadCrumbs;

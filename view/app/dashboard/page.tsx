@@ -1,15 +1,15 @@
 'use client';
 
 import React from 'react';
-import use_monitor from './hooks/use_monitor';
-import ContainersTable from './components/container_table';
-import SystemStats from './components/system_stats';
+import useMonitor from './hooks/use-monitor';
+import ContainersTable from './components/containers/container-table';
+import SystemStats from './components/system/system-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package } from 'lucide-react';
-import DiskUsageCard from './components/diisk_usage';
+import DiskUsageCard from './components/system/disk-usage';
 
 function DashboardPage() {
-  const { containersData, systemStats } = use_monitor();
+  const { containersData, systemStats } = useMonitor();
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-6xl">

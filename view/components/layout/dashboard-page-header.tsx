@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import React from 'react';
-import { SortOption, SortSelect } from './sort-selector';
-import { SearchBar } from './search-bar';
+import { SortOption, SortSelect } from '@/components/ui/sort-selector';
+import { SearchBar } from '@/components/ui/search-bar';
 import { SortConfig } from '@/hooks/use-searchable';
 
 interface DashboardPageHeaderProps {

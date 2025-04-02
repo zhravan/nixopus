@@ -1,4 +1,4 @@
-import { useWebSocket } from '@/hooks/socket_provider';
+import { useWebSocket } from '@/hooks/socket-provider';
 import { SOCKET_EVENTS } from '@/redux/api-conf';
 import { useGetApplicationByIdQuery } from '@/redux/services/deploy/applicationsApi';
 import { SubscribeToTopic } from '@/redux/sockets/socket';

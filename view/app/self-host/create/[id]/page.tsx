@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import useFindRepository from '../../hooks/use_find_repository';
-import DashboardPageHeader from '@/components/dashboard-page-header';
+import DashboardPageHeader from '@/components/layout/dashboard-page-header';
 import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import { DeployForm } from '../../components/create-form/deploy-form';
 

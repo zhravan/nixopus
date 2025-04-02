@@ -16,6 +16,11 @@ import (
 
 func TestCreateDomainSuccess(t *testing.T) {
 	mockStorage := NewMockDomainStorage()
+	mockTx := &mockTx{}
+	mockTx.On("Commit").Return(nil)
+	mockTx.On("Rollback").Return(nil)
+	mockStorage.On("BeginTx").Return(mockTx, nil)
+	mockStorage.On("WithTx", mockTx).Return(mockStorage)
 	mockStorage.On("GetDomainByName", mock.Anything).Return(nil, nil)
 	mockStorage.On("CreateDomain", mock.Anything).Return(nil)
 
@@ -29,6 +34,11 @@ func TestCreateDomainSuccess(t *testing.T) {
 
 func TestCreateDomainAlreadyExists(t *testing.T) {
 	mockStorage := NewMockDomainStorage()
+	mockTx := &mockTx{}
+	mockTx.On("Commit").Return(nil)
+	mockTx.On("Rollback").Return(nil)
+	mockStorage.On("BeginTx").Return(mockTx, nil)
+	mockStorage.On("WithTx", mockTx).Return(mockStorage)
 	mockStorage.On("GetDomainByName", "example.com").Return(&shared_types.Domain{}, nil)
 
 	service := service.NewDomainsService(nil, context.Background(), logger.NewLogger(), mockStorage)
@@ -41,6 +51,11 @@ func TestCreateDomainAlreadyExists(t *testing.T) {
 
 func TestCreateDomainInvalidUserID(t *testing.T) {
 	mockStorage := NewMockDomainStorage()
+	mockTx := &mockTx{}
+	mockTx.On("Commit").Return(nil)
+	mockTx.On("Rollback").Return(nil)
+	mockStorage.On("BeginTx").Return(mockTx, nil)
+	mockStorage.On("WithTx", mockTx).Return(mockStorage)
 	mockStorage.On("GetDomainByName", "example.com").Return(nil, nil)
 
 	service := service.NewDomainsService(nil, context.Background(), logger.NewLogger(), mockStorage)
@@ -52,6 +67,11 @@ func TestCreateDomainInvalidUserID(t *testing.T) {
 
 func TestCreateDomainStorageError(t *testing.T) {
 	mockStorage := NewMockDomainStorage()
+	mockTx := &mockTx{}
+	mockTx.On("Commit").Return(nil)
+	mockTx.On("Rollback").Return(nil)
+	mockStorage.On("BeginTx").Return(mockTx, nil)
+	mockStorage.On("WithTx", mockTx).Return(mockStorage)
 	mockStorage.On("GetDomainByName", mock.Anything).Return(nil, nil)
 	mockStorage.On("CreateDomain", mock.Anything).Return(errors.New("storage error"))
 
@@ -61,4 +81,16 @@ func TestCreateDomainStorageError(t *testing.T) {
 	userID := uuid.New().String()
 	_, err := service.CreateDomain(req, userID)
 	assert.NotNil(t, err)
+}
+
+func TestCreateDomainTransactionError(t *testing.T) {
+	mockStorage := NewMockDomainStorage()
+	mockStorage.On("BeginTx").Return(nil, errors.New("transaction error"))
+
+	service := service.NewDomainsService(nil, context.Background(), logger.NewLogger(), mockStorage)
+
+	req := types.CreateDomainRequest{Name: "example.com"}
+	userID := uuid.New().String()
+	_, err := service.CreateDomain(req, userID)
+	assert.Equal(t, types.ErrFailedToCreateDomain, err)
 }

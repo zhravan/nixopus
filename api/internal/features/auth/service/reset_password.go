@@ -45,7 +45,6 @@ func (c *AuthService) ResetPassword(user *shared_types.User, reset_password_requ
 		return types.ErrInvalidResetToken
 	}
 
-
 	hashedPassword, err := utils.HashPassword(reset_password_request.Password)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToHashPassword.Error(), err.Error())

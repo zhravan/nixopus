@@ -33,8 +33,8 @@ func CorsMiddleware(next http.Handler) http.Handler {
 		}
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token, Sec-WebSocket-Extensions, Sec-WebSocket-Key, Sec-WebSocket-Version")
-		w.Header().Set("Access-Control-Expose-Headers", "Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token, Sec-WebSocket-Extensions, Sec-WebSocket-Key, Sec-WebSocket-Version, X-Organization-Id")
+		w.Header().Set("Access-Control-Expose-Headers", "Authorization, X-Organization-Id")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Max-Age", "300")
 

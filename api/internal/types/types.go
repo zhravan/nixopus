@@ -19,6 +19,7 @@ type contextKey string
 const UserContextKey contextKey = "user"
 const AuthTokenKey ClientContext = "auth_token"
 const DBContextKey ClientContext = "db"
+const OrganizationIDKey contextKey = "organization_id"
 
 type Payload struct {
 	Action string      `json:"action"`

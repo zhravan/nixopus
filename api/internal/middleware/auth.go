@@ -39,8 +39,30 @@ func AuthMiddleware(next http.Handler, app *storage.App) http.Handler {
 
 		log.Printf("User authenticated. ID: %s, Phone: %s", user.ID, user.Email)
 
+		organizationID := r.Header.Get("X-Organization-Id")
+		if organizationID == "" {
+			utils.SendErrorResponse(w, "No organization ID provided", http.StatusBadRequest)
+			return
+		}
+
+		userStorage := user_storage.UserStorage{
+			DB:  app.Store.DB,
+			Ctx: app.Ctx,
+		}
+		belongsToOrg, err := userStorage.UserBelongsToOrganization(user.ID.String(), organizationID)
+		if err != nil {
+			log.Printf("Error checking organization membership: %v", err)
+			utils.SendErrorResponse(w, "Error verifying organization membership", http.StatusInternalServerError)
+			return
+		}
+		if !belongsToOrg {
+			utils.SendErrorResponse(w, "User does not belong to the specified organization", http.StatusForbidden)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), types.UserContextKey, user)
 		ctx = context.WithValue(ctx, types.AuthTokenKey, token)
+		ctx = context.WithValue(ctx, types.OrganizationIDKey, organizationID)
 
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)

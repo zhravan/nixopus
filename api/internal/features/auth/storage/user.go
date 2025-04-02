@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -8,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
-	"golang.org/x/net/context"
 
 	userTypes "github.com/raghavyuva/nixopus-api/internal/features/auth/types"
 )
@@ -288,4 +288,16 @@ func (u *UserStorage) UpdateUserEmailVerification(userID string, verified bool) 
 
 	log.Printf("Successfully updated email verification status for user %s", userID)
 	return nil
+}
+
+// UserBelongsToOrganization checks if a user belongs to a specific organization
+func (u *UserStorage) UserBelongsToOrganization(userID string, organizationID string) (bool, error) {
+	count, err := u.getDB().NewSelect().
+		Model((*types.OrganizationUsers)(nil)).
+		Where("user_id = ? AND organization_id = ?", userID, organizationID).
+		Count(context.Background())
+	if err != nil {
+		return false, fmt.Errorf("failed to check organization membership: %w", err)
+	}
+	return count > 0, nil
 }

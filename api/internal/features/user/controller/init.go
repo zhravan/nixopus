@@ -60,6 +60,6 @@ func (c *UserController) parseAndValidate(w http.ResponseWriter, r *http.Request
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return false
 	}
-	
+
 	return true
 }

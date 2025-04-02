@@ -25,8 +25,16 @@ func (c *AuthService) ResetPassword(user *shared_types.User, reset_password_requ
 		return types.ErrInvalidResetToken
 	}
 
-	user, err := c.storage.GetResetToken(user.ResetToken)
+	tx, err := c.storage.BeginTx()
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to start transaction", err.Error())
+		return types.ErrFailedToUpdateUser
+	}
+	defer tx.Rollback()
 
+	txStorage := c.storage.WithTx(tx)
+
+	user, err = txStorage.GetResetToken(user.ResetToken)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrInvalidResetToken.Error(), err.Error())
 		return types.ErrInvalidResetToken
@@ -54,9 +62,14 @@ func (c *AuthService) ResetPassword(user *shared_types.User, reset_password_requ
 	user.Password = hashedPassword
 	user.ResetToken = ""
 
-	err = c.storage.UpdateUser(user)
+	err = txStorage.UpdateUser(user)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToUpdateUser.Error(), err.Error())
+		return types.ErrFailedToUpdateUser
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.logger.Log(logger.Error, "failed to commit transaction", err.Error())
 		return types.ErrFailedToUpdateUser
 	}
 

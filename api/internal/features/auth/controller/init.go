@@ -35,23 +35,23 @@ func NewAuthController(
 	}
 }
 
-func (c *AuthController) parseAndValidate(w http.ResponseWriter, r *http.Request, req any) bool {
+func (c *AuthController) parseAndValidate(w http.ResponseWriter, r *http.Request, req any) error {
 	if err := c.validator.ValidateRequest(req); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
-		return false
+		return err
 	}
 
 	if r.URL.Path == "/api/v1/auth/login" {
-		return true
+		return nil
 	}
 
 	user := utils.GetUser(w, r)
 	if err := c.validator.AccessValidator(w, r, user); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }
 
 func (c *AuthController) Notify(payloadType notification.NotificationPayloadType, user *shared_types.User, r *http.Request) {

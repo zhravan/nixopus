@@ -43,9 +43,9 @@ func (c *AuthController) CreateUser(s fuego.ContextWithBody[types.RegisterReques
 	}
 
 	w, r := s.Response(), s.Request()
-	if !c.parseAndValidate(w, r, &registration_request) {
+	if err := c.parseAndValidate(w, r, &registration_request); err != nil {
 		return nil, fuego.HTTPError{
-			Err:    nil,
+			Err:    err,
 			Status: http.StatusBadRequest,
 		}
 	}

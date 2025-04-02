@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/raghavyuva/nixopus-api/internal/cache"
 	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
@@ -18,7 +19,7 @@ import (
 // AuthMiddleware is a middleware that checks if the request has a valid
 // authorization token. If the token is valid, it adds both the user and
 // the authenticated client to the request context.
-func AuthMiddleware(next http.Handler, app *storage.App) http.Handler {
+func AuthMiddleware(next http.Handler, app *storage.App, cache *cache.Cache) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		if token == "" {
@@ -30,7 +31,7 @@ func AuthMiddleware(next http.Handler, app *storage.App) http.Handler {
 			token = token[7:]
 		}
 
-		user, err := verifyToken(token, app.Store.DB, app.Ctx)
+		user, err := verifyToken(token, app.Store.DB, app.Ctx, cache)
 		if err != nil {
 			log.Printf("Auth error: %v", err)
 			utils.SendErrorResponse(w, "Invalid authorization token", http.StatusUnauthorized)
@@ -45,16 +46,28 @@ func AuthMiddleware(next http.Handler, app *storage.App) http.Handler {
 			return
 		}
 
-		userStorage := user_storage.UserStorage{
-			DB:  app.Store.DB,
-			Ctx: app.Ctx,
-		}
-		belongsToOrg, err := userStorage.UserBelongsToOrganization(user.ID.String(), organizationID)
+		belongsToOrg, err := cache.GetOrgMembership(r.Context(), user.ID.String(), organizationID)
 		if err != nil {
-			log.Printf("Error checking organization membership: %v", err)
-			utils.SendErrorResponse(w, "Error verifying organization membership", http.StatusInternalServerError)
-			return
+			log.Printf("Cache error for org membership: %v", err)
 		}
+
+		if !belongsToOrg {
+			userStorage := user_storage.UserStorage{
+				DB:  app.Store.DB,
+				Ctx: app.Ctx,
+			}
+			belongsToOrg, err = userStorage.UserBelongsToOrganization(user.ID.String(), organizationID)
+			if err != nil {
+				log.Printf("Error checking organization membership: %v", err)
+				utils.SendErrorResponse(w, "Error verifying organization membership", http.StatusInternalServerError)
+				return
+			}
+
+			if err := cache.SetOrgMembership(r.Context(), user.ID.String(), organizationID, belongsToOrg); err != nil {
+				log.Printf("Error caching org membership: %v", err)
+			}
+		}
+
 		if !belongsToOrg {
 			utils.SendErrorResponse(w, "User does not belong to the specified organization", http.StatusForbidden)
 			return
@@ -70,7 +83,7 @@ func AuthMiddleware(next http.Handler, app *storage.App) http.Handler {
 }
 
 // verifyToken validates a JWT token and returns the associated user
-func verifyToken(tokenString string, db *bun.DB, ctx context.Context) (*types.User, error) {
+func verifyToken(tokenString string, db *bun.DB, ctx context.Context, cache *cache.Cache) (*types.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -93,13 +106,25 @@ func verifyToken(tokenString string, db *bun.DB, ctx context.Context) (*types.Us
 		if !ok {
 			return nil, fmt.Errorf("invalid token claims")
 		}
-		user_storage := user_storage.UserStorage{
-			DB:  db,
-			Ctx: ctx,
-		}
-		user, err := user_storage.FindUserByEmail(email)
+
+		user, err := cache.GetUser(ctx, email)
 		if err != nil {
-			return nil, err
+			log.Printf("Cache error for user: %v", err)
+		}
+
+		if user == nil {
+			user_storage := user_storage.UserStorage{
+				DB:  db,
+				Ctx: ctx,
+			}
+			user, err = user_storage.FindUserByEmail(email)
+			if err != nil {
+				return nil, err
+			}
+
+			if err := cache.SetUser(ctx, email, user); err != nil {
+				log.Printf("Error caching user: %v", err)
+			}
 		}
 
 		return user, nil

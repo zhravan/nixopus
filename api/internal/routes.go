@@ -9,6 +9,7 @@ import (
 	"github.com/go-fuego/fuego/option"
 	"github.com/go-fuego/fuego/param"
 	"github.com/joho/godotenv"
+	"github.com/raghavyuva/nixopus-api/internal/cache"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	authService "github.com/raghavyuva/nixopus-api/internal/features/auth/service"
 	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
@@ -34,12 +35,14 @@ import (
 )
 
 type Router struct {
-	app *storage.App
+	app   *storage.App
+	cache *cache.Cache
 }
 
-func NewRouter(app *storage.App) *Router {
+func NewRouter(app *storage.App, cache *cache.Cache) *Router {
 	return &Router{
-		app: app,
+		app:   app,
+		cache: cache,
 	}
 }
 
@@ -83,7 +86,7 @@ func (router *Router) Routes() {
 	router.AuthRoutes(authController, authGroup)
 
 	fuego.Use(server, func(next http.Handler) http.Handler {
-		return middleware.AuthMiddleware(next, router.app)
+		return middleware.AuthMiddleware(next, router.app, router.cache)
 	})
 
 	s := fuego.Group(server, "/api/v1", option.Header("Authorization", "Bearer token", param.Required()))

@@ -17,10 +17,30 @@ func (c *AuthService) Logout(refreshToken string) error {
 		return types.ErrRefreshTokenIsRequired
 	}
 
-	token, err := c.storage.GetRefreshToken(refreshToken)
+	tx, err := c.storage.BeginTx()
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to start transaction", err.Error())
+		return types.ErrFailedToUpdateUser
+	}
+	defer tx.Rollback()
+
+	txStorage := c.storage.WithTx(tx)
+
+	token, err := txStorage.GetRefreshToken(refreshToken)
 	if err != nil {
 		c.logger.Log(logger.Error, "Failed to get refresh token", err.Error())
 		return err
 	}
-	return c.storage.RevokeRefreshToken(token.Token)
+
+	if err := txStorage.RevokeRefreshToken(token.Token); err != nil {
+		c.logger.Log(logger.Error, "Failed to revoke refresh token", err.Error())
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.logger.Log(logger.Error, "failed to commit transaction", err.Error())
+		return types.ErrFailedToUpdateUser
+	}
+
+	return nil
 }

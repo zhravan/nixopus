@@ -13,6 +13,7 @@ import (
 type UserStorage struct {
 	DB  *bun.DB
 	Ctx context.Context
+	tx  *bun.Tx
 }
 
 type AuthRepository interface {
@@ -24,11 +25,33 @@ type AuthRepository interface {
 	GetRefreshToken(refreshToken string) (*types.RefreshToken, error)
 	GetResetToken(token string) (*types.User, error)
 	RevokeRefreshToken(refreshToken string) error
+	BeginTx() (bun.Tx, error)
+	WithTx(tx bun.Tx) AuthRepository
+}
+
+
+func (u *UserStorage) WithTx(tx bun.Tx) AuthRepository {
+	return &UserStorage{
+		DB:  u.DB,
+		Ctx: u.Ctx,
+		tx:  &tx,
+	}
+}
+
+func (u *UserStorage) BeginTx() (bun.Tx, error) {
+	return u.DB.BeginTx(u.Ctx, nil)
+}
+
+func (u *UserStorage) getDB() bun.IDB {
+	if u.tx != nil {
+		return *u.tx
+	}
+	return u.DB
 }
 
 func (u *UserStorage) FindUserByEmail(email string) (*types.User, error) {
 	user := &types.User{}
-	err := u.DB.NewSelect().
+	err := u.getDB().NewSelect().
 		Model(user).
 		Where("email = ?", email).
 		Relation("Organizations").
@@ -37,7 +60,7 @@ func (u *UserStorage) FindUserByEmail(email string) (*types.User, error) {
 		return nil, err
 	}
 
-	err = u.DB.NewSelect().
+	err = u.getDB().NewSelect().
 		Model(&user.OrganizationUsers).
 		Where("user_id = ?", user.ID).
 		Relation("Role").
@@ -49,7 +72,7 @@ func (u *UserStorage) FindUserByEmail(email string) (*types.User, error) {
 
 	for i, orgUser := range user.OrganizationUsers {
 		if orgUser.Role != nil {
-			err = u.DB.NewSelect().
+			err = u.getDB().NewSelect().
 				Model(&user.OrganizationUsers[i].Role.Permissions).
 				Join("JOIN role_permissions AS rp ON rp.permission_id = p.id").
 				Where("rp.role_id = ?", orgUser.Role.ID).
@@ -69,7 +92,7 @@ func (u *UserStorage) FindUserByEmail(email string) (*types.User, error) {
 // fails.
 func (u *UserStorage) FindUserByID(id string) (*types.User, error) {
 	user := &types.User{}
-	err := u.DB.NewSelect().Model(user).Where("id = ?", id).Scan(u.Ctx)
+	err := u.getDB().NewSelect().Model(user).Where("id = ?", id).Scan(u.Ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +104,7 @@ func (u *UserStorage) FindUserByID(id string) (*types.User, error) {
 // The function takes a pointer to a `types.User` struct as an argument.
 // The function returns an error if the query fails.
 func (u *UserStorage) CreateUser(user *types.User) error {
-	_, err := u.DB.NewInsert().Model(user).Exec(u.Ctx)
+	_, err := u.getDB().NewInsert().Model(user).Exec(u.Ctx)
 	return err
 }
 
@@ -93,7 +116,7 @@ func (u *UserStorage) CreateUser(user *types.User) error {
 //
 // Returns an error if the update query fails.
 func (u *UserStorage) UpdateUser(user *types.User) error {
-	_, err := u.DB.NewUpdate().Model(user).Where("id = ?", user.ID).Exec(u.Ctx)
+	_, err := u.getDB().NewUpdate().Model(user).Where("id = ?", user.ID).Exec(u.Ctx)
 	return err
 }
 
@@ -108,7 +131,7 @@ func (u *UserStorage) UpdateUser(user *types.User) error {
 // needed, as it helps verify the validity of the reset token.
 func (u *UserStorage) GetResetToken(token string) (*types.User, error) {
 	user := &types.User{}
-	err := u.DB.NewSelect().Model(user).Where("reset_token = ?", token).Scan(u.Ctx)
+	err := u.getDB().NewSelect().Model(user).Where("reset_token = ?", token).Scan(u.Ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +154,7 @@ func (u *UserStorage) CreateRefreshToken(userID uuid.UUID) (*types.RefreshToken,
 		CreatedAt: time.Now(),
 	}
 
-	_, err := u.DB.NewInsert().Model(refreshToken).Exec(u.Ctx)
+	_, err := u.getDB().NewInsert().Model(refreshToken).Exec(u.Ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to store refresh token: %w", err)
 	}
@@ -148,7 +171,7 @@ func (u *UserStorage) CreateRefreshToken(userID uuid.UUID) (*types.RefreshToken,
 // fails, or if the token has expired or been revoked, it returns an error.
 func (u *UserStorage) GetRefreshToken(token string) (*types.RefreshToken, error) {
 	var refreshToken types.RefreshToken
-	err := u.DB.NewSelect().Model(&refreshToken).Where("token = ?", token).Scan(u.Ctx)
+	err := u.getDB().NewSelect().Model(&refreshToken).Where("token = ?", token).Scan(u.Ctx)
 	if err != nil {
 		return nil, fmt.Errorf("refresh token not found: %w", err)
 	}
@@ -172,7 +195,7 @@ func (u *UserStorage) GetRefreshToken(token string) (*types.RefreshToken, error)
 // database.
 func (u *UserStorage) RevokeRefreshToken(token string) error {
 	now := time.Now()
-	_, err := u.DB.NewUpdate().
+	_, err := u.getDB().NewUpdate().
 		Model(&types.RefreshToken{}).
 		Set("revoked_at = ?", now).
 		Where("token = ?", token).

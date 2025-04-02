@@ -43,12 +43,21 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 		false,
 	)
 
-	if err := c.storage.CreateUser(&user); err != nil {
+	tx, err := c.storage.BeginTx()
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to start transaction", err.Error())
+		return types.AuthResponse{}, types.ErrFailedToRegisterUser
+	}
+	defer tx.Rollback()
+
+	txStorage := c.storage.WithTx(tx)
+
+	if err := txStorage.CreateUser(&user); err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToRegisterUser.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToRegisterUser
 	}
 
-	refreshToken, err := c.storage.CreateRefreshToken(user.ID)
+	refreshToken, err := txStorage.CreateRefreshToken(user.ID)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateRefreshToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateToken
@@ -82,6 +91,11 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 			c.logger.Log(logger.Error, types.ErrFailedToAddUserToOrganization.Error(), err.Error())
 			return types.AuthResponse{}, types.ErrFailedToAddUserToOrganization
 		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.logger.Log(logger.Error, "failed to commit transaction", err.Error())
+		return types.AuthResponse{}, types.ErrFailedToRegisterUser
 	}
 
 	return types.AuthResponse{

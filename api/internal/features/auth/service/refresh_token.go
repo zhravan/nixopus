@@ -17,14 +17,23 @@ func (c *AuthService) RefreshToken(refreshToken types.RefreshTokenRequest) (type
 		return types.AuthResponse{}, types.ErrRefreshTokenIsRequired
 	}
 
+	tx, err := c.storage.BeginTx()
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to start transaction", err.Error())
+		return types.AuthResponse{}, types.ErrFailedToCreateToken
+	}
+	defer tx.Rollback()
+
+	txStorage := c.storage.WithTx(tx)
+
 	c.logger.Log(logger.Info, "refreshing token", refreshToken.RefreshToken)
-	token, err := c.storage.GetRefreshToken(refreshToken.RefreshToken)
+	token, err := txStorage.GetRefreshToken(refreshToken.RefreshToken)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrInvalidRefreshToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrInvalidRefreshToken
 	}
 
-	user, err := c.storage.FindUserByID(token.UserID.String())
+	user, err := txStorage.FindUserByID(token.UserID.String())
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrUserNotFound.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrUserNotFound
@@ -36,11 +45,20 @@ func (c *AuthService) RefreshToken(refreshToken types.RefreshTokenRequest) (type
 		return types.AuthResponse{}, types.ErrFailedToCreateToken
 	}
 
-	c.storage.RevokeRefreshToken(token.Token)
-	newRefreshToken, err := c.storage.CreateRefreshToken(user.ID)
+	if err := txStorage.RevokeRefreshToken(token.Token); err != nil {
+		c.logger.Log(logger.Error, "failed to revoke refresh token", err.Error())
+		return types.AuthResponse{}, types.ErrFailedToCreateRefreshToken
+	}
+
+	newRefreshToken, err := txStorage.CreateRefreshToken(user.ID)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateRefreshToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateRefreshToken
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.logger.Log(logger.Error, "failed to commit transaction", err.Error())
+		return types.AuthResponse{}, types.ErrFailedToCreateToken
 	}
 
 	return types.AuthResponse{

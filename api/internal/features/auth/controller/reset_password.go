@@ -21,9 +21,9 @@ func (c *AuthController) ResetPassword(s fuego.ContextWithBody[types.ResetPasswo
 	}
 
 	w, r := s.Response(), s.Request()
-	if !c.parseAndValidate(w, r, &reset_password_request) {
+	if err := c.parseAndValidate(w, r, &reset_password_request); err != nil {
 		return shared_types.Response{}, fuego.HTTPError{
-			Err:    nil,
+			Err:    err,
 			Status: http.StatusBadRequest,
 		}
 	}

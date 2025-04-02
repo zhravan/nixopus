@@ -51,7 +51,6 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-
 type VerificationToken struct {
 	ID        uuid.UUID `bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
 	UserID    uuid.UUID `bun:"user_id,type:uuid,notnull"`

@@ -117,7 +117,6 @@ func (v *Validator) validateLogoutRequest(req types.LogoutRequest) error {
 		return types.ErrMissingRefreshToken
 	}
 
-	// Check if the refresh token is a valid UUID
 	if _, err := uuid.Parse(req.RefreshToken); err != nil {
 		return types.ErrInvalidRefreshToken
 	}
@@ -129,7 +128,6 @@ func (v *Validator) validateRefreshTokenRequest(req types.RefreshTokenRequest) e
 		return types.ErrMissingRefreshToken
 	}
 
-	// Check if the refresh token is a valid UUID
 	if _, err := uuid.Parse(req.RefreshToken); err != nil {
 		return types.ErrInvalidRefreshToken
 	}

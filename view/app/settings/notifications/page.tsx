@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import DashboardPageHeader from '@/components/dashboard-page-header';
+import DashboardPageHeader from '@/components/layout/dashboard-page-header';
 import NotificationPreferencesTab from './components/preferenceTab';
 import NotificationChannelsTab from './components/channelTab';
 import useNotificationSettings from '../hooks/use-notification-settings';

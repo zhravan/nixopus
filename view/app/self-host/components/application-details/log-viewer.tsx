@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Maximize2, Minimize2, Search, Download, RefreshCw, MoreHorizontal } from 'lucide-react';
 import './logViewer.css';
-import AceEditorComponent from '@/components/ace-editor';
+import AceEditorComponent from '@/components/ui/ace-editor';
 import useLogViewer, { LogViewerProps, LOG_LEVELS } from '../../hooks/use_log_viewer';
 
 function LogViewer({

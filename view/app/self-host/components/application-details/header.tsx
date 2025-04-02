@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Application } from '@/redux/types/applications';
-import { DeleteDialog } from '@/components/delete-dialog';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 import {
   useRedeployApplicationMutation,
   useRestartApplicationMutation

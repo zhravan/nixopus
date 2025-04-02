@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import UploadAvatar from '@/components/upload_avatar';
+import UploadAvatar from '@/components/ui/upload_avatar';
 import { User } from '@/redux/types/user';
 
 interface AvatarSectionProps {

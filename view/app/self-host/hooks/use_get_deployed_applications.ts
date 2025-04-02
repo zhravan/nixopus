@@ -1,4 +1,4 @@
-import { SortOption } from '@/components/sort-selector';
+import { SortOption } from '@/components/ui/sort-selector';
 import { useSearchable } from '@/hooks/use-searchable';
 import {
   useGetAllGithubConnectorQuery,

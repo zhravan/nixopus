@@ -1,5 +1,5 @@
 'use client';
-import { AppSidebar } from '@/components/app-sidebar';
+import { AppSidebar } from '@/components/layout/app-sidebar';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,9 +10,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useRouter } from 'next/navigation';
-import { CreateTeam } from './create-team';
+import { CreateTeam } from '@/components/features/create-team';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
-import use_bread_crumbs from '@/hooks/use_bread_crumbs';
+import useBreadCrumbs from '@/hooks/use-bread-crumbs';
 import React, { useEffect } from 'react';
 import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     handleTeamNameChange,
     handleTeamDescriptionChange
   } = useTeamSwitcher();
-  const { getBreadcrumbs } = use_bread_crumbs();
+  const { getBreadcrumbs } = useBreadCrumbs();
   const breadcrumbs = React.useMemo(() => getBreadcrumbs(), [getBreadcrumbs]);
   const { isTerminalOpen, toggleTerminal } = useTerminalState();
   const [TerminalPosition, setTerminalPosition] = React.useState(TERMINAL_POSITION.BOTTOM);

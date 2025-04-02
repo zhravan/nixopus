@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import { Folder, Home, Package, SettingsIcon } from 'lucide-react';
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
-import { TeamSwitcher } from '@/components/team-switcher';
+import { NavMain } from '@/components/layout/nav-main';
+import { NavUser } from '@/components/layout/nav-user';
+import { TeamSwitcher } from '@/components/ui/team-switcher';
 import {
   Sidebar,
   SidebarContent,

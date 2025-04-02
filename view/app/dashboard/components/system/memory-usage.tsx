@@ -3,7 +3,7 @@
 import React from 'react';
 import { BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SystemStatsType } from '../hooks/use_monitor';
+import { SystemStatsType } from '../../hooks/use-monitor';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface MemoryUsageCardProps {

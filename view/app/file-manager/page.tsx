@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import FileManagerSkeleton from './components/FileManagerSkeleton';
 import FileManagerHeader from './components/FileManagerHeader';
-import { SearchBar } from '@/components/search-bar';
+import { SearchBar } from '@/components/ui/search-bar';
 import { FileBreadCrumbs } from './components/FileBreadCrumbs';
 import FileSortMethods from './components/FileSortMethods';
 import FileManagerLayouts from './components/FileManagerLayoutSwitcher';

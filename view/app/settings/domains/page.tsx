@@ -1,5 +1,5 @@
 'use client';
-import DashboardPageHeader from '@/components/dashboard-page-header';
+import DashboardPageHeader from '@/components/layout/dashboard-page-header';
 import { Button } from '@/components/ui/button';
 import React from 'react';
 import DomainsTable from './components/domainsTable';

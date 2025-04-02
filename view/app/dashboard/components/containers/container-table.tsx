@@ -9,9 +9,9 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ContainerData } from '../hooks/use_monitor';
-import getStatusColor from '../utils/getStatusColor';
-import truncateId from '../utils/truncateId';
+import { ContainerData } from '../../hooks/use-monitor';
+import getStatusColor from '../utils/get-status-color';
+import truncateId from '../utils/truncate-id';
 
 const ContainersTable = ({ containersData }: { containersData: ContainerData[] }) => {
   const hasContainers = containersData && containersData.length > 0;

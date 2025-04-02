@@ -1,5 +1,5 @@
 'use client';
-import { useWebSocket } from '@/hooks/socket_provider';
+import { useWebSocket } from '@/hooks/socket-provider';
 import { useEffect, useState } from 'react';
 
 export type ContainerData = {

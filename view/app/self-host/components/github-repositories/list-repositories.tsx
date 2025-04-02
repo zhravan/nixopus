@@ -1,9 +1,9 @@
 import React from 'react';
 import { GithubRepository } from '@/redux/types/github';
 import useGithubRepoPagination from '../../hooks/use_github_repo_pagination';
-import { DahboardUtilityHeader } from '@/components/dashboard-page-header';
+import { DahboardUtilityHeader } from '@/components/layout/dashboard-page-header';
 import GithubRepositories, { GithubRepositoriesSkeletonLoader } from './repository-card';
-import PaginationWrapper from '@/components/pagination';
+import PaginationWrapper from '@/components/ui/pagination';
 
 function ListRepositories() {
   const {

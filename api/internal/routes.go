@@ -93,32 +93,55 @@ func (router *Router) Routes() {
 
 	userController := user.NewUserController(router.app.Store, router.app.Ctx, l)
 	userGroup := fuego.Group(s, "/user")
-
+	fuego.Use(userGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "user")
+	})
 	router.UserRoutes(userGroup, userController)
 
 	domainController := domain.NewDomainsController(router.app.Store, router.app.Ctx, l, notificationManager)
 	domainGroup := fuego.Group(s, "/domain")
 	domainsAllGroup := fuego.Group(s, "/domains")
+	fuego.Use(domainGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "domain")
+	})
+	fuego.Use(domainsAllGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "domain")
+	})
 	router.DomainRoutes(domainGroup, domainsAllGroup, domainController)
 
 	githubConnectorController := githubConnector.NewGithubConnectorController(router.app.Store, router.app.Ctx, l, notificationManager)
 	githubConnectorGroup := fuego.Group(s, "/github-connector")
+	fuego.Use(githubConnectorGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "github-connector")
+	})
 	router.GithubConnectorRoutes(githubConnectorGroup, githubConnectorController)
 
 	notifController := notificationController.NewNotificationController(router.app.Store, router.app.Ctx, l, notificationManager)
 	notificationGroup := fuego.Group(s, "/notification")
+	fuego.Use(notificationGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "notification")
+	})
 	router.NotificationRoutes(notificationGroup, notifController)
 
 	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l, notificationManager)
 	organizationGroup := fuego.Group(s, "/organizations")
+	fuego.Use(organizationGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "organization")
+	})
 	router.OrganizationRoutes(organizationGroup, organizationController)
 
 	fileManagerController := file_manager.NewFileManagerController(router.app.Ctx, l, notificationManager)
 	fileManagerGroup := fuego.Group(s, "/file-manager")
+	fuego.Use(fileManagerGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "file-manager")
+	})
 	fuego.Use(fileManagerGroup, middleware.IsAdmin)
 	router.FileManagerRoutes(fileManagerGroup, fileManagerController)
 
 	deployGroup := fuego.Group(s, "/deploy")
+	fuego.Use(deployGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "deploy")
+	})
 	router.DeployRoutes(deployGroup, deployController)
 
 	server.Run()
@@ -128,7 +151,6 @@ func (s *Router) BasicRoutes(fs *fuego.Server) {
 	fuego.Get(fs, "", health.HealthCheck)
 }
 
-// This is a special adapter that allows using a raw http.Handler with Fuego
 func (router *Router) WebSocketServer(f *fuego.Server, deployController *deploy.DeployController) {
 	wsServer, err := realtime.NewSocketServer(deployController, router.app.Store.DB, router.app.Ctx)
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -163,28 +162,4 @@ func (v *Validator) validateCreateUserRequest(createUserRequest types.RegisterRe
 	}
 
 	return nil
-}
-
-func (v *Validator) AccessValidator(w http.ResponseWriter, r *http.Request, user *shared_types.User) error {
-	path := r.URL.Path
-
-	// User has access to login, logout, refresh-token, and request-password-reset, reset-password (where they are the owner of the resource they are accessing to)
-	if path == "/api/v1/auth/login" || path == "/api/v1/auth/logout" || path == "/api/v1/auth/refresh-token" || path == "/api/v1/auth/request-password-reset" || path == "/api/v1/auth/reset-password" {
-		return nil
-	}
-
-	if user == nil {
-		return types.ErrInvalidAccess
-	}
-
-	fmt.Printf("User ID: %s, Path: %s\n", user.ID, path)
-	// for creating a new user the user should have admin role
-	if path == "/api/v1/auth/create-user" {
-		if user.Type != shared_types.RoleAdmin {
-			return types.ErrInvalidAccess
-		}
-		return nil
-	}
-
-	return types.ErrInvalidAccess
 }

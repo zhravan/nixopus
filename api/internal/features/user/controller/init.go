@@ -60,12 +60,6 @@ func (c *UserController) parseAndValidate(w http.ResponseWriter, r *http.Request
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return false
 	}
-
-	if err := c.validator.AccessValidator(w, r, user); err != nil {
-		c.logger.Log(logger.Error, err.Error(), err.Error())
-		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
-		return false
-	}
-
+	
 	return true
 }

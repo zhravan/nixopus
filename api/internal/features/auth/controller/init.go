@@ -9,7 +9,6 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
-	"github.com/raghavyuva/nixopus-api/internal/utils"
 )
 
 type AuthController struct {
@@ -43,12 +42,6 @@ func (c *AuthController) parseAndValidate(w http.ResponseWriter, r *http.Request
 
 	if r.URL.Path == "/api/v1/auth/login" {
 		return nil
-	}
-
-	user := utils.GetUser(w, r)
-	if err := c.validator.AccessValidator(w, r, user); err != nil {
-		c.logger.Log(logger.Error, err.Error(), err.Error())
-		return err
 	}
 
 	return nil

@@ -12,7 +12,6 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/notification/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification/validation"
 	shared_storage "github.com/raghavyuva/nixopus-api/internal/storage"
-	"github.com/raghavyuva/nixopus-api/internal/utils"
 )
 
 type NotificationController struct {
@@ -73,12 +72,7 @@ func (c *NotificationController) parseAndValidate(w http.ResponseWriter, r *http
 		return false
 	}
 
-	user := utils.GetUser(w, r)
-	if user == nil {
-		return false
-	}
-
-	if err := c.validator.ValidateRequest(req, user); err != nil {
+	if err := c.validator.ValidateRequest(req); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
 		return false
 	}

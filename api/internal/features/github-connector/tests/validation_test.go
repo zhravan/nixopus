@@ -21,9 +21,8 @@ func TestNewValidator(t *testing.T) {
 func TestValidateRequest_InvalidType(t *testing.T) {
 	mockRepo := NewMockGithubConnectorStorage()
 	validator := validation.NewValidator(mockRepo)
-	user := &shared_types.User{}
 
-	err := validator.ValidateRequest("invalid type", user)
+	err := validator.ValidateRequest("invalid type")
 
 	assert.Equal(t, types.ErrInvalidRequestType, err)
 }
@@ -31,8 +30,6 @@ func TestValidateRequest_InvalidType(t *testing.T) {
 func TestValidateCreateGithubConnectorRequest(t *testing.T) {
 	mockRepo := NewMockGithubConnectorStorage()
 	validator := validation.NewValidator(mockRepo)
-	user := &shared_types.User{}
-
 	tests := []struct {
 		name    string
 		request types.CreateGithubConnectorRequest
@@ -104,7 +101,7 @@ func TestValidateCreateGithubConnectorRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req := &tt.request
-			err := validator.ValidateRequest(req, user)
+			err := validator.ValidateRequest(req)
 			assert.Equal(t, tt.wantErr, err)
 		})
 	}
@@ -216,7 +213,7 @@ func TestValidateUpdateGithubConnectorRequest(t *testing.T) {
 
 			validator := validation.NewValidator(mockRepo)
 			req := &tt.request
-			err := validator.ValidateRequest(req, tt.user)
+			err := validator.ValidateRequest(req)
 
 			if tt.wantErr == nil {
 				assert.NoError(t, err)
@@ -233,11 +230,6 @@ func TestValidateUpdateGithubConnectorRequest(t *testing.T) {
 
 func TestValidateUpdateGithubConnectorRequest_WithErrorMock(t *testing.T) {
 	userID := uuid.New()
-	regularUser := &shared_types.User{
-		ID:   userID,
-		Type: "regular",
-	}
-
 	t.Run("Storage error", func(t *testing.T) {
 		mockRepo := NewMockGithubConnectorStorageWithErr()
 		mockRepo.On("GetAllConnectors", userID.String()).Return(nil, errors.New("failed to get all connectors")).Once()
@@ -247,7 +239,7 @@ func TestValidateUpdateGithubConnectorRequest_WithErrorMock(t *testing.T) {
 			InstallationID: "test-installation-id",
 		}
 
-		err := validator.ValidateRequest(req, regularUser)
+		err := validator.ValidateRequest(req)
 		assert.Error(t, err)
 		assert.Equal(t, "failed to get all connectors", err.Error())
 

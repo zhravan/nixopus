@@ -44,13 +44,6 @@ func (c *NotificationController) GetSmtp(f fuego.ContextNoBody) (*shared_types.R
 		}
 	}
 
-	if err := c.validator.AccessValidator("smtp", "read", user); err != nil {
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusForbidden,
-		}
-	}
-
 	SMTPConfigs, err := c.service.GetSmtp(user.ID.String(), orgID)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")

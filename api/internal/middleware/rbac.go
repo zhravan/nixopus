@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"net/http"
 	appStorage "github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
+	"net/http"
 )
 
 // RBACMiddleware is a middleware that checks if the user has the required permissions

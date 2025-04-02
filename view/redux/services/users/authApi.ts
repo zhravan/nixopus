@@ -50,6 +50,22 @@ export const authApi = createApi({
           body: { password }
         };
       }
+    }),
+    verifyEmail: builder.mutation<void, { token: string }>({
+      query({ token }) {
+        return {
+          url: `${AUTHURLS.VERIFY_EMAIL}?token=${token}`,
+          method: 'GET'
+        };
+      }
+    }),
+    sendVerificationEmail: builder.mutation<void, void>({
+      query() {
+        return {
+          url: AUTHURLS.SEND_VERIFICATION,
+          method: 'POST'
+        };
+      }
     })
   })
 });
@@ -58,5 +74,7 @@ export const {
   useLoginUserMutation,
   useGetUserDetailsQuery,
   useRefreshTokenMutation,
-  useResetPasswordMutation
+  useResetPasswordMutation,
+  useVerifyEmailMutation,
+  useSendVerificationEmailMutation
 } = authApi;

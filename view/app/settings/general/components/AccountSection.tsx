@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Mail, User, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, User, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { User as UserType } from '@/redux/types/user';
 import { ModeToggle } from '@/components/theme-toggler';
+import { useSendVerificationEmailMutation } from '@/redux/services/users/authApi';
 
 interface AccountSectionProps {
   username: string;
@@ -35,6 +36,21 @@ function AccountSection({
   handleUsernameChange,
   user
 }: AccountSectionProps) {
+  const [sendVerificationEmail, { isLoading: isSendingVerification }] =
+    useSendVerificationEmailMutation();
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
+
+  const handleSendVerification = async () => {
+    try {
+      await sendVerificationEmail().unwrap();
+      setVerificationSent(true);
+      setVerificationError('');
+    } catch (error) {
+      setVerificationError('Failed to send verification email. Please try again later.');
+    }
+  };
+
   return (
     <TabsContent value="account" className="space-y-4 mt-4">
       <Card>
@@ -84,10 +100,47 @@ function AccountSection({
               <Mail size={16} />
               Email Address
             </Label>
-            <Input id="email" value={email} readOnly disabled className="bg-muted/50" />
-            <p className="text-sm text-muted-foreground">
-              Contact support to change your email address
-            </p>
+            <div className="flex flex-col gap-2">
+              <Input id="email" value={email} readOnly disabled className="bg-muted/50" />
+              {!user.is_verified && (
+                <div className="space-y-2">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Email Not Verified</AlertTitle>
+                    <AlertDescription>
+                      Your email address is not verified. Please verify your email to access all
+                      features.
+                    </AlertDescription>
+                  </Alert>
+                  <Button
+                    onClick={handleSendVerification}
+                    disabled={isSendingVerification || verificationSent}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isSendingVerification
+                      ? 'Sending...'
+                      : verificationSent
+                        ? 'Verification Email Sent'
+                        : 'Send Verification Email'}
+                  </Button>
+                  {verificationError && <p className="text-sm text-red-500">{verificationError}</p>}
+                  {verificationSent && (
+                    <Alert variant="default">
+                      <CheckCircle className="h-4 w-4" />
+                      <AlertTitle>Verification Email Sent</AlertTitle>
+                      <AlertDescription>
+                        Please check your email and click the verification link to verify your email
+                        address.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Contact support to change your email address
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -54,6 +54,12 @@ func (m *NotificationManager) Start() {
 							m.SendPasswordResetEmail(payload.UserID, data.Token)
 						}
 					}
+					if payload.Type == NotificationPayloadTypeVerificationEmail {
+						fmt.Printf("Verification Email Notification - %+v", payload)
+						if data, ok := payload.Data.(NotificationVerificationEmailData); ok {
+							m.SendVerificationEmail(payload.UserID, data.Token)
+						}
+					}
 				}
 			case <-m.ctx.Done():
 				return
@@ -172,4 +178,56 @@ func (s *NotificationManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, err
 		return nil, err
 	}
 	return config, nil
+}
+
+func (m *NotificationManager) SendVerificationEmail(userID string, token string) {
+	smtpConfig, err := m.GetSmtp(userID)
+	if err != nil {
+		log.Printf("smtp error: %s", err)
+		return
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("error getting working directory: %s", err)
+		return
+	}
+	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/verification_email.html"))
+	if err != nil {
+		log.Printf("template parsing error: %s", err)
+		return
+	}
+
+	resetURL := fmt.Sprintf("http://localhost:3000/verify-email?token=%s", token)
+	data := ResetEmailData{
+		ResetURL: resetURL,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Printf("template execution error: %s", err)
+		return
+	}
+
+	from := smtpConfig.Username
+	to := []string{smtpConfig.FromEmail}
+	subject := "Verification Email"
+
+	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
+		"From: %s\r\n"+
+		"To: %s\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: text/html; charset=UTF-8\r\n"+
+		"\r\n"+
+		"%s", subject, from, smtpConfig.FromEmail, body.String()))
+
+	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
+	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
+
+	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+		log.Printf("Failed to send verification email: %s", err)
+		return
+	}
+
+	log.Printf("Verification email sent successfully to %s", smtpConfig.FromEmail)
 }

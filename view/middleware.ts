@@ -20,7 +20,11 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/reset-password') &&
     request.nextUrl.searchParams.has('token');
 
-  if (isGitHubFlow || isPasswordResetFlow) {
+  const isVerificationFlow =
+    request.nextUrl.pathname.startsWith('/verify-email') &&
+    request.nextUrl.searchParams.has('token');
+
+  if (isGitHubFlow || isPasswordResetFlow || isVerificationFlow) {
     return NextResponse.next();
   }
 

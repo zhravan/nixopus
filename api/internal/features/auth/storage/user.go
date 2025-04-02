@@ -2,12 +2,15 @@ package storage
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
 	"golang.org/x/net/context"
+
+	userTypes "github.com/raghavyuva/nixopus-api/internal/features/auth/types"
 )
 
 type UserStorage struct {
@@ -27,6 +30,10 @@ type AuthRepository interface {
 	RevokeRefreshToken(refreshToken string) error
 	BeginTx() (bun.Tx, error)
 	WithTx(tx bun.Tx) AuthRepository
+	StoreVerificationToken(userID string, token string, expiresAt time.Time) error
+	GetVerificationToken(token string) (string, time.Time, error)
+	DeleteVerificationToken(token string) error
+	UpdateUserEmailVerification(userID string, verified bool) error
 }
 
 func (u *UserStorage) WithTx(tx bun.Tx) AuthRepository {
@@ -200,4 +207,85 @@ func (u *UserStorage) RevokeRefreshToken(token string) error {
 		Where("token = ?", token).
 		Exec(u.Ctx)
 	return err
+}
+
+func (u *UserStorage) StoreVerificationToken(userID string, token string, expiresAt time.Time) error {
+	log.Printf("Attempting to store verification token for user %s with token %s", userID, token)
+
+	verificationToken := &userTypes.VerificationToken{
+		ID:        uuid.New(),
+		UserID:    uuid.MustParse(userID),
+		Token:     token,
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+	}
+
+	var existingToken userTypes.VerificationToken
+	err := u.getDB().NewSelect().Model(&existingToken).Where("token = ?", token).Scan(u.Ctx)
+	if err == nil {
+		log.Printf("Token %s already exists for user %s", token, userID)
+		return fmt.Errorf("token already exists")
+	}
+
+	_, err = u.getDB().NewInsert().Model(verificationToken).Exec(u.Ctx)
+	if err != nil {
+		log.Printf("Failed to store verification token for user %s: %v", userID, err)
+		return fmt.Errorf("failed to store verification token: %w", err)
+	}
+
+	var storedToken userTypes.VerificationToken
+	err = u.getDB().NewSelect().Model(&storedToken).Where("token = ?", token).Scan(u.Ctx)
+	if err != nil {
+		log.Printf("Failed to verify token storage for user %s: %v", userID, err)
+		return fmt.Errorf("failed to verify token storage: %w", err)
+	}
+
+	log.Printf("Successfully stored and verified token for user %s", userID)
+	return nil
+}
+
+func (u *UserStorage) GetVerificationToken(token string) (string, time.Time, error) {
+	log.Printf("Attempting to retrieve verification token %s", token)
+
+	var verificationToken userTypes.VerificationToken
+	err := u.getDB().NewSelect().
+		Model(&verificationToken).
+		Where("token = ?", token).
+		Scan(u.Ctx)
+
+	if err != nil {
+		log.Printf("Failed to get verification token %s: %v", token, err)
+		return "", time.Time{}, fmt.Errorf("verification token not found: %w", err)
+	}
+
+	if time.Now().After(verificationToken.ExpiresAt) {
+		log.Printf("Token %s has expired for user %s", token, verificationToken.UserID)
+		return "", time.Time{}, fmt.Errorf("verification token expired")
+	}
+
+	log.Printf("Successfully retrieved verification token for user %s", verificationToken.UserID)
+	return verificationToken.UserID.String(), verificationToken.ExpiresAt, nil
+}
+
+func (u *UserStorage) DeleteVerificationToken(token string) error {
+	_, err := u.getDB().NewDelete().Model(&userTypes.VerificationToken{}).Where("token = ?", token).Exec(u.Ctx)
+	return err
+}
+
+func (u *UserStorage) UpdateUserEmailVerification(userID string, verified bool) error {
+	log.Printf("Updating email verification status for user %s to %v", userID, verified)
+
+	_, err := u.getDB().NewUpdate().
+		Model(&types.User{}).
+		Set("is_verified = ?", verified).
+		Where("id = ?", userID).
+		Exec(u.Ctx)
+
+	if err != nil {
+		log.Printf("Failed to update email verification status for user %s: %v", userID, err)
+		return fmt.Errorf("failed to update email verification status: %w", err)
+	}
+
+	log.Printf("Successfully updated email verification status for user %s", userID)
+	return nil
 }

@@ -156,7 +156,7 @@ func (router *Router) AuthenticatedAuthRoutes(s *fuego.Server, authController *a
 	fuego.Post(s, "/reset-password", authController.ResetPassword)
 	fuego.Post(s, "/logout", authController.Logout)
 	fuego.Post(s, "/send-verification-email", authController.SendVerificationEmail)
-	fuego.Post(s, "/verify-email", authController.VerifyEmail)
+	fuego.Get(s, "/verify-email", authController.VerifyEmail)
 	fuego.Post(s, "/create-user", authController.CreateUser)
 	fuego.Post(s, "/refresh-token", authController.RefreshToken)
 }

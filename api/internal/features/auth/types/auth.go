@@ -2,11 +2,12 @@ package types
 
 import (
 	"errors"
+	"time"
 
+	"github.com/google/uuid"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-// This struct is used for both login and register responses
 type AuthResponse struct {
 	AccessToken  string            `json:"access_token"`
 	RefreshToken string            `json:"refresh_token"`
@@ -48,6 +49,15 @@ type LogoutRequest struct {
 
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
+}
+
+
+type VerificationToken struct {
+	ID        uuid.UUID `bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
+	UserID    uuid.UUID `bun:"user_id,type:uuid,notnull"`
+	Token     string    `bun:"token,type:text,notnull,unique"`
+	ExpiresAt time.Time `bun:"expires_at,type:timestamp,notnull"`
+	CreatedAt time.Time `bun:"created_at,type:timestamp,notnull,default:now()"`
 }
 
 var (

@@ -22,8 +22,14 @@ export const baseQueryWithReauth: BaseQueryFn<
     baseUrl: BASE_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.token;
+      const organizationId =
+        (getState() as RootState).user.activeOrganization?.id ||
+        (getState() as RootState).auth.user?.organization_users?.[0]?.organization_id;
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
+      }
+      if (organizationId) {
+        headers.set('X-Organization-Id', organizationId);
       }
       return headers;
     },

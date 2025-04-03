@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/types"
+	"github.com/raghavyuva/nixopus-api/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLogout(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	registerRequest := types.RegisterRequest{
 		Email:    "test@example.com",
@@ -17,7 +18,7 @@ func TestLogout(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := authService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest)
 	assert.NoError(t, err)
 
 	tests := []struct {
@@ -47,7 +48,7 @@ func TestLogout(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := authService.Logout(tt.refreshToken)
+			err := setup.AuthService.Logout(tt.refreshToken)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -61,7 +62,7 @@ func TestLogout(t *testing.T) {
 }
 
 func TestLogoutWithAlreadyRevokedToken(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	registerRequest := types.RegisterRequest{
 		Email:    "test@example.com",
@@ -70,13 +71,13 @@ func TestLogoutWithAlreadyRevokedToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := authService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest)
 	assert.NoError(t, err)
 
-	err = authService.Logout(registerResponse.RefreshToken)
+	err = setup.AuthService.Logout(registerResponse.RefreshToken)
 	assert.NoError(t, err)
 
-	err = authService.Logout(registerResponse.RefreshToken)
+	err = setup.AuthService.Logout(registerResponse.RefreshToken)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), types.ErrInvalidRefreshToken.Error())
 }

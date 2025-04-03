@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/domain/types"
+	"github.com/raghavyuva/nixopus-api/internal/features/domain/validation"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
@@ -32,6 +33,21 @@ func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID stri
 		return types.CreateDomainResponse{}, types.ErrInvalidUserID
 	}
 
+	validator := validation.NewValidator(s.storage)
+	if err := validator.ValidateCreateDomainRequest(req); err != nil {
+		return types.CreateDomainResponse{}, err
+	}
+
+	org, err := s.store.Organization.GetOrganization(req.OrganizationID.String())
+	if err != nil {
+		s.logger.Log(logger.Error, "error while retrieving organization", err.Error())
+		return types.CreateDomainResponse{}, fmt.Errorf("organization not found")
+	}
+	if org == nil || org.ID == uuid.Nil {
+		s.logger.Log(logger.Error, "organization not found", req.OrganizationID.String())
+		return types.CreateDomainResponse{}, fmt.Errorf("organization not found")
+	}
+
 	tx, err := s.storage.BeginTx()
 	if err != nil {
 		s.logger.Log(logger.Error, "failed to start transaction", err.Error())
@@ -41,7 +57,7 @@ func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID stri
 
 	txStorage := s.storage.WithTx(tx)
 
-	existing_domain, err := txStorage.GetDomainByName(req.Name)
+	existing_domain, err := txStorage.GetDomainByName(req.Name, req.OrganizationID)
 	if err != nil {
 		s.logger.Log(logger.Error, "error while retrieving domain", err.Error())
 		return types.CreateDomainResponse{}, err

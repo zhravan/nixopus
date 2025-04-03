@@ -184,7 +184,7 @@ func (c *DeployController) ReDeployApplication(f fuego.ContextWithBody[types.ReD
 }
 
 func (c *DeployController) GetDeploymentById(f fuego.ContextNoBody) (*shared_types.Response, error) {
-	deploymentID := f.QueryParam("deployment_id")
+	deploymentID := f.PathParam("deployment_id")
 
 	deployment, err := c.service.GetDeploymentById(deploymentID)
 	if err != nil {

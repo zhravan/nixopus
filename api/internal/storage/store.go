@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/raghavyuva/nixopus-api/internal/features/organization/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
 )
 
 type Store struct {
-	DB *bun.DB
+	DB           *bun.DB
+	Organization storage.OrganizationRepository
 }
 
 type App struct {
@@ -23,7 +25,10 @@ func NewApp(config *types.Config, store *Store, ctx context.Context) *App {
 }
 
 func NewStore(db *bun.DB) *Store {
-	return &Store{DB: db}
+	return &Store{
+		DB:           db,
+		Organization: &storage.OrganizationStore{DB: db, Ctx: context.Background()},
+	}
 }
 
 func (s *Store) CreateTable(ctx context.Context, model interface{}) error {

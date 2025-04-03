@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/types"
+	"github.com/raghavyuva/nixopus-api/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestResetPassword(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	registerRequest := types.RegisterRequest{
 		Email:    "test@example.com",
@@ -17,10 +18,10 @@ func TestResetPassword(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := authService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest)
 	assert.NoError(t, err)
 
-	user, resetToken, err := authService.GeneratePasswordResetLink(&registerResponse.User)
+	user, resetToken, err := setup.AuthService.GeneratePasswordResetLink(&registerResponse.User)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resetToken)
 
@@ -49,7 +50,7 @@ func TestResetPassword(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := authService.ResetPassword(user, tt.request)
+			err := setup.AuthService.ResetPassword(user, tt.request)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -59,7 +60,7 @@ func TestResetPassword(t *testing.T) {
 
 			assert.NoError(t, err)
 
-			response, err := authService.Login(user.Email, tt.request.Password)
+			response, err := setup.AuthService.Login(user.Email, tt.request.Password)
 			assert.NoError(t, err)
 			assert.NotEmpty(t, response.AccessToken)
 		})
@@ -67,7 +68,7 @@ func TestResetPassword(t *testing.T) {
 }
 
 func TestResetPasswordWithExpiredToken(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	registerRequest := types.RegisterRequest{
 		Email:    "test@example.com",
@@ -76,19 +77,19 @@ func TestResetPasswordWithExpiredToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := authService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest)
 	assert.NoError(t, err)
 
-	user, resetToken, err := authService.GeneratePasswordResetLink(&registerResponse.User)
+	user, resetToken, err := setup.AuthService.GeneratePasswordResetLink(&registerResponse.User)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resetToken)
 
-	err = authService.ResetPassword(user, types.ResetPasswordRequest{
+	err = setup.AuthService.ResetPassword(user, types.ResetPasswordRequest{
 		Password: "newpassword123",
 	})
 	assert.NoError(t, err)
 
-	err = authService.ResetPassword(user, types.ResetPasswordRequest{
+	err = setup.AuthService.ResetPassword(user, types.ResetPasswordRequest{
 		Password: "newpassword456",
 	})
 	assert.Error(t, err)

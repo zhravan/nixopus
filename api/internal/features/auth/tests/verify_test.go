@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/types"
+	"github.com/raghavyuva/nixopus-api/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestVerifyToken(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	registerRequest := types.RegisterRequest{
 		Email:    "test@example.com",
@@ -17,10 +18,10 @@ func TestVerifyToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := authService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest)
 	assert.NoError(t, err)
 
-	verificationToken, err := authService.GenerateVerificationToken(registerResponse.User.ID.String())
+	verificationToken, err := setup.AuthService.GenerateVerificationToken(registerResponse.User.ID.String())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, verificationToken)
 
@@ -51,7 +52,7 @@ func TestVerifyToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			userID, err := authService.VerifyToken(tt.token)
+			userID, err := setup.AuthService.VerifyToken(tt.token)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -62,7 +63,7 @@ func TestVerifyToken(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, registerResponse.User.ID.String(), userID)
 
-			user, err := authService.GetUserByID(userID)
+			user, err := setup.AuthService.GetUserByID(userID)
 			assert.NoError(t, err)
 			assert.True(t, user.IsVerified)
 		})
@@ -70,7 +71,7 @@ func TestVerifyToken(t *testing.T) {
 }
 
 func TestVerifyTokenWithExpiredToken(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	registerRequest := types.RegisterRequest{
 		Email:    "test@example.com",
@@ -79,18 +80,18 @@ func TestVerifyTokenWithExpiredToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := authService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest)
 	assert.NoError(t, err)
 
-	verificationToken, err := authService.GenerateVerificationToken(registerResponse.User.ID.String())
+	verificationToken, err := setup.AuthService.GenerateVerificationToken(registerResponse.User.ID.String())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, verificationToken)
 
-	userID, err := authService.VerifyToken(verificationToken)
+	userID, err := setup.AuthService.VerifyToken(verificationToken)
 	assert.NoError(t, err)
 	assert.Equal(t, registerResponse.User.ID.String(), userID)
 
-	_, err = authService.VerifyToken(verificationToken)
+	_, err = setup.AuthService.VerifyToken(verificationToken)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "verification token is already used")
 }

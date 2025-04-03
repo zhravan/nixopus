@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/auth/types"
+	"github.com/raghavyuva/nixopus-api/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegister(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	tests := []struct {
 		name          string
@@ -52,7 +53,7 @@ func TestRegister(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			response, err := authService.Register(tt.request)
+			response, err := setup.AuthService.Register(tt.request)
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -71,7 +72,7 @@ func TestRegister(t *testing.T) {
 }
 
 func TestRegisterWithOrganization(t *testing.T) {
-	_, authService := GetTestStorage()
+	setup := testutils.NewTestSetup()
 
 	request := types.RegisterRequest{
 		Email:    "orgtest@example.com",
@@ -80,7 +81,7 @@ func TestRegisterWithOrganization(t *testing.T) {
 		Type:     "admin",
 	}
 
-	response, err := authService.Register(request)
+	response, err := setup.AuthService.Register(request)
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, response.User.ID)

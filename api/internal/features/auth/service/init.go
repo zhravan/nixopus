@@ -50,4 +50,5 @@ type AuthServiceInterface interface {
 	GenerateVerificationToken(userID string) (string, error)
 	VerifyToken(token string) (string, error)
 	MarkEmailAsVerified(userID string) error
+	GetUserByID(userID string) (*shared_types.User, error)
 }

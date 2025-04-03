@@ -70,21 +70,25 @@ func (s *Store) Init(ctx context.Context) error {
 
 func (s *Store) DropAllTables(ctx context.Context) error {
 	models := []interface{}{
+		(*types.ApplicationLogs)(nil),
+		(*types.ApplicationDeploymentStatus)(nil),
+		(*types.ApplicationDeployment)(nil),
+		(*types.ApplicationStatus)(nil),
+		(*types.Application)(nil),
+		(*types.GithubConnector)(nil),
+		(*types.Domain)(nil),
+		(*types.PreferenceItem)(nil),
+		(*types.NotificationPreferences)(nil),
+		(*types.SMTPConfigs)(nil),
 		(*types.OrganizationUsers)(nil),
 		(*types.Organization)(nil),
 		(*types.RolePermissions)(nil),
 		(*types.Permission)(nil),
 		(*types.Role)(nil),
 		(*types.RefreshToken)(nil),
-		(*types.SMTPConfigs)(nil),
-		(*types.PreferenceItem)(nil),
-		(*types.NotificationPreferences)(nil),
-		(*types.Domain)(nil),
-		(*types.Server)(nil),
-		(*types.GithubConnector)(nil),
-		(*types.Application)(nil),
-		(*types.ApplicationStatus)(nil),
-		(*types.ApplicationLogs)(nil),
+		&struct {
+			bun.BaseModel `bun:"table:verification_tokens"`
+		}{},
 		(*types.User)(nil),
 	}
 

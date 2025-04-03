@@ -29,7 +29,12 @@ func (c *AuthService) Logout(refreshToken string) error {
 	token, err := txStorage.GetRefreshToken(refreshToken)
 	if err != nil {
 		c.logger.Log(logger.Error, "Failed to get refresh token", err.Error())
-		return err
+		return types.ErrInvalidRefreshToken
+	}
+
+	if token.RevokedAt != nil {
+		c.logger.Log(logger.Error, "Refresh token is already revoked", refreshToken)
+		return types.ErrRefreshTokenAlreadyRevoked
 	}
 
 	if err := txStorage.RevokeRefreshToken(token.Token); err != nil {

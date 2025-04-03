@@ -30,7 +30,7 @@ func (c *AuthService) RefreshToken(refreshToken types.RefreshTokenRequest) (type
 	token, err := txStorage.GetRefreshToken(refreshToken.RefreshToken)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrInvalidRefreshToken.Error(), err.Error())
-		return types.AuthResponse{}, types.ErrInvalidRefreshToken
+		return types.AuthResponse{}, types.ErrRefreshTokenAlreadyRevoked
 	}
 
 	user, err := txStorage.FindUserByID(token.UserID.String())

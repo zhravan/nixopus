@@ -125,7 +125,7 @@ func (c *AuthService) createDefaultOrganization(user shared_types.User, tx bun.T
 	return org, nil
 }
 
-func (c *AuthService) addUserToOrganizationWithRole(user shared_types.User, organization shared_types.Organization, roleName string,tx bun.Tx) error {
+func (c *AuthService) addUserToOrganizationWithRole(user shared_types.User, organization shared_types.Organization, roleName string, tx bun.Tx) error {
 	c.logger.Log(logger.Info, "adding user to organization with role", roleName)
 
 	roles, err := c.role_service.GetRoleByName(roleName)

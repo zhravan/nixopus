@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
 func (s *AuthService) GenerateVerificationToken(userID string) (string, error) {
@@ -24,11 +25,15 @@ func (s *AuthService) GenerateVerificationToken(userID string) (string, error) {
 }
 
 func (s *AuthService) VerifyToken(token string) (string, error) {
+	if token == "" {
+		return "", errors.New("verification token is required")
+	}
+
 	s.logger.Log(logger.Info, "Verifying token", token)
 	userID, expiresAt, err := s.storage.GetVerificationToken(token)
 	if err != nil {
 		s.logger.Log(logger.Error, "Failed to get verification token", err.Error())
-		return "", errors.New("invalid verification token")
+		return "", errors.New("verification token is already used")
 	}
 
 	if time.Now().After(expiresAt) {
@@ -39,6 +44,13 @@ func (s *AuthService) VerifyToken(token string) (string, error) {
 	err = s.storage.DeleteVerificationToken(token)
 	if err != nil {
 		s.logger.Log(logger.Error, "Failed to delete verification token", err.Error())
+		return "", errors.New("verification token is already used")
+	}
+
+	err = s.MarkEmailAsVerified(userID)
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to mark email as verified", err.Error())
+		return "", errors.New("failed to mark email as verified")
 	}
 
 	s.logger.Log(logger.Info, "Successfully verified token for user", userID)
@@ -55,4 +67,14 @@ func (s *AuthService) MarkEmailAsVerified(userID string) error {
 
 	s.logger.Log(logger.Info, "Successfully marked email as verified for user", userID)
 	return nil
+}
+
+func (s *AuthService) GetUserByID(userID string) (*shared_types.User, error) {
+	s.logger.Log(logger.Info, "Getting user by ID", userID)
+	user, err := s.storage.FindUserByID(userID)
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to get user by ID", err.Error())
+		return nil, errors.New("user not found")
+	}
+	return user, nil
 }

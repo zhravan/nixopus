@@ -1,0 +1,96 @@
+package tests
+
+import (
+	"testing"
+
+	"github.com/raghavyuva/nixopus-api/internal/features/auth/types"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestResetPassword(t *testing.T) {
+	_, authService := GetTestStorage()
+
+	registerRequest := types.RegisterRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+		Username: "testuser",
+		Type:     "viewer",
+	}
+
+	registerResponse, err := authService.Register(registerRequest)
+	assert.NoError(t, err)
+
+	user, resetToken, err := authService.GeneratePasswordResetLink(&registerResponse.User)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resetToken)
+
+	tests := []struct {
+		name          string
+		request       types.ResetPasswordRequest
+		expectError   bool
+		errorContains string
+	}{
+		{
+			name: "successful password reset",
+			request: types.ResetPasswordRequest{
+				Password: "newpassword123",
+			},
+			expectError: false,
+		},
+		{
+			name: "empty password",
+			request: types.ResetPasswordRequest{
+				Password: "",
+			},
+			expectError:   true,
+			errorContains: types.ErrInvalidResetToken.Error(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := authService.ResetPassword(user, tt.request)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorContains)
+				return
+			}
+
+			assert.NoError(t, err)
+
+			response, err := authService.Login(user.Email, tt.request.Password)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, response.AccessToken)
+		})
+	}
+}
+
+func TestResetPasswordWithExpiredToken(t *testing.T) {
+	_, authService := GetTestStorage()
+
+	registerRequest := types.RegisterRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+		Username: "testuser",
+		Type:     "viewer",
+	}
+
+	registerResponse, err := authService.Register(registerRequest)
+	assert.NoError(t, err)
+
+	user, resetToken, err := authService.GeneratePasswordResetLink(&registerResponse.User)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resetToken)
+
+	err = authService.ResetPassword(user, types.ResetPasswordRequest{
+		Password: "newpassword123",
+	})
+	assert.NoError(t, err)
+
+	err = authService.ResetPassword(user, types.ResetPasswordRequest{
+		Password: "newpassword456",
+	})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid reset token")
+}

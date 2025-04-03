@@ -9,6 +9,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	organization_types "github.com/raghavyuva/nixopus-api/internal/features/organization/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	"github.com/uptrace/bun"
 )
 
 func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types.AuthResponse, error) {
@@ -69,13 +70,13 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 		return types.AuthResponse{}, types.ErrFailedToCreateToken
 	}
 
-	organization, err := c.createDefaultOrganization(user)
+	organization, err := c.createDefaultOrganization(user, tx)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateDefaultOrganization.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateDefaultOrganization
 	}
 
-	if err := c.addUserToOrganizationWithRole(user, organization, "admin"); err != nil {
+	if err := c.addUserToOrganizationWithRole(user, organization, "admin", tx); err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToAddUserToOrganization.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToAddUserToOrganization
 	}
@@ -87,7 +88,7 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 			return types.AuthResponse{}, types.ErrFailedToGetOrganization
 		}
 
-		if err := c.addUserToOrganizationWithRole(user, requestedOrganization, userType); err != nil {
+		if err := c.addUserToOrganizationWithRole(user, requestedOrganization, userType, tx); err != nil {
 			c.logger.Log(logger.Error, types.ErrFailedToAddUserToOrganization.Error(), err.Error())
 			return types.AuthResponse{}, types.ErrFailedToAddUserToOrganization
 		}
@@ -106,7 +107,7 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 	}, nil
 }
 
-func (c *AuthService) createDefaultOrganization(user shared_types.User) (shared_types.Organization, error) {
+func (c *AuthService) createDefaultOrganization(user shared_types.User, tx bun.Tx) (shared_types.Organization, error) {
 	c.logger.Log(logger.Info, "creating default organization for user", user.Email)
 
 	orgRequest := &organization_types.CreateOrganizationRequest{
@@ -114,7 +115,7 @@ func (c *AuthService) createDefaultOrganization(user shared_types.User) (shared_
 		Description: "My Team",
 	}
 
-	org, err := c.organization_service.CreateOrganization(orgRequest)
+	org, err := c.organization_service.CreateOrganization(orgRequest, tx)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateDefaultOrganization.Error(), err.Error())
 		return shared_types.Organization{}, types.ErrFailedToCreateDefaultOrganization
@@ -124,7 +125,7 @@ func (c *AuthService) createDefaultOrganization(user shared_types.User) (shared_
 	return org, nil
 }
 
-func (c *AuthService) addUserToOrganizationWithRole(user shared_types.User, organization shared_types.Organization, roleName string) error {
+func (c *AuthService) addUserToOrganizationWithRole(user shared_types.User, organization shared_types.Organization, roleName string,tx bun.Tx) error {
 	c.logger.Log(logger.Info, "adding user to organization with role", roleName)
 
 	roles, err := c.role_service.GetRoleByName(roleName)
@@ -144,5 +145,5 @@ func (c *AuthService) addUserToOrganizationWithRole(user shared_types.User, orga
 		RoleId:         roles.ID.String(),
 	}
 
-	return c.organization_service.AddUserToOrganization(userOrganization)
+	return c.organization_service.AddUserToOrganization(userOrganization, tx)
 }

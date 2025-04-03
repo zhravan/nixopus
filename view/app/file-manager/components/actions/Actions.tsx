@@ -10,9 +10,9 @@ import {
 import { DotsVerticalIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
-import FileUpload from './FileUpload';
 import { FileData } from '@/redux/types/files';
-import use_menu_actions from '../hooks/use_menu_actions';
+import use_menu_actions from '../../hooks/ui/useMenuActions';
+import FileUpload from './Upload';
 
 interface FileManagerActionsProps {
   refetch: () => void;

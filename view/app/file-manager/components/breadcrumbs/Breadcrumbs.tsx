@@ -9,12 +9,12 @@ import {
 import { HomeIcon } from 'lucide-react';
 import React from 'react';
 
-export interface FileBreadCrumbsProps {
+export interface BreadcrumbsProps {
   breadcrumbs: string[];
   fileClicked: (filePath: string) => void;
 }
 
-export const FileBreadCrumbs = ({ breadcrumbs, fileClicked }: FileBreadCrumbsProps) => {
+export const Breadcrumbs = ({ breadcrumbs, fileClicked }: BreadcrumbsProps) => {
   return (
     <Breadcrumb>
       <BreadcrumbList>

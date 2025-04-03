@@ -15,15 +15,15 @@ import {
   TrashIcon,
   UploadCloudIcon
 } from 'lucide-react';
-import FileManagerSkeleton from './components/FileManagerSkeleton';
-import FileManagerHeader from './components/FileManagerHeader';
+import Skeleton from './components/skeleton/Skeleton';
+import Header from './components/layout/Header';
 import { SearchBar } from '@/components/ui/search-bar';
-import { FileBreadCrumbs } from './components/FileBreadCrumbs';
-import FileSortMethods from './components/FileSortMethods';
-import FileManagerLayouts from './components/FileManagerLayoutSwitcher';
-import FileManagerActions from './components/FileManagerActions';
-import { FileItem } from './components/FileItem';
-import use_file_manager from './hooks/use_file_manager';
+import { Breadcrumbs } from './components/breadcrumbs/Breadcrumbs';
+import SortMethods from './components/actions/SortMethods';
+import LayoutSwitcher from './components/layout/LayoutSwitcher';
+import Actions from './components/actions/Actions';
+import { FileItem } from './components/file-list/FileItem';
+import useFileManager from './hooks/ui/useFileManager';
 
 function FileManager() {
   const {
@@ -52,17 +52,17 @@ function FileManager() {
     setFileToMove,
     setSelectedPath,
     files
-  } = use_file_manager();
+  } = useFileManager();
 
   if (isLoading || isCopyFileOrDirectoryLoading || isMoveOrRenameDirectoryLoading) {
-    return <FileManagerSkeleton />;
+    return <Skeleton />;
   }
 
   return (
     <div>
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between px-0 lg:px-6">
-          <FileManagerHeader />
+          <Header />
           <div className="relative">
             <SearchBar
               searchTerm={searchTerm}
@@ -72,14 +72,14 @@ function FileManager() {
           </div>
         </div>
         <div className="mb-6 flex items-center justify-between px-0 lg:px-6">
-          <FileBreadCrumbs
+          <Breadcrumbs
             breadcrumbs={currentPath.split('/').filter(Boolean)}
             fileClicked={fileClicked}
           />
           <div className="flex items-center gap-4">
-            <FileSortMethods files={visibleFiles} onSortChange={handleSortChange} />
-            <FileManagerLayouts layout={layout} setLayout={setLayout} />
-            <FileManagerActions
+            <SortMethods files={visibleFiles} onSortChange={handleSortChange} />
+            <LayoutSwitcher layout={layout} setLayout={setLayout} />
+            <Actions
               refetch={refetch}
               showHidden={showHidden}
               setShowHidden={setShowHidden}

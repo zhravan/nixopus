@@ -3,7 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Upload, Trash } from 'lucide-react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import use_file_upload from '../hooks/use_file_upload';
+import use_file_upload from '../../hooks/file-operations/useUpload';
 
 export default function FileUpload({
   setIsDialogOpen

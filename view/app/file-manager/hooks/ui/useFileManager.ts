@@ -7,7 +7,7 @@ import {
   useCreateDirectoryMutation,
   useGetFilesInPathQuery
 } from '@/redux/services/file-manager/fileManagersApi';
-import { useFileManagerActionsHook } from './use_file_actions';
+import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 
 function use_file_manager() {
   const [currentPath, setCurrentPath] = useState('/');

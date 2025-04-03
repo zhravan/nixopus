@@ -8,11 +8,11 @@ import {
 import { Code, Copy, Info, MoveIcon, Pencil, TrashIcon } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
 import { FileData, FileType } from '@/redux/types/files';
-import { useFileOperations } from '../hooks/use_file_operations';
-import { useFileManagerActionsHook } from '../hooks/use_file_actions';
 import FileInfo from './FileInfo';
 import { getFileIcons } from '@/app/self-host/utils/getFileIcons';
 import { formatFileSize } from '@/app/self-host/utils/formatFileSize';
+import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
+import { useFileOperations } from '../../hooks/file-operations/useOperations';
 
 export interface FileItemProps {
   onFolderClick: (filePath: string) => void;

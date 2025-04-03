@@ -40,8 +40,7 @@ function useTeamSettings() {
           name: user.user?.username || 'Unknown User',
           email: user.user?.email || '',
           role: roleName,
-          permissions,
-          avatar: user.user?.avatar
+          permissions
         };
       });
 
@@ -72,15 +71,18 @@ function useTeamSettings() {
     const tempUser = {
       username: newUser.name || '',
       email: newUser.email || '',
-      avatar: '' as string,
       password: 'test1234@Test', // This is a temporary password we can use for testing,
       organization: activeOrganization?.id || '',
       type: newUser.role.toLowerCase() as UserTypes
     };
 
     setUsers([...users, { id: newId, ...tempUser, permissions, name: newUser.name }]);
-    await createUser(tempUser as any);
-    toast.success('User added successfully');
+    try {
+      const user = await createUser(tempUser as any);
+      toast.success('User added successfully');
+    } catch (error) {
+      toast.error('Failed to add user');
+    }
     setNewUser({ name: '', email: '', role: 'Member' });
     setIsAddUserDialogOpen(false);
   };

@@ -30,4 +30,5 @@ var (
 	ErrInvalidRequestType                 = errors.New("invalid request type")
 	ErrRoleDoesNotExist                   = errors.New("role does not exist")
 	ErrOrganizationNotFound               = errors.New("organization not found")
+	ErrUserNotFound                       = errors.New("user not found")
 )

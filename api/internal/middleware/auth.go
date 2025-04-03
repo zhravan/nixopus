@@ -19,7 +19,7 @@ import (
 // AuthMiddleware is a middleware that checks if the request has a valid
 // authorization token. If the token is valid, it adds both the user and
 // the authenticated client to the request context.
-func AuthMiddleware(next http.Handler, app *storage.App, cache *cache.Cache) http.Handler {
+func AuthMiddleware(next http.Handler, app *storage.App, cache cache.CacheRepository) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		if token == "" {
@@ -83,7 +83,7 @@ func AuthMiddleware(next http.Handler, app *storage.App, cache *cache.Cache) htt
 }
 
 // verifyToken validates a JWT token and returns the associated user
-func verifyToken(tokenString string, db *bun.DB, ctx context.Context, cache *cache.Cache) (*types.User, error) {
+func verifyToken(tokenString string, db *bun.DB, ctx context.Context, cache cache.CacheRepository) (*types.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

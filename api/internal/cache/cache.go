@@ -21,6 +21,13 @@ type Cache struct {
 	client *redis.Client
 }
 
+type CacheRepository interface {
+	GetUser(ctx context.Context, email string) (*types.User, error)
+	SetUser(ctx context.Context, email string, user *types.User) error
+	GetOrgMembership(ctx context.Context, userID, orgID string) (bool, error)
+	SetOrgMembership(ctx context.Context, userID, orgID string, belongs bool) error
+}
+
 func NewCache(redisURL string) (*Cache, error) {
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {

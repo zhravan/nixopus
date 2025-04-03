@@ -36,10 +36,10 @@ import (
 
 type Router struct {
 	app   *storage.App
-	cache *cache.Cache
+	cache cache.CacheRepository
 }
 
-func NewRouter(app *storage.App, cache *cache.Cache) *Router {
+func NewRouter(app *storage.App, cache cache.CacheRepository) *Router {
 	return &Router{
 		app:   app,
 		cache: cache,

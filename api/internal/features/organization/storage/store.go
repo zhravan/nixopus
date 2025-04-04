@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/google/uuid"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
 )
@@ -25,6 +26,7 @@ type OrganizationRepository interface {
 	RemoveUserFromOrganization(userID string, organizationID string) error
 	FindUserInOrganization(userID string, organizationID string) (*shared_types.OrganizationUsers, error)
 	GetOrganizationByName(name string) (*shared_types.Organization, error)
+	UpdateUserRole(userID string, organizationID string, roleID uuid.UUID) error
 	BeginTx() (bun.Tx, error)
 	WithTx(tx bun.Tx) OrganizationRepository
 }
@@ -185,5 +187,19 @@ func (s OrganizationStore) FindUserInOrganization(userID string, organizationID 
 // returns the error. Otherwise, it returns nil, indicating a successful deletion.
 func (s OrganizationStore) RemoveUserFromOrganization(userID string, organizationID string) error {
 	_, err := s.getDB().NewDelete().Model(&shared_types.OrganizationUsers{}).Where("user_id = ? AND organization_id = ?", userID, organizationID).Exec(s.Ctx)
+	return err
+}
+
+// UpdateUserRole updates a user's role in an organization.
+//
+// It constructs an update query that updates the role ID for the organization user record
+// that matches the given user ID and organization ID. If an error occurs during the update,
+// it returns the error. Otherwise, it returns nil, indicating a successful update.
+func (s OrganizationStore) UpdateUserRole(userID string, organizationID string, roleID uuid.UUID) error {
+	_, err := s.getDB().NewUpdate().
+		Model(&shared_types.OrganizationUsers{}).
+		Set("role_id = ?", roleID).
+		Where("user_id = ? AND organization_id = ?", userID, organizationID).
+		Exec(s.Ctx)
 	return err
 }

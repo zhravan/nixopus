@@ -36,6 +36,7 @@ type CreateDeploymentRequest struct {
 	EnvironmentVariables map[string]string        `json:"environment_variables"`
 	Port                 int                      `json:"port"`
 	DockerfilePath       string                   `json:"dockerfile_path,omitempty"`
+	BasePath             string                   `json:"base_path,omitempty"`
 }
 
 type UpdateDeploymentRequest struct {
@@ -48,6 +49,7 @@ type UpdateDeploymentRequest struct {
 	ID                   uuid.UUID         `json:"id,omitempty"`
 	Force                bool              `json:"force,omitempty"`
 	DockerfilePath       string            `json:"dockerfile_path,omitempty"`
+	BasePath             string            `json:"base_path,omitempty"`
 }
 
 type DeleteDeploymentRequest struct {

@@ -21,6 +21,7 @@ interface DeployFormProps {
   pre_run_commands?: string;
   post_run_commands?: string;
   DockerfilePath?: string;
+  base_path?: string;
 }
 
 export const DeployForm = ({
@@ -35,7 +36,8 @@ export const DeployForm = ({
   build_variables = {},
   pre_run_commands = '',
   post_run_commands = '',
-  DockerfilePath = '/Dockerfile'
+  DockerfilePath = '/Dockerfile',
+  base_path = '/'
 }: DeployFormProps) => {
   const { validateEnvVar, form, onSubmit, parsePort } = useCreateDeployment({
     application_name,
@@ -49,7 +51,8 @@ export const DeployForm = ({
     build_variables,
     pre_run_commands,
     post_run_commands,
-    DockerfilePath
+    DockerfilePath,
+    base_path
   });
 
   return (
@@ -79,18 +82,26 @@ export const DeployForm = ({
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Branch"
-            name="branch"
-            description="Branch from where you want to deploy"
-            placeholder="Branch"
+            label="Base Path"
+            name="base_path"
+            description="The build context path for your application"
+            placeholder="/"
+            required={false}
           />
           <FormInputField
             form={form}
             label="Dockerfile Path"
             name="DockerfilePath"
-            description="Path of the dockerfile in case of mono repo"
+            description="Path of the dockerfile relative to the base path"
             placeholder="Dockerfile"
             required={false}
+          />
+          <FormInputField
+            form={form}
+            label="Branch"
+            name="branch"
+            description="Branch from where you want to deploy"
+            placeholder="Branch"
           />
           <FormInputField
             form={form}

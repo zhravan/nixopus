@@ -22,6 +22,7 @@ type Application struct {
 	PostRunCommand       string                   `json:"post_run_command" bun:"post_run_command,notnull"`
 	Domain               string                   `json:"domain" bun:"domain,notnull"`
 	DockerfilePath       string                   `json:"dockerfile_path" bun:"dockerfile_path,notnull,default:Dockerfile"`
+	BasePath             string                   `json:"base_path" bun:"base_path,notnull,default:/"`
 	UserID               uuid.UUID                `json:"user_id" bun:"user_id,notnull,type:uuid"`
 	CreatedAt            time.Time                `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	UpdatedAt            time.Time                `json:"updated_at" bun:"updated_at,notnull,default:current_timestamp"`

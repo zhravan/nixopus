@@ -23,6 +23,7 @@ interface DeploymentFormValues {
   pre_run_commands: string;
   post_run_commands: string;
   DockerfilePath: string;
+  base_path: string;
 }
 
 function useCreateDeployment({
@@ -37,7 +38,8 @@ function useCreateDeployment({
   build_variables = {},
   pre_run_commands = '',
   post_run_commands = '',
-  DockerfilePath = '/Dockerfile'
+  DockerfilePath = '/Dockerfile',
+  base_path = '/'
 }: DeploymentFormValues) {
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const { data: domains } = useGetAllDomainsQuery(activeOrg?.id);
@@ -83,7 +85,8 @@ function useCreateDeployment({
     build_variables: z.record(z.string(), z.string()).optional().default({}),
     pre_run_commands: z.string().optional(),
     post_run_commands: z.string().optional(),
-    DockerfilePath: z.string().optional().default(DockerfilePath)
+    DockerfilePath: z.string().optional().default(DockerfilePath),
+    base_path: z.string().optional().default(base_path)
   });
 
   const form = useForm<z.infer<typeof deploymentFormSchema>>({
@@ -99,7 +102,9 @@ function useCreateDeployment({
       env_variables,
       build_variables,
       pre_run_commands,
-      post_run_commands
+      post_run_commands,
+      DockerfilePath,
+      base_path
     }
   });
 
@@ -118,6 +123,7 @@ function useCreateDeployment({
     if (pre_run_commands) form.setValue('pre_run_commands', pre_run_commands);
     if (post_run_commands) form.setValue('post_run_commands', post_run_commands);
     if (DockerfilePath) form.setValue('DockerfilePath', DockerfilePath);
+    if (base_path) form.setValue('base_path', base_path);
   }, [
     form,
     application_name,
@@ -131,7 +137,8 @@ function useCreateDeployment({
     build_variables,
     pre_run_commands,
     post_run_commands,
-    DockerfilePath
+    DockerfilePath,
+    base_path
   ]);
 
   async function onSubmit(values: z.infer<typeof deploymentFormSchema>) {
@@ -148,7 +155,8 @@ function useCreateDeployment({
         build_variables: values.build_variables,
         pre_run_command: values.pre_run_commands as string,
         post_run_command: values.post_run_commands as string,
-        dockerfile_path: values.DockerfilePath
+        dockerfile_path: values.DockerfilePath,
+        base_path: values.base_path
       }).unwrap();
 
       if (data?.deployments?.[0]?.id) {

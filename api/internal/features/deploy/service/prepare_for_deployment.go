@@ -36,6 +36,7 @@ func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRe
 		CreatedAt:            timeValue,
 		UpdatedAt:            time.Now(),
 		DockerfilePath:       deployment.DockerfilePath,
+		BasePath:             deployment.BasePath,
 	}
 
 	return application
@@ -70,6 +71,10 @@ func createApplicationFromExistingApplicationAndUpdateRequest(application shared
 		application.DockerfilePath = deployment.DockerfilePath
 	} else {
 		application.DockerfilePath = "Dockerfile"
+	}
+
+	if deployment.BasePath != "" {
+		application.BasePath = deployment.BasePath
 	}
 
 	application.UpdatedAt = time.Now()

@@ -10,6 +10,7 @@ import (
 	"github.com/go-fuego/fuego/param"
 	"github.com/joho/godotenv"
 	"github.com/raghavyuva/nixopus-api/internal/cache"
+	audit "github.com/raghavyuva/nixopus-api/internal/features/audit/controller"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	authService "github.com/raghavyuva/nixopus-api/internal/features/auth/service"
 	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
@@ -53,8 +54,6 @@ func (router *Router) Routes() {
 	}
 	PORT := os.Getenv("PORT")
 
-	log.Printf("open port %s", PORT)
-
 	l := logger.NewLogger()
 	server := fuego.NewServer(
 		fuego.WithGlobalMiddlewares(
@@ -88,6 +87,10 @@ func (router *Router) Routes() {
 
 	fuego.Use(server, func(next http.Handler) http.Handler {
 		return middleware.AuthMiddleware(next, router.app, router.cache)
+	})
+
+	fuego.Use(server, func(next http.Handler) http.Handler {
+		return middleware.AuditMiddleware(next, router.app, l)
 	})
 
 	s := fuego.Group(server, "/api/v1", option.Header("Authorization", "Bearer token", param.Required()))
@@ -139,7 +142,6 @@ func (router *Router) Routes() {
 	fuego.Use(fileManagerGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "file-manager")
 	})
-	fuego.Use(fileManagerGroup, middleware.IsAdmin)
 	router.FileManagerRoutes(fileManagerGroup, fileManagerController)
 
 	deployGroup := fuego.Group(s, "/deploy")
@@ -147,6 +149,13 @@ func (router *Router) Routes() {
 		return middleware.RBACMiddleware(next, router.app, "deploy")
 	})
 	router.DeployRoutes(deployGroup, deployController)
+
+	auditController := audit.NewAuditController(router.app.Store.DB, router.app.Ctx, l)
+	auditGroup := fuego.Group(s, "/audit")
+	fuego.Use(auditGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "audit")
+	})
+	router.AuditRoutes(auditGroup, auditController)
 
 	server.Run()
 }
@@ -245,4 +254,8 @@ func (router *Router) FileManagerRoutes(f *fuego.Server, fileManagerController *
 
 func (router *Router) OrganizationRoutes(f *fuego.Server, organizationController *organization.OrganizationsController) {
 	fuego.Get(f, "/users", organizationController.GetOrganizationUsers)
+}
+
+func (router *Router) AuditRoutes(s *fuego.Server, auditController *audit.AuditController) {
+	fuego.Get(s, "/logs", auditController.GetRecentAuditLogs)
 }

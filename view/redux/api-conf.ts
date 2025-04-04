@@ -76,3 +76,7 @@ export enum FILEMANAGERURLS {
   GET_DISK_USAGE = 'v1/files/disk-usage',
   GET_MEMORY_USAGE = 'v1/files/memory-usage'
 }
+
+export enum AUDITURLS {
+  GET_RECENT_AUDIT_LOGS = 'v1/audit/logs'
+}

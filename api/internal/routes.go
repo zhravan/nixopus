@@ -58,6 +58,7 @@ func (router *Router) Routes() {
 	l := logger.NewLogger()
 	server := fuego.NewServer(
 		fuego.WithGlobalMiddlewares(
+			middleware.RecoveryMiddleware,
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
 			// middleware.RateLimiter

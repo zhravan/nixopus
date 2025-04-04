@@ -52,7 +52,7 @@ export default defineConfigWithTheme({
     ],
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2024-present Nixopus'
+      copyright: 'Copyright © 2025-present Nixopus'
     },
     sidebar: [
       {
@@ -79,8 +79,7 @@ export default defineConfigWithTheme({
           { text: "Change Log", link: "/changelog/index.md" },
           { text: "License", link: "/license/index.md" },
           { text: "Privacy Policy", link: "/privacy-policy/index.md" },
-          { text: "Credits", link: "/credits/index.md" },
-          { text: "Self Hosting", link: "/hosting/index.md" }
+          { text: "Credits", link: "/credits/index.md" }
         ]
       },
       {
@@ -103,11 +102,11 @@ export default defineConfigWithTheme({
                   <span class="OASidebarItem-badge OAMethodBadge--${extractHttpMethods(item.text)}">${extractHttpMethods(item.text)}</span>
                   <span class="OASidebarItem-text text">${endpoint}</span>
                 </span>`;
-              
+
               return {
                 ...item,
                 link: `${item.link}`,
-                text:methodSpan
+                text: methodSpan
               };
             }),
           })),
@@ -115,21 +114,21 @@ export default defineConfigWithTheme({
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/nixopus/nixopus' },
-      { icon: "discord", link: "https://github.com/nixopus/nixopus" },
-      { icon: "x", link: "https://github.com/nixopus/nixopus" },
-      { icon: "youtube", link: "https://github.com/nixopus/nixopus" },
+      { icon: 'github', link: 'https://github.com/raghavyuva/nixopus' },
+      { icon: "discord", link: "https://github.com/raghavyuva/nixopus" },
+      { icon: "x", link: "https://github.com/raghavyuva/nixopus" },
+      { icon: "youtube", link: "https://github.com/raghavyuva/nixopus" },
     ]
   }
 })
 
 function extractHttpMethods(text) {
   const methodRegex = /OAMethodBadge--(\w+)/g;
-  const methods : string[] = [];
+  const methods: string[] = [];
   let match;
 
   while ((match = methodRegex.exec(text)) !== null) {
-      methods.push(match[1].toUpperCase());
+    methods.push(match[1].toUpperCase());
   }
 
   return methods[0]

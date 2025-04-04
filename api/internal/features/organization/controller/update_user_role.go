@@ -5,14 +5,19 @@ import (
 
 	"github.com/go-fuego/fuego"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
-	"github.com/raghavyuva/nixopus-api/internal/features/organization/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
 )
 
-func (c *OrganizationsController) RemoveUserFromOrganization(f fuego.ContextWithBody[types.RemoveUserFromOrganizationRequest]) (*shared_types.Response, error) {
+type UpdateUserRoleRequest struct {
+	UserID         string `json:"user_id"`
+	OrganizationID string `json:"organization_id"`
+	Role           string `json:"role"`
+}
+
+func (c *OrganizationsController) UpdateUserRole(f fuego.ContextWithBody[UpdateUserRoleRequest]) (*shared_types.Response, error) {
 	_, r := f.Response(), f.Request()
-	user, err := f.Body()
+	req, err := f.Body()
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
@@ -28,18 +33,18 @@ func (c *OrganizationsController) RemoveUserFromOrganization(f fuego.ContextWith
 		}
 	}
 
-	if err := c.service.RemoveUserFromOrganization(&user); err != nil {
+	if err := c.service.UpdateUserRole(req.UserID, req.OrganizationID, req.Role); err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
 			Status: http.StatusInternalServerError,
 		}
 	}
 
-	c.Notify(notification.NortificationPayloadTypeRemoveUserFromOrganization, loggedInUser, r)
+	c.Notify(notification.NotificationPayloadTypeUpdateUserRole, loggedInUser, r)
 
 	return &shared_types.Response{
 		Status:  "success",
-		Message: "User removed from organization successfully",
+		Message: "User role updated successfully",
 		Data:    nil,
 	}, nil
 }

@@ -254,6 +254,11 @@ func (router *Router) FileManagerRoutes(f *fuego.Server, fileManagerController *
 
 func (router *Router) OrganizationRoutes(f *fuego.Server, organizationController *organization.OrganizationsController) {
 	fuego.Get(f, "/users", organizationController.GetOrganizationUsers)
+	fuego.Post(f, "/add-user", organizationController.AddUserToOrganization)
+	fuego.Post(f, "/remove-user", organizationController.RemoveUserFromOrganization)
+	fuego.Post(f, "/update-user-role", organizationController.UpdateUserRole)
+	fuego.Get(f, "/roles", organizationController.GetRoles)
+	fuego.Get(f, "/resources", organizationController.GetResources)
 }
 
 func (router *Router) AuditRoutes(s *fuego.Server, auditController *audit.AuditController) {

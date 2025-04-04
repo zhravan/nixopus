@@ -78,7 +78,10 @@ func (s *RoleStorage) GetRoleByName(name string) (*types.Role, error) {
 // If no roles are found, it returns an empty slice and no error.
 func (s *RoleStorage) GetRoles() ([]types.Role, error) {
 	var roles []types.Role
-	err := s.getDB().NewSelect().Model(&roles).Scan(s.Ctx)
+	err := s.getDB().NewSelect().
+		Model(&roles).
+		Relation("Permissions").
+		Scan(s.Ctx)
 	if err == sql.ErrNoRows {
 		return roles, nil
 	}

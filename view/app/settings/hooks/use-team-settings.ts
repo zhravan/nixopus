@@ -2,7 +2,10 @@ import { useAppSelector } from '@/redux/hooks';
 import {
   useCreateUserMutation,
   useGetOrganizationUsersQuery,
-  useUpdateOrganizationDetailsMutation
+  useRemoveUserFromOrganizationMutation,
+  useUpdateOrganizationDetailsMutation,
+  useUpdateUserRoleMutation,
+  useGetResourcesQuery
 } from '@/redux/services/users/userApi';
 import { UserTypes } from '@/redux/types/orgs';
 import { useState, useEffect } from 'react';
@@ -16,6 +19,8 @@ function useTeamSettings() {
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
   const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
+  const [removeUserFromOrganization] = useRemoveUserFromOrganizationMutation();
+  const [updateUserRole] = useUpdateUserRoleMutation();
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
   const {
     data: apiUsers,
@@ -24,6 +29,7 @@ function useTeamSettings() {
   } = useGetOrganizationUsersQuery(activeOrganization?.id, {
     skip: !activeOrganization
   });
+  const { data: resources = [], isLoading: isLoadingResources } = useGetResourcesQuery();
   const [updateOrganizationDetails, { isLoading: isUpdating, error: updateError }] =
     useUpdateOrganizationDetailsMutation();
 
@@ -33,7 +39,7 @@ function useTeamSettings() {
         const roleName = user.role?.name || 'Unknown';
         const permissions =
           user.role?.permissions?.map(
-            (permission) => permission.resource.toUpperCase() + ':' + permission.name
+            (permission) => `${permission.resource.toUpperCase()}:${permission.name}`
           ) || [];
         return {
           id: user.user.id,
@@ -71,7 +77,7 @@ function useTeamSettings() {
     const tempUser = {
       username: newUser.name || '',
       email: newUser.email || '',
-      password: 'test1234@Test', // This is a temporary password we can use for testing,
+      password: 'test1234@Test',
       organization: activeOrganization?.id || '',
       type: newUser.role.toLowerCase() as UserTypes
     };
@@ -87,8 +93,49 @@ function useTeamSettings() {
     setIsAddUserDialogOpen(false);
   };
 
-  const handleRemoveUser = (userId: string) => {
-    setUsers(users.filter((user: any) => user.id !== userId));
+  const handleRemoveUser = async (userId: string) => {
+    try {
+      await removeUserFromOrganization({
+        user_id: userId,
+        organization_id: activeOrganization?.id || ''
+      });
+      setUsers(users.filter((user: any) => user.id !== userId));
+      toast.success('User removed successfully');
+    } catch (error) {
+      toast.error('Failed to remove user');
+    }
+  };
+
+  const handleUpdateUser = async (
+    userId: string,
+    role: UserTypes,
+    permissions: { resource: string; action: string }[]
+  ) => {
+    try {
+      await updateUserRole({
+        user_id: userId,
+        organization_id: activeOrganization?.id || '',
+        role_id: role
+      });
+
+      const updatedUsers = users.map((user: any) => {
+        if (user.id === userId) {
+          return {
+            ...user,
+            role,
+            permissions: permissions.map(
+              (p) => `${p.resource.toUpperCase()}:${p.action.toUpperCase()}`
+            )
+          };
+        }
+        return user;
+      });
+
+      setUsers(updatedUsers);
+      toast.success('User updated successfully');
+    } catch (error) {
+      toast.error('Failed to update user');
+    }
   };
 
   const getRoleBadgeVariant = (role: string) => {
@@ -120,7 +167,7 @@ function useTeamSettings() {
       teamDescription !== activeOrganization?.description
     ) {
       await updateOrganizationDetails({
-        id: activeOrganization?.id,
+        id: activeOrganization?.id || '',
         name: teamName,
         description: teamDescription
       });
@@ -130,7 +177,7 @@ function useTeamSettings() {
 
   return {
     users,
-    isLoading,
+    isLoading: isLoading || isLoadingResources,
     error,
     isAddUserDialogOpen,
     setIsAddUserDialogOpen,
@@ -138,6 +185,7 @@ function useTeamSettings() {
     setNewUser,
     handleAddUser,
     handleRemoveUser,
+    handleUpdateUser,
     getRoleBadgeVariant,
     handleUpdateTeam,
     setEditTeamDialogOpen,
@@ -146,7 +194,8 @@ function useTeamSettings() {
     isEditTeamDialogOpen,
     teamName,
     teamDescription,
-    isUpdating
+    isUpdating,
+    resources
   };
 }
 

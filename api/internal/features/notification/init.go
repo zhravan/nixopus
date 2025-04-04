@@ -60,6 +60,14 @@ func (m *NotificationManager) Start() {
 							m.SendVerificationEmail(payload.UserID, data.Token)
 						}
 					}
+				case NotificationCategoryOrganization:
+					fmt.Printf("Organization Notification - %+v", payload)
+					if payload.Type == NotificationPayloadTypeUpdateUserRole {
+						fmt.Printf("Update User Role Notification - %+v", payload)
+						if data, ok := payload.Data.(NotificationOrganizationData); ok {
+							m.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
+						}
+					}
 				}
 			case <-m.ctx.Done():
 				return
@@ -230,4 +238,56 @@ func (m *NotificationManager) SendVerificationEmail(userID string, token string)
 	}
 
 	log.Printf("Verification email sent successfully to %s", smtpConfig.FromEmail)
+}
+
+func (m *NotificationManager) SendUpdateUserRoleEmail(userID string, organizationID string, updatedUserID string) {
+	smtpConfig, err := m.GetSmtp(userID)
+	if err != nil {
+		log.Printf("smtp error: %s", err)
+		return
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("error getting working directory: %s", err)
+		return
+	}
+	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/update_user_role.html"))
+	if err != nil {
+		log.Printf("template parsing error: %s", err)
+		return
+	}
+
+	data := UpdateUserRoleData{
+		OrganizationID: organizationID,
+		UserID:         updatedUserID,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Printf("template execution error: %s", err)
+		return
+	}
+
+	from := smtpConfig.Username
+	to := []string{smtpConfig.FromEmail}
+	subject := "User Role Updated"
+
+	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
+		"From: %s\r\n"+
+		"To: %s\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: text/html; charset=UTF-8\r\n"+
+		"\r\n"+
+		"%s", subject, from, smtpConfig.FromEmail, body.String()))
+
+	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
+	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
+
+	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+		log.Printf("Failed to send update user role email: %s", err)
+		return
+	}
+
+	log.Printf("Update user role email sent successfully to %s", smtpConfig.FromEmail)
 }

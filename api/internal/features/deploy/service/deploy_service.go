@@ -143,6 +143,7 @@ func (s *DeployService) StartDeploymentInBackground(
 		DeploymentID:   d.deployment_config.ID.String(),
 		DeploymentType: string(d.deployment.Type),
 		Branch:         d.application.Branch,
+		ApplicationID:  d.application.ID.String(),
 	}
 
 	// we will pass the commit hash to the clone repository function for rollback feature

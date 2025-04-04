@@ -130,9 +130,9 @@ func getResourceTypeFromPath(path string) string {
 	case "smtp":
 		return "smtp_config"
 	case "file-manager":
-		return "application" 
+		return "application"
 	case "audit":
-		return "application" 
+		return "application"
 	default:
 		return "application"
 	}

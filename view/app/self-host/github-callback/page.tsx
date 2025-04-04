@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
-import { useUpdateGithubConnectorMutation } from '@/redux/services/connector/githubConnectorApi';
 
 const Page = () => {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');

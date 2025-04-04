@@ -150,7 +150,12 @@ function useCreateDeployment({
         post_run_command: values.post_run_commands as string,
         dockerfile_path: values.DockerfilePath
       }).unwrap();
-      router.push('/self-host/application/' + data?.id);
+
+      if (data?.deployments?.[0]?.id) {
+        router.push('/self-host/application/' + data.id + '/deployments/' + data.deployments[0].id);
+      } else {
+        router.push('/self-host/application/' + data.id + '?logs=true');
+      }
     } catch (error) {
       toast.error('Failed to create deployment');
     }

@@ -2,6 +2,9 @@ package service
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
+
 	// "github.com/docker/docker/api/types/image"
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
@@ -93,8 +96,48 @@ func (s *DeployService) handleDockerfileDeployment(d DeployerConfig) error {
 // handleDockerComposeDeployment processes Docker Compose-based deployments
 func (s *DeployService) handleDockerComposeDeployment(d DeployerConfig) error {
 	s.addLog(d.application.ID, types.LogUsingDockerComposeStrategy, d.deployment_config.ID)
-	s.addLog(d.application.ID, types.LogDockerComposeNotImplemented, d.deployment_config.ID)
-	return types.ErrDockerComposeNotImplemented
+
+	// For monorepo setups, we need to consider the base path
+	composeContextPath := d.contextPath
+	if d.application.BasePath != "" && d.application.BasePath != "/" {
+		composeContextPath = filepath.Join(d.contextPath, d.application.BasePath)
+	}
+
+	// Handle docker-compose.yml path relative to build context
+	composeFilePath := "docker-compose.yml"
+	if d.application.DockerfilePath != "" {
+		// Docker Compose file path should be relative to the build context
+		composeFilePath = d.application.DockerfilePath
+		if strings.HasPrefix(composeFilePath, "/") {
+			composeFilePath = composeFilePath[1:]
+		}
+	}
+	absComposePath := filepath.Join(composeContextPath, composeFilePath)
+
+	s.addLog(d.application.ID, fmt.Sprintf(types.LogBuildContextPath, composeContextPath), d.deployment_config.ID)
+	s.addLog(d.application.ID, fmt.Sprintf("Using docker-compose file: %s", absComposePath), d.deployment_config.ID)
+
+	envVars := make(map[string]string)
+	for k, v := range GetMapFromString(d.application.EnvironmentVariables) {
+		envVars[k] = v
+	}
+	for k, v := range GetMapFromString(d.application.BuildVariables) {
+		envVars[k] = v
+	}
+	s.addLog(d.application.ID, "Building Docker Compose services...", d.deployment_config.ID)
+	if err := s.dockerRepo.ComposeBuild(absComposePath, envVars); err != nil {
+		s.addLog(d.application.ID, fmt.Sprintf("Error building Docker Compose services: %v", err), d.deployment_config.ID)
+		return fmt.Errorf("%w: %v", types.ErrDockerComposeCommandFailed, err)
+	}
+
+	s.addLog(d.application.ID, "Starting Docker Compose services...", d.deployment_config.ID)
+	if err := s.dockerRepo.ComposeUp(absComposePath, envVars); err != nil {
+		s.addLog(d.application.ID, fmt.Sprintf("Error starting Docker Compose services: %v", err), d.deployment_config.ID)
+		return fmt.Errorf("%w: %v", types.ErrDockerComposeCommandFailed, err)
+	}
+
+	s.addLog(d.application.ID, "Docker Compose deployment completed successfully", d.deployment_config.ID)
+	return nil
 }
 
 // buildAndRunDockerImage handles the Docker image building and running process

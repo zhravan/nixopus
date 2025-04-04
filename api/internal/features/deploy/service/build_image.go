@@ -119,8 +119,8 @@ func (s *DeployService) processBuildOutput(logReader *LogReader) error {
 	termFd, isTerm := term.GetFdInfo(os.Stdout)
 	err := jsonmessage.DisplayJSONMessagesStream(logReader, os.Stdout, termFd, isTerm, nil)
 	if err != nil {
-		s.addLog(logReader.ApplicationID, types.ErrProcessingBuildOutput.Error(), logReader.deployment_config.ID)
-		return types.ErrProcessingBuildOutput
+		s.addLog(logReader.ApplicationID, err.Error(), logReader.deployment_config.ID)
+		return err
 	}
 	return nil
 }

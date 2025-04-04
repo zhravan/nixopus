@@ -25,7 +25,11 @@ interface WebSocketMessage {
 
 function useApplicationDetails() {
   const { id } = useParams();
-  const { data: application } = useGetApplicationByIdQuery({ id: id as string }, { skip: !id });
+  const applicationId = id as string;
+  const { data: application } = useGetApplicationByIdQuery(
+    { id: applicationId },
+    { skip: !applicationId }
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [logs, setLogs] = useState(application?.logs || []);
   const { isReady, message, sendJsonMessage } = useWebSocket();
@@ -33,8 +37,12 @@ function useApplicationDetails() {
   const defaultTab = searchParams.get('logs') === 'true' ? 'logs' : 'monitoring';
 
   useEffect(() => {
-    sendJsonMessage(SubscribeToTopic(id as string, SOCKET_EVENTS.MONITOR_APPLICATION_DEPLOYMENT));
-  }, []);
+    if (applicationId) {
+      sendJsonMessage(
+        SubscribeToTopic(applicationId, SOCKET_EVENTS.MONITOR_APPLICATION_DEPLOYMENT)
+      );
+    }
+  }, [applicationId]);
 
   useEffect(() => {
     if (message) {
@@ -42,12 +50,18 @@ function useApplicationDetails() {
       if (
         parsedMessage.action === 'message' &&
         parsedMessage.data.table === 'application_logs' &&
-        parsedMessage.data.application_id === id
+        parsedMessage.data.data.application_id === applicationId
       ) {
         setLogs((prevLogs) => [...prevLogs, parsedMessage.data.data]);
       }
     }
-  }, [message, id]);
+  }, [message, applicationId]);
+
+  useEffect(() => {
+    if (application?.logs) {
+      setLogs(application.logs);
+    }
+  }, [application?.logs]);
 
   const parseEnvVariables = (variablesString: string | undefined): Record<string, string> => {
     if (!variablesString) return {};

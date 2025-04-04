@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronRight, type LucideIcon } from 'lucide-react';
-
+import { usePathname, useRouter } from 'next/navigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
@@ -14,23 +14,28 @@ import {
   SidebarMenuSubItem
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
-export function NavMain({
-  items
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+interface NavItem {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+  isActive?: boolean;
+  items?: { title: string; url: string }[];
+}
+
+interface NavMainProps {
+  items: NavItem[];
+  onItemClick?: (url: string) => void;
+}
+
+export function NavMain({ items, onItemClick }: NavMainProps) {
+  const pathname = usePathname();
   const router = useRouter();
+
+  const handleClick = (url: string) => {
+    onItemClick?.(url);
+    router.push(url);
+  };
 
   return (
     <SidebarGroup>
@@ -45,12 +50,7 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  tooltip={item.title}
-                  onClick={() => {
-                    (item.items?.length || 0) <= 0 ? router.push(item.url) : null;
-                  }}
-                >
+                <SidebarMenuButton tooltip={item.title} onClick={() => handleClick(item.url)}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   {(item.items?.length || 0) > 0 && (

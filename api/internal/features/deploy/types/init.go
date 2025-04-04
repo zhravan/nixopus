@@ -91,6 +91,9 @@ var (
 	ErrFailedToStartNewContainer    = errors.New("failed to start new container")
 	ErrFailedToUpdateContainer      = errors.New("failed to update container")
 	ErrContainerNotRunning          = errors.New("container is not running")
+	ErrDockerComposeFileNotFound    = errors.New("docker-compose file not found")
+	ErrDockerComposeCommandFailed   = errors.New("docker-compose command failed")
+	ErrDockerComposeInvalidConfig   = errors.New("invalid docker-compose configuration")
 )
 
 const (
@@ -117,6 +120,9 @@ const (
 	LogFailedToRunDockerImage                    = "Failed to run Docker image: %s"
 	LogDockerComposeNotImplemented               = "Docker compose deployment not implemented yet"
 	LogDeploymentBuildPack                       = "Starting deployment process for build pack: %s"
+	LogDockerComposeDeploymentStarted            = "Starting Docker Compose deployment"
+	LogDockerComposeDeploymentCompleted          = "Docker Compose deployment completed successfully"
+	LogDockerComposeDeploymentFailed             = "Docker Compose deployment failed: %s"
 	LogRunningContainerFromImage                 = "Running container from image"
 	LogPreparingToRunContainer                   = "Preparing to run container from image %s"
 	LogEnvironmentVariables                      = "Environment variables: %v"

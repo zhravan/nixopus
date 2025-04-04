@@ -51,7 +51,7 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 		return "", nil
 	}
 
-	// TODO: we will need to handle multiple connectors here 
+	// TODO: we will need to handle multiple connectors here
 	installation_id := connectors[0].InstallationID
 	jwt := GenerateJwt(&connectors[0])
 
@@ -81,7 +81,7 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 
 	clonePath, should_pull, err := s.GetClonePath(c.UserID, c.Environment, c.ApplicationID)
 
-	s.logger.Log(logger.Info, fmt.Sprintf("Clone path: %s", clonePath),"")
+	s.logger.Log(logger.Info, fmt.Sprintf("Clone path: %s", clonePath), "")
 
 	if err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to get clone path: %s", err.Error()), "")

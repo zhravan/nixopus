@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 
 	docker_types "github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/archive"
@@ -13,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/moby/term"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
@@ -21,16 +24,31 @@ import (
 func (s *DeployService) buildImageFromDockerfile(b DeployerConfig) (string, error) {
 	s.addLog(b.application.ID, types.LogStartingDockerImageBuild, b.deployment_config.ID)
 	s.updateStatus(b.deployment_config.ID, shared_types.Building, b.appStatus.ID)
-	archive, err := s.createBuildContextArchive(b.contextPath)
+
+	// For monorepo setups, we need to consider the base path
+	buildContextPath := b.contextPath
+	if b.application.BasePath != "" && b.application.BasePath != "/" {
+		buildContextPath = filepath.Join(b.contextPath, b.application.BasePath)
+	}
+
+	archive, err := s.createBuildContextArchive(buildContextPath)
 	if err != nil {
 		return "", err
 	}
 
-	s.logger.Log("considering dockerfile base path as ", b.application.DockerfilePath, "")
+	// Handle Dockerfile path relative to build context
 	dockerfile_path := "Dockerfile"
 	if b.application.DockerfilePath != "" {
+		// Dockerfile path should be relative to the build context
 		dockerfile_path = b.application.DockerfilePath
+		if strings.HasPrefix(dockerfile_path, "/") {
+			dockerfile_path = dockerfile_path[1:]
+		}
 	}
+
+	s.logger.Log(logger.Info, "using dockerfile path: "+dockerfile_path, "")
+	s.logger.Log(logger.Info, "using build context path: "+buildContextPath, "")
+
 	buildOptions := s.createBuildOptions(b, dockerfile_path)
 	resp, err := s.dockerRepo.BuildImage(buildOptions, archive)
 	if err != nil {
@@ -57,7 +75,9 @@ func (s *DeployService) buildImageFromDockerfile(b DeployerConfig) (string, erro
 // createBuildContextArchive creates a tar archive of the build context at the provided path.
 // It returns the archive as an io.Reader and an error if the archive creation fails.
 func (s *DeployService) createBuildContextArchive(contextPath string) (io.Reader, error) {
-	buildContextTar, err := archive.TarWithOptions(contextPath, &archive.TarOptions{})
+	buildContextTar, err := archive.TarWithOptions(contextPath, &archive.TarOptions{
+		ExcludePatterns: []string{".git", "node_modules", "vendor"},
+	})
 	if err != nil {
 		return nil, types.ErrFailedToCreateTarFromContext
 	}

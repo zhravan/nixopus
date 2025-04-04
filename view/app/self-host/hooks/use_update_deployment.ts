@@ -21,6 +21,7 @@ interface UseUpdateDeploymentProps {
   id?: string;
   force?: boolean;
   DockerfilePath?: string;
+  base_path?: string;
 }
 
 function useUpdateDeployment({
@@ -32,7 +33,8 @@ function useUpdateDeployment({
   port = 3000,
   id = '',
   force = false,
-  DockerfilePath = '/Dockerfile'
+  DockerfilePath = '/Dockerfile',
+  base_path = '/'
 }: UseUpdateDeploymentProps = {}) {
   const { isReady, message, sendJsonMessage } = useWebSocket();
   const [updateDeployment, { isLoading }] = useUpdateDeploymentMutation();
@@ -53,7 +55,8 @@ function useUpdateDeployment({
     port: z.string().optional(),
     id: z.string().optional(),
     force: z.boolean().optional().default(false),
-    DockerfilePath: z.string().optional().default(DockerfilePath)
+    DockerfilePath: z.string().optional().default(DockerfilePath),
+    base_path: z.string().optional().default(base_path)
   });
 
   const form = useForm<z.infer<typeof deploymentFormSchema>>({
@@ -67,7 +70,8 @@ function useUpdateDeployment({
       port: port.toString(),
       id,
       force,
-      DockerfilePath
+      DockerfilePath,
+      base_path
     }
   });
 
@@ -82,6 +86,7 @@ function useUpdateDeployment({
     if (port) form.setValue('port', port.toString());
     if (id) form.setValue('id', id);
     if (DockerfilePath) form.setValue('DockerfilePath', DockerfilePath);
+    if (base_path) form.setValue('base_path', base_path);
     form.setValue('force', force);
   }, [
     form,
@@ -93,7 +98,8 @@ function useUpdateDeployment({
     port,
     id,
     force,
-    DockerfilePath
+    DockerfilePath,
+    base_path
   ]);
 
   async function onSubmit(values: z.infer<typeof deploymentFormSchema>) {
@@ -107,7 +113,8 @@ function useUpdateDeployment({
         port: parsePort(values.port?.toString() || '3000') || 3000,
         id: values.id,
         force: values.force,
-        dockerfile_path: values.DockerfilePath
+        dockerfile_path: values.DockerfilePath,
+        base_path: values.base_path
       };
 
       const data = await updateDeployment(updateData).unwrap();

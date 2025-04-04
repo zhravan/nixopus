@@ -23,6 +23,7 @@ interface DeployConfigureProps {
   post_run_commands?: string;
   application_id?: string;
   dockerFilePath?: string;
+  base_path?: string;
 }
 
 export const DeployConfigureForm = ({
@@ -38,7 +39,8 @@ export const DeployConfigureForm = ({
   pre_run_commands = '',
   post_run_commands = '',
   application_id = '',
-  dockerFilePath = '/Dockerfile'
+  dockerFilePath = '/Dockerfile',
+  base_path = '/'
 }: DeployConfigureProps) => {
   const { validateEnvVar, form, onSubmit, isLoading, domains } = useUpdateDeployment({
     name: application_name,
@@ -49,7 +51,8 @@ export const DeployConfigureForm = ({
     port: parsePort(port) || 3000,
     force: true,
     id: application_id,
-    DockerfilePath: dockerFilePath
+    DockerfilePath: dockerFilePath,
+    base_path
   });
 
   return (
@@ -73,9 +76,17 @@ export const DeployConfigureForm = ({
           />
           <FormInputField
             form={form}
+            label="Base Path"
+            name="base_path"
+            description="The build context path for your application"
+            placeholder="/"
+            required={false}
+          />
+          <FormInputField
+            form={form}
             label="Dockerfile Path"
             name="DockerfilePath"
-            description="Path of the dockerfile in case of mono repo"
+            description="Path of the dockerfile relative to the base path"
             placeholder="Dockerfile"
             required={false}
           />

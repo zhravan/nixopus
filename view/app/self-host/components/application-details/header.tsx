@@ -17,12 +17,47 @@ import {
 } from '@/redux/services/deploy/applicationsApi';
 import { useDeleteApplicationMutation } from '@/redux/services/deploy/applicationsApi';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const ApplicationDetailsHeader = ({ application }: { application?: Application }) => {
-  const [redeployApplication, { isLoading }] = useRedeployApplicationMutation();
+  const [redeployApplication, { isLoading: isRedeploying }] = useRedeployApplicationMutation();
   const [deleteApplication, { isLoading: isDeleting }] = useDeleteApplicationMutation();
   const router = useRouter();
   const [restartApplication, { isLoading: isRestarting }] = useRestartApplicationMutation();
+
+  const handleDelete = async () => {
+    try {
+      await deleteApplication({
+        id: application?.id || ''
+      }).unwrap();
+      toast.success('Application deleted successfully');
+      router.push('/self-host');
+    } catch (error) {
+      toast.error('Failed to delete application');
+    }
+  };
+
+  const handleRestart = async () => {
+    try {
+      await restartApplication({ id: application?.deployments?.[0]?.id || '' }).unwrap();
+      toast.success('Application restarted successfully');
+    } catch (error) {
+      toast.error('Failed to restart application');
+    }
+  };
+
+  const handleRedeploy = async (forceWithoutCache: boolean) => {
+    try {
+      await redeployApplication({
+        id: application?.id || '',
+        force: true,
+        force_without_cache: forceWithoutCache
+      }).unwrap();
+      toast.success('Application redeployed successfully');
+    } catch (error) {
+      toast.error('Failed to redeploy application');
+    }
+  };
 
   return (
     <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -49,7 +84,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
                 variant="secondary"
                 size="icon"
                 disabled={isRestarting}
-                onClick={() => restartApplication({ id: application?.deployments?.[0]?.id || '' })}
+                onClick={handleRestart}
               >
                 <RotateCcw className="h-4 w-4" />
               </Button>
@@ -61,12 +96,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
         </TooltipProvider>
         <DeleteDialog
           jobName={application?.name || ''}
-          onDelete={() => {
-            deleteApplication({
-              id: application?.id || ''
-            });
-            router.push('/self-host');
-          }}
+          onDelete={handleDelete}
           showButton={false}
           isDeleting={isDeleting}
         />
@@ -77,26 +107,10 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => {
-                redeployApplication({
-                  id: application?.id || '',
-                  force: true,
-                  force_without_cache: true
-                });
-              }}
-            >
+            <DropdownMenuItem onClick={() => handleRedeploy(true)} disabled={isRedeploying}>
               Re-Deploy
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                redeployApplication({
-                  id: application?.id || '',
-                  force: true,
-                  force_without_cache: false
-                });
-              }}
-            >
+            <DropdownMenuItem onClick={() => handleRedeploy(false)} disabled={isRedeploying}>
               Force Deploy Without Cache
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -40,7 +40,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
   const handleRestart = async () => {
     try {
       await restartApplication({ id: application?.deployments?.[0]?.id || '' }).unwrap();
-      toast.success('Application restarted successfully');
+      toast.success('Application restart started');
     } catch (error) {
       toast.error('Failed to restart application');
     }
@@ -53,7 +53,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
         force: true,
         force_without_cache: forceWithoutCache
       }).unwrap();
-      toast.success('Application redeployed successfully');
+      toast.success('Application redeployment started');
     } catch (error) {
       toast.error('Failed to redeploy application');
     }

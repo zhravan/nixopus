@@ -52,6 +52,12 @@ function useDeploymentDetails() {
     }
   }, [message, deploymentId]);
 
+  useEffect(() => {
+    if (deployment?.logs) {
+      setLogs(deployment.logs);
+    }
+  }, [deployment?.logs]);
+
   return {
     deployment: deployment ? { ...deployment, logs } : undefined,
     logs

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { TrashIcon } from 'lucide-react';
+import { TrashIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { DotsVerticalIcon } from '@radix-ui/react-icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppSelector } from '@/redux/hooks';
@@ -37,6 +37,8 @@ interface TeamMembersProps {
   getRoleBadgeVariant: (role: string) => 'destructive' | 'default' | 'secondary' | 'outline';
 }
 
+const MAX_VISIBLE_PERMISSIONS = 3;
+
 function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembersProps) {
   const loggedInUser = useAppSelector((state) => state.auth.user);
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
@@ -45,6 +47,57 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
     'user',
     activeOrganization?.id
   );
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+
+  const toggleUserPermissions = (userId: string) => {
+    setExpandedUsers((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderPermissions = (permissions: string[], userId: string) => {
+    const isExpanded = expandedUsers.has(userId);
+    const visiblePermissions = isExpanded
+      ? permissions
+      : permissions.slice(0, MAX_VISIBLE_PERMISSIONS);
+    const hasMore = permissions.length > MAX_VISIBLE_PERMISSIONS;
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {visiblePermissions.map((permission, index) => (
+            <Badge key={index} variant="outline" className="bg-background">
+              {permission}
+            </Badge>
+          ))}
+        </div>
+        {hasMore && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-medium text-primary hover:text-primary/80"
+            onClick={() => toggleUserPermissions(userId)}
+          >
+            {isExpanded ? (
+              <>
+                Show Less <ChevronUpIcon className="ml-1 h-3 w-3" />
+              </>
+            ) : (
+              <>
+                Show More <ChevronDownIcon className="ml-1 h-3 w-3" />
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Card>
@@ -59,9 +112,9 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Permissions</TableHead>
-              {/* {(canUpdateUser || canDeleteUser) && (
+              {(canUpdateUser || canDeleteUser) && (
                 <TableHead className="text-right">Actions</TableHead>
-              )} */}
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -87,16 +140,8 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
                 <TableCell>
                   <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {user.permissions.map((permission, index) => (
-                      <Badge key={index} variant="outline">
-                        {permission}
-                      </Badge>
-                    ))}
-                  </div>
-                </TableCell>
-                {/* {(canUpdateUser || canDeleteUser) && loggedInUser.id !== user.id && (
+                <TableCell>{renderPermissions(user.permissions, user.id)}</TableCell>
+                {(canUpdateUser || canDeleteUser) && loggedInUser.id !== user.id && (
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -105,7 +150,6 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         {canUpdateUser && (
                           <>
                             <DropdownMenuItem>Edit User</DropdownMenuItem>
@@ -125,7 +169,7 @@ function TeamMembers({ users, handleRemoveUser, getRoleBadgeVariant }: TeamMembe
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                )} */}
+                )}
               </TableRow>
             ))}
           </TableBody>

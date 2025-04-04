@@ -14,14 +14,14 @@ import {
 } from '@/components/ui/sidebar';
 import { useAppSelector } from '@/redux/hooks';
 import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
+import { useNavigationState } from '@/hooks/use_navigation_state';
 
 const data = {
   navMain: [
     {
       title: 'Dashboard',
       url: '/dashboard',
-      icon: Home,
-      isActive: true
+      icon: Home
     },
     {
       title: 'Self Host',
@@ -66,6 +66,7 @@ export function AppSidebar({
   const user = useAppSelector((state) => state.auth.user);
   const { isLoading } = useGetUserOrganizationsQuery();
   const organizations = useAppSelector((state) => state.user.organizations);
+  const { activeNav, setActiveNav } = useNavigationState();
 
   React.useEffect(() => {
     if (user && user.type !== 'admin') {
@@ -86,7 +87,13 @@ export function AppSidebar({
         />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain
+          items={data.navMain.map((item) => ({
+            ...item,
+            isActive: item.url === activeNav
+          }))}
+          onItemClick={(url) => setActiveNav(url)}
+        />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

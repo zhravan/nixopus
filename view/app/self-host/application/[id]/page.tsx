@@ -10,13 +10,13 @@ import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import ApplicationDetailsHeader from '../../components/application-details/header';
 
 function Page() {
-  const { application, currentPage, setCurrentPage, envVariables, buildVariables } =
+  const { application, currentPage, setCurrentPage, envVariables, buildVariables, defaultTab } =
     useApplicationDetails();
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl 2xl:max-w-7xl">
       <ApplicationDetailsHeader application={application} />
-      <Tabs defaultValue="monitoring" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList>
           <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
           <TabsTrigger value="configuration">Configuration</TabsTrigger>

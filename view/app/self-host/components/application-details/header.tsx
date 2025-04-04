@@ -53,6 +53,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
         force: true,
         force_without_cache: forceWithoutCache
       }).unwrap();
+      router.push('/self-host/application/' + application?.id + '?logs=true');
       toast.success('Application redeployment started');
     } catch (error) {
       toast.error('Failed to redeploy application');

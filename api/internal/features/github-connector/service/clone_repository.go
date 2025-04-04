@@ -14,6 +14,7 @@ type CloneRepositoryConfig struct {
 	DeploymentID   string
 	DeploymentType string
 	Branch         string
+	ApplicationID  string
 }
 
 // CloneRepository clones the specified repository for the given user and environment.
@@ -50,8 +51,8 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 		return "", nil
 	}
 
+	// TODO: we will need to handle multiple connectors here 
 	installation_id := connectors[0].InstallationID
-
 	jwt := GenerateJwt(&connectors[0])
 
 	accessToken, err := s.getInstallationToken(jwt, installation_id)
@@ -78,7 +79,9 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 		return "", err
 	}
 
-	clonePath, should_pull, err := s.GetClonePath(c.UserID, c.Environment)
+	clonePath, should_pull, err := s.GetClonePath(c.UserID, c.Environment, c.ApplicationID)
+
+	s.logger.Log(logger.Info, fmt.Sprintf("Clone path: %s", clonePath),"")
 
 	if err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to get clone path: %s", err.Error()), "")

@@ -85,8 +85,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </Breadcrumb>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <img src="/nixopus_logo_transparent.png" alt="" width={50} height={50} />
+            <div className="flex items-center gap-2 hover:cursor-pointer">
+              <img
+                src="/nixopus_logo_transparent.png"
+                className="hover:animate-bounce"
+                alt=""
+                width={50}
+                height={50}
+              />
               <span className="hidden md:block text-2xl font-mono">Nixopus</span>
             </div>
           </div>

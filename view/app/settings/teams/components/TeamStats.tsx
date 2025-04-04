@@ -1,19 +1,11 @@
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface TeamStatsProps {
   users: {
     id: string;
     name: string;
-    role: 'Admin' | 'Member' | 'Viewer' | 'Owner';
+    role: 'admin' | 'member' | 'viewer' | 'owner';
   }[];
 }
 
@@ -32,15 +24,15 @@ function TeamStats({ users }: TeamStatsProps) {
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Owners</span>
-            <span className="font-medium">{users.filter((u) => u.role === 'Owner').length}</span>
+            <span className="font-medium">{users.filter((u) => u.role === 'admin').length}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Members</span>
-            <span className="font-medium">{users.filter((u) => u.role === 'Member').length}</span>
+            <span className="font-medium">{users.filter((u) => u.role === 'member').length}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Viewers</span>
-            <span className="font-medium">{users.filter((u) => u.role === 'Viewer').length}</span>
+            <span className="font-medium">{users.filter((u) => u.role === 'viewer').length}</span>
           </div>
         </div>
       </CardContent>

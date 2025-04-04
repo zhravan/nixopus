@@ -86,6 +86,11 @@ function Page() {
       ) : (
         <div className="text-center text-muted-foreground">No team members found.</div>
       )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TeamStats users={users} />
+        <RecentActivity />
+      </div>
     </div>
   );
 }

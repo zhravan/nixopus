@@ -20,6 +20,7 @@ import { GithubConnectorApi } from '@/redux/services/connector/githubConnectorAp
 import githubConnector from './features/github-connector/githubConnectorSlice';
 import { deployApi } from './services/deploy/applicationsApi';
 import { fileManagersApi } from './services/file-manager/fileManagersApi';
+import { auditApi } from './services/audit';
 
 const createNoopStorage = () => {
   return {
@@ -53,7 +54,8 @@ const rootReducer = combineReducers({
   githubConnector: githubConnector,
   [deployApi.reducerPath]: deployApi.reducer,
   user: userSlice,
-  fileManagersApi: fileManagersApi.reducer
+  fileManagersApi: fileManagersApi.reducer,
+  [auditApi.reducerPath]: auditApi.reducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -72,7 +74,8 @@ const storeOptions: ConfigureStoreOptions = {
       domainsApi.middleware,
       GithubConnectorApi.middleware,
       deployApi.middleware,
-      fileManagersApi.middleware
+      fileManagersApi.middleware,
+      auditApi.middleware
     )
 };
 

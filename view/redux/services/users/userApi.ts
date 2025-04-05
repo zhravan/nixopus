@@ -136,6 +136,15 @@ export const userApi = createApi({
       transformResponse: (response: { data: string[] }) => {
         return response.data;
       }
+    }),
+    deleteOrganization: builder.mutation<void, string>({
+      query(organizationId) {
+        return {
+          url: `${USERURLS.CREATE_ORGANIZATION}?id=${organizationId}`,
+          method: 'DELETE'
+        };
+      },
+      invalidatesTags: [{ type: 'User', id: 'LIST' }]
     })
   })
 });
@@ -151,5 +160,6 @@ export const {
   useUpdateOrganizationDetailsMutation,
   useCreateUserMutation,
   useUpdateUserRoleMutation,
-  useGetResourcesQuery
+  useGetResourcesQuery,
+  useDeleteOrganizationMutation
 } = userApi;

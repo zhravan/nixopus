@@ -1,9 +1,5 @@
 import { useAppSelector } from '@/redux/hooks';
-import {
-  useAddUserToOrganizationMutation,
-  useCreateOrganizationMutation
-} from '@/redux/services/users/userApi';
-import { UserOrganization } from '@/redux/types/orgs';
+import { useCreateOrganizationMutation } from '@/redux/services/users/userApi';
 import React from 'react';
 import { toast } from 'sonner';
 
@@ -14,8 +10,6 @@ function useTeamSwitcher() {
   const [teamName, setTeamName] = React.useState('');
   const [teamDescription, setTeamDescription] = React.useState('');
   const [createOrganization, { isLoading }] = useCreateOrganizationMutation();
-  const [addUserToOrganization, { isLoading: isAddingUser }] = useAddUserToOrganizationMutation();
-  const organizations = useAppSelector((state) => state.user.organizations);
 
   const toggleAddTeamModal = () => {
     setOpen(!open);
@@ -30,16 +24,17 @@ function useTeamSwitcher() {
   };
 
   const validateTeamName = (name: string) => {
-    return name.length > 0;
+    if (!name) {
+      return false;
+    }
+    return name.length <= 50;
   };
 
   const validateTeamDescription = (description: string) => {
-    return description.length > 0;
-  };
-
-  const getOwnerRoleId = () => {
-    const org = organizations.find((org: UserOrganization) => org.role.name === 'Owner');
-    return org?.role.id;
+    if (!description) {
+      return false;
+    }
+    return description.length <= 100;
   };
 
   const onCreateTeam = async () => {
@@ -50,12 +45,12 @@ function useTeamSwitcher() {
       }
 
       if (!validateTeamName(teamName)) {
-        toast.error('Team name is required');
+        toast.error('Team name is required and must be less than 50 characters');
         return;
       }
 
       if (!validateTeamDescription(teamDescription)) {
-        toast.error('Team description is required');
+        toast.error('Team description is required and must be less than 100 characters');
         return;
       }
 
@@ -68,16 +63,12 @@ function useTeamSwitcher() {
         toast.error('Failed to create team');
         return;
       }
-      const ownerRoleId = getOwnerRoleId();
-      await addUserToOrganization({
-        organization_id: res.id,
-        user_id: user?.id,
-        role_id: ownerRoleId
-      }).unwrap();
       toast.success('Team created successfully');
       setOpen(false);
+      setTeamName('');
+      setTeamDescription('');
     } catch (error) {
-      console.log(error);
+      console.error('Failed to create team:', error);
       toast.error('Failed to create team');
     }
   };
@@ -91,7 +82,7 @@ function useTeamSwitcher() {
     teamDescription,
     handleTeamNameChange,
     handleTeamDescriptionChange,
-    isLoading: isLoading || isAddingUser
+    isLoading
   };
 }
 

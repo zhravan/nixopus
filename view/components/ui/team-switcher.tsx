@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronsUpDown, GroupIcon, Plus, Users } from 'lucide-react';
+import { ChevronsUpDown, GroupIcon, Plus, Trash2, Users } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -21,6 +21,8 @@ import {
 import { UserOrganization } from '@/redux/types/orgs';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setActiveOrganization } from '@/redux/features/users/userSlice';
+import { DeleteDialog } from './delete-dialog';
+import { useDeleteOrganizationMutation } from '@/redux/services/users/userApi';
 
 export function TeamSwitcher({
   teams,
@@ -34,6 +36,9 @@ export function TeamSwitcher({
   const isAdmin = React.useMemo(() => user?.type === 'admin', [user]);
   const activeTeam = useAppSelector((state) => state.user.activeOrganization);
   const dispatch = useAppDispatch();
+  const [deleteOrganization] = useDeleteOrganizationMutation();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+
   React.useEffect(() => {
     if (teams && teams.length > 0 && !activeTeam) {
       dispatch(setActiveOrganization(teams[0].organization));
@@ -54,57 +59,89 @@ export function TeamSwitcher({
     dispatch(setActiveOrganization(team.organization));
   };
 
+  const handleDeleteOrganization = async () => {
+    try {
+      await deleteOrganization(displayTeam.id).unwrap();
+      dispatch(setActiveOrganization(null));
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to delete organization:', error);
+    }
+  };
+
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <div className="bg-primary text-background flex aspect-square size-8 items-center justify-center rounded-lg">
-                <Users className="size-4 text-background" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayTeam.name}</span>
-                <span className="truncate text-xs">{displayTeam.description}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            align="start"
-            side={isMobile ? 'bottom' : 'right'}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="text-muted-foreground text-xs">Teams</DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.organization.id}
-                onClick={() => handleTeamChange(team)}
-                className="gap-2 p-2"
+    <>
+      <DeleteDialog
+        title="Delete Organization"
+        description={`Are you sure you want to delete the organization "${displayTeam.name}"? This action cannot be undone.`}
+        onConfirm={handleDeleteOrganization}
+        variant="destructive"
+        icon={Trash2}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="flex size-6 items-center justify-center rounded-xs border">
-                  <GroupIcon className="size-4 shrink-0" />
+                <div className="bg-primary text-background flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Users className="size-4 text-background" />
                 </div>
-                {team.organization.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            {isAdmin && (
-              <DropdownMenuItem className="gap-2 p-2" onClick={toggleAddTeamModal}>
-                <div className="bg-background flex size-6 items-center justify-center rounded-md border">
-                  <Plus className="size-4" />
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{displayTeam.name}</span>
+                  <span className="truncate text-xs">{displayTeam.description}</span>
                 </div>
-                <div className="text-muted-foreground font-medium">Add team</div>
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+                <ChevronsUpDown className="ml-auto" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              align="start"
+              side={isMobile ? 'bottom' : 'right'}
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="text-muted-foreground text-xs">Teams</DropdownMenuLabel>
+              {teams.map((team, index) => (
+                <DropdownMenuItem
+                  key={team.organization.id}
+                  onClick={() => handleTeamChange(team)}
+                  className="gap-2 p-2"
+                >
+                  <div className="flex size-6 items-center justify-center rounded-xs border">
+                    <GroupIcon className="size-4 shrink-0" />
+                  </div>
+                  {team.organization.name}
+                  {index < 9 && <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              {isAdmin && (
+                <>
+                  <DropdownMenuItem className="gap-2 p-2" onClick={toggleAddTeamModal}>
+                    <div className="bg-background flex size-6 items-center justify-center rounded-md border">
+                      <Plus className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground font-medium">Add team</div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="gap-2 p-2 text-destructive"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                  >
+                    <div className="bg-background flex size-6 items-center justify-center rounded-md border">
+                      <Trash2 className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground font-medium">Delete team</div>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </>
   );
 }

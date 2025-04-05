@@ -24,8 +24,13 @@ import LayoutSwitcher from './components/layout/LayoutSwitcher';
 import Actions from './components/actions/Actions';
 import { FileItem } from './components/file-list/FileItem';
 import useFileManager from './hooks/ui/useFileManager';
+import { useAppSelector } from '@/redux/hooks';
+import { hasPermission } from '@/lib/permission';
 
 function FileManager() {
+  const user = useAppSelector((state) => state.auth.user);
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
+
   const {
     currentPath,
     layout,
@@ -55,7 +60,13 @@ function FileManager() {
     handleFileUpload
   } = useFileManager();
 
+  const canRead = hasPermission(user, 'file-manager', 'read', activeOrg?.id);
+  const canCreate = hasPermission(user, 'file-manager', 'create', activeOrg?.id);
+  const canUpdate = hasPermission(user, 'file-manager', 'update', activeOrg?.id);
+  const canDelete = hasPermission(user, 'file-manager', 'delete', activeOrg?.id);
+
   const handleFileDrop = (e: React.DragEvent) => {
+    if (!canCreate) return;
     e.preventDefault();
     e.stopPropagation();
 
@@ -64,9 +75,21 @@ function FileManager() {
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canCreate) return;
     const files = Array.from(e.target.files || []);
     files.forEach(handleFileUpload);
   };
+
+  if (!canRead) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <p className="text-muted-foreground">You don't have permission to view this page</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || isCopyFileOrDirectoryLoading || isMoveOrRenameDirectoryLoading) {
     return <Skeleton />;
@@ -101,6 +124,9 @@ function FileManager() {
               setSelectedPath={setSelectedPath}
               selectedPath={selectedPath}
               files={files || []}
+              canCreate={canCreate}
+              canUpdate={canUpdate}
+              canDelete={canDelete}
             />
           </div>
         </div>
@@ -127,6 +153,8 @@ function FileManager() {
                   setFileToCopy={setFileToCopy}
                   setFileToMove={setFileToMove}
                   index={index}
+                  canUpdate={canUpdate}
+                  canDelete={canDelete}
                 />
               ))}
               {visibleFiles.length === 0 && (
@@ -137,14 +165,22 @@ function FileManager() {
             </div>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem>
-              <label className="flex cursor-pointer items-center">
-                <UploadCloudIcon className="mr-2 h-5 w-5" />
-                <span>Upload File</span>
-                <input type="file" className="hidden" onChange={handleFileInput} multiple />
-              </label>
-            </ContextMenuItem>
-            {fileToMove && (
+            {canCreate && (
+              <>
+                <ContextMenuItem>
+                  <label className="flex cursor-pointer items-center">
+                    <UploadCloudIcon className="mr-2 h-5 w-5" />
+                    <span>Upload File</span>
+                    <input type="file" className="hidden" onChange={handleFileInput} multiple />
+                  </label>
+                </ContextMenuItem>
+                <ContextMenuItem onSelect={createNewFolder}>
+                  <FolderPlusIcon className="mr-2 h-5 w-5" />
+                  <span>New Folder</span>
+                </ContextMenuItem>
+              </>
+            )}
+            {canUpdate && fileToMove && (
               <ContextMenuItem
                 onSelect={() => {
                   handleFileMove(fileToMove.path, currentPath + '/' + fileToMove.name);
@@ -156,7 +192,7 @@ function FileManager() {
                 <span>Move here</span>
               </ContextMenuItem>
             )}
-            {fileToCopy && (
+            {canUpdate && fileToCopy && (
               <ContextMenuItem
                 onSelect={() => {
                   handleFilePaste(fileToCopy.path, currentPath + '/' + fileToCopy.name);
@@ -168,10 +204,6 @@ function FileManager() {
                 <span>Paste here</span>
               </ContextMenuItem>
             )}
-            <ContextMenuItem onSelect={createNewFolder}>
-              <FolderPlusIcon className="mr-2 h-5 w-5" />
-              <span>New Folder</span>
-            </ContextMenuItem>
             <ContextMenuItem onSelect={() => setShowHidden(!showHidden)}>
               {showHidden ? (
                 <EyeOffIcon className="mr-2 h-5 w-5" />
@@ -180,10 +212,12 @@ function FileManager() {
               )}
               <span>{showHidden ? 'Hide Hidden Files' : 'Show Hidden Files'}</span>
             </ContextMenuItem>
-            <ContextMenuItem>
-              <TrashIcon className="mr-2 h-5 w-5" />
-              <span>Trash</span>
-            </ContextMenuItem>
+            {canDelete && (
+              <ContextMenuItem>
+                <TrashIcon className="mr-2 h-5 w-5" />
+                <span>Trash</span>
+              </ContextMenuItem>
+            )}
           </ContextMenuContent>
         </ContextMenu>
       </div>

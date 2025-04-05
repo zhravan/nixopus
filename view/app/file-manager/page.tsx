@@ -51,15 +51,29 @@ function FileManager() {
     setFileToCopy,
     setFileToMove,
     setSelectedPath,
-    files
+    files,
+    handleFileUpload
   } = useFileManager();
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const files = Array.from(e.dataTransfer.files);
+    files.forEach(handleFileUpload);
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(handleFileUpload);
+  };
 
   if (isLoading || isCopyFileOrDirectoryLoading || isMoveOrRenameDirectoryLoading) {
     return <Skeleton />;
   }
 
   return (
-    <div>
+    <div onDrop={handleFileDrop} onDragOver={(e) => e.preventDefault()}>
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between px-0 lg:px-6">
           <Header />
@@ -124,8 +138,11 @@ function FileManager() {
           </ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem>
-              <UploadCloudIcon className="mr-2 h-5 w-5" />
-              <span>New File</span>
+              <label className="flex cursor-pointer items-center">
+                <UploadCloudIcon className="mr-2 h-5 w-5" />
+                <span>Upload File</span>
+                <input type="file" className="hidden" onChange={handleFileInput} multiple />
+              </label>
             </ContextMenuItem>
             {fileToMove && (
               <ContextMenuItem

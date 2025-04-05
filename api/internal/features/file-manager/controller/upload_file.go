@@ -8,20 +8,23 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-type DeleteFileRequest struct {
-	Path string `json:"path"`
-}
-
-func (c *FileManagerController) DeleteFile(f fuego.ContextWithBody[DeleteFileRequest]) (*shared_types.Response, error) {
-	request, err := f.Body()
+func (c *FileManagerController) UploadFile(f fuego.ContextNoBody) (*shared_types.Response, error) {
+	file, header, err := f.Request().FormFile("file")
 	if err != nil {
+		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
 			Status: http.StatusBadRequest,
 		}
 	}
+	defer file.Close()
 
-	err = c.service.DeleteFile(request.Path)
+	path := f.Request().FormValue("path")
+	if path == "" {
+		path = "."
+	}
+
+	err = c.service.UploadFile(file, path, header.Filename)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
@@ -32,6 +35,6 @@ func (c *FileManagerController) DeleteFile(f fuego.ContextWithBody[DeleteFileReq
 
 	return &shared_types.Response{
 		Status:  "success",
-		Message: "File deleted successfully",
+		Message: "File uploaded successfully",
 	}, nil
 }

@@ -5,7 +5,8 @@ import { FileData, FileType } from '@/redux/types/files';
 import { useSearchable } from '@/hooks/use-searchable';
 import {
   useCreateDirectoryMutation,
-  useGetFilesInPathQuery
+  useGetFilesInPathQuery,
+  useUploadFileMutation
 } from '@/redux/services/file-manager/fileManagersApi';
 import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 
@@ -18,6 +19,7 @@ function use_file_manager() {
   const [fileToCopy, setFileToCopy] = useState<FileData | undefined>();
   const [fileToMove, setFileToMove] = useState<FileData | undefined>();
   const [createDirectory] = useCreateDirectoryMutation();
+  const [uploadFile] = useUploadFileMutation();
   const router = useRouter();
   const path = useSearchParams().get('path');
   const { data: files, isLoading, refetch } = useGetFilesInPathQuery({ path: currentPath });
@@ -154,6 +156,17 @@ function use_file_manager() {
     setSelectedFile(files?.find((file) => file.path === path));
   };
 
+  const handleFileUpload = async (file: File) => {
+    if (!currentPath) return;
+
+    try {
+      await uploadFile({ file, path: currentPath });
+      refetch();
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+    }
+  };
+
   return {
     currentPath,
     layout,
@@ -179,7 +192,8 @@ function use_file_manager() {
     setFileToCopy,
     setFileToMove,
     setSelectedPath,
-    files
+    files,
+    handleFileUpload
   };
 }
 

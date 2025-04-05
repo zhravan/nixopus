@@ -71,19 +71,19 @@ export const fileManagersApi = createApi({
       }),
       transformResponse: (response: any) => response.data
     }),
-    getDiskUsage: builder.query<any, void>({
-      query: () => ({
-        url: FILEMANAGERURLS.GET_DISK_USAGE,
-        method: 'GET'
-      }),
-      transformResponse: (response: { data: any }) => response.data
-    }),
-    getMemoryUsage: builder.query<any, void>({
-      query: () => ({
-        url: FILEMANAGERURLS.GET_MEMORY_USAGE,
-        method: 'GET'
-      }),
-      transformResponse: (response: { data: any }) => response.data
+    uploadFile: builder.mutation<any, { file: File; path: string }>({
+      query: ({ file, path }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('path', path);
+
+        return {
+          url: FILEMANAGERURLS.UPLOAD_FILE,
+          method: 'POST',
+          body: formData
+        };
+      },
+      transformResponse: (response: any) => response
     })
   })
 });
@@ -97,6 +97,5 @@ export const {
   useCopyFileOrDirectoryMutation,
   useCreateFileMutation,
   useCalculateDirectorySizeMutation,
-  useGetDiskUsageQuery,
-  useGetMemoryUsageQuery
+  useUploadFileMutation
 } = fileManagersApi;

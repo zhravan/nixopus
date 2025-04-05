@@ -1,73 +1,80 @@
-import { useState, useRef, DragEvent, ChangeEvent } from 'react';
+import { useState, useRef } from 'react';
+import { useUploadFileMutation } from '@/redux/services/file-manager/fileManagersApi';
+import useFileManager from '../ui/useFileManager';
 
 interface FileObject {
-  file: File;
   id: string;
+  file: File;
   progress: number;
-  uploading: boolean;
 }
-function use_file_upload() {
+
+export default function use_file_upload() {
   const [files, setFiles] = useState<FileObject[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentPath, refetch } = useFileManager();
+  const [uploadFile] = useUploadFileMutation();
 
-  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
+
     const droppedFiles = Array.from(e.dataTransfer.files);
-    handleFiles(droppedFiles);
+    addFiles(droppedFiles);
   };
 
-  const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      handleFiles(selectedFiles);
-    }
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    addFiles(selectedFiles);
   };
 
-  const handleFiles = (newFiles: File[]) => {
-    const updatedFiles: FileObject[] = newFiles.map((file) => ({
-      file,
+  const addFiles = (newFiles: File[]) => {
+    const fileObjects = newFiles.map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
-      progress: 0,
-      uploading: false
+      file,
+      progress: 0
     }));
-    setFiles((prev) => [...prev, ...updatedFiles]);
-    updatedFiles.forEach((fileObj) => simulateUpload(fileObj.id));
+
+    setFiles((prev) => [...prev, ...fileObjects]);
+    uploadFiles(fileObjects);
   };
 
-  const simulateUpload = (id: string) => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, progress, uploading: true } : f)));
-      if (progress >= 100) {
-        clearInterval(interval);
-        setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, uploading: false } : f)));
+  const uploadFiles = async (fileObjects: FileObject[]) => {
+    for (const fileObj of fileObjects) {
+      try {
+        const formData = new FormData();
+        formData.append('file', fileObj.file);
+        formData.append('path', currentPath);
+
+        await uploadFile({ file: fileObj.file, path: currentPath });
+        setFiles((prev) => prev.filter((f) => f.id !== fileObj.id));
+      } catch (error) {
+        console.error('Failed to upload file:', error);
       }
-    }, 500);
+    }
+    refetch();
   };
 
   const deleteFile = (id: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
+    setFiles((prev) => prev.filter((file) => file.id !== id));
   };
 
   return {
@@ -79,10 +86,6 @@ function use_file_upload() {
     handleDragOver,
     handleDrop,
     handleFileInput,
-    handleFiles,
-    simulateUpload,
     deleteFile
   };
 }
-
-export default use_file_upload;

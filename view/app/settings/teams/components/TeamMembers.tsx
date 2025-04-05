@@ -24,6 +24,7 @@ import { useAppSelector } from '@/redux/hooks';
 import { useResourcePermissions } from '@/lib/permission';
 import EditUserDialog from './EditUserDialog';
 import { UserTypes } from '@/redux/types/orgs';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 
 type EditUser = {
   id: string;
@@ -60,6 +61,8 @@ function TeamMembers({
   );
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const [editingUser, setEditingUser] = useState<EditUser | null>(null);
+  const [userToRemove, setUserToRemove] = useState<EditUser | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const toggleUserPermissions = (userId: string) => {
     setExpandedUsers((prev) => {
@@ -187,7 +190,10 @@ function TeamMembers({
                           {canDeleteUser && (
                             <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
-                              onClick={() => handleRemoveUser(user.id)}
+                              onClick={() => {
+                                setUserToRemove(user);
+                                setIsDeleteDialogOpen(true);
+                              }}
                             >
                               <TrashIcon className="h-4 w-4 mr-2" />
                               Remove User
@@ -211,6 +217,23 @@ function TeamMembers({
           user={editingUser}
           onSave={handleSaveUser}
           resources={resources}
+        />
+      )}
+
+      {userToRemove && (
+        <DeleteDialog
+          title={`Remove ${userToRemove.name}`}
+          description={`Are you sure you want to remove ${userToRemove.name} from the team? This action cannot be undone.`}
+          onConfirm={() => {
+            handleRemoveUser(userToRemove.id);
+            setUserToRemove(null);
+            setIsDeleteDialogOpen(false);
+          }}
+          confirmText="Remove User"
+          variant="destructive"
+          icon={TrashIcon}
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
         />
       )}
     </>

@@ -99,5 +99,5 @@ export interface CreateUserRequest {
 export interface UpdateUserRoleRequest {
   user_id: string;
   organization_id: string;
-  role_id: UserTypes;
+  role_name: UserTypes;
 }

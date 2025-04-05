@@ -27,8 +27,7 @@ function Page() {
     teamName,
     teamDescription,
     isUpdating,
-    handleUpdateUser,
-    resources
+    handleUpdateUser
   } = useTeamSettings();
 
   const user = useAppSelector((state) => state.auth.user);
@@ -85,7 +84,6 @@ function Page() {
           handleRemoveUser={handleRemoveUser}
           getRoleBadgeVariant={getRoleBadgeVariant}
           onUpdateUser={handleUpdateUser}
-          resources={resources}
         />
       ) : (
         <div className="text-center text-muted-foreground">No team members found.</div>

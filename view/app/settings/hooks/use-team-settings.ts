@@ -4,8 +4,7 @@ import {
   useGetOrganizationUsersQuery,
   useRemoveUserFromOrganizationMutation,
   useUpdateOrganizationDetailsMutation,
-  useUpdateUserRoleMutation,
-  useGetResourcesQuery
+  useUpdateUserRoleMutation
 } from '@/redux/services/users/userApi';
 import { UserTypes } from '@/redux/types/orgs';
 import { useState, useEffect } from 'react';
@@ -29,7 +28,6 @@ function useTeamSettings() {
   } = useGetOrganizationUsersQuery(activeOrganization?.id, {
     skip: !activeOrganization
   });
-  const { data: resources = [], isLoading: isLoadingResources } = useGetResourcesQuery();
   const [updateOrganizationDetails, { isLoading: isUpdating, error: updateError }] =
     useUpdateOrganizationDetailsMutation();
 
@@ -63,17 +61,6 @@ function useTeamSettings() {
 
   const handleAddUser = async () => {
     const newId = crypto.randomUUID();
-    let permissions: string[] = [];
-
-    switch (newUser.role) {
-      case 'Member':
-        permissions = ['READ', 'UPDATE'];
-        break;
-      case 'Viewer':
-        permissions = ['READ'];
-        break;
-    }
-
     const tempUser = {
       username: newUser.name || '',
       email: newUser.email || '',
@@ -82,7 +69,7 @@ function useTeamSettings() {
       type: newUser.role.toLowerCase() as UserTypes
     };
 
-    setUsers([...users, { id: newId, ...tempUser, permissions, name: newUser.name }]);
+    setUsers([...users, { id: newId, ...tempUser, name: newUser.name }]);
     try {
       const user = await createUser(tempUser as any);
       toast.success('User added successfully');
@@ -106,26 +93,19 @@ function useTeamSettings() {
     }
   };
 
-  const handleUpdateUser = async (
-    userId: string,
-    role: UserTypes,
-    permissions: { resource: string; action: string }[]
-  ) => {
+  const handleUpdateUser = async (userId: string, role: UserTypes) => {
     try {
       await updateUserRole({
         user_id: userId,
         organization_id: activeOrganization?.id || '',
-        role_id: role
+        role_name: role
       });
 
       const updatedUsers = users.map((user: any) => {
         if (user.id === userId) {
           return {
             ...user,
-            role,
-            permissions: permissions.map(
-              (p) => `${p.resource.toUpperCase()}:${p.action.toUpperCase()}`
-            )
+            role
           };
         }
         return user;
@@ -177,7 +157,7 @@ function useTeamSettings() {
 
   return {
     users,
-    isLoading: isLoading || isLoadingResources,
+    isLoading,
     error,
     isAddUserDialogOpen,
     setIsAddUserDialogOpen,
@@ -194,8 +174,7 @@ function useTeamSettings() {
     isEditTeamDialogOpen,
     teamName,
     teamDescription,
-    isUpdating,
-    resources
+    isUpdating
   };
 }
 

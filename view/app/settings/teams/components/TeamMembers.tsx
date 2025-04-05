@@ -39,8 +39,7 @@ interface TeamMembersProps {
   users: EditUser[];
   handleRemoveUser: (userId: string) => void;
   getRoleBadgeVariant: (role: string) => 'destructive' | 'default' | 'secondary' | 'outline';
-  onUpdateUser: (userId: string, role: UserTypes, permissions: any[]) => void;
-  resources: string[];
+  onUpdateUser: (userId: string, role: UserTypes) => void;
 }
 
 const MAX_VISIBLE_PERMISSIONS = 3;
@@ -49,8 +48,7 @@ function TeamMembers({
   users,
   handleRemoveUser,
   getRoleBadgeVariant,
-  onUpdateUser,
-  resources
+  onUpdateUser
 }: TeamMembersProps) {
   const loggedInUser = useAppSelector((state) => state.auth.user);
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
@@ -83,8 +81,8 @@ function TeamMembers({
     });
   };
 
-  const handleSaveUser = (userId: string, role: UserTypes, permissions: any[]) => {
-    onUpdateUser(userId, role, permissions);
+  const handleSaveUser = (userId: string, role: UserTypes) => {
+    onUpdateUser(userId, role);
     setEditingUser(null);
   };
 
@@ -216,7 +214,6 @@ function TeamMembers({
           onClose={() => setEditingUser(null)}
           user={editingUser}
           onSave={handleSaveUser}
-          resources={resources}
         />
       )}
 

@@ -12,7 +12,7 @@ import (
 type UpdateUserRoleRequest struct {
 	UserID         string `json:"user_id"`
 	OrganizationID string `json:"organization_id"`
-	Role           string `json:"role"`
+	RoleName       string `json:"role_name"`
 }
 
 func (c *OrganizationsController) UpdateUserRole(f fuego.ContextWithBody[UpdateUserRoleRequest]) (*shared_types.Response, error) {
@@ -33,7 +33,7 @@ func (c *OrganizationsController) UpdateUserRole(f fuego.ContextWithBody[UpdateU
 		}
 	}
 
-	if err := c.service.UpdateUserRole(req.UserID, req.OrganizationID, req.Role); err != nil {
+	if err := c.service.UpdateUserRole(req.UserID, req.OrganizationID, req.RoleName); err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
 			Status: http.StatusInternalServerError,

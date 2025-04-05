@@ -33,11 +33,7 @@ function Page() {
   const user = useAppSelector((state) => state.auth.user);
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
 
-  const {
-    canUpdate: canUpdateUser,
-    canDelete: canDeleteUser,
-    canCreate: canCreateUser
-  } = useResourcePermissions(user, 'user', activeOrganization?.id);
+  const { canCreate: canCreateUser } = useResourcePermissions(user, 'user', activeOrganization?.id);
   const { canRead: canReadOrg, canUpdate: canUpdateOrg } = useResourcePermissions(
     user,
     'organization',

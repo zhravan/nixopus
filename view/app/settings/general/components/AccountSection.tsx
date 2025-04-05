@@ -137,9 +137,6 @@ function AccountSection({
                   )}
                 </div>
               )}
-              <p className="text-sm text-muted-foreground">
-                Contact support to change your email address
-              </p>
             </div>
           </div>
         </CardContent>

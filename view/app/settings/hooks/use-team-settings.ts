@@ -137,12 +137,19 @@ function useTeamSettings() {
       teamName !== activeOrganization?.name ||
       teamDescription !== activeOrganization?.description
     ) {
-      await updateOrganizationDetails({
-        id: activeOrganization?.id || '',
-        name: teamName,
-        description: teamDescription
-      });
-      toast.success('Team details updated successfully');
+      try {
+        await updateOrganizationDetails({
+          id: activeOrganization?.id || '',
+          name: teamName,
+          description: teamDescription
+        });
+        await refetchUsers();
+        toast.success('Team details updated successfully');
+      } catch (error) {
+        toast.error('Failed to update team details');
+        setTeamName(activeOrganization?.name || '');
+        setTeamDescription(activeOrganization?.description || '');
+      }
     }
   };
 

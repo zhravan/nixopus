@@ -20,6 +20,9 @@ interface FileContextMenuProps {
   setSelectedPath: React.Dispatch<React.SetStateAction<string>>;
   selectedPath: string;
   files: FileData[];
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
 }
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({
@@ -29,12 +32,16 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
   currentPath,
   setSelectedPath,
   selectedPath,
-  files
+  files,
+  canCreate,
+  canUpdate,
+  canDelete
 }) => {
   const [isUploadOpen, setIsUploadOpen] = React.useState(false);
   const [createDirectory] = useCreateDirectoryMutation();
 
   const handleCreateDirectory = async () => {
+    if (!canCreate) return;
     try {
       const newFolderName = `New Folder ${files.filter((f) => f.name.startsWith('New Folder')).length + 1}`;
       await createDirectory({ path: currentPath, name: newFolderName });
@@ -53,20 +60,24 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-            <DialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload File
-              </DropdownMenuItem>
-            </DialogTrigger>
-            <FileUpload setIsDialogOpen={setIsUploadOpen} />
-          </Dialog>
+          {canCreate && (
+            <>
+              <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload File
+                  </DropdownMenuItem>
+                </DialogTrigger>
+                <FileUpload setIsDialogOpen={setIsUploadOpen} />
+              </Dialog>
 
-          <DropdownMenuItem onSelect={handleCreateDirectory}>
-            <FolderPlus className="mr-2 h-4 w-4" />
-            Create Directory
-          </DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleCreateDirectory}>
+                <FolderPlus className="mr-2 h-4 w-4" />
+                Create Directory
+              </DropdownMenuItem>
+            </>
+          )}
 
           <DropdownMenuItem onSelect={() => setShowHidden(!showHidden)}>
             {showHidden ? (

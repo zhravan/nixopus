@@ -10,6 +10,9 @@ interface ActionsProps {
   setSelectedPath: React.Dispatch<React.SetStateAction<string>>;
   selectedPath: string;
   files: FileData[];
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
 }
 
 const Actions: React.FC<ActionsProps> = ({
@@ -19,7 +22,10 @@ const Actions: React.FC<ActionsProps> = ({
   currentPath,
   setSelectedPath,
   selectedPath,
-  files
+  files,
+  canCreate,
+  canUpdate,
+  canDelete
 }) => {
   return (
     <FileContextMenu
@@ -30,6 +36,9 @@ const Actions: React.FC<ActionsProps> = ({
       setSelectedPath={setSelectedPath}
       selectedPath={selectedPath}
       files={files}
+      canCreate={canCreate}
+      canUpdate={canUpdate}
+      canDelete={canDelete}
     />
   );
 };

@@ -12,47 +12,57 @@ import {
   SidebarHeader,
   SidebarRail
 } from '@/components/ui/sidebar';
-import { useAppSelector } from '@/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
 import { useNavigationState } from '@/hooks/use_navigation_state';
+import { hasPermission } from '@/lib/permission';
+import { setActiveOrganization } from '@/redux/features/users/userSlice';
 
 const data = {
   navMain: [
     {
       title: 'Dashboard',
       url: '/dashboard',
-      icon: Home
+      icon: Home,
+      resource: 'dashboard'
     },
     {
       title: 'Self Host',
       url: '/self-host',
-      icon: Package
+      icon: Package,
+      resource: 'deploy'
     },
     {
       title: 'File Manager',
       url: '/file-manager',
-      icon: Folder
+      icon: Folder,
+      resource: 'file-manager'
     },
     {
       title: 'Settings',
       url: '/settings/general',
       icon: SettingsIcon,
+      resource: 'settings',
       items: [
         {
           title: 'General',
-          url: '/settings/general'
+          url: '/settings/general',
+          resource: 'settings'
         },
         {
           title: 'Notifications',
-          url: '/settings/notifications'
+          url: '/settings/notifications',
+          resource: 'notification'
         },
         {
           title: 'Team',
-          url: '/settings/teams'
+          url: '/settings/teams',
+          resource: 'organization'
         },
         {
           title: 'Domains',
-          url: '/settings/domains'
+          url: '/settings/domains',
+          resource: 'domain'
         }
       ]
     }
@@ -67,14 +77,58 @@ export function AppSidebar({
   const { isLoading, refetch } = useGetUserOrganizationsQuery();
   const organizations = useAppSelector((state) => state.user.organizations);
   const { activeNav, setActiveNav } = useNavigationState();
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
+  const dispatch = useAppDispatch();
+
+  const hasAnyPermission = React.useMemo(() => {
+    const allowedResources = ['dashboard', 'settings'];
+
+    return (resource: string) => {
+      if (!user || !activeOrg) return false;
+
+      if (allowedResources.includes(resource)) {
+        return true;
+      }
+
+      return (
+        hasPermission(user, resource, 'read', activeOrg.id) ||
+        hasPermission(user, resource, 'create', activeOrg.id) ||
+        hasPermission(user, resource, 'update', activeOrg.id) ||
+        hasPermission(user, resource, 'delete', activeOrg.id)
+      );
+    };
+  }, [user, activeOrg]);
+
+  const filteredNavItems = React.useMemo(
+    () =>
+      data.navMain.filter((item) => {
+        if (!item.resource) return false;
+
+        if (item.items) {
+          const filteredSubItems = item.items.filter(
+            (subItem) => subItem.resource && hasAnyPermission(subItem.resource)
+          );
+          return filteredSubItems.length > 0;
+        }
+
+        return hasAnyPermission(item.resource);
+      }),
+    [data.navMain, hasAnyPermission]
+  );
 
   React.useEffect(() => {
-    if (user && user.type !== 'admin') {
-      delete data.navMain[2];
+    if (organizations && organizations.length > 0 && !activeOrg) {
+      dispatch(setActiveOrganization(organizations[0].organization));
     }
-  }, [user]);
+  }, [organizations, activeOrg, dispatch]);
 
-  if (!user) {
+  React.useEffect(() => {
+    if (activeOrg?.id) {
+      refetch();
+    }
+  }, [activeOrg?.id, refetch]);
+
+  if (!user || !activeOrg) {
     return null;
   }
 
@@ -89,9 +143,12 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain
-          items={data.navMain.map((item) => ({
+          items={filteredNavItems.map((item) => ({
             ...item,
-            isActive: item.url === activeNav
+            isActive: item.url === activeNav,
+            items: item.items?.filter(
+              (subItem) => subItem.resource && hasAnyPermission(subItem.resource)
+            )
           }))}
           onItemClick={(url) => setActiveNav(url)}
         />

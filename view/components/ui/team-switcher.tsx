@@ -41,12 +41,6 @@ export function TeamSwitcher({
   const [deleteOrganization] = useDeleteOrganizationMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    if (teams && teams.length > 0 && !activeTeam) {
-      dispatch(setActiveOrganization(teams[0].organization));
-    }
-  }, [teams, activeTeam, dispatch]);
-
   if (!teams || teams.length === 0) {
     return null;
   }

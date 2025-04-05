@@ -14,21 +14,22 @@ import { formatFileSize } from '@/app/self-host/utils/formatFileSize';
 import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 import { useFileOperations } from '../../hooks/file-operations/useOperations';
 
-export interface FileItemProps {
+interface FileItemProps {
+  file: FileData;
   onFolderClick: (filePath: string) => void;
-  type: 'folder' | 'file';
+  type: 'file' | 'folder';
   layout: 'grid' | 'list';
   activePath: string;
-  onFolderClickActive: (filePath: string) => void;
+  onFolderClickActive: (path: string) => void;
   refetch: () => void;
-  file: FileData;
-  isHeader?: boolean;
   setFileToCopy: React.Dispatch<React.SetStateAction<FileData | undefined>>;
   setFileToMove: React.Dispatch<React.SetStateAction<FileData | undefined>>;
   index: number;
+  canUpdate: boolean;
+  canDelete: boolean;
 }
 
-export const FileItem = ({
+export function FileItem({
   file,
   onFolderClick,
   type,
@@ -36,11 +37,12 @@ export const FileItem = ({
   activePath,
   onFolderClickActive,
   refetch,
-  isHeader = false,
   setFileToCopy,
   setFileToMove,
-  index
-}: FileItemProps) => {
+  index,
+  canUpdate,
+  canDelete
+}: FileItemProps) {
   const {
     isEditing,
     setIsEditing,
@@ -84,7 +86,7 @@ export const FileItem = ({
 
   const gridLayout = (
     <div
-      className={`flex flex-col items-center  w-full min-h-[120px] sm:min-h-[130px] md:min-h-[140px] p-2 sm:p-3`}
+      className={`flex flex-col items-center w-full min-h-[120px] sm:min-h-[130px] md:min-h-[140px] p-2 sm:p-3`}
     >
       <div
         className="mb-3 flex items-center justify-center flex-1"
@@ -110,24 +112,14 @@ export const FileItem = ({
           if (type === 'folder') onFolderClick(file.path);
         }}
       >
-        {!isHeader && (
-          <div className="">{getFileIcons(type, file.name.split('.').pop() as string, layout)}</div>
-        )}
-        <div className="min-w-0 flex-1">
-          {isHeader ? <span className="text-muted-foreground">Name</span> : renderFileName()}
-        </div>
+        <div className="">{getFileIcons(type, file.name.split('.').pop() as string, layout)}</div>
+        <div className="min-w-0 flex-1">{renderFileName()}</div>
       </div>
       <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-        <p className="w-24">
-          {isHeader ? 'Size' : file.file_type === FileType.File ? formatFileSize(file.size) : '-'}
-        </p>
-        <p className="w-20">{isHeader ? 'Type' : file.file_type}</p>
-        <p className="w-32">
-          {isHeader ? 'Created On' : new Date(file.created_at).toLocaleDateString()}
-        </p>
-        <p className="w-32">
-          {isHeader ? 'Modified On' : new Date(file.updated_at).toLocaleDateString()}
-        </p>
+        <p className="w-24">{file.file_type === FileType.File ? formatFileSize(file.size) : '-'}</p>
+        <p className="w-20">{file.file_type}</p>
+        <p className="w-32">{new Date(file.created_at).toLocaleDateString()}</p>
+        <p className="w-32">{new Date(file.updated_at).toLocaleDateString()}</p>
       </div>
     </div>
   );
@@ -143,29 +135,28 @@ export const FileItem = ({
         <ContextMenuItem onSelect={() => setIsDialogOpen(true)}>
           <Info className="mr-2 h-4 w-4" /> Info
         </ContextMenuItem>
-        <ContextMenuItem
-          onSelect={() => {
-            window.open('http://localhost:8087?folder=' + file.path, '_blank');
-          }}
-        >
-          <Code className="mr-2 h-4 w-4" /> Open in Code Editor
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={startRenaming}>
-          <Pencil className="mr-2 h-4 w-4" /> Rename
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={() => handleCopyFile(file, setFileToCopy)}>
-          <Copy className="mr-2 h-4 w-4" /> Copy
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={() => setFileToMove(file)}>
-          <MoveIcon className="mr-2 h-4 w-4" /> Move
-        </ContextMenuItem>
-        <ContextMenuItem onSelect={onDeleteFolder}>
-          <TrashIcon className="mr-2 h-4 w-4" /> Move to Trash
-        </ContextMenuItem>
+        {canUpdate && (
+          <>
+            <ContextMenuItem onSelect={startRenaming}>
+              <Pencil className="mr-2 h-4 w-4" /> Rename
+            </ContextMenuItem>
+            <ContextMenuItem onSelect={() => handleCopyFile(file, setFileToCopy)}>
+              <Copy className="mr-2 h-4 w-4" /> Copy
+            </ContextMenuItem>
+            <ContextMenuItem onSelect={() => setFileToMove(file)}>
+              <MoveIcon className="mr-2 h-4 w-4" /> Move
+            </ContextMenuItem>
+          </>
+        )}
+        {canDelete && (
+          <ContextMenuItem onSelect={onDeleteFolder}>
+            <TrashIcon className="mr-2 h-4 w-4" /> Move to Trash
+          </ContextMenuItem>
+        )}
       </ContextMenuContent>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <FileInfo file={file} isLoading={isSizeLoading} fileSize={fileSize || null} />
       </Dialog>
     </ContextMenu>
   );
-};
+}

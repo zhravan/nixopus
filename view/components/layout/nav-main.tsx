@@ -14,6 +14,7 @@ import {
   SidebarMenuSubItem
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
+import { useCollapsibleState } from '@/hooks/use-collapsible-state';
 
 interface NavItem {
   title: string;
@@ -31,6 +32,7 @@ interface NavMainProps {
 export function NavMain({ items, onItemClick }: NavMainProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isItemCollapsed, toggleItem } = useCollapsibleState();
 
   const handleClick = (url: string) => {
     onItemClick?.(url);
@@ -45,7 +47,8 @@ export function NavMain({ items, onItemClick }: NavMainProps) {
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={item.isActive}
+            open={!isItemCollapsed(item.title)}
+            onOpenChange={() => toggleItem(item.title)}
             className="group/collapsible"
           >
             <SidebarMenuItem>

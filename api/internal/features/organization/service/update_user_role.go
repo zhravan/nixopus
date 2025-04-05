@@ -38,19 +38,13 @@ func (o *OrganizationService) UpdateUserRole(userID, organizationID, role string
 		return types.ErrUserNotInOrganization
 	}
 
-	roleID, err := uuid.Parse(role)
-	if err != nil {
-		o.logger.Log(logger.Error, types.ErrInvalidRoleID.Error(), err.Error())
-		return types.ErrInvalidRoleID
-	}
-
-	existingRole, err := o.role_storage.GetRole(roleID.String())
+	existingRole, err := o.role_storage.GetRoleByName(role)
 	if err == nil && existingRole.ID == uuid.Nil {
 		o.logger.Log(logger.Error, types.ErrRoleDoesNotExist.Error(), "")
 		return types.ErrRoleDoesNotExist
 	}
 
-	if err := o.storage.UpdateUserRole(userID, organizationID, roleID); err != nil {
+	if err := o.storage.UpdateUserRole(userID, organizationID, existingRole.ID); err != nil {
 		o.logger.Log(logger.Error, types.ErrFailedToUpdateUserRole.Error(), err.Error())
 		return types.ErrFailedToUpdateUserRole
 	}

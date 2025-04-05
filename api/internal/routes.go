@@ -262,6 +262,8 @@ func (router *Router) OrganizationRoutes(f *fuego.Server, organizationController
 	fuego.Get(f, "/roles", organizationController.GetRoles)
 	fuego.Get(f, "/resources", organizationController.GetResources)
 	fuego.Put(f, "", organizationController.UpdateOrganization)
+	fuego.Post(f, "", organizationController.CreateOrganization)
+	fuego.Delete(f, "", organizationController.DeleteOrganization)
 }
 
 func (router *Router) AuditRoutes(s *fuego.Server, auditController *audit.AuditController) {

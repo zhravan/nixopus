@@ -76,8 +76,7 @@ export enum FILEMANAGERURLS {
   MOVE_FOLDER_FILES_RECURSIVELY_OR_RENAME = 'v1/file-manager/move-directory',
   COPY_FOLDER_FILES_RECURSIVELY = 'v1/files/copy',
   CALCULATE_DIRECTORY_SIZE = 'v1/files/directories/size',
-  GET_DISK_USAGE = 'v1/files/disk-usage',
-  GET_MEMORY_USAGE = 'v1/files/memory-usage'
+  UPLOAD_FILE = 'v1/file-manager/upload'
 }
 
 export enum AUDITURLS {

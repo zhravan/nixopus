@@ -2,11 +2,13 @@ package service
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"syscall"
 	"time"
 
+	"github.com/pkg/sftp"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 )
 
@@ -28,9 +30,11 @@ type SFTPClient interface {
 	Close() error
 	ReadDir(path string) ([]os.FileInfo, error)
 	Mkdir(path string) error
+	MkdirAll(path string) error
 	Remove(path string) error
 	Stat(path string) (os.FileInfo, error)
 	Rename(fromPath string, toPath string) error
+	Create(path string) (*sftp.File, error)
 }
 
 type SFTPFileInfo interface {
@@ -188,6 +192,34 @@ func (f *FileManagerService) MoveDirectory(fromPath string, toPath string) error
 		if err := client.Rename(fromPath, toPath); err != nil {
 			return fmt.Errorf("failed to move directory %s to %s: %w", fromPath, toPath, err)
 		}
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UploadFile handles file upload to the specified path
+func (f *FileManagerService) UploadFile(file io.Reader, path string, filename string) error {
+	f.logger.Log(logger.Info, "uploading file", filename)
+
+	err := f.withSFTPClient(func(client SFTPClient) error {
+		if err := client.MkdirAll(path); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", path, err)
+		}
+		targetPath := filepath.Join(path, filename)
+		out, err := client.Create(targetPath)
+		if err != nil {
+			return fmt.Errorf("failed to create file %s: %w", targetPath, err)
+		}
+		defer out.Close()
+		if _, err := io.Copy(out, file); err != nil {
+			return fmt.Errorf("failed to write file content: %w", err)
+		}
+
 		return nil
 	})
 

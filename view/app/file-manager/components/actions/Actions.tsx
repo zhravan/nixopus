@@ -1,30 +1,18 @@
 import React from 'react';
-import { UploadCloudIcon, FolderPlusIcon, Trash, EyeIcon, EyeOffIcon } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { DotsVerticalIcon } from '@radix-ui/react-icons';
-import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
 import { FileData } from '@/redux/types/files';
-import use_menu_actions from '../../hooks/ui/useMenuActions';
-import FileUpload from './Upload';
+import FileContextMenu from './FileContextMenu';
 
-interface FileManagerActionsProps {
+interface ActionsProps {
   refetch: () => void;
   showHidden: boolean;
   setShowHidden: React.Dispatch<React.SetStateAction<boolean>>;
   currentPath: string;
   setSelectedPath: React.Dispatch<React.SetStateAction<string>>;
   selectedPath: string;
-  files: FileData[] | [];
+  files: FileData[];
 }
 
-function FileManagerActions({
+const Actions: React.FC<ActionsProps> = ({
   refetch,
   showHidden,
   setShowHidden,
@@ -32,67 +20,18 @@ function FileManagerActions({
   setSelectedPath,
   selectedPath,
   files
-}: FileManagerActionsProps) {
-  const { createNewFolder, handleFileUpload, isDialogOpen, setIsDialogOpen } = use_menu_actions({
-    refetch,
-    currentPath,
-    setSelectedPath,
-    files
-  });
+}) => {
   return (
-    <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={'outline'} size="icon">
-            <DotsVerticalIcon className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            className="flex cursor-pointer items-center gap-3"
-            onClick={handleFileUpload}
-          >
-            <UploadCloudIcon className="h-5 w-5 flex-shrink-0" />
-            <span>New File</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="flex cursor-pointer items-center gap-3"
-            onClick={createNewFolder}
-          >
-            <FolderPlusIcon className="h-5 w-5 flex-shrink-0" />
-            <span>New Folder</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="flex cursor-pointer items-center gap-3"
-            onClick={() => setShowHidden(!showHidden)}
-          >
-            {!showHidden ? (
-              <EyeIcon className="h-5 w-5 flex-shrink-0" />
-            ) : (
-              <EyeOffIcon className="h-5 w-5 flex-shrink-0" />
-            )}
-            <span className="truncate">
-              {!showHidden ? 'Show Hidden Files' : 'Hide Hidden Files'}
-            </span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex cursor-pointer items-center gap-3">
-            <Trash className="h-5 w-5 flex-shrink-0" />
-            <span>Trash</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={(open) => {
-          setIsDialogOpen(open);
-        }}
-      >
-        <FileUpload setIsDialogOpen={setIsDialogOpen} />
-      </Dialog>
-    </div>
+    <FileContextMenu
+      refetch={refetch}
+      showHidden={showHidden}
+      setShowHidden={setShowHidden}
+      currentPath={currentPath}
+      setSelectedPath={setSelectedPath}
+      selectedPath={selectedPath}
+      files={files}
+    />
   );
-}
+};
 
-export default FileManagerActions;
+export default Actions;

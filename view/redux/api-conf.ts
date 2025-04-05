@@ -70,7 +70,7 @@ export enum SOCKET_ACTIONS {
 export enum FILEMANAGERURLS {
   LIST_FILES_AT_PATH = 'v1/file-manager',
   CREATE_DIRECTORY = 'v1/file-manager/create-directory',
-  DELETE_FILE = 'v1/files',
+  DELETE_FILE = 'v1/file-manager',
   CREATE_FILE = 'v1/files',
   DELETE_DIRECTORY = 'v1/files/directories',
   MOVE_FOLDER_FILES_RECURSIVELY_OR_RENAME = 'v1/file-manager/move-directory',

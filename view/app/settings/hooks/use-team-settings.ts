@@ -24,7 +24,8 @@ function useTeamSettings() {
   const {
     data: apiUsers,
     isLoading,
-    error
+    error,
+    refetch: refetchUsers
   } = useGetOrganizationUsersQuery(activeOrganization?.id, {
     skip: !activeOrganization
   });
@@ -68,10 +69,11 @@ function useTeamSettings() {
       organization: activeOrganization?.id || '',
       type: newUser.role.toLowerCase() as UserTypes
     };
-
-    setUsers([...users, { id: newId, ...tempUser, name: newUser.name }]);
+    const permissions = newUser.role === 'Member' ? ['READ', 'UPDATE'] : ['READ'];
+    setUsers([...users, { id: newId, ...tempUser, name: newUser.name, permissions }]);
     try {
       const user = await createUser(tempUser as any);
+      await refetchUsers();
       toast.success('User added successfully');
     } catch (error) {
       toast.error('Failed to add user');
@@ -86,7 +88,7 @@ function useTeamSettings() {
         user_id: userId,
         organization_id: activeOrganization?.id || ''
       });
-      setUsers(users.filter((user: any) => user.id !== userId));
+      await refetchUsers();
       toast.success('User removed successfully');
     } catch (error) {
       toast.error('Failed to remove user');
@@ -100,18 +102,7 @@ function useTeamSettings() {
         organization_id: activeOrganization?.id || '',
         role_name: role
       });
-
-      const updatedUsers = users.map((user: any) => {
-        if (user.id === userId) {
-          return {
-            ...user,
-            role
-          };
-        }
-        return user;
-      });
-
-      setUsers(updatedUsers);
+      await refetchUsers();
       toast.success('User updated successfully');
     } catch (error) {
       toast.error('Failed to update user');

@@ -109,7 +109,12 @@ func (s OrganizationStore) UpdateOrganization(organization *shared_types.Organiz
 // the deletion, it returns the error. Otherwise, it returns nil, indicating
 // a successful deletion.
 func (s OrganizationStore) DeleteOrganization(id string) error {
-	_, err := s.getDB().NewDelete().Model(&shared_types.Organization{}).Where("id = ?", id).Exec(s.Ctx)
+	_, err := s.getDB().NewDelete().Model(&shared_types.AuditLog{}).Where("organization_id = ?", id).Exec(s.Ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.getDB().NewDelete().Model(&shared_types.Organization{}).Where("id = ?", id).Exec(s.Ctx)
 	return err
 }
 

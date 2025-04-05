@@ -140,8 +140,9 @@ export const userApi = createApi({
     deleteOrganization: builder.mutation<void, string>({
       query(organizationId) {
         return {
-          url: `${USERURLS.CREATE_ORGANIZATION}?id=${organizationId}`,
-          method: 'DELETE'
+          url: `${USERURLS.CREATE_ORGANIZATION}`,
+          method: 'DELETE',
+          body: { id: organizationId }
         };
       },
       invalidatesTags: [{ type: 'User', id: 'LIST' }]

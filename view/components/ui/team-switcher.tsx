@@ -62,7 +62,7 @@ export function TeamSwitcher({
   const handleDeleteOrganization = async () => {
     try {
       await deleteOrganization(displayTeam.id).unwrap();
-      dispatch(setActiveOrganization(null));
+      dispatch(setActiveOrganization(teams.length > 1 ? teams[0].organization : null));
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error('Failed to delete organization:', error);

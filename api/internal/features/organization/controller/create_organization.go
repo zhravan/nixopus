@@ -26,7 +26,6 @@ func (c *OrganizationsController) CreateOrganization(f fuego.ContextWithBody[typ
 	w, r := f.Response(), f.Request()
 	if err := c.validator.ValidateRequest(&organization); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
-		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return nil, fuego.HTTPError{
 			Err:    err,
 			Status: http.StatusBadRequest,

@@ -14,11 +14,17 @@ interface AuthTokens {
 }
 
 export function getToken(ctx?: any): string | null {
+  if (ctx?.cookies) {
+    return ctx.cookies.get('token')?.value || null;
+  }
   const cookies = parseCookies(ctx);
   return cookies.token || null;
 }
 
 export function getRefreshToken(ctx?: any): string | null {
+  if (ctx?.cookies) {
+    return ctx.cookies.get('refreshToken')?.value || null;
+  }
   const cookies = parseCookies(ctx);
   return cookies.refreshToken || null;
 }
@@ -38,7 +44,9 @@ export function isTokenExpired(token: string | null): boolean {
       return true;
     }
 
-    return decoded.exp * 1000 < Date.now() + 5 * 60 * 1000;
+    console.log(decoded.exp * 1000, Date.now() + 1 * 60 * 1000);
+
+    return decoded.exp * 1000 < Date.now() + 1 * 60 * 1000;
   } catch (error) {
     console.error('Error checking token expiration:', error);
     return true;
@@ -48,31 +56,55 @@ export function isTokenExpired(token: string | null): boolean {
 export function setAuthTokens(tokens: AuthTokens, ctx?: any): void {
   const { access_token, refresh_token, expires_in } = tokens;
 
-  setCookie(ctx, 'token', access_token, {
-    maxAge: expires_in || 30 * 24 * 60 * 60,
-    path: '/',
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  });
-
-  if (refresh_token) {
-    setCookie(ctx, 'refreshToken', refresh_token, {
-      maxAge: 60 * 24 * 60 * 60,
+  if (ctx?.cookies) {
+    ctx.cookies.set('token', access_token, {
+      maxAge: expires_in || 30 * 24 * 60 * 60,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict'
     });
+
+    if (refresh_token) {
+      ctx.cookies.set('refreshToken', refresh_token, {
+        maxAge: 60 * 24 * 60 * 60,
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+    }
+  } else {
+    setCookie(ctx, 'token', access_token, {
+      maxAge: expires_in || 30 * 24 * 60 * 60,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    if (refresh_token) {
+      setCookie(ctx, 'refreshToken', refresh_token, {
+        maxAge: 60 * 24 * 60 * 60,
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+    }
   }
 }
 
 export function clearAuthTokens(ctx?: any): void {
-  destroyCookie(ctx, 'token', { path: '/' });
-  destroyCookie(ctx, 'refreshToken', { path: '/' });
+  if (ctx?.cookies) {
+    ctx.cookies.delete('token', { path: '/' });
+    ctx.cookies.delete('refreshToken', { path: '/' });
+  } else {
+    // Client-side context
+    destroyCookie(ctx, 'token', { path: '/' });
+    destroyCookie(ctx, 'refreshToken', { path: '/' });
+  }
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
   try {
-    const response = await fetch(`${BASE_URL}${AUTHURLS.REFRESH_TOKEN}`, {
+    const response = await fetch(`${BASE_URL}/${AUTHURLS.REFRESH_TOKEN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -91,11 +123,11 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthToke
     }
 
     const data = await response.json();
-    if (!data.access_token) {
+    if (!data.data?.access_token) {
       throw new Error('Invalid response: missing access token');
     }
 
-    return data;
+    return data.data;
   } catch (error) {
     console.error('Error during token refresh:', error);
     throw error;

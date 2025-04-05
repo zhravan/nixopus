@@ -39,7 +39,7 @@ func (c *AuthService) RefreshToken(refreshToken types.RefreshTokenRequest) (type
 		return types.AuthResponse{}, types.ErrUserNotFound
 	}
 
-	accessToken, err := utils.CreateToken(user.Email, time.Minute*15)
+	accessToken, err := utils.CreateToken(user.Email, time.Hour*1)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateToken
@@ -64,7 +64,7 @@ func (c *AuthService) RefreshToken(refreshToken types.RefreshTokenRequest) (type
 	return types.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken.Token,
-		ExpiresIn:    newRefreshToken.ExpiresAt.Unix(),
+		ExpiresIn:    3600,
 		User:         *user,
 	}, nil
 }

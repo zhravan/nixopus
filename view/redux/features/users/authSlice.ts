@@ -29,20 +29,24 @@ export const initializeAuth = createAsyncThunk<AuthPayload | null>(
   'auth/initialize',
   async (_, { dispatch, rejectWithValue }) => {
     try {
+      console.log('Starting auth initialization');
       const token = getToken();
       const refreshToken = getRefreshToken();
 
       if (!token || !refreshToken) {
+        console.log('No tokens found, returning null');
         return null;
       }
 
       if (isTokenExpired(token)) {
+        console.log('Token expired, attempting refresh');
         try {
           const refreshResult = await dispatch(
             authApi.endpoints.refreshToken.initiate({ refresh_token: refreshToken })
           ).unwrap();
 
           if (refreshResult?.access_token) {
+            console.log('Token refresh successful');
             setAuthTokens({
               access_token: refreshResult.access_token,
               refresh_token: refreshResult.refresh_token,
@@ -53,34 +57,41 @@ export const initializeAuth = createAsyncThunk<AuthPayload | null>(
               authApi.endpoints.getUserDetails.initiate(undefined)
             ).unwrap();
 
+            console.log('User details fetched successfully after refresh');
             return {
               user: userResult,
               token: refreshResult.access_token,
               refreshToken: refreshResult.refresh_token || refreshToken
             };
           } else {
+            console.log('Token refresh failed - no access token received');
             return null;
           }
         } catch (refreshError) {
+          console.error('Token refresh error:', refreshError);
           clearAuthTokens();
           return rejectWithValue('Token refresh failed');
         }
       } else {
+        console.log('Token valid, fetching user details');
         try {
           const userResult = await dispatch(
             authApi.endpoints.getUserDetails.initiate(undefined)
           ).unwrap();
 
+          console.log('User details fetched successfully');
           return {
             user: userResult,
             token,
             refreshToken
           };
         } catch (error) {
+          console.error('Failed to fetch user details:', error);
           return rejectWithValue('Failed to fetch user details');
         }
       }
     } catch (error) {
+      console.error('Auth initialization error:', error);
       return rejectWithValue('Auth initialization failed');
     }
   }
@@ -149,17 +160,29 @@ export const authSlice = createSlice({
         state.isInitialized = true;
       })
       .addMatcher(authApi.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
+        console.log('Login successful, payload:', payload);
         if (payload?.access_token) {
+          console.log('Setting auth state with access token');
           state.user = payload.user;
           state.token = payload.access_token;
           state.refreshToken = payload.refresh_token || null;
           state.isAuthenticated = true;
+          state.isInitialized = true;
 
           setAuthTokens({
             access_token: payload.access_token,
             refresh_token: payload.refresh_token,
             expires_in: payload.expires_in
           });
+          console.log('Auth state updated:', {
+            hasUser: !!state.user,
+            hasToken: !!state.token,
+            hasRefreshToken: !!state.refreshToken,
+            isAuthenticated: state.isAuthenticated,
+            isInitialized: state.isInitialized
+          });
+        } else {
+          console.error('Login payload missing access token:', payload);
         }
       })
       .addMatcher(authApi.endpoints.refreshToken.matchFulfilled, (state, { payload }) => {

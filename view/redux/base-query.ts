@@ -1,7 +1,5 @@
-import { AUTHURLS } from '@/redux/api-conf';
 import { BASE_URL } from '@/redux/conf';
 import { RootState } from '@/redux/store';
-import { AuthResponse } from '@/redux/types/user';
 import {
   BaseQueryFn,
   FetchArgs,
@@ -9,13 +7,8 @@ import {
   fetchBaseQuery
 } from '@reduxjs/toolkit/query/react';
 import { Mutex } from 'async-mutex';
-import { setAuthTokens } from '@/lib/auth';
 
 const mutex = new Mutex();
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
@@ -44,88 +37,8 @@ export const baseQueryWithReauth: BaseQueryFn<
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
-    if (!mutex.isLocked()) {
-      const release = await mutex.acquire();
-
-      try {
-        const refreshToken = (api.getState() as RootState).auth.refreshToken;
-
-        if (!refreshToken) {
-          console.warn('No refresh token available, logging out');
-          api.dispatch({ type: 'auth/logout' });
-          return result;
-        }
-
-        let retryCount = 0;
-        let refreshResult;
-
-        while (retryCount < MAX_RETRIES) {
-          try {
-            refreshResult = await baseQuery(
-              {
-                url: AUTHURLS.REFRESH_TOKEN,
-                method: 'POST',
-                body: { refresh_token: refreshToken }
-              },
-              api,
-              extraOptions
-            );
-
-            if (refreshResult.data) {
-              break;
-            }
-
-            if (refreshResult.error?.status === 401 || refreshResult.error?.status === 403) {
-              console.warn('Refresh token invalid, logging out');
-              api.dispatch({ type: 'auth/logout' });
-              return result;
-            }
-
-            console.warn(`Refresh token attempt ${retryCount + 1} failed:`, refreshResult.error);
-            retryCount++;
-            if (retryCount < MAX_RETRIES) {
-              await sleep(RETRY_DELAY * retryCount);
-            }
-          } catch (error) {
-            console.warn(`Refresh token attempt ${retryCount + 1} threw error:`, error);
-            retryCount++;
-            if (retryCount < MAX_RETRIES) {
-              await sleep(RETRY_DELAY * retryCount);
-            }
-          }
-        }
-
-        if (refreshResult?.data) {
-          const refreshData = refreshResult.data as AuthResponse;
-
-          setAuthTokens({
-            access_token: refreshData.access_token,
-            refresh_token: refreshData.refresh_token,
-            expires_in: refreshData.expires_in
-          });
-
-          api.dispatch({
-            type: 'auth/setCredentials',
-            payload: {
-              user: null,
-              token: refreshData.access_token,
-              refreshToken: refreshData.refresh_token,
-              expiresIn: refreshData.expires_in
-            }
-          });
-
-          result = await baseQuery(args, api, extraOptions);
-        } else {
-          console.error('All refresh token attempts failed');
-          api.dispatch({ type: 'auth/logout' });
-        }
-      } finally {
-        release();
-      }
-    } else {
-      await mutex.waitForUnlock();
-      result = await baseQuery(args, api, extraOptions);
-    }
+    console.warn('Unauthorized request, logging out');
+    api.dispatch({ type: 'auth/logout' });
   }
 
   return result;

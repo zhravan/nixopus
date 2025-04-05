@@ -104,20 +104,22 @@ const NotificationChannelCard: React.FC<NotificationChannelProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4 pt-4">
-          {fields.map((field) => (
-            <div className="space-y-2" key={field.id}>
-              <Label htmlFor={`${title.toLowerCase()}-${field.id}`}>
-                {field.label} {field.required && <span className="text-red-500">*</span>}
-              </Label>
-              <Input
-                id={`${title.toLowerCase()}-${field.id}`}
-                type={field.type || 'text'}
-                value={formData[field.id] || ''}
-                onChange={(e) => handleInputChange(field.id, e.target.value)}
-                placeholder={field.placeholder}
-              />
-            </div>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fields.map((field) => (
+              <div className="space-y-2" key={field.id}>
+                <Label htmlFor={`${title.toLowerCase()}-${field.id}`}>
+                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                </Label>
+                <Input
+                  id={`${title.toLowerCase()}-${field.id}`}
+                  type={field.type || 'text'}
+                  value={formData[field.id] || ''}
+                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            ))}
+          </div>
 
           <div className="pt-2 flex space-x-2 justify-end">
             <Button onClick={handleSave} disabled={!isFormValid || isLoading}>

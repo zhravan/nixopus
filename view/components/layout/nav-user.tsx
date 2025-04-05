@@ -1,12 +1,11 @@
 'use client';
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { AlertCircle, ChevronsUpDown, HelpCircle, Heart, LogOut } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -28,6 +27,18 @@ export function NavUser({ user }: { user: User }) {
 
   const handleLogout = () => {
     dispatch(logout());
+  };
+
+  const handleSponsor = () => {
+    window.open('https://github.com/sponsors/raghavyuva', '_blank');
+  };
+
+  const handleReportIssue = () => {
+    window.open('https://github.com/raghavyuva/nixopus/issues', '_blank');
+  };
+
+  const handleHelp = () => {
+    window.open('https://docs.nixopus.com', '_blank');
   };
 
   return (
@@ -82,6 +93,19 @@ export function NavUser({ user }: { user: User }) {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSponsor}>
+              <Heart className="text-red-500" />
+              Sponsor
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleHelp}>
+              <HelpCircle />
+              Help
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleReportIssue}>
+              <AlertCircle />
+              Report an issue
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />

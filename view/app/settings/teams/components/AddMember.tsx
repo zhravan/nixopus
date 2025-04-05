@@ -28,12 +28,14 @@ interface AddMemberProps {
     name: string;
     email: string;
     role: string;
+    password: string;
   };
   setNewUser: React.Dispatch<
     React.SetStateAction<{
       name: string;
       email: string;
       role: string;
+      password: string;
     }>
   >;
   handleAddUser: () => void;
@@ -100,6 +102,18 @@ function AddMember({
                 <SelectItem value="Viewer">Viewer</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="password" className="text-right">
+              Password
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={newUser.password}
+              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              className="col-span-3"
+            />
           </div>
         </div>
         <DialogFooter>

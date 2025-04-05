@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertCircle, ChevronsUpDown, HelpCircle, Heart, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -18,15 +19,65 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { User } from '@/redux/types/user';
-import { useAppDispatch } from '@/redux/hooks';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logout } from '@/redux/features/users/authSlice';
+import { authApi, useLogoutMutation } from '@/redux/services/users/authApi';
+import { userApi } from '@/redux/services/users/userApi';
+import { notificationApi } from '@/redux/services/settings/notificationApi';
+import { domainsApi } from '@/redux/services/settings/domainsApi';
+import { GithubConnectorApi } from '@/redux/services/connector/githubConnectorApi';
+import { deployApi } from '@/redux/services/deploy/applicationsApi';
+import { fileManagersApi } from '@/redux/services/file-manager/fileManagersApi';
+import { auditApi } from '@/redux/services/audit';
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const [logoutMutation] = useLogoutMutation();
+  const { refreshToken } = useAppSelector((state) => state.auth);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const clearLocalStorage = () => {
+    const keys = [
+      'COLLAPSIBLE_STATE_KEY',
+      'LAST_ACTIVE_NAV_KEY',
+      'SIDEBAR_STORAGE_KEY',
+      'terminalOpen',
+      'persist:root'
+    ];
+    keys.forEach((key) => localStorage.removeItem(key));
+  };
+
+  const resetApiStates = () => {
+    const apis = [
+      authApi,
+      userApi,
+      notificationApi,
+      domainsApi,
+      GithubConnectorApi,
+      deployApi,
+      fileManagersApi,
+      auditApi
+    ];
+    apis.forEach((api) => dispatch(api.util.resetApiState()));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutMutation({ refresh_token: refreshToken }).unwrap();
+      clearLocalStorage();
+      resetApiStates();
+      dispatch({ type: 'RESET_STATE' });
+      dispatch(logout());
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      clearLocalStorage();
+      resetApiStates();
+      dispatch({ type: 'RESET_STATE' });
+      dispatch(logout());
+      router.push('/login');
+    }
   };
 
   const handleSponsor = () => {

@@ -8,10 +8,29 @@ import useApplicationDetails from '../../hooks/use_application_details';
 import { DeployConfigureForm } from '../../components/application-details/configuration';
 import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import ApplicationDetailsHeader from '../../components/application-details/header';
+import { useAppSelector } from '@/redux/hooks';
+import { hasPermission } from '@/lib/permission';
 
 function Page() {
+  const user = useAppSelector((state) => state.auth.user);
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const { application, currentPage, setCurrentPage, envVariables, buildVariables, defaultTab } =
     useApplicationDetails();
+
+  const canRead = hasPermission(user, 'deploy', 'read', activeOrg?.id);
+
+  if (!canRead) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You don't have permission to view application details
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl 2xl:max-w-7xl">

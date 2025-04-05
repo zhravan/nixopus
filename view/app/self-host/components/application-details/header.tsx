@@ -18,14 +18,25 @@ import {
 import { useDeleteApplicationMutation } from '@/redux/services/deploy/applicationsApi';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useAppSelector } from '@/redux/hooks';
+import { hasPermission } from '@/lib/permission';
 
 const ApplicationDetailsHeader = ({ application }: { application?: Application }) => {
+  const user = useAppSelector((state) => state.auth.user);
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const [redeployApplication, { isLoading: isRedeploying }] = useRedeployApplicationMutation();
   const [deleteApplication, { isLoading: isDeleting }] = useDeleteApplicationMutation();
   const router = useRouter();
   const [restartApplication, { isLoading: isRestarting }] = useRestartApplicationMutation();
 
+  const canUpdate = hasPermission(user, 'deploy', 'update', activeOrg?.id);
+  const canDelete = hasPermission(user, 'deploy', 'delete', activeOrg?.id);
+
   const handleDelete = async () => {
+    if (!canDelete) {
+      toast.error('You do not have permission to delete applications');
+      return;
+    }
     try {
       await deleteApplication({
         id: application?.id || ''
@@ -38,6 +49,10 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
   };
 
   const handleRestart = async () => {
+    if (!canUpdate) {
+      toast.error('You do not have permission to restart applications');
+      return;
+    }
     try {
       await restartApplication({ id: application?.deployments?.[0]?.id || '' }).unwrap();
       toast.success('Application restart started');
@@ -47,6 +62,10 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
   };
 
   const handleRedeploy = async (forceWithoutCache: boolean) => {
+    if (!canUpdate) {
+      toast.error('You do not have permission to redeploy applications');
+      return;
+    }
     try {
       await redeployApplication({
         id: application?.id || '',
@@ -78,51 +97,57 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="secondary"
-                size="icon"
-                disabled={isRestarting}
-                onClick={handleRestart}
-              >
-                <RotateCcw className="h-4 w-4" />
+        {canUpdate && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  disabled={isRestarting}
+                  onClick={handleRestart}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Restart Application</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {canDelete && (
+          <DeleteDialog
+            title={`Delete ${application?.name}`}
+            description={`Are you sure you want to delete ${application?.name}? This action cannot be undone.`}
+            onConfirm={handleDelete}
+            trigger={
+              <Button variant="outline" size="icon">
+                <TrashIcon className="h-4 w-4" />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Restart Application</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <DeleteDialog
-          title={`Delete ${application?.name}`}
-          description={`Are you sure you want to delete ${application?.name}? This action cannot be undone.`}
-          onConfirm={handleDelete}
-          trigger={
-            <Button variant="outline" size="icon">
-              <TrashIcon className="h-4 w-4" />
-            </Button>
-          }
-          isDeleting={isDeleting}
-          variant="destructive"
-          icon={TrashIcon}
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleRedeploy(true)} disabled={isRedeploying}>
-              Re-Deploy
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleRedeploy(false)} disabled={isRedeploying}>
-              Force Deploy Without Cache
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            }
+            isDeleting={isDeleting}
+            variant="destructive"
+            icon={TrashIcon}
+          />
+        )}
+        {canUpdate && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleRedeploy(true)} disabled={isRedeploying}>
+                Re-Deploy
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRedeploy(false)} disabled={isRedeploying}>
+                Force Deploy Without Cache
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );

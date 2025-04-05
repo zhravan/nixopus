@@ -27,6 +27,7 @@ type OrganizationRepository interface {
 	FindUserInOrganization(userID string, organizationID string) (*shared_types.OrganizationUsers, error)
 	GetOrganizationByName(name string) (*shared_types.Organization, error)
 	UpdateUserRole(userID string, organizationID string, roleID uuid.UUID) error
+	GetOrganizationCount() (int, error)
 	BeginTx() (bun.Tx, error)
 	WithTx(tx bun.Tx) OrganizationRepository
 }
@@ -207,4 +208,9 @@ func (s OrganizationStore) UpdateUserRole(userID string, organizationID string, 
 		Where("user_id = ? AND organization_id = ?", userID, organizationID).
 		Exec(s.Ctx)
 	return err
+}
+
+func (s OrganizationStore) GetOrganizationCount() (int, error) {
+	count, err := s.getDB().NewSelect().Model(&shared_types.Organization{}).Count(s.Ctx)
+	return count, err
 }

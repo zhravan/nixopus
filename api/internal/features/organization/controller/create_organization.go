@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-fuego/fuego"
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	"github.com/raghavyuva/nixopus-api/internal/features/organization/types"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
@@ -20,10 +21,14 @@ func (c *OrganizationsController) CreateOrganization(f fuego.ContextWithBody[typ
 		}
 	}
 
+	c.logger.Log("Creating organization", organization.Name, organization.Description)
+
 	w, r := f.Response(), f.Request()
-	if !c.parseAndValidate(w, r, &organization) {
+	if err := c.validator.ValidateRequest(&organization); err != nil {
+		c.logger.Log(logger.Error, err.Error(), err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return nil, fuego.HTTPError{
-			Err:    nil,
+			Err:    err,
 			Status: http.StatusBadRequest,
 		}
 	}
@@ -43,6 +48,28 @@ func (c *OrganizationsController) CreateOrganization(f fuego.ContextWithBody[typ
 			Status: http.StatusInternalServerError,
 		}
 	}
+
+	roles, err := c.role_service.GetRoleByName(shared_types.RoleAdmin)
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to get role by name", err.Error())
+		return nil, fuego.HTTPError{
+			Err:    err,
+			Status: http.StatusInternalServerError,
+		}
+	}
+
+	if roles == nil {
+		return nil, fuego.HTTPError{
+			Err:    err,
+			Status: http.StatusInternalServerError,
+		}
+	}
+
+	c.service.AddUserToOrganization(types.AddUserToOrganizationRequest{
+		UserID:         loggedInUser.ID.String(),
+		OrganizationID: createdOrganization.ID.String(),
+		RoleId:         roles.ID.String(),
+	})
 
 	c.Notify(notification.NortificationPayloadTypeCreateOrganization, loggedInUser, r)
 

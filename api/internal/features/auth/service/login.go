@@ -46,7 +46,7 @@ func (u *AuthService) Login(email string, password string) (types.AuthResponse, 
 		return types.AuthResponse{}, types.ErrFailedToCreateRefreshToken
 	}
 
-	accessToken, err := utils.CreateToken(user.Email, time.Minute*15)
+	accessToken, err := utils.CreateToken(user.Email, time.Hour*1)
 	if err != nil {
 		u.logger.Log(logger.Error, types.ErrFailedToCreateAccessToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateAccessToken
@@ -60,7 +60,7 @@ func (u *AuthService) Login(email string, password string) (types.AuthResponse, 
 	return types.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken.Token,
-		ExpiresIn:    900,
+		ExpiresIn:    3600,
 		User:         *user,
 	}, nil
 }

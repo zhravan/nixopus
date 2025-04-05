@@ -184,6 +184,7 @@ func (router *Router) AuthRoutes(authController *auth.AuthController, s *fuego.S
 	//register route is disabled for now (we do not have register seperately either the one who installs it, or the one who is added by admin)
 	fuego.Post(s, "/register", authController.Register)
 	fuego.Post(s, "/login", authController.Login)
+	fuego.Post(s, "/refresh-token", authController.RefreshToken)
 }
 
 func (router *Router) AuthenticatedAuthRoutes(s *fuego.Server, authController *auth.AuthController) {
@@ -193,7 +194,6 @@ func (router *Router) AuthenticatedAuthRoutes(s *fuego.Server, authController *a
 	fuego.Post(s, "/send-verification-email", authController.SendVerificationEmail)
 	fuego.Get(s, "/verify-email", authController.VerifyEmail)
 	fuego.Post(s, "/create-user", authController.CreateUser)
-	fuego.Post(s, "/refresh-token", authController.RefreshToken)
 }
 
 func (router *Router) UserRoutes(s *fuego.Server, userController *user.UserController) {

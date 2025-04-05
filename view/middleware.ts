@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isTokenExpired, refreshAccessToken, setAuthTokens } from './lib/auth';
+import {
+  getRefreshToken,
+  getToken,
+  isTokenExpired,
+  refreshAccessToken,
+  setAuthTokens,
+  clearAuthTokens
+} from './lib/auth';
 
 export async function middleware(request: NextRequest) {
+  console.log(`Processing request for path: ${request.nextUrl.pathname}`);
   const publicPaths = ['/login', '/register', '/api/auth', '/_next', '/static', '/favicon.ico'];
 
   if (publicPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
+    console.log('Public path accessed, skipping auth check');
     return NextResponse.next();
   }
 
@@ -25,60 +34,46 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.searchParams.has('token');
 
   if (isGitHubFlow || isPasswordResetFlow || isVerificationFlow) {
+    console.log('Special flow detected, skipping auth check');
     return NextResponse.next();
   }
 
-  const token = request.cookies.get('token')?.value;
-  const refreshToken = request.cookies.get('refreshToken')?.value;
+  const token = getToken(request);
+  const refreshToken = getRefreshToken(request);
 
   if (!token) {
+    console.log('No token found, redirecting to login');
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   if (isTokenExpired(token) && refreshToken) {
+    console.log('Token expired, attempting refresh');
     try {
       const newTokens = await refreshAccessToken(refreshToken);
+      console.log('Token refresh successful');
       const response = NextResponse.next();
-
-      response.cookies.set({
-        name: 'token',
-        value: newTokens.access_token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: newTokens.expires_in || 30 * 24 * 60 * 60
-      });
-
-      if (newTokens.refresh_token) {
-        response.cookies.set({
-          name: 'refreshToken',
-          value: newTokens.refresh_token,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 60 * 24 * 60 * 60
-        });
-      }
-
+      setAuthTokens(newTokens, response);
       return response;
     } catch (error) {
       console.error('Token refresh failed:', error);
 
       const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
-      response.cookies.delete('token');
-      response.cookies.delete('refreshToken');
+      clearAuthTokens(response);
+      console.log('Cleared auth cookies due to refresh failure');
 
       return response;
     }
   }
 
   if (isTokenExpired(token)) {
+    console.log('Token expired without refresh token, redirecting to login');
     const response = NextResponse.redirect(new URL('/login?error=session_expired', request.url));
     response.cookies.delete('token');
     response.cookies.delete('refreshToken');
     return response;
   }
 
+  console.log('Token valid, proceeding with request');
   return NextResponse.next();
 }
 

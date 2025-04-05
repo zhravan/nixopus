@@ -64,7 +64,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { toggleAddTeamModal?: () => void }) {
   const user = useAppSelector((state) => state.auth.user);
-  const { isLoading } = useGetUserOrganizationsQuery();
+  const { isLoading, refetch } = useGetUserOrganizationsQuery();
   const organizations = useAppSelector((state) => state.user.organizations);
   const { activeNav, setActiveNav } = useNavigationState();
 
@@ -84,6 +84,7 @@ export function AppSidebar({
         <TeamSwitcher
           teams={isLoading ? [] : organizations}
           toggleAddTeamModal={toggleAddTeamModal}
+          refetch={refetch}
         />
       </SidebarHeader>
       <SidebarContent>

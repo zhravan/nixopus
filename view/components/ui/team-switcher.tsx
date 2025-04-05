@@ -26,10 +26,12 @@ import { useDeleteOrganizationMutation } from '@/redux/services/users/userApi';
 
 export function TeamSwitcher({
   teams,
-  toggleAddTeamModal
+  toggleAddTeamModal,
+  refetch
 }: {
   teams?: UserOrganization[] | [];
   toggleAddTeamModal?: () => void;
+  refetch: () => void;
 }) {
   const { isMobile } = useSidebar();
   const user = useAppSelector((state) => state.auth.user);
@@ -60,9 +62,15 @@ export function TeamSwitcher({
   };
 
   const handleDeleteOrganization = async () => {
+    if (teams.length <= 1) {
+      return;
+    }
+
     try {
       await deleteOrganization(displayTeam.id).unwrap();
-      dispatch(setActiveOrganization(teams.length > 1 ? teams[0].organization : null));
+      const remainingTeams = teams.filter((team) => team.organization.id !== displayTeam.id);
+      dispatch(setActiveOrganization(remainingTeams?.[0]?.organization || null));
+      await refetch();
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error('Failed to delete organization:', error);
@@ -127,15 +135,17 @@ export function TeamSwitcher({
                     </div>
                     <div className="text-muted-foreground font-medium">Add team</div>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="gap-2 p-2 text-destructive"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                  >
-                    <div className="bg-background flex size-6 items-center justify-center rounded-md border">
-                      <Trash2 className="size-4" />
-                    </div>
-                    <div className="text-muted-foreground font-medium">Delete team</div>
-                  </DropdownMenuItem>
+                  {teams.length > 1 && (
+                    <DropdownMenuItem
+                      className="gap-2 p-2 text-destructive"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                    >
+                      <div className="bg-background flex size-6 items-center justify-center rounded-md border">
+                        <Trash2 className="size-4" />
+                      </div>
+                      <div className="text-muted-foreground font-medium">Delete team</div>
+                    </DropdownMenuItem>
+                  )}
                 </>
               )}
             </DropdownMenuContent>

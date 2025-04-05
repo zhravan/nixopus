@@ -24,7 +24,6 @@ func (c *OrganizationsController) DeleteOrganization(f fuego.ContextWithBody[typ
 		}
 	}
 
-
 	w, r := f.Response(), f.Request()
 	if err := c.validator.ValidateRequest(&organization); err != nil {
 		c.logger.Log(logger.Error, err.Error(), err.Error())
@@ -47,6 +46,21 @@ func (c *OrganizationsController) DeleteOrganization(f fuego.ContextWithBody[typ
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Status: http.StatusBadRequest,
+		}
+	}
+
+	count, err := c.service.GetOrganizationCount(loggedInUser.ID.String())
+	if err != nil {
+		return nil, fuego.HTTPError{
+			Err:    err,
+			Status: http.StatusInternalServerError,
+		}
+	}
+
+	if count <= 1 {
+		return nil, fuego.HTTPError{
+			Err:    nil,
 			Status: http.StatusBadRequest,
 		}
 	}

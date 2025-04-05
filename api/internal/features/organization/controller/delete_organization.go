@@ -15,6 +15,8 @@ import (
 
 func (c *OrganizationsController) DeleteOrganization(f fuego.ContextWithBody[types.DeleteOrganizationRequest]) (*shared_types.Response, error) {
 	organization, err := f.Body()
+	c.logger.Log(logger.Info, "Deleting organization", organization.ID)
+
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
@@ -22,10 +24,12 @@ func (c *OrganizationsController) DeleteOrganization(f fuego.ContextWithBody[typ
 		}
 	}
 
+
 	w, r := f.Response(), f.Request()
-	if !c.parseAndValidate(w, r, &organization) {
+	if err := c.validator.ValidateRequest(&organization); err != nil {
+		c.logger.Log(logger.Error, err.Error(), err.Error())
 		return nil, fuego.HTTPError{
-			Err:    nil,
+			Err:    err,
 			Status: http.StatusBadRequest,
 		}
 	}

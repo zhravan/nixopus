@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 function useTeamSettings() {
   const [users, setUsers] = useState<any>([]);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Member' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Member', password: '' });
   const [isEditTeamDialogOpen, setEditTeamDialogOpen] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
@@ -77,7 +77,7 @@ function useTeamSettings() {
     const tempUser = {
       username: newUser.name || '',
       email: newUser.email || '',
-      password: 'test1234@Test',
+      password: newUser.password || '',
       organization: activeOrganization?.id || '',
       type: newUser.role.toLowerCase() as UserTypes
     };
@@ -89,7 +89,7 @@ function useTeamSettings() {
     } catch (error) {
       toast.error('Failed to add user');
     }
-    setNewUser({ name: '', email: '', role: 'Member' });
+    setNewUser({ name: '', email: '', role: 'Member', password: '' });
     setIsAddUserDialogOpen(false);
   };
 

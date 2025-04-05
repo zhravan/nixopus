@@ -58,7 +58,14 @@ const rootReducer = combineReducers({
   [auditApi.reducerPath]: auditApi.reducer
 });
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const appReducer = (state: any, action: any) => {
+  if (action.type === 'RESET_STATE') {
+    state = undefined;
+  }
+  return rootReducer(state, action);
+};
+
+const persistedReducer = persistReducer(persistConfig, appReducer);
 
 const storeOptions: ConfigureStoreOptions = {
   reducer: persistedReducer,

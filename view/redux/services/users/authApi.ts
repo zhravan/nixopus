@@ -22,6 +22,16 @@ export const authApi = createApi({
       },
       invalidatesTags: [{ type: 'Authentication', id: 'LIST' }]
     }),
+    logout: builder.mutation<void, { refresh_token: string }>({
+      query({ refresh_token }) {
+        return {
+          url: AUTHURLS.LOGOUT,
+          method: 'POST',
+          body: { refresh_token }
+        };
+      },
+      invalidatesTags: [{ type: 'Authentication', id: 'LIST' }]
+    }),
     getUserDetails: builder.query<User, void>({
       query: () => ({
         url: AUTHURLS.USER_DETAILS,
@@ -72,6 +82,7 @@ export const authApi = createApi({
 
 export const {
   useLoginUserMutation,
+  useLogoutMutation,
   useGetUserDetailsQuery,
   useRefreshTokenMutation,
   useResetPasswordMutation,

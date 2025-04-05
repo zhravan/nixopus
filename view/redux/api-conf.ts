@@ -5,7 +5,8 @@ export enum AUTHURLS {
   REQUEST_PASSWORD_RESET = 'v1/auth/request-password-reset',
   RESET_PASSWORD = 'v1/auth/reset-password',
   SEND_VERIFICATION = 'v1/auth/send-verification-email',
-  VERIFY_EMAIL = 'v1/auth/verify-email'
+  VERIFY_EMAIL = 'v1/auth/verify-email',
+  LOGOUT = 'v1/auth/logout'
 }
 
 export enum USERURLS {

@@ -7,6 +7,8 @@ import FormSelectField from '@/components/ui/form-select-field';
 import { FormSelectTagInputField } from '@/components/ui/form-select-tag-field';
 import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import useCreateDeployment from '../../hooks/use_create_deployment';
+import { useAppSelector } from '@/redux/hooks';
+import { hasPermission } from '@/lib/permission';
 
 interface DeployFormProps {
   application_name?: string;
@@ -39,6 +41,10 @@ export const DeployForm = ({
   DockerfilePath = '/Dockerfile',
   base_path = '/'
 }: DeployFormProps) => {
+  const user = useAppSelector((state) => state.auth.user);
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
+  const canCreate = hasPermission(user, 'deploy', 'create', activeOrg?.id);
+
   const { validateEnvVar, form, onSubmit, parsePort } = useCreateDeployment({
     application_name,
     environment,
@@ -54,6 +60,19 @@ export const DeployForm = ({
     DockerfilePath,
     base_path
   });
+
+  if (!canCreate) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You don't have permission to deploy new applications
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

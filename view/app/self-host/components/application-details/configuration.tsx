@@ -6,8 +6,9 @@ import FormInputField from '@/components/ui/form-input-field';
 import { FormSelectTagInputField } from '@/components/ui/form-select-tag-field';
 import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import useUpdateDeployment from '../../hooks/use_update_deployment';
-import { Domain } from '@/redux/types/domain';
 import { parsePort } from '../../utils/parsePort';
+import { useAppSelector } from '@/redux/hooks';
+import { hasPermission } from '@/lib/permission';
 
 interface DeployConfigureProps {
   application_name?: string;
@@ -42,6 +43,10 @@ export const DeployConfigureForm = ({
   dockerFilePath = '/Dockerfile',
   base_path = '/'
 }: DeployConfigureProps) => {
+  const user = useAppSelector((state) => state.auth.user);
+  const activeOrg = useAppSelector((state) => state.user.activeOrganization);
+  const canUpdate = hasPermission(user, 'deploy', 'update', activeOrg?.id);
+
   const { validateEnvVar, form, onSubmit, isLoading, domains } = useUpdateDeployment({
     name: application_name,
     pre_run_command: pre_run_commands,
@@ -54,6 +59,77 @@ export const DeployConfigureForm = ({
     DockerfilePath: dockerFilePath,
     base_path
   });
+
+  const renderReadOnlyField = (label: string, value: string | undefined, description: string) => (
+    <div className="space-y-2">
+      <label className="text-sm font-medium">{label}</label>
+      <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
+        {value || '-'}
+      </div>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </div>
+  );
+
+  if (!canUpdate) {
+    return (
+      <div className="space-y-8">
+        <div className="grid sm:grid-cols-2 gap-4">
+          {renderReadOnlyField('Application Name', application_name, 'Application name')}
+          {renderReadOnlyField('Port', port, 'Port on which your application will be available')}
+          {renderReadOnlyField(
+            'Base Path',
+            base_path,
+            'The build context path for your application'
+          )}
+          {renderReadOnlyField(
+            'Dockerfile Path',
+            dockerFilePath,
+            'Path of the dockerfile relative to the base path'
+          )}
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {renderReadOnlyField(
+            'Environment Variables',
+            Object.entries(env_variables)
+              .map(([key, value]) => `${key}=${value}`)
+              .join('\n'),
+            'Environment variables for the application'
+          )}
+          {renderReadOnlyField(
+            'Build Variables',
+            Object.entries(build_variables)
+              .map(([key, value]) => `${key}=${value}`)
+              .join('\n'),
+            'Build variables for the application'
+          )}
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {renderReadOnlyField(
+            'Pre Run Commands',
+            pre_run_commands,
+            'Commands to run before deployment'
+          )}
+          {renderReadOnlyField(
+            'Post Run Commands',
+            post_run_commands,
+            'Commands to run after deployment'
+          )}
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {renderReadOnlyField('Environment', environment, 'Environment of the deployment')}
+          {renderReadOnlyField('Branch', branch, 'Branch from where you want to deploy')}
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {renderReadOnlyField('Domain', domain, 'Domain on which your application is available')}
+          {renderReadOnlyField('Build Pack', build_pack, 'Build pack used for the application')}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -135,39 +211,13 @@ export const DeployConfigureForm = ({
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Environment</label>
-            <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
-              {environment}
-            </div>
-            <p className="text-sm text-muted-foreground">Environment of the deployment</p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Branch</label>
-            <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
-              {branch}
-            </div>
-            <p className="text-sm text-muted-foreground">Branch from where you want to deploy</p>
-          </div>
+          {renderReadOnlyField('Environment', environment, 'Environment of the deployment')}
+          {renderReadOnlyField('Branch', branch, 'Branch from where you want to deploy')}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Domain</label>
-            <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
-              {domain}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Domain on which your application is available
-            </p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Build Pack</label>
-            <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
-              {build_pack}
-            </div>
-            <p className="text-sm text-muted-foreground">Build pack used for the application</p>
-          </div>
+          {renderReadOnlyField('Domain', domain, 'Domain on which your application is available')}
+          {renderReadOnlyField('Build Pack', build_pack, 'Build pack used for the application')}
         </div>
 
         <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>

@@ -132,10 +132,10 @@ export const useTerminal = (isTerminalOpen: boolean, width: number, height: numb
           action: 'terminal',
           data: '\r'
         });
-        sendJsonMessage({
-          action: 'terminal',
-          data: 'export TERM=xterm-256color\r'
-        });
+        // sendJsonMessage({
+        //   action: 'terminal',
+        //   data: 'export TERM=xterm-256color\r'
+        // });
         requestAnimationFrame(() => {
           fitAddon.fit();
           const dimensions = fitAddon.proposeDimensions();

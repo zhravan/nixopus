@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MoreVertical, RotateCcw } from 'lucide-react';
+import { ExternalLink, MoreVertical, RotateCcw, TrashIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -96,10 +96,17 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
           </Tooltip>
         </TooltipProvider>
         <DeleteDialog
-          jobName={application?.name || ''}
-          onDelete={handleDelete}
-          showButton={false}
+          title={`Delete ${application?.name}`}
+          description={`Are you sure you want to delete ${application?.name}? This action cannot be undone.`}
+          onConfirm={handleDelete}
+          trigger={
+            <Button variant="outline" size="icon">
+              <TrashIcon className="h-4 w-4" />
+            </Button>
+          }
           isDeleting={isDeleting}
+          variant="destructive"
+          icon={TrashIcon}
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

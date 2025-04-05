@@ -8,55 +8,61 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { Trash } from 'lucide-react';
-import { useState } from 'react';
+import { LucideIcon } from 'lucide-react';
+import { ReactNode } from 'react';
 
-interface DeleteDialogProps {
-  jobName: string;
-  onDelete: () => void;
-  showButton?: boolean;
+interface ConfirmationDialogProps {
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  trigger?: ReactNode;
+  confirmText?: string;
+  cancelText?: string;
   isDeleting?: boolean;
+  variant?: 'default' | 'destructive';
+  icon?: LucideIcon;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function DeleteDialog({
-  jobName,
-  onDelete,
-  showButton = true,
-  isDeleting
-}: DeleteDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleDelete = () => {
-    onDelete();
-    setIsOpen(false);
+  title,
+  description,
+  onConfirm,
+  trigger,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  isDeleting,
+  variant = 'default',
+  icon: Icon,
+  open,
+  onOpenChange
+}: ConfirmationDialogProps) {
+  const handleConfirm = () => {
+    onConfirm();
+    onOpenChange?.(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {showButton ? (
-          <Button variant="destructive" className="w-full sm:w-32" disabled={isDeleting}>
-            Delete
-          </Button>
-        ) : (
-          <Button variant="destructive" className="mr-2" disabled={isDeleting}>
-            <Trash className="h-4 w-4" />
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Are you sure you want to delete {jobName}?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently remove {jobName} from your account.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-end">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Cancel
+          <Button variant="outline" onClick={() => onOpenChange?.(false)}>
+            {cancelText}
           </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            Delete
+          <Button
+            variant={variant}
+            onClick={handleConfirm}
+            disabled={isDeleting}
+            className={variant === 'destructive' ? 'bg-destructive' : ''}
+          >
+            {Icon && <Icon className="mr-2 h-4 w-4" />}
+            {confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

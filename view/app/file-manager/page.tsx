@@ -26,8 +26,10 @@ import { FileItem } from './components/file-list/FileItem';
 import useFileManager from './hooks/ui/useFileManager';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
+import { useTranslation } from '@/hooks/use-translation';
 
 function FileManager() {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
 
@@ -84,8 +86,8 @@ function FileManager() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
-          <p className="text-muted-foreground">You don't have permission to view this page</p>
+          <h2 className="text-2xl font-bold">{t('common.accessDenied')}</h2>
+          <p className="text-muted-foreground">{t('common.noPermissionView')}</p>
         </div>
       </div>
     );
@@ -104,7 +106,7 @@ function FileManager() {
             <SearchBar
               searchTerm={searchTerm}
               handleSearchChange={handleSearchChange}
-              label="Search files..."
+              label={t('common.searchFiles')}
             />
           </div>
         </div>
@@ -159,7 +161,7 @@ function FileManager() {
               ))}
               {visibleFiles.length === 0 && (
                 <div className="col-span-full text-center text-5xl text-muted-foreground">
-                  No files found
+                  {t('fileManager.noFiles')}
                 </div>
               )}
             </div>
@@ -170,13 +172,13 @@ function FileManager() {
                 <ContextMenuItem>
                   <label className="flex cursor-pointer items-center">
                     <UploadCloudIcon className="mr-2 h-5 w-5" />
-                    <span>Upload File</span>
+                    <span>{t('fileManager.actions.upload')}</span>
                     <input type="file" className="hidden" onChange={handleFileInput} multiple />
                   </label>
                 </ContextMenuItem>
                 <ContextMenuItem onSelect={createNewFolder}>
                   <FolderPlusIcon className="mr-2 h-5 w-5" />
-                  <span>New Folder</span>
+                  <span>{t('fileManager.actions.createDirectory')}</span>
                 </ContextMenuItem>
               </>
             )}
@@ -189,7 +191,7 @@ function FileManager() {
                 }}
               >
                 <Move className="mr-2 h-5 w-5" />
-                <span>Move here</span>
+                <span>{t('fileManager.item.actions.moveHere')}</span>
               </ContextMenuItem>
             )}
             {canUpdate && fileToCopy && (
@@ -201,7 +203,7 @@ function FileManager() {
                 }}
               >
                 <Copy className="mr-2 h-5 w-5" />
-                <span>Paste here</span>
+                <span>{t('fileManager.item.actions.pasteHere')}</span>
               </ContextMenuItem>
             )}
             <ContextMenuItem onSelect={() => setShowHidden(!showHidden)}>
@@ -210,12 +212,16 @@ function FileManager() {
               ) : (
                 <EyeIcon className="mr-2 h-5 w-5" />
               )}
-              <span>{showHidden ? 'Hide Hidden Files' : 'Show Hidden Files'}</span>
+              <span>
+                {showHidden
+                  ? t('fileManager.actions.hideHidden')
+                  : t('fileManager.actions.showHidden')}
+              </span>
             </ContextMenuItem>
             {canDelete && (
               <ContextMenuItem>
                 <TrashIcon className="mr-2 h-5 w-5" />
-                <span>Trash</span>
+                <span>{t('fileManager.item.actions.delete')}</span>
               </ContextMenuItem>
             )}
           </ContextMenuContent>

@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Upload, Trash } from 'lucide-react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import use_file_upload from '../../hooks/file-operations/useUpload';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface FileUploadProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ setIsDialogOpen }) => {
+  const { t } = useTranslation();
   const {
     files,
     isDragging,
@@ -25,7 +27,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setIsDialogOpen }) => {
   return (
     <DialogContent>
       <DialogHeader className="space-y-8">
-        <DialogTitle>Upload file</DialogTitle>
+        <DialogTitle>{t('fileManager.upload.title')}</DialogTitle>
         <div className="mx-auto w-full">
           <div
             className={`cursor-pointer rounded-lg border-2 border-dashed p-10 text-center ${
@@ -38,9 +40,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ setIsDialogOpen }) => {
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-            <p className="text-md mt-2 text-muted-foreground">
-              Drag and drop files here, or click to select files
-            </p>
+            <p className="text-md mt-2 text-muted-foreground">{t('fileManager.upload.dragDrop')}</p>
           </div>
           <input
             type="file"

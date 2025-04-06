@@ -4,7 +4,9 @@
     "dashboard": "Panel de control",
     "settings": "Configuración",
     "profile": "Perfil",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "accessDenied": "Acceso Denegado",
+    "noPermissionView": "No tienes permiso para ver esta página"
   },
   "auth": {
     "login": {
@@ -466,6 +468,64 @@
       "cpu": "CPU",
       "uptime": "Tiempo de Actividad",
       "lastUpdated": "Última Actualización"
+    }
+  },
+  "fileManager": {
+    "header": {
+      "title": "Gestor de Archivos",
+      "subtitle": "Administra tus archivos aquí"
+    },
+    "actions": {
+      "upload": "Subir Archivo",
+      "createDirectory": "Crear Directorio",
+      "showHidden": "Mostrar Archivos Ocultos",
+      "hideHidden": "Ocultar Archivos Ocultos",
+      "newFolder": "Nueva Carpeta {number}",
+      "errors": {
+        "createDirectory": "Error al crear el directorio"
+      }
+    },
+    "sort": {
+      "title": "Ordenar por",
+      "methods": {
+        "name": "Nombre",
+        "updated_at": "Fecha de Modificación",
+        "created_at": "Fecha de Creación",
+        "size": "Tamaño",
+        "file_type": "Tipo"
+      }
+    },
+    "upload": {
+      "title": "Subir Archivo",
+      "dragDrop": "Arrastra y suelta archivos aquí, o haz clic para seleccionar archivos",
+      "errors": {
+        "uploadFailed": "Error al subir el archivo",
+        "fileTooLarge": "El tamaño del archivo excede el límite",
+        "invalidType": "Tipo de archivo inválido"
+      }
+    },
+    "info": {
+      "labels": {
+        "path": "Ruta",
+        "size": "Tamaño",
+        "created": "Creado",
+        "updated": "Actualizado",
+        "type": "Tipo",
+        "hidden": "Oculto",
+        "permissions": "Permisos"
+      },
+      "calculating": "Calculando...",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "item": {
+      "actions": {
+        "info": "Información",
+        "rename": "Renombrar",
+        "copy": "Copiar",
+        "move": "Mover",
+        "delete": "Mover a Papelera"
+      }
     }
   }
 }

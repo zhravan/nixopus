@@ -119,7 +119,7 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := s.verifyToken(token)
-	if err != nil {
+	if err != nil || user == nil {
 		log.Printf("Auth error: %v", err)
 		s.sendError(conn, "Invalid authorization token")
 		conn.Close()
@@ -136,7 +136,8 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 // handleDisconnect handles the disconnection of a client.
 // it closes all the monitors and deletes the connection from the map.
 // Parameters:
-//   conn - the *websocket.Conn representing the client connection.
+//
+//	conn - the *websocket.Conn representing the client connection.
 //
 // Returns:
 //   - nil

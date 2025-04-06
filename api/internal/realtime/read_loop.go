@@ -35,10 +35,10 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 			s.handlePing(conn)
 
 		case types.SUBSCRIBE:
-			s.handleSubscribe(conn, msg, user)
+			s.handleSubscribe(conn, msg)
 
 		case types.UNSUBSCRIBE:
-			s.handleUnsubscribe(conn, msg, user)
+			s.handleUnsubscribe(conn, msg)
 
 		case types.AUTHENTICATE:
 			user = s.handleAuthenticate(conn, msg)
@@ -62,51 +62,6 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 			s.sendError(conn, "Unknown message action")
 		}
 	}
-}
-
-func (s *SocketServer) handleSubscribe(conn *websocket.Conn, msg types.Payload, user *types.User) {
-	if user == nil {
-		s.sendError(conn, "Authentication required")
-		return
-	}
-
-	if msg.Topic != "" && msg.Data != nil {
-		var resourceID string
-		if dataMap, ok := msg.Data.(map[string]interface{}); ok {
-			resourceID, ok = dataMap["resource_id"].(string)
-			if !ok {
-				s.sendError(conn, "Invalid topic subscription format. Requires resourceId")
-				return
-			}
-		}
-
-		s.SubscribeToTopic(topics(msg.Topic), resourceID, conn)
-		return
-	}
-	s.sendError(conn, "Invalid topic subscription format")
-}
-
-func (s *SocketServer) handleUnsubscribe(conn *websocket.Conn, msg types.Payload, user *types.User) {
-	if user == nil {
-		s.sendError(conn, "Authentication required")
-		return
-	}
-
-	if msg.Topic != "" && msg.Data != nil {
-		var resourceID string
-		if dataMap, ok := msg.Data.(map[string]interface{}); ok {
-			resourceID, ok = dataMap["resource_id"].(string)
-			if !ok {
-				s.sendError(conn, "Invalid topic unsubscription format. Requires resourceId")
-				return
-			}
-		}
-
-		s.UnsubscribeFromTopic(topics(msg.Topic), resourceID, conn)
-		return
-	}
-
-	s.sendError(conn, "Invalid topic unsubscription format")
 }
 
 func (s *SocketServer) handleAuthenticate(conn *websocket.Conn, msg types.Payload) *types.User {

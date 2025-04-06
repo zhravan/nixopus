@@ -25,15 +25,15 @@ const OrganizationIDKey contextKey = "organization_id"
 type AvailableActions string
 
 const (
-	PING            AvailableActions = "ping"
-	SUBSCRIBE       AvailableActions = "subscribe"
-	UNSUBSCRIBE     AvailableActions = "unsubscribe"
-	AUTHENTICATE    AvailableActions = "authenticate"
-	TERMINAL        AvailableActions = "terminal"
-	TERMINAL_RESIZE AvailableActions = "terminal_resize"
-	DASHBOARD_MONITOR AvailableActions = "dashboard_monitor"
+	PING                   AvailableActions = "ping"
+	SUBSCRIBE              AvailableActions = "subscribe"
+	UNSUBSCRIBE            AvailableActions = "unsubscribe"
+	AUTHENTICATE           AvailableActions = "authenticate"
+	TERMINAL               AvailableActions = "terminal"
+	TERMINAL_RESIZE        AvailableActions = "terminal_resize"
+	DASHBOARD_MONITOR      AvailableActions = "dashboard_monitor"
 	STOP_DASHBOARD_MONITOR AvailableActions = "stop_dashboard_monitor"
-	MONITOR_APPLICATION AvailableActions = "monitor_application"
+	MONITOR_APPLICATION    AvailableActions = "monitor_application"
 )
 
 type Payload struct {

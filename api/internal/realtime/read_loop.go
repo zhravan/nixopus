@@ -3,7 +3,6 @@ package realtime
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -40,9 +39,6 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 		case types.UNSUBSCRIBE:
 			s.handleUnsubscribe(conn, msg)
 
-		case types.AUTHENTICATE:
-			user = s.handleAuthenticate(conn, msg)
-
 		case types.TERMINAL:
 			s.handleTerminal(conn, msg, user)
 
@@ -62,31 +58,6 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 			s.sendError(conn, "Unknown message action")
 		}
 	}
-}
-
-func (s *SocketServer) handleAuthenticate(conn *websocket.Conn, msg types.Payload) *types.User {
-	token, ok := msg.Data.(string)
-	if !ok {
-		s.sendError(conn, "Invalid authentication token format")
-		return nil
-	}
-
-	newUser, err := s.verifyToken(token)
-	if err != nil {
-		s.sendError(conn, "Invalid authorization token")
-		return nil
-	}
-
-	s.conns.Store(conn, newUser.ID)
-
-	conn.WriteJSON(types.Payload{
-		Action: "authenticated",
-		Data:   newUser.ID,
-	})
-
-	log.Printf("User re-authenticated. ID: %s, Email: %s", newUser.ID, newUser.Email)
-
-	return newUser
 }
 
 func (s *SocketServer) handleTerminal(conn *websocket.Conn, msg types.Payload, user *types.User) {

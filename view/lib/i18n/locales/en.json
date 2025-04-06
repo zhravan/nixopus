@@ -72,6 +72,74 @@
           }
         }
       }
+    },
+    "domains": {
+      "page": {
+        "title": "Server and Domains",
+        "description": "Configure your domains",
+        "noOrganization": {
+          "title": "No Organization Selected",
+          "description": "Please select an organization to view and manage domains."
+        },
+        "accessDenied": {
+          "title": "Access Denied",
+          "description": "You don't have permission to view domains for this organization."
+        },
+        "loading": "Loading domains...",
+        "error": "Failed to load domains. Please try again later.",
+        "domainsList": {
+          "title": "Domains",
+          "addButton": "Add Domain"
+        },
+        "noDomains": {
+          "title": "No Domains Found",
+          "noPermission": "You don't have permission to add domains."
+        }
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "delete": {
+        "title": "Delete Domain",
+        "description": "Are you sure you want to delete this domain?",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "success": "Domain deleted successfully",
+        "error": "Failed to delete domain"
+      },
+      "types": {
+        "wildcard": "Wildcard",
+        "standard": "Standard"
+      },
+      "table": {
+        "headers": {
+          "domain": "Domain",
+          "type": "Type",
+          "actions": "Actions"
+        }
+      },
+      "update": {
+        "addButton": "Add Domain",
+        "addTitle": "Add Domain",
+        "updateTitle": "Update Domain",
+        "description": "Domain will help to deploy your applications",
+        "form": {
+          "placeholder": "example.com",
+          "validation": {
+            "minLength": "Domain name must be at least 3 characters.",
+            "invalidFormat": "Please enter a valid domain name (e.g., example.com)."
+          }
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save",
+          "saving": "Saving..."
+        },
+        "success": "Domain added successfully",
+        "error": "Failed to add domain"
+      }
     }
   },
   "languages": {

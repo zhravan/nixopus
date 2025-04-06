@@ -72,6 +72,74 @@
           }
         }
       }
+    },
+    "domains": {
+      "page": {
+        "title": "Serveur et Domaines",
+        "description": "Configurez vos domaines",
+        "noOrganization": {
+          "title": "Aucune Organisation Sélectionnée",
+          "description": "Veuillez sélectionner une organisation pour voir et gérer les domaines."
+        },
+        "accessDenied": {
+          "title": "Accès Refusé",
+          "description": "Vous n'avez pas la permission de voir les domaines de cette organisation."
+        },
+        "loading": "Chargement des domaines...",
+        "error": "Échec du chargement des domaines. Veuillez réessayer plus tard.",
+        "domainsList": {
+          "title": "Domaines",
+          "addButton": "Ajouter un Domaine"
+        },
+        "noDomains": {
+          "title": "Aucun Domaine Trouvé",
+          "noPermission": "Vous n'avez pas la permission d'ajouter des domaines."
+        }
+      },
+      "actions": {
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "delete": {
+        "title": "Supprimer le Domaine",
+        "description": "Êtes-vous sûr de vouloir supprimer ce domaine ?",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "deleting": "Suppression en cours...",
+        "success": "Domaine supprimé avec succès",
+        "error": "Échec de la suppression du domaine"
+      },
+      "types": {
+        "wildcard": "Joker",
+        "standard": "Standard"
+      },
+      "table": {
+        "headers": {
+          "domain": "Domaine",
+          "type": "Type",
+          "actions": "Actions"
+        }
+      },
+      "update": {
+        "addButton": "Ajouter un Domaine",
+        "addTitle": "Ajouter un Domaine",
+        "updateTitle": "Mettre à jour le Domaine",
+        "description": "Le domaine vous aidera à déployer vos applications",
+        "form": {
+          "placeholder": "exemple.com",
+          "validation": {
+            "minLength": "Le nom de domaine doit contenir au moins 3 caractères.",
+            "invalidFormat": "Veuillez entrer un nom de domaine valide (exemple : exemple.com)."
+          }
+        },
+        "buttons": {
+          "cancel": "Annuler",
+          "save": "Enregistrer",
+          "saving": "Enregistrement en cours..."
+        },
+        "success": "Domaine ajouté avec succès",
+        "error": "Échec de l'ajout du domaine"
+      }
     }
   },
   "languages": {

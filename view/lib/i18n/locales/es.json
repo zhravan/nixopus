@@ -72,6 +72,74 @@
           }
         }
       }
+    },
+    "domains": {
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "delete": {
+        "title": "Eliminar Dominio",
+        "description": "¿Estás seguro de que quieres eliminar este dominio?",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "deleting": "Eliminando...",
+        "success": "Dominio eliminado exitosamente",
+        "error": "Error al eliminar el dominio"
+      },
+      "types": {
+        "wildcard": "Comodín",
+        "standard": "Estándar"
+      },
+      "table": {
+        "headers": {
+          "domain": "Dominio",
+          "type": "Tipo",
+          "actions": "Acciones"
+        }
+      },
+      "update": {
+        "addButton": "Agregar Dominio",
+        "addTitle": "Agregar Dominio",
+        "updateTitle": "Actualizar Dominio",
+        "description": "El dominio ayudará a desplegar tus aplicaciones",
+        "form": {
+          "placeholder": "ejemplo.com",
+          "validation": {
+            "minLength": "El nombre del dominio debe tener al menos 3 caracteres.",
+            "invalidFormat": "Por favor ingresa un nombre de dominio válido (ejemplo: ejemplo.com)."
+          }
+        },
+        "buttons": {
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "saving": "Guardando..."
+        },
+        "success": "Dominio agregado exitosamente",
+        "error": "Error al agregar el dominio"
+      },
+      "page": {
+        "title": "Servidor y Dominios",
+        "description": "Configura tus dominios",
+        "noOrganization": {
+          "title": "No hay Organización Seleccionada",
+          "description": "Por favor selecciona una organización para ver y gestionar dominios."
+        },
+        "accessDenied": {
+          "title": "Acceso Denegado",
+          "description": "No tienes permiso para ver los dominios de esta organización."
+        },
+        "loading": "Cargando dominios...",
+        "error": "Error al cargar los dominios. Por favor intenta de nuevo más tarde.",
+        "domainsList": {
+          "title": "Dominios",
+          "addButton": "Agregar Dominio"
+        },
+        "noDomains": {
+          "title": "No se Encontraron Dominios",
+          "noPermission": "No tienes permiso para agregar dominios."
+        }
+      }
     }
   },
   "languages": {

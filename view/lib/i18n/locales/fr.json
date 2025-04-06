@@ -7,10 +7,59 @@
     "logout": "Déconnexion"
   },
   "auth": {
-    "login": "Connexion",
+    "login": {
+      "title": "Connexion",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "errors": {
+        "loginFailed": "Échec de la connexion",
+        "invalidCredentials": "Email ou mot de passe invalide",
+        "requiredFields": "L'email et le mot de passe sont requis"
+      }
+    },
     "register": "S'inscrire",
     "email": "E-mail",
-    "password": "Mot de passe"
+    "password": "Mot de passe",
+    "resetPassword": {
+      "title": "Réinitialiser le Mot de Passe",
+      "description": "Veuillez entrer votre nouveau mot de passe ci-dessous.",
+      "newPassword": "Nouveau Mot de Passe",
+      "confirmPassword": "Confirmer le Mot de Passe",
+      "submit": "Réinitialiser le Mot de Passe",
+      "submitting": "Réinitialisation en cours...",
+      "success": "Mot de passe réinitialisé avec succès",
+      "errors": {
+        "invalidLink": "Lien de réinitialisation invalide",
+        "resetFailed": "Échec de la réinitialisation du mot de passe",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "passwordRequirements": {
+          "minLength": "Le mot de passe doit contenir au moins 8 caractères",
+          "uppercase": "Le mot de passe doit contenir au moins une lettre majuscule",
+          "lowercase": "Le mot de passe doit contenir au moins une lettre minuscule",
+          "number": "Le mot de passe doit contenir au moins un chiffre",
+          "specialChar": "Le mot de passe doit contenir au moins un caractère spécial"
+        }
+      }
+    },
+    "verifyEmail": {
+      "title": "Vérification de l'E-mail",
+      "description": "Veuillez patienter pendant que nous vérifions votre adresse e-mail",
+      "loading": "Vérification de votre e-mail en cours...",
+      "success": {
+        "title": "E-mail Vérifié",
+        "message": "E-mail vérifié avec succès ! Vous pouvez maintenant vous connecter."
+      },
+      "error": {
+        "title": "Échec de la Vérification",
+        "message": "Échec de la vérification de l'e-mail. Le lien a peut-être expiré ou est invalide.",
+        "invalidLink": "Lien de vérification invalide"
+      },
+      "buttons": {
+        "goToLogin": "Aller à la Connexion",
+        "backToLogin": "Retour à la Connexion"
+      }
+    }
   },
   "settings": {
     "title": "Paramètres",

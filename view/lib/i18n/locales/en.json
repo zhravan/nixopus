@@ -7,10 +7,59 @@
     "logout": "Logout"
   },
   "auth": {
-    "login": "Login",
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Login",
+      "errors": {
+        "loginFailed": "Login failed",
+        "invalidCredentials": "Invalid email or password",
+        "requiredFields": "Email and password are required"
+      }
+    },
     "register": "Register",
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Please enter your new password below.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Reset Password",
+      "submitting": "Resetting Password...",
+      "success": "Password reset successfully",
+      "errors": {
+        "invalidLink": "Invalid reset link",
+        "resetFailed": "Failed to reset password",
+        "passwordMismatch": "Passwords don't match",
+        "passwordRequirements": {
+          "minLength": "Password must be at least 8 characters",
+          "uppercase": "Password must contain at least one uppercase letter",
+          "lowercase": "Password must contain at least one lowercase letter",
+          "number": "Password must contain at least one number",
+          "specialChar": "Password must contain at least one special character"
+        }
+      }
+    },
+    "verifyEmail": {
+      "title": "Email Verification",
+      "description": "Please wait while we verify your email address",
+      "loading": "Verifying your email...",
+      "success": {
+        "title": "Email Verified",
+        "message": "Email verified successfully! You can now log in."
+      },
+      "error": {
+        "title": "Verification Failed",
+        "message": "Failed to verify email. The link may have expired or is invalid.",
+        "invalidLink": "Invalid verification link"
+      },
+      "buttons": {
+        "goToLogin": "Go to Login",
+        "backToLogin": "Back to Login"
+      }
+    }
   },
   "settings": {
     "title": "Settings",

@@ -118,7 +118,6 @@ func (s *SocketServer) handleDashboardMonitor(conn *websocket.Conn, msg types.Pa
 //
 //	conn - the *websocket.Conn representing the client connection.
 //	response - the types.Payload representing the response to send to the client.
-//
 func (s *SocketServer) sendResponse(conn *websocket.Conn, response types.Payload) {
 	jsonData, err := json.Marshal(response)
 	if err != nil {

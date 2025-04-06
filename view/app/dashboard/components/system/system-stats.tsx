@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SystemStatsType } from '../../hooks/use-monitor';
+import { SystemStatsType } from '@/redux/types/monitor';
 import SystemInfoCard, { SystemInfoCardSkeleton } from './system-info';
 import LoadAverageCard, { LoadAverageCardSkeleton } from './load-average';
 import MemoryUsageCard, { MemoryUsageCardSkeleton } from './memory-usage';

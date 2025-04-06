@@ -9,7 +9,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ContainerData } from '../../hooks/use-monitor';
+import { ContainerData } from '@/redux/types/monitor';
 import getStatusColor from '../utils/get-status-color';
 import truncateId from '../utils/truncate-id';
 

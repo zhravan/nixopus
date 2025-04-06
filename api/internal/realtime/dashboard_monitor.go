@@ -10,6 +10,13 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/types"
 )
 
+// handleStopDashboardMonitor stops the dashboard monitor for a given connection.
+//
+// Parameters:
+//
+//	conn - the *websocket.Conn representing the client connection.
+//
+// Returns:
 func (s *SocketServer) handleStopDashboardMonitor(conn *websocket.Conn) {
 	s.dashboardMutex.Lock()
 	defer s.dashboardMutex.Unlock()
@@ -24,6 +31,15 @@ func (s *SocketServer) handleStopDashboardMonitor(conn *websocket.Conn) {
 	}
 }
 
+// handleDashboardMonitor starts or stops the dashboard monitor for a given connection.
+//
+// Parameters:
+//
+//	conn - the *websocket.Conn representing the client connection.
+//	msg - the types.Payload representing the message from the client.
+//
+// Returns:
+//   - nil
 func (s *SocketServer) handleDashboardMonitor(conn *websocket.Conn, msg types.Payload) {
 	s.dashboardMutex.Lock()
 	monitor, exists := s.dashboardMonitors[conn]
@@ -85,26 +101,30 @@ func (s *SocketServer) handleDashboardMonitor(conn *websocket.Conn, msg types.Pa
 			},
 		}
 
-		jsonData, err := json.Marshal(response)
-		if err != nil {
-			s.sendError(conn, "Failed to marshal response")
-			return
-		}
-
-		conn.WriteMessage(websocket.TextMessage, jsonData)
+		s.sendResponse(conn, response)
 	} else {
 		monitor.Stop()
 		response := types.Payload{
 			Action: "dashboard_monitor_stopped",
 			Data:   nil,
 		}
-
-		jsonData, err := json.Marshal(response)
-		if err != nil {
-			s.sendError(conn, "Failed to marshal response")
-			return
-		}
-
-		conn.WriteMessage(websocket.TextMessage, jsonData)
+		s.sendResponse(conn, response)
 	}
+}
+
+// sendResponse sends a response to the client. (utility function)
+//
+// Parameters:
+//
+//	conn - the *websocket.Conn representing the client connection.
+//	response - the types.Payload representing the response to send to the client.
+//
+func (s *SocketServer) sendResponse(conn *websocket.Conn, response types.Payload) {
+	jsonData, err := json.Marshal(response)
+	if err != nil {
+		s.sendError(conn, "Failed to marshal response")
+		return
+	}
+
+	conn.WriteMessage(websocket.TextMessage, jsonData)
 }

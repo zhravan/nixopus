@@ -1,0 +1,82 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account",
+    "tabs": {
+      "account": "Account",
+      "security": "Security"
+    },
+    "preferences": {
+      "language": {
+        "title": "Language Preferences",
+        "description": "Choose your preferred language for the application",
+        "select": "Select language"
+      }
+    },
+    "account": {
+      "title": "Account Information",
+      "description": "Update your account details",
+      "username": {
+        "label": "Username",
+        "placeholder": "Enter your username",
+        "update": "Update",
+        "success": "Your username has been updated successfully!",
+        "error": "Failed to update username"
+      },
+      "email": {
+        "label": "Email Address",
+        "notVerified": {
+          "title": "Email Not Verified",
+          "description": "Your email address is not verified. Please verify your email to access all features.",
+          "sendButton": "Send Verification Email",
+          "sending": "Sending...",
+          "sent": "Verification Email Sent",
+          "error": "Failed to send verification email. Please try again later.",
+          "checkEmail": "Please check your email and click the verification link to verify your email address."
+        }
+      },
+      "preferences": {
+        "title": "Account Preferences",
+        "description": "Manage your notification and display settings",
+        "appearance": "Appearance"
+      },
+      "avatar": {
+        "title": "Profile",
+        "description": "Manage your public profile"
+      }
+    },
+    "security": {
+      "password": {
+        "title": "Password",
+        "description": "Change your password",
+        "reset": {
+          "label": "Reset Password",
+          "description": "We'll send a password reset link to your email address",
+          "button": "Send Password Reset Link",
+          "emailSent": {
+            "title": "Email Sent!",
+            "description": "Check your inbox for a password reset link"
+          }
+        }
+      }
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French"
+  }
+}

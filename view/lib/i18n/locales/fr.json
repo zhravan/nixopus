@@ -1,0 +1,82 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Gérez votre compte",
+    "tabs": {
+      "account": "Compte",
+      "security": "Sécurité"
+    },
+    "preferences": {
+      "language": {
+        "title": "Préférences de Langue",
+        "description": "Choisissez votre langue préférée pour l'application",
+        "select": "Sélectionner la langue"
+      }
+    },
+    "account": {
+      "title": "Informations du Compte",
+      "description": "Mettez à jour les détails de votre compte",
+      "username": {
+        "label": "Nom d'utilisateur",
+        "placeholder": "Entrez votre nom d'utilisateur",
+        "update": "Mettre à jour",
+        "success": "Votre nom d'utilisateur a été mis à jour avec succès !",
+        "error": "Échec de la mise à jour du nom d'utilisateur"
+      },
+      "email": {
+        "label": "Adresse e-mail",
+        "notVerified": {
+          "title": "E-mail non vérifié",
+          "description": "Votre adresse e-mail n'est pas vérifiée. Veuillez vérifier votre e-mail pour accéder à toutes les fonctionnalités.",
+          "sendButton": "Envoyer l'e-mail de vérification",
+          "sending": "Envoi en cours...",
+          "sent": "E-mail de vérification envoyé",
+          "error": "Échec de l'envoi de l'e-mail de vérification. Veuillez réessayer plus tard.",
+          "checkEmail": "Veuillez vérifier votre e-mail et cliquer sur le lien de vérification pour vérifier votre adresse e-mail."
+        }
+      },
+      "preferences": {
+        "title": "Préférences du Compte",
+        "description": "Gérez vos paramètres de notification et d'affichage",
+        "appearance": "Apparence"
+      },
+      "avatar": {
+        "title": "Profil",
+        "description": "Gérez votre profil public"
+      }
+    },
+    "security": {
+      "password": {
+        "title": "Mot de passe",
+        "description": "Changez votre mot de passe",
+        "reset": {
+          "label": "Réinitialiser le mot de passe",
+          "description": "Nous enverrons un lien de réinitialisation à votre adresse e-mail",
+          "button": "Envoyer le lien de réinitialisation",
+          "emailSent": {
+            "title": "E-mail envoyé !",
+            "description": "Vérifiez votre boîte de réception pour trouver le lien de réinitialisation"
+          }
+        }
+      }
+    }
+  },
+  "languages": {
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français"
+  }
+}

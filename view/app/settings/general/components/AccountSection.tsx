@@ -12,6 +12,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { User as UserType } from '@/redux/types/user';
 import { ModeToggle } from '@/components/ui/theme-toggler';
 import { useSendVerificationEmailMutation } from '@/redux/services/users/authApi';
+import { useTranslation } from '@/hooks/use-translation';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 interface AccountSectionProps {
   username: string;
@@ -36,6 +38,7 @@ function AccountSection({
   handleUsernameChange,
   user
 }: AccountSectionProps) {
+  const { t } = useTranslation();
   const [sendVerificationEmail, { isLoading: isSendingVerification }] =
     useSendVerificationEmailMutation();
   const [verificationSent, setVerificationSent] = useState(false);
@@ -47,7 +50,7 @@ function AccountSection({
       setVerificationSent(true);
       setVerificationError('');
     } catch (error) {
-      setVerificationError('Failed to send verification email. Please try again later.');
+      setVerificationError(t('settings.account.email.notVerified.error'));
     }
   };
 
@@ -55,14 +58,14 @@ function AccountSection({
     <TabsContent value="account" className="space-y-4 mt-4">
       <Card>
         <CardHeader>
-          <CardTitle>Account Information</CardTitle>
-          <CardDescription>Update your account details</CardDescription>
+          <CardTitle>{t('settings.account.title')}</CardTitle>
+          <CardDescription>{t('settings.account.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="username" className="flex items-center gap-2">
               <User size={16} />
-              Username
+              {t('settings.account.username.label')}
             </Label>
             <div className="flex gap-2">
               <Input
@@ -72,13 +75,13 @@ function AccountSection({
                   setUsername(e.target.value);
                   setUsernameError('');
                 }}
-                placeholder="Enter your username"
+                placeholder={t('settings.account.username.placeholder')}
               />
               <Button
                 onClick={handleUsernameChange}
                 disabled={isLoading || username === user.username}
               >
-                Update
+                {t('settings.account.username.update')}
               </Button>
             </div>
 
@@ -88,7 +91,7 @@ function AccountSection({
               <Alert variant="default">
                 <CheckCircle className="h-4 w-4" />
                 <AlertTitle>Success</AlertTitle>
-                <AlertDescription>Your username has been updated successfully!</AlertDescription>
+                <AlertDescription>{t('settings.account.username.success')}</AlertDescription>
               </Alert>
             )}
           </div>
@@ -98,7 +101,7 @@ function AccountSection({
           <div className="space-y-2">
             <Label htmlFor="email" className="flex items-center gap-2">
               <Mail size={16} />
-              Email Address
+              {t('settings.account.email.label')}
             </Label>
             <div className="flex flex-col gap-2">
               <Input id="email" value={email} readOnly disabled className="bg-muted/50" />
@@ -106,10 +109,9 @@ function AccountSection({
                 <div className="space-y-2">
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Email Not Verified</AlertTitle>
+                    <AlertTitle>{t('settings.account.email.notVerified.title')}</AlertTitle>
                     <AlertDescription>
-                      Your email address is not verified. Please verify your email to access all
-                      features.
+                      {t('settings.account.email.notVerified.description')}
                     </AlertDescription>
                   </Alert>
                   <Button
@@ -119,19 +121,18 @@ function AccountSection({
                     className="w-full"
                   >
                     {isSendingVerification
-                      ? 'Sending...'
+                      ? t('settings.account.email.notVerified.sending')
                       : verificationSent
-                        ? 'Verification Email Sent'
-                        : 'Send Verification Email'}
+                        ? t('settings.account.email.notVerified.sent')
+                        : t('settings.account.email.notVerified.sendButton')}
                   </Button>
                   {verificationError && <p className="text-sm text-red-500">{verificationError}</p>}
                   {verificationSent && (
                     <Alert variant="default">
                       <CheckCircle className="h-4 w-4" />
-                      <AlertTitle>Verification Email Sent</AlertTitle>
+                      <AlertTitle>{t('settings.account.email.notVerified.sent')}</AlertTitle>
                       <AlertDescription>
-                        Please check your email and click the verification link to verify your email
-                        address.
+                        {t('settings.account.email.notVerified.checkEmail')}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -144,15 +145,30 @@ function AccountSection({
 
       <Card>
         <CardHeader>
-          <CardTitle>Account Preferences</CardTitle>
-          <CardDescription>Manage your notification and display settings</CardDescription>
+          <CardTitle>{t('settings.account.preferences.title')}</CardTitle>
+          <CardDescription>{t('settings.account.preferences.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm flex justify-between items-center">
-            <span>Appearance</span> <ModeToggle />
+            <span>{t('settings.account.preferences.appearance')}</span> <ModeToggle />
           </p>
         </CardContent>
       </Card>
+
+      <div className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('settings.preferences.language.title')}</CardTitle>
+            <CardDescription>{t('settings.preferences.language.description')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500">{t('settings.preferences.language.select')}</p>
+              <LanguageSwitcher />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </TabsContent>
   );
 }

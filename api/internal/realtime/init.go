@@ -133,6 +133,13 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 	s.readLoop(conn, user)
 }
 
+// handleDisconnect handles the disconnection of a client.
+// it closes all the monitors and deletes the connection from the map.
+// Parameters:
+//   conn - the *websocket.Conn representing the client connection.
+//
+// Returns:
+//   - nil
 func (s *SocketServer) handleDisconnect(conn *websocket.Conn) {
 	userID, _ := s.conns.Load(conn)
 	s.conns.Delete(conn)
@@ -148,6 +155,27 @@ func (s *SocketServer) handleDisconnect(conn *websocket.Conn) {
 	}
 
 	s.topicsMu.Unlock()
+
+	s.terminalMutex.Lock()
+	if term, exists := s.terminals[conn]; exists {
+		term.Close()
+		delete(s.terminals, conn)
+	}
+	s.terminalMutex.Unlock()
+
+	s.dashboardMutex.Lock()
+	if monitor, exists := s.dashboardMonitors[conn]; exists {
+		monitor.Stop()
+		delete(s.dashboardMonitors, conn)
+	}
+	s.dashboardMutex.Unlock()
+
+	s.applicationMutex.Lock()
+	if monitor, exists := s.applicationMonitors[conn]; exists {
+		monitor.Stop()
+		delete(s.applicationMonitors, conn)
+	}
+	s.applicationMutex.Unlock()
 
 	conn.Close()
 	fmt.Printf("Client disconnected: %s (User ID: %v)\n", conn.RemoteAddr(), userID)

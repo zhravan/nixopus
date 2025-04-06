@@ -15,22 +15,6 @@ import (
 )
 
 func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
-	defer func() {
-		s.terminalMutex.Lock()
-		if term, exists := s.terminals[conn]; exists {
-			term.Close()
-			delete(s.terminals, conn)
-		}
-		s.terminalMutex.Unlock()
-
-		s.dashboardMutex.Lock()
-		if monitor, exists := s.dashboardMonitors[conn]; exists {
-			monitor.Stop()
-			delete(s.dashboardMonitors, conn)
-		}
-		s.dashboardMutex.Unlock()
-	}()
-
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {

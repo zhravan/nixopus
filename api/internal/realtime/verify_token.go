@@ -9,6 +9,14 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/types"
 )
 
+// verifyToken verifies the JWT token and returns the user if the token is valid.
+//
+// Parameters:
+//   tokenString - the JWT token string to verify.
+//
+// Returns:
+//   - the user if the token is valid.
+//   - an error if the token is invalid.
 func (s *SocketServer) verifyToken(tokenString string) (*types.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

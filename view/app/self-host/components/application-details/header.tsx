@@ -20,8 +20,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
+import { useTranslation } from '@/hooks/use-translation';
 
 const ApplicationDetailsHeader = ({ application }: { application?: Application }) => {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const [redeployApplication, { isLoading: isRedeploying }] = useRedeployApplicationMutation();
@@ -34,36 +36,36 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
 
   const handleDelete = async () => {
     if (!canDelete) {
-      toast.error('You do not have permission to delete applications');
+      toast.error(t('selfHost.applicationDetails.header.actions.delete.permissionError'));
       return;
     }
     try {
       await deleteApplication({
         id: application?.id || ''
       }).unwrap();
-      toast.success('Application deleted successfully');
+      toast.success(t('selfHost.applicationDetails.header.actions.delete.success'));
       router.push('/self-host');
     } catch (error) {
-      toast.error('Failed to delete application');
+      toast.error(t('selfHost.applicationDetails.header.actions.delete.error'));
     }
   };
 
   const handleRestart = async () => {
     if (!canUpdate) {
-      toast.error('You do not have permission to restart applications');
+      toast.error(t('selfHost.applicationDetails.header.actions.restart.permissionError'));
       return;
     }
     try {
       await restartApplication({ id: application?.deployments?.[0]?.id || '' }).unwrap();
-      toast.success('Application restart started');
+      toast.success(t('selfHost.applicationDetails.header.actions.restart.success'));
     } catch (error) {
-      toast.error('Failed to restart application');
+      toast.error(t('selfHost.applicationDetails.header.actions.restart.error'));
     }
   };
 
   const handleRedeploy = async (forceWithoutCache: boolean) => {
     if (!canUpdate) {
-      toast.error('You do not have permission to redeploy applications');
+      toast.error(t('selfHost.applicationDetails.header.actions.redeploy.permissionError'));
       return;
     }
     try {
@@ -73,9 +75,9 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
         force_without_cache: forceWithoutCache
       }).unwrap();
       router.push('/self-host/application/' + application?.id + '?logs=true');
-      toast.success('Application redeployment started');
+      toast.success(t('selfHost.applicationDetails.header.actions.redeploy.success'));
     } catch (error) {
-      toast.error('Failed to redeploy application');
+      toast.error(t('selfHost.applicationDetails.header.actions.redeploy.error'));
     }
   };
 
@@ -89,7 +91,7 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
               variant="ghost"
               size="icon"
               onClick={() => window.open('https://' + application?.domain, '_blank')}
-              aria-label="Open application in new tab"
+              aria-label={t('selfHost.applicationDetails.header.actions.open')}
             >
               <ExternalLink className="h-5 w-5" />
             </Button>
@@ -111,15 +113,20 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Restart Application</p>
+                <p>{t('selfHost.applicationDetails.header.actions.restart.button')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
         {canDelete && (
           <DeleteDialog
-            title={`Delete ${application?.name}`}
-            description={`Are you sure you want to delete ${application?.name}? This action cannot be undone.`}
+            title={t('selfHost.applicationDetails.header.actions.delete.dialog.title').replace(
+              '{name}',
+              application?.name || ''
+            )}
+            description={t(
+              'selfHost.applicationDetails.header.actions.delete.dialog.description'
+            ).replace('{name}', application?.name || '')}
             onConfirm={handleDelete}
             trigger={
               <Button variant="outline" size="icon">
@@ -140,10 +147,10 @@ const ApplicationDetailsHeader = ({ application }: { application?: Application }
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleRedeploy(true)} disabled={isRedeploying}>
-                Re-Deploy
+                {t('selfHost.applicationDetails.header.actions.redeploy.button')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleRedeploy(false)} disabled={isRedeploying}>
-                Force Deploy Without Cache
+                {t('selfHost.applicationDetails.header.actions.redeploy.forceButton')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

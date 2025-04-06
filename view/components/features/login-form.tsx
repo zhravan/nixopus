@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import nixopusLogo from '@/public/nixopus_logo_transparent.png';
+import { useTranslation } from '@/hooks/use-translation';
 
 export interface LoginFormProps {
   email: string;
@@ -15,6 +16,8 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ ...props }: LoginFormProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={cn('flex flex-col gap-6')}>
       <Card className="overflow-hidden p-0">
@@ -22,15 +25,15 @@ export function LoginForm({ ...props }: LoginFormProps) {
           <div className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">Login to your Nixopus account</p>
+                <h1 className="text-2xl font-bold">{t('auth.login.title')}</h1>
+                <p className="text-muted-foreground text-balance">{t('auth.login.description')}</p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder={t('auth.login.emailPlaceholder')}
                   required
                   value={props.email}
                   onChange={props.handleEmailChange}
@@ -43,7 +46,7 @@ export function LoginForm({ ...props }: LoginFormProps) {
                     Forgot your password?
                   </a>
                 </div> */}
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -58,7 +61,7 @@ export function LoginForm({ ...props }: LoginFormProps) {
                 onClick={props.handleLogin}
                 disabled={props.isLoading}
               >
-                {props.isLoading ? 'Loading...' : 'Login'}
+                {props.isLoading ? t('auth.login.loading') : t('auth.login.submit')}
               </Button>
               {/* <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
@@ -78,13 +81,13 @@ export function LoginForm({ ...props }: LoginFormProps) {
         </CardContent>
       </Card>
       <div className="text-muted-foreground text-center text-xs text-balance">
-        By clicking continue, you agree to our{' '}
+        {t('auth.login.terms')}{' '}
         <a href="#" className="underline underline-offset-4 hover:text-primary">
-          Terms of Service
+          {t('auth.login.termsOfService')}
         </a>{' '}
-        and{' '}
+        {t('auth.login.and')}{' '}
         <a href="#" className="underline underline-offset-4 hover:text-primary">
-          Privacy Policy
+          {t('auth.login.privacyPolicy')}
         </a>
         .
       </div>

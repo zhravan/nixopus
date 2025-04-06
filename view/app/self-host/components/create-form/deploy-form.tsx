@@ -9,6 +9,7 @@ import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import useCreateDeployment from '../../hooks/use_create_deployment';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface DeployFormProps {
   application_name?: string;
@@ -41,6 +42,7 @@ export const DeployForm = ({
   DockerfilePath = '/Dockerfile',
   base_path = '/'
 }: DeployFormProps) => {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const canCreate = hasPermission(user, 'deploy', 'create', activeOrg?.id);
@@ -65,9 +67,9 @@ export const DeployForm = ({
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <h2 className="text-2xl font-bold">{t('selfHost.deployForm.accessDenied.title')}</h2>
           <p className="text-muted-foreground">
-            You don't have permission to deploy new applications
+            {t('selfHost.deployForm.accessDenied.description')}
           </p>
         </div>
       </div>
@@ -80,94 +82,112 @@ export const DeployForm = ({
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Application Name"
+            label={t('selfHost.deployForm.fields.applicationName.label')}
             name="application_name"
-            description="Application name"
-            placeholder="Application name"
+            description={t('selfHost.deployForm.fields.applicationName.description')}
+            placeholder={t('selfHost.deployForm.fields.applicationName.placeholder')}
           />
           <FormSelectField
             form={form}
-            label="Environment"
+            label={t('selfHost.deployForm.fields.environment.label')}
             name="environment"
-            description="Environments helps you deploy to different spaces"
-            placeholder="Environment"
+            description={t('selfHost.deployForm.fields.environment.description')}
+            placeholder={t('selfHost.deployForm.fields.environment.placeholder')}
             selectOptions={[
-              { label: 'Staging', value: 'staging' },
-              { label: 'Production', value: 'production' },
-              { label: 'Development', value: 'development' }
+              {
+                label: t('selfHost.deployForm.fields.environment.options.staging'),
+                value: 'staging'
+              },
+              {
+                label: t('selfHost.deployForm.fields.environment.options.production'),
+                value: 'production'
+              },
+              {
+                label: t('selfHost.deployForm.fields.environment.options.development'),
+                value: 'development'
+              }
             ]}
           />
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Base Path"
+            label={t('selfHost.deployForm.fields.basePath.label')}
             name="base_path"
-            description="The build context path for your application"
-            placeholder="/"
+            description={t('selfHost.deployForm.fields.basePath.description')}
+            placeholder={t('selfHost.deployForm.fields.basePath.placeholder')}
             required={false}
           />
           <FormInputField
             form={form}
-            label="Dockerfile Path"
+            label={t('selfHost.deployForm.fields.dockerfilePath.label')}
             name="DockerfilePath"
-            description="Path of the dockerfile relative to the base path"
-            placeholder="Dockerfile"
+            description={t('selfHost.deployForm.fields.dockerfilePath.description')}
+            placeholder={t('selfHost.deployForm.fields.dockerfilePath.placeholder')}
             required={false}
           />
           <FormInputField
             form={form}
-            label="Branch"
+            label={t('selfHost.deployForm.fields.branch.label')}
             name="branch"
-            description="Branch from where you want to deploy"
-            placeholder="Branch"
+            description={t('selfHost.deployForm.fields.branch.description')}
+            placeholder={t('selfHost.deployForm.fields.branch.placeholder')}
           />
           <FormInputField
             form={form}
-            label="Port"
+            label={t('selfHost.deployForm.fields.port.label')}
             name="port"
-            description="Port on which your application will be available"
-            placeholder="3000"
+            description={t('selfHost.deployForm.fields.port.description')}
+            placeholder={t('selfHost.deployForm.fields.port.placeholder')}
             validator={(value) => parsePort(value) !== null}
           />
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Domain"
+            label={t('selfHost.deployForm.fields.domain.label')}
             name="domain"
-            description="Domain on which your application will be available"
-            placeholder="Domain"
+            description={t('selfHost.deployForm.fields.domain.description')}
+            placeholder={t('selfHost.deployForm.fields.domain.placeholder')}
           />
           <FormSelectField
             form={form}
-            label="Build Pack"
+            label={t('selfHost.deployForm.fields.buildPack.label')}
             name="build_pack"
-            description="Choose the one that best fits your application structure"
-            placeholder="Build Pack"
+            description={t('selfHost.deployForm.fields.buildPack.description')}
+            placeholder={t('selfHost.deployForm.fields.buildPack.placeholder')}
             selectOptions={[
-              { label: 'Dockerfile', value: BuildPack.Dockerfile },
-              { label: 'DockerCompose', value: BuildPack.DockerCompose },
-              { label: 'Static', value: BuildPack.Static }
+              {
+                label: t('selfHost.deployForm.fields.buildPack.options.dockerfile'),
+                value: BuildPack.Dockerfile
+              },
+              {
+                label: t('selfHost.deployForm.fields.buildPack.options.dockerCompose'),
+                value: BuildPack.DockerCompose
+              },
+              {
+                label: t('selfHost.deployForm.fields.buildPack.options.static'),
+                value: BuildPack.Static
+              }
             ]}
           />
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <FormSelectTagInputField
             form={form}
-            label="Environment Variables"
+            label={t('selfHost.deployForm.fields.envVariables.label')}
             name="env_variables"
-            description="Type KEY=VALUE and press Enter to add"
-            placeholder="NODE_ENV=production"
+            description={t('selfHost.deployForm.fields.envVariables.description')}
+            placeholder={t('selfHost.deployForm.fields.envVariables.placeholder')}
             required={false}
             validator={validateEnvVar}
           />
           <FormSelectTagInputField
             form={form}
-            label="Build Variables"
+            label={t('selfHost.deployForm.fields.buildVariables.label')}
             name="build_variables"
-            description="Type KEY=VALUE and press Enter to add"
-            placeholder="DEBUG=false"
+            description={t('selfHost.deployForm.fields.buildVariables.description')}
+            placeholder={t('selfHost.deployForm.fields.buildVariables.placeholder')}
             required={false}
             validator={validateEnvVar}
           />
@@ -175,22 +195,22 @@ export const DeployForm = ({
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Pre Run Commands"
+            label={t('selfHost.deployForm.fields.preRunCommands.label')}
             name="pre_run_commands"
-            description="Commands to run before deployment"
-            placeholder="npm install"
+            description={t('selfHost.deployForm.fields.preRunCommands.description')}
+            placeholder={t('selfHost.deployForm.fields.preRunCommands.placeholder')}
             required={false}
           />
           <FormInputField
             form={form}
-            label="Post Run Commands"
+            label={t('selfHost.deployForm.fields.postRunCommands.label')}
             name="post_run_commands"
-            description="Commands to run after deployment"
-            placeholder="npm run test"
+            description={t('selfHost.deployForm.fields.postRunCommands.description')}
+            placeholder={t('selfHost.deployForm.fields.postRunCommands.placeholder')}
             required={false}
           />
         </div>
-        <Button className="w-full cursor-pointer">Deploy</Button>
+        <Button className="w-full cursor-pointer">{t('selfHost.deployForm.submit')}</Button>
       </form>
     </Form>
   );

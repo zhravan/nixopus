@@ -10,8 +10,10 @@ import { BuildPack, Environment } from '@/redux/types/deploy-form';
 import ApplicationDetailsHeader from '../../components/application-details/header';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
+import { useTranslation } from '@/hooks/use-translation';
 
 function Page() {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const { application, currentPage, setCurrentPage, envVariables, buildVariables, defaultTab } =
@@ -23,9 +25,9 @@ function Page() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <h2 className="text-2xl font-bold">{t('selfHost.application.accessDenied.title')}</h2>
           <p className="text-muted-foreground">
-            You don't have permission to view application details
+            {t('selfHost.application.accessDenied.description')}
           </p>
         </div>
       </div>
@@ -37,10 +39,14 @@ function Page() {
       <ApplicationDetailsHeader application={application} />
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList>
-          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-          <TabsTrigger value="configuration">Configuration</TabsTrigger>
-          <TabsTrigger value="deployments">Deployments</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsTrigger value="monitoring">{t('selfHost.application.tabs.monitoring')}</TabsTrigger>
+          <TabsTrigger value="configuration">
+            {t('selfHost.application.tabs.configuration')}
+          </TabsTrigger>
+          <TabsTrigger value="deployments">
+            {t('selfHost.application.tabs.deployments')}
+          </TabsTrigger>
+          <TabsTrigger value="logs">{t('selfHost.application.tabs.logs')}</TabsTrigger>
         </TabsList>
         <TabsContent value="deployments" className="mt-6">
           <DeploymentsList deployments={application?.deployments} />

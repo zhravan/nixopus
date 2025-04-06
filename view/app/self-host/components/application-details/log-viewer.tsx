@@ -15,6 +15,7 @@ import { Maximize2, Minimize2, Search, Download, RefreshCw, MoreHorizontal } fro
 import './logViewer.css';
 import AceEditorComponent from '@/components/ui/ace-editor';
 import useLogViewer, { LogViewerProps, LOG_LEVELS } from '../../hooks/use_log_viewer';
+import { useTranslation } from '@/hooks/use-translation';
 
 function LogViewer({
   logs = '',
@@ -24,6 +25,7 @@ function LogViewer({
   currentPage = 1,
   setCurrentPage
 }: LogViewerProps) {
+  const { t } = useTranslation();
   const {
     filteredLogs,
     handleRefresh,
@@ -59,13 +61,13 @@ function LogViewer({
       <Card className={`h-full ${isFullscreen ? 'rounded-none' : ''}`}>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <CardDescription>{description}</CardDescription>
+            <h3 className="text-lg font-semibold">{t('selfHost.logViewer.title')}</h3>
+            <CardDescription>{t('selfHost.logViewer.description')}</CardDescription>
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="outline" onClick={() => setCurrentPage(currentPage + 1)}>
               <MoreHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
-              Fetch More
+              {t('selfHost.logViewer.actions.fetchMore')}
             </Button>
             <Button variant="outline" size="icon" onClick={handleRefresh} disabled={isRefreshing}>
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -82,7 +84,7 @@ function LogViewer({
                 <div className="relative flex-1">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search logs..."
+                    placeholder={t('selfHost.logViewer.actions.search.placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8"
@@ -91,13 +93,15 @@ function LogViewer({
                 {markers.length > 0 && (
                   <div className="flex items-center space-x-2">
                     <Button variant="outline" size="sm" onClick={() => navigateSearch('prev')}>
-                      Previous
+                      {t('selfHost.logViewer.actions.search.previous')}
                     </Button>
                     <span className="text-sm">
-                      {currentSearchIndex + 1} of {markers.length}
+                      {t('selfHost.logViewer.actions.search.results')
+                        .replace('{current}', (currentSearchIndex + 1).toString())
+                        .replace('{total}', markers.length.toString())}
                     </span>
                     <Button variant="outline" size="sm" onClick={() => navigateSearch('next')}>
-                      Next
+                      {t('selfHost.logViewer.actions.search.next')}
                     </Button>
                   </div>
                 )}
@@ -105,10 +109,12 @@ function LogViewer({
               <div className="flex items-center space-x-4">
                 <Select value={selectedLevel} onValueChange={setSelectedLevel}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by level" />
+                    <SelectValue placeholder={t('selfHost.logViewer.actions.filter.level.label')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="all">
+                      {t('selfHost.logViewer.actions.filter.level.all')}
+                    </SelectItem>
                     {LOG_LEVELS?.map((level) => (
                       <SelectItem key={level.value} value={level.value} className={level.color}>
                         {level.label}
@@ -119,14 +125,24 @@ function LogViewer({
 
                 <Select value={timeRange} onValueChange={setTimeRange}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Time range" />
+                    <SelectValue placeholder={t('selfHost.logViewer.actions.filter.time.label')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="5m">Last 5 minutes</SelectItem>
-                    <SelectItem value="15m">Last 15 minutes</SelectItem>
-                    <SelectItem value="1h">Last hour</SelectItem>
-                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="all">
+                      {t('selfHost.logViewer.actions.filter.time.all')}
+                    </SelectItem>
+                    <SelectItem value="5m">
+                      {t('selfHost.logViewer.actions.filter.time.5m')}
+                    </SelectItem>
+                    <SelectItem value="15m">
+                      {t('selfHost.logViewer.actions.filter.time.15m')}
+                    </SelectItem>
+                    <SelectItem value="1h">
+                      {t('selfHost.logViewer.actions.filter.time.1h')}
+                    </SelectItem>
+                    <SelectItem value="24h">
+                      {t('selfHost.logViewer.actions.filter.time.24h')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <div className="ml-auto flex items-center space-x-2">
@@ -137,7 +153,7 @@ function LogViewer({
                       onChange={(e) => setAutoScroll(e.target.checked)}
                       className="form-checkbox"
                     />
-                    <span>Auto-scroll</span>
+                    <span>{t('selfHost.logViewer.actions.autoScroll')}</span>
                   </label>
                 </div>
                 <Button variant="outline" size="icon" onClick={handleDownload}>

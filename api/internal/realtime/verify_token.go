@@ -12,7 +12,8 @@ import (
 // verifyToken verifies the JWT token and returns the user if the token is valid.
 //
 // Parameters:
-//   tokenString - the JWT token string to verify.
+//
+//	tokenString - the JWT token string to verify.
 //
 // Returns:
 //   - the user if the token is valid.

@@ -4,6 +4,7 @@ import { useGetRecentAuditLogsQuery } from '@/redux/services/audit';
 import { formatDistanceToNow } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { AuditAction, AuditLog } from '@/redux/types/audit';
+import { useTranslation } from '@/hooks/use-translation';
 
 const getActionColor = (action: AuditAction) => {
   switch (action) {
@@ -18,32 +19,27 @@ const getActionColor = (action: AuditAction) => {
   }
 };
 
-const getActionMessage = (log: AuditLog) => {
-  const username = log.user?.username || 'A user';
+const getActionMessage = (log: AuditLog, t: (key: string) => string) => {
+  const username = log.user?.username || t('settings.teams.recentActivity.actions.defaultUser');
   const resource = log.resource_type
     .split('_')
     .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(' ')
+    .toLowerCase();
 
-  switch (log.action) {
-    case 'create':
-      return `${username} created a new ${resource.toLowerCase()}`;
-    case 'update':
-      return `${username} updated a ${resource.toLowerCase()}`;
-    case 'delete':
-      return `${username} deleted a ${resource.toLowerCase()}`;
-    default:
-      return `${username} accessed a ${resource.toLowerCase()}`;
-  }
+  const actionKey = `settings.teams.recentActivity.actions.${log.action}`;
+  return t(actionKey).replace('{username}', username).replace('{resource}', resource);
 };
 
 function RecentActivity() {
+  const { t } = useTranslation();
   const { data: auditLogs, isLoading, error } = useGetRecentAuditLogsQuery();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Activities</CardTitle>
-        <CardDescription>Recent changes to your organization</CardDescription>
+        <CardTitle>{t('settings.teams.recentActivity.title')}</CardTitle>
+        <CardDescription>{t('settings.teams.recentActivity.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -51,14 +47,14 @@ function RecentActivity() {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : error ? (
-          <div className="p-4 text-red-600">Failed to load recent activities</div>
+          <div className="p-4 text-red-600">{t('settings.teams.recentActivity.error')}</div>
         ) : auditLogs && auditLogs.length > 0 ? (
           <div className="space-y-4">
             {auditLogs.map((log) => (
               <div key={log.id} className="flex items-start gap-4">
                 <div className={`h-2 w-2 mt-2 rounded-full ${getActionColor(log.action)}`}></div>
                 <div>
-                  <p className="text-sm font-medium">{getActionMessage(log)}</p>
+                  <p className="text-sm font-medium">{getActionMessage(log, t)}</p>
                   <p className="text-xs text-muted-foreground">
                     {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                   </p>
@@ -67,7 +63,9 @@ function RecentActivity() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-muted-foreground">No recent activities found</div>
+          <div className="text-center text-muted-foreground">
+            {t('settings.teams.recentActivity.noActivities')}
+          </div>
         )}
       </CardContent>
     </Card>

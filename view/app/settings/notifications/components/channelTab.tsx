@@ -3,6 +3,7 @@ import React from 'react';
 import { Mail } from 'lucide-react';
 import NotificationChannelCard from './channel';
 import { SMTPConfig } from '@/redux/types/notification';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface NotificationChannelsProps {
   smtpConfigs: SMTPConfig | undefined;
@@ -15,11 +16,13 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
   isLoading,
   handleOnSave
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="grid gap-6 md:grid-cols-1">
       <NotificationChannelCard
-        title="Email"
-        description="Configure SMTP settings to send email notifications"
+        title={t('settings.notifications.channels.email.title')}
+        description={t('settings.notifications.channels.email.description')}
         icon={<Mail className="h-5 w-5 text-primary" />}
         configData={{
           smtpServer: smtpConfigs?.host || '',
@@ -31,6 +34,7 @@ export const NotificationChannels: React.FC<NotificationChannelsProps> = ({
         }}
         onSave={(data) => handleOnSave(data)}
         isLoading={isLoading}
+        channelType="email"
       />
     </div>
   );

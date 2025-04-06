@@ -56,6 +56,13 @@
       "avatar": {
         "title": "Profil",
         "description": "Gérez votre profil public"
+      },
+      "errors": {
+        "emptyUsername": "Le nom d'utilisateur ne peut pas être vide",
+        "sameUsername": "Veuillez entrer un nom d'utilisateur différent",
+        "updateFailed": "Échec de la mise à jour du nom d'utilisateur. Veuillez réessayer.",
+        "resetEmailFailed": "Échec de l'envoi de l'e-mail de réinitialisation",
+        "imageNotImplemented": "Pas encore implémenté"
       }
     },
     "security": {
@@ -139,6 +146,205 @@
         },
         "success": "Domaine ajouté avec succès",
         "error": "Échec de l'ajout du domaine"
+      }
+    },
+    "notifications": {
+      "page": {
+        "title": "Notifications",
+        "description": "Gérez vos préférences et canaux de notification",
+        "accessDenied": {
+          "title": "Accès Refusé",
+          "description": "Vous n'avez pas la permission de voir les paramètres de notification"
+        },
+        "tabs": {
+          "channels": "Canaux",
+          "preferences": "Préférences"
+        },
+        "permissions": {
+          "update": "Vous n'avez pas la permission de mettre à jour les paramètres de notification",
+          "create": "Vous n'avez pas la permission de créer les paramètres de notification"
+        }
+      },
+      "channels": {
+        "email": {
+          "title": "E-mail",
+          "description": "Configurer les paramètres SMTP pour envoyer des notifications par e-mail",
+          "fields": {
+            "smtpServer": {
+              "label": "Serveur SMTP",
+              "placeholder": "smtp.exemple.com"
+            },
+            "port": {
+              "label": "Port",
+              "placeholder": "587"
+            },
+            "username": {
+              "label": "Nom d'utilisateur",
+              "placeholder": "votre-email@exemple.com"
+            },
+            "password": {
+              "label": "Mot de passe",
+              "placeholder": "Entrez votre mot de passe SMTP"
+            },
+            "fromEmail": {
+              "label": "E-mail d'expédition",
+              "placeholder": "notifications@exemple.com"
+            },
+            "fromName": {
+              "label": "Nom d'expédition",
+              "placeholder": "Nom de votre Organisation"
+            }
+          },
+          "buttons": {
+            "save": "Enregistrer"
+          }
+        }
+      },
+      "preferences": {
+        "activity": {
+          "title": "Notifications d'Activité",
+          "description": "Notifications concernant l'activité dans votre équipe"
+        },
+        "security": {
+          "title": "Notifications de Sécurité",
+          "description": "Alertes importantes concernant les applications déployées et les erreurs"
+        },
+        "updates": {
+          "title": "Mises à Jour et Marketing",
+          "description": "Restez informé de nos produits et services"
+        }
+      }
+    },
+    "teams": {
+      "addMember": {
+        "button": "Ajouter un Utilisateur",
+        "dialog": {
+          "title": "Ajouter un Nouvel Utilisateur",
+          "description": "Ajouter un nouvel utilisateur à votre organisation",
+          "fields": {
+            "name": {
+              "label": "Nom",
+              "placeholder": "Entrez le nom de l'utilisateur"
+            },
+            "email": {
+              "label": "E-mail",
+              "placeholder": "Entrez l'e-mail de l'utilisateur"
+            },
+            "role": {
+              "label": "Rôle",
+              "placeholder": "Sélectionnez un rôle",
+              "options": {
+                "admin": "Administrateur",
+                "member": "Membre",
+                "viewer": "Observateur"
+              }
+            },
+            "password": {
+              "label": "Mot de passe",
+              "placeholder": "Entrez le mot de passe de l'utilisateur"
+            }
+          },
+          "buttons": {
+            "cancel": "Annuler",
+            "add": "Ajouter l'Utilisateur"
+          }
+        }
+      },
+      "editTeam": {
+        "dialog": {
+          "title": "Modifier les Détails de l'Équipe",
+          "description": "Les détails de l'équipe vous aident à l'identifier",
+          "fields": {
+            "name": {
+              "label": "Nom",
+              "placeholder": "Entrez le nom de l'équipe"
+            },
+            "description": {
+              "label": "Description",
+              "placeholder": "Entrez la description de l'équipe"
+            }
+          },
+          "buttons": {
+            "cancel": "Annuler",
+            "update": "Mettre à jour",
+            "updating": "Mise à jour en cours..."
+          }
+        }
+      },
+      "editUser": {
+        "dialog": {
+          "title": "Modifier le Rôle de l'Utilisateur",
+          "description": "Mettre à jour le rôle pour {name}",
+          "fields": {
+            "role": {
+              "label": "Rôle",
+              "placeholder": "Sélectionner un rôle"
+            }
+          },
+          "buttons": {
+            "cancel": "Annuler",
+            "save": "Enregistrer les Modifications"
+          },
+          "errors": {
+            "noRole": "Veuillez sélectionner un rôle"
+          }
+        }
+      },
+      "recentActivity": {
+        "title": "Activités Récentes",
+        "description": "Changements récents dans votre organisation",
+        "loading": "Chargement des activités récentes...",
+        "error": "Échec du chargement des activités récentes",
+        "noActivities": "Aucune activité récente trouvée",
+        "actions": {
+          "create": "{username} a créé un nouveau {resource}",
+          "update": "{username} a mis à jour un {resource}",
+          "delete": "{username} a supprimé un {resource}",
+          "default": "{username} a accédé à un {resource}"
+        }
+      },
+      "members": {
+        "title": "Membres de l'Équipe",
+        "description": "Gérez les utilisateurs et leurs rôles dans votre équipe",
+        "table": {
+          "headers": {
+            "user": "Utilisateur",
+            "role": "Rôle",
+            "permissions": "Permissions",
+            "actions": "Actions"
+          }
+        },
+        "actions": {
+          "edit": "Modifier l'Utilisateur",
+          "remove": "Supprimer l'Utilisateur",
+          "showMore": "Afficher Plus",
+          "showLess": "Afficher Moins"
+        },
+        "deleteDialog": {
+          "title": "Supprimer {name}",
+          "description": "Êtes-vous sûr de vouloir supprimer {name} de l'équipe ? Cette action ne peut pas être annulée.",
+          "confirm": "Supprimer l'Utilisateur"
+        }
+      },
+      "stats": {
+        "title": "Statistiques de l'Équipe",
+        "description": "Aperçu de votre équipe",
+        "totalMembers": "Total des Membres",
+        "owners": "Propriétaires",
+        "members": "Membres",
+        "viewers": "Observateurs"
+      },
+      "noMembers": "Aucun membre d'équipe trouvé",
+      "messages": {
+        "userAdded": "Utilisateur ajouté avec succès",
+        "userAddFailed": "Échec de l'ajout de l'utilisateur",
+        "userRemoved": "Utilisateur supprimé avec succès",
+        "userRemoveFailed": "Échec de la suppression de l'utilisateur",
+        "userUpdated": "Utilisateur mis à jour avec succès",
+        "userUpdateFailed": "Échec de la mise à jour de l'utilisateur",
+        "teamUpdated": "Détails de l'équipe mis à jour avec succès",
+        "teamUpdateFailed": "Échec de la mise à jour des détails de l'équipe",
+        "requiredFields": "Le nom et la description de l'équipe sont requis"
       }
     }
   },

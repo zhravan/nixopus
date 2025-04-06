@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { UserTypes } from '@/redux/types/orgs';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface EditUserDialogProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ const AVAILABLE_ROLES: { value: UserTypes; label: string }[] = [
 ];
 
 function EditUserDialog({ isOpen, onClose, user, onSave }: EditUserDialogProps) {
+  const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = React.useState<UserTypes>('admin');
 
   React.useEffect(() => {
@@ -54,7 +56,7 @@ function EditUserDialog({ isOpen, onClose, user, onSave }: EditUserDialogProps) 
 
   const handleSave = () => {
     if (!selectedRole) {
-      toast.error('Please select a role');
+      toast.error(t('settings.teams.editUser.dialog.errors.noRole'));
       return;
     }
     onSave(user.id, selectedRole);
@@ -65,15 +67,19 @@ function EditUserDialog({ isOpen, onClose, user, onSave }: EditUserDialogProps) 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit User Role</DialogTitle>
-          <DialogDescription>Update role for {user.name}</DialogDescription>
+          <DialogTitle>{t('settings.teams.editUser.dialog.title')}</DialogTitle>
+          <DialogDescription>
+            {t('settings.teams.editUser.dialog.description').replace('{name}', user.name)}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label>Role</Label>
+            <Label>{t('settings.teams.editUser.dialog.fields.role.label')}</Label>
             <Select value={selectedRole} onValueChange={handleRoleChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue
+                  placeholder={t('settings.teams.editUser.dialog.fields.role.placeholder')}
+                />
               </SelectTrigger>
               <SelectContent>
                 {AVAILABLE_ROLES.map((role) => (
@@ -87,9 +93,9 @@ function EditUserDialog({ isOpen, onClose, user, onSave }: EditUserDialogProps) 
         </div>
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t('settings.teams.editUser.dialog.buttons.cancel')}
           </Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button onClick={handleSave}>{t('settings.teams.editUser.dialog.buttons.save')}</Button>
         </div>
       </DialogContent>
     </Dialog>

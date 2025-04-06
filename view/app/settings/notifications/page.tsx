@@ -8,12 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 export type NotificationChannelConfig = {
   [key: string]: string;
 };
 
 const Page: React.FC = () => {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const { smtpConfigs, isLoading, handleOnSave, preferences, handleUpdatePreference } =
@@ -27,9 +29,11 @@ const Page: React.FC = () => {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <h2 className="text-2xl font-bold">
+            {t('settings.notifications.page.accessDenied.title')}
+          </h2>
           <p className="text-muted-foreground">
-            You don't have permission to view notification settings
+            {t('settings.notifications.page.accessDenied.description')}
           </p>
         </div>
       </div>
@@ -41,13 +45,13 @@ const Page: React.FC = () => {
       if (canUpdate) {
         handleOnSave(data);
       } else {
-        toast.error('You do not have permission to update notification settings');
+        toast.error(t('settings.notifications.page.permissions.update'));
       }
     } else {
       if (canCreate) {
         handleOnSave(data);
       } else {
-        toast.error('You do not have permission to create notification settings');
+        toast.error(t('settings.notifications.page.permissions.create'));
       }
     }
   };
@@ -62,8 +66,8 @@ const Page: React.FC = () => {
     return (
       <div className="container mx-auto py-6 space-y-8 max-w-4xl">
         <DashboardPageHeader
-          label="Notifications"
-          description="Manage your notification preferences and channels"
+          label={t('settings.notifications.page.title')}
+          description={t('settings.notifications.page.description')}
         />
         <NotificationPreferencesTab
           activityPreferences={preferences?.activity}
@@ -78,13 +82,17 @@ const Page: React.FC = () => {
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-4xl">
       <DashboardPageHeader
-        label="Notifications"
-        description="Manage your notification preferences and channels"
+        label={t('settings.notifications.page.title')}
+        description={t('settings.notifications.page.description')}
       />
       <Tabs defaultValue="channels" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="channels">Channels</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="channels">
+            {t('settings.notifications.page.tabs.channels')}
+          </TabsTrigger>
+          <TabsTrigger value="preferences">
+            {t('settings.notifications.page.tabs.preferences')}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="channels">
           <NotificationChannelsTab

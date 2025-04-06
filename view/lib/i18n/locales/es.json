@@ -1,0 +1,82 @@
+{
+  "common": {
+    "welcome": "Bienvenido",
+    "dashboard": "Panel de control",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "logout": "Cerrar sesión"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña"
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Administra tu cuenta",
+    "tabs": {
+      "account": "Cuenta",
+      "security": "Seguridad"
+    },
+    "preferences": {
+      "language": {
+        "title": "Preferencias de Idioma",
+        "description": "Elige tu idioma preferido para la aplicación",
+        "select": "Seleccionar idioma"
+      }
+    },
+    "account": {
+      "title": "Información de la Cuenta",
+      "description": "Actualiza los detalles de tu cuenta",
+      "username": {
+        "label": "Nombre de usuario",
+        "placeholder": "Ingresa tu nombre de usuario",
+        "update": "Actualizar",
+        "success": "¡Tu nombre de usuario ha sido actualizado exitosamente!",
+        "error": "Error al actualizar el nombre de usuario"
+      },
+      "email": {
+        "label": "Correo electrónico",
+        "notVerified": {
+          "title": "Correo no verificado",
+          "description": "Tu correo electrónico no está verificado. Por favor verifica tu correo para acceder a todas las funciones.",
+          "sendButton": "Enviar correo de verificación",
+          "sending": "Enviando...",
+          "sent": "Correo de verificación enviado",
+          "error": "Error al enviar el correo de verificación. Por favor intenta de nuevo más tarde.",
+          "checkEmail": "Por favor revisa tu correo y haz clic en el enlace de verificación para verificar tu dirección de correo electrónico."
+        }
+      },
+      "preferences": {
+        "title": "Preferencias de la Cuenta",
+        "description": "Administra tus configuraciones de notificación y visualización",
+        "appearance": "Apariencia"
+      },
+      "avatar": {
+        "title": "Perfil",
+        "description": "Administra tu perfil público"
+      }
+    },
+    "security": {
+      "password": {
+        "title": "Contraseña",
+        "description": "Cambia tu contraseña",
+        "reset": {
+          "label": "Restablecer Contraseña",
+          "description": "Enviaremos un enlace para restablecer la contraseña a tu correo electrónico",
+          "button": "Enviar Enlace de Restablecimiento",
+          "emailSent": {
+            "title": "¡Correo Enviado!",
+            "description": "Revisa tu bandeja de entrada para encontrar el enlace de restablecimiento"
+          }
+        }
+      }
+    }
+  },
+  "languages": {
+    "en": "Inglés",
+    "es": "Español",
+    "fr": "Francés"
+  }
+}

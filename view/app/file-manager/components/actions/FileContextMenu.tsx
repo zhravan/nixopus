@@ -11,6 +11,8 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import FileUpload from './Upload';
 import { FileData } from '@/redux/types/files';
 import { useCreateDirectoryMutation } from '@/redux/services/file-manager/fileManagersApi';
+import { useTranslation } from '@/hooks/use-translation';
+import { toast } from 'sonner';
 
 interface FileContextMenuProps {
   refetch: () => void;
@@ -37,17 +39,20 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
   canUpdate,
   canDelete
 }) => {
+  const { t } = useTranslation();
   const [isUploadOpen, setIsUploadOpen] = React.useState(false);
   const [createDirectory] = useCreateDirectoryMutation();
 
   const handleCreateDirectory = async () => {
     if (!canCreate) return;
     try {
-      const newFolderName = `New Folder ${files.filter((f) => f.name.startsWith('New Folder')).length + 1}`;
+      const newFolderNumber = files.filter((f) => f.name.startsWith('New Folder')).length + 1;
+      const newFolderName = `New Folder ${newFolderNumber}`;
       await createDirectory({ path: currentPath, name: newFolderName });
       refetch();
     } catch (error) {
       console.error('Failed to create directory:', error);
+      toast.error(t('fileManager.actions.errors.createDirectory'));
     }
   };
 
@@ -66,7 +71,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
                 <DialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <Upload className="mr-2 h-4 w-4" />
-                    Upload File
+                    {t('fileManager.actions.upload')}
                   </DropdownMenuItem>
                 </DialogTrigger>
                 <FileUpload setIsDialogOpen={setIsUploadOpen} />
@@ -74,7 +79,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
 
               <DropdownMenuItem onSelect={handleCreateDirectory}>
                 <FolderPlus className="mr-2 h-4 w-4" />
-                Create Directory
+                {t('fileManager.actions.createDirectory')}
               </DropdownMenuItem>
             </>
           )}
@@ -83,12 +88,12 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
             {showHidden ? (
               <>
                 <EyeOff className="mr-2 h-4 w-4" />
-                Hide Hidden Files
+                {t('fileManager.actions.hideHidden')}
               </>
             ) : (
               <>
                 <Eye className="mr-2 h-4 w-4" />
-                Show Hidden Files
+                {t('fileManager.actions.showHidden')}
               </>
             )}
           </DropdownMenuItem>

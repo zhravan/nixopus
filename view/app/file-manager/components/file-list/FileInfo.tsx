@@ -2,6 +2,7 @@ import React from 'react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FileData } from '@/redux/types/files';
 import { formatFileSize } from '@/app/self-host/utils/formatFileSize';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface FileInfoProps {
   file: FileData;
@@ -10,22 +11,35 @@ interface FileInfoProps {
 }
 
 function FileInfo({ file, isLoading, fileSize }: FileInfoProps) {
+  const { t } = useTranslation();
+
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader className="space-y-6">
         <DialogTitle className="text-2xl font-bold text-primary">{file.name}</DialogTitle>
         <div className="mx-auto w-full space-y-4 rounded-lg bg-secondary/10 p-4">
-          <InfoItem label="Path" value={file.path} />
+          <InfoItem label={t('fileManager.info.labels.path')} value={file.path} />
           <InfoItem
-            label="Size"
-            value={isLoading ? 'Calculating...' : formatFileSize(fileSize || file.size)}
+            label={t('fileManager.info.labels.size')}
+            value={
+              isLoading ? t('fileManager.info.calculating') : formatFileSize(fileSize || file.size)
+            }
           />
-          <InfoItem label="Created" value={new Date(file.created_at).toLocaleString()} />
-          <InfoItem label="Updated" value={new Date(file.updated_at).toLocaleString()} />
-          <InfoItem label="Type" value={file.file_type} />
-          <InfoItem label="Hidden" value={file.is_hidden ? 'Yes' : 'No'} />
           <InfoItem
-            label="Permissions"
+            label={t('fileManager.info.labels.created')}
+            value={new Date(file.created_at).toLocaleString()}
+          />
+          <InfoItem
+            label={t('fileManager.info.labels.updated')}
+            value={new Date(file.updated_at).toLocaleString()}
+          />
+          <InfoItem label={t('fileManager.info.labels.type')} value={file.file_type} />
+          <InfoItem
+            label={t('fileManager.info.labels.hidden')}
+            value={file.is_hidden ? t('fileManager.info.yes') : t('fileManager.info.no')}
+          />
+          <InfoItem
+            label={t('fileManager.info.labels.permissions')}
             value={
               (file.permissions & 0o400 ? 'r' : '-') +
               (file.permissions & 0o200 ? 'w' : '-') +

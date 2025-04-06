@@ -13,6 +13,7 @@ import { getFileIcons } from '@/app/self-host/utils/getFileIcons';
 import { formatFileSize } from '@/app/self-host/utils/formatFileSize';
 import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 import { useFileOperations } from '../../hooks/file-operations/useOperations';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface FileItemProps {
   file: FileData;
@@ -43,6 +44,7 @@ export function FileItem({
   canUpdate,
   canDelete
 }: FileItemProps) {
+  const { t } = useTranslation();
   const {
     isEditing,
     setIsEditing,
@@ -133,24 +135,24 @@ export function FileItem({
       </ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem onSelect={() => setIsDialogOpen(true)}>
-          <Info className="mr-2 h-4 w-4" /> Info
+          <Info className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.info')}
         </ContextMenuItem>
         {canUpdate && (
           <>
             <ContextMenuItem onSelect={startRenaming}>
-              <Pencil className="mr-2 h-4 w-4" /> Rename
+              <Pencil className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.rename')}
             </ContextMenuItem>
             <ContextMenuItem onSelect={() => handleCopyFile(file, setFileToCopy)}>
-              <Copy className="mr-2 h-4 w-4" /> Copy
+              <Copy className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.copy')}
             </ContextMenuItem>
             <ContextMenuItem onSelect={() => setFileToMove(file)}>
-              <MoveIcon className="mr-2 h-4 w-4" /> Move
+              <MoveIcon className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.move')}
             </ContextMenuItem>
           </>
         )}
         {canDelete && (
           <ContextMenuItem onSelect={onDeleteFolder}>
-            <TrashIcon className="mr-2 h-4 w-4" /> Move to Trash
+            <TrashIcon className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.delete')}
           </ContextMenuItem>
         )}
       </ContextMenuContent>

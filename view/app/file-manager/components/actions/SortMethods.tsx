@@ -9,6 +9,7 @@ import {
   DropdownMenuRadioGroup
 } from '@/components/ui/dropdown-menu';
 import { FileData } from '@/redux/types/files';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface FileSortMethodsProps {
   files: FileData[] | [];
@@ -16,6 +17,7 @@ interface FileSortMethodsProps {
 }
 
 function FileSortMethods({ files, onSortChange }: FileSortMethodsProps) {
+  const { t } = useTranslation();
   const [sortMethod, setSortMethod] = useState<keyof FileData | ''>('');
 
   const handleSortChange = (value: string) => {
@@ -39,28 +41,28 @@ function FileSortMethods({ files, onSortChange }: FileSortMethodsProps) {
         <DropdownMenuContent>
           <DropdownMenuRadioGroup value={sortMethod} onValueChange={handleSortChange}>
             <DropdownMenuRadioItem value="name" className="flex cursor-pointer items-center gap-3">
-              Name
+              {t('fileManager.sort.methods.name')}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem
               value="updated_at"
               className="flex cursor-pointer items-center gap-3"
             >
-              Date Modified
+              {t('fileManager.sort.methods.updated_at')}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem
               value="created_at"
               className="flex cursor-pointer items-center gap-3"
             >
-              Date Created
+              {t('fileManager.sort.methods.created_at')}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="size" className="flex cursor-pointer items-center gap-3">
-              Size
+              {t('fileManager.sort.methods.size')}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem
               value="file_type"
               className="flex cursor-pointer items-center gap-3"
             >
-              Type
+              {t('fileManager.sort.methods.file_type')}
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>

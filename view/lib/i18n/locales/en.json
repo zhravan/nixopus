@@ -4,7 +4,10 @@
     "dashboard": "Dashboard",
     "settings": "Settings",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "accessDenied": "Access Denied",
+    "noPermissionView": "You don't have permission to view this page",
+    "searchFiles": "Search files..."
   },
   "auth": {
     "login": {
@@ -467,5 +470,66 @@
       "uptime": "Uptime",
       "lastUpdated": "Last Updated"
     }
+  },
+  "fileManager": {
+    "header": {
+      "title": "File Manager",
+      "subtitle": "Manage your files here"
+    },
+    "actions": {
+      "upload": "Upload File",
+      "createDirectory": "Create Directory",
+      "showHidden": "Show Hidden Files",
+      "hideHidden": "Hide Hidden Files",
+      "newFolder": "New Folder {number}",
+      "errors": {
+        "createDirectory": "Failed to create directory"
+      }
+    },
+    "sort": {
+      "title": "Sort by",
+      "methods": {
+        "name": "Name",
+        "updated_at": "Date Modified",
+        "created_at": "Date Created",
+        "size": "Size",
+        "file_type": "Type"
+      }
+    },
+    "upload": {
+      "title": "Upload File",
+      "dragDrop": "Drag and drop files here, or click to select files",
+      "errors": {
+        "uploadFailed": "Failed to upload file",
+        "fileTooLarge": "File size exceeds limit",
+        "invalidType": "Invalid file type"
+      }
+    },
+    "info": {
+      "labels": {
+        "path": "Path",
+        "size": "Size",
+        "created": "Created",
+        "updated": "Updated",
+        "type": "Type",
+        "hidden": "Hidden",
+        "permissions": "Permissions"
+      },
+      "calculating": "Calculating...",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "item": {
+      "actions": {
+        "info": "Info",
+        "rename": "Rename",
+        "copy": "Copy",
+        "move": "Move",
+        "delete": "Move to Trash",
+        "moveHere": "Move here",
+        "pasteHere": "Paste here"
+      }
+    },
+    "noFiles": "No files found"
   }
 }

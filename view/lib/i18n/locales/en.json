@@ -434,7 +434,8 @@
   "languages": {
     "en": "English",
     "es": "Spanish",
-    "fr": "French"
+    "fr": "French",
+    "kn": "Kannada"
   },
   "dashboard": {
     "title": "Dashboard",

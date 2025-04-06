@@ -433,7 +433,8 @@
   "languages": {
     "en": "Inglés",
     "es": "Español",
-    "fr": "Francés"
+    "fr": "Francés",
+    "kn": "Kannada"
   },
   "dashboard": {
     "title": "Panel de Control",

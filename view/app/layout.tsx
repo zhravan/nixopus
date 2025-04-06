@@ -59,13 +59,13 @@ const ChildrenWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        {pathname === '/' || pathname === '/login' ? (
-          <>{children}</>
-        ) : (
-          <WebSocketProvider>
+        <WebSocketProvider>
+          {pathname === '/' || pathname === '/login' ? (
+            <>{children}</>
+          ) : (
             <DashboardLayout>{children}</DashboardLayout>
-          </WebSocketProvider>
-        )}
+          )}
+        </WebSocketProvider>
       </ThemeProvider>
       <Toaster />
     </>

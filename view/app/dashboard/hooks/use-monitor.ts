@@ -1,6 +1,6 @@
 'use client';
 import { useWebSocket } from '@/hooks/socket-provider';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export type ContainerData = {
   Id: string;
@@ -74,6 +74,9 @@ function use_monitor() {
   const [containersData, setContainersData] = useState<ContainerData[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStatsType | null>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
     if (message) {
@@ -87,49 +90,79 @@ function use_monitor() {
 
         if (parsedMessage.action === 'get_containers' && parsedMessage.data) {
           setContainersData(parsedMessage.data);
+          setLastError(null);
         } else if (parsedMessage.action === 'get_system_stats' && parsedMessage.data) {
           setSystemStats(parsedMessage.data);
+          setLastError(null);
+        } else if (parsedMessage.action === 'error') {
+          setLastError(parsedMessage.error || 'Unknown error occurred');
+          if (isMonitoring) {
+            stopMonitoring();
+            setTimeout(startMonitoring, 5000);
+          }
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
+        setLastError('Failed to parse message');
       }
     }
   }, [message]);
 
   const startMonitoring = () => {
-    sendJsonMessage({
-      action: 'dashboard_monitor',
-      data: {
-        interval: 10,
-        operations: ['get_containers', 'get_system_stats']
-      }
-    });
-    setIsMonitoring(true);
+    if (!isMonitoring) {
+      sendJsonMessage({
+        action: 'dashboard_monitor',
+        data: {
+          interval: 10,
+          operations: ['get_containers', 'get_system_stats']
+        }
+      });
+      setIsMonitoring(true);
+      setLastError(null);
+    }
   };
 
   const stopMonitoring = () => {
-    sendJsonMessage({
-      action: 'stop_dashboard_monitor'
-    });
-    setIsMonitoring(false);
+    if (isMonitoring) {
+      sendJsonMessage({
+        action: 'stop_dashboard_monitor'
+      });
+      setIsMonitoring(false);
+    }
   };
 
   useEffect(() => {
-    startMonitoring();
+    if (isReady && !isInitializedRef.current) {
+      startMonitoring();
+      isInitializedRef.current = true;
+    }
     return () => {
-      stopMonitoring();
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, [isReady]);
 
   useEffect(() => {
-    if (!isMonitoring) {
-      startMonitoring();
+    if (isReady && !isMonitoring && lastError) {
+      reconnectTimeoutRef.current = setTimeout(() => {
+        startMonitoring();
+      }, 5000);
     }
-  }, [isMonitoring]);
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, [isReady, isMonitoring, lastError]);
 
   return {
     containersData,
-    systemStats
+    systemStats,
+    isMonitoring,
+    lastError,
+    startMonitoring,
+    stopMonitoring
   };
 }
 

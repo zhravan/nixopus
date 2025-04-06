@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
 )
@@ -44,10 +45,24 @@ func (m *NotificationManager) Start() {
 		for {
 			select {
 			case payload := <-m.PayloadChan:
+				shouldSend, err := m.CheckUserNotificationPreferences(
+					payload.UserID,
+					NotificationCategory(payload.Category),
+					NotificationPayloadType(payload.Type),
+				)
+				if err != nil {
+					log.Printf("Failed to check notification preferences: %v", err)
+					continue
+				}
+
+				if !shouldSend {
+					log.Printf("Notification skipped due to user preferences: %+v", payload)
+					continue
+				}
+
 				switch payload.Category {
 				case NotificationCategoryAuthentication:
 					fmt.Printf("Authentication Notification - %+v", payload)
-					// m.SendEmail(payload.UserID, "login successfully")
 					if payload.Type == NotificationPayloadTypePasswordReset {
 						fmt.Printf("Password Reset Notification - %+v", payload)
 						if data, ok := payload.Data.(NotificationPasswordResetData); ok {
@@ -86,208 +101,222 @@ func (m *NotificationManager) SendNotification(payload NotificationPayload) {
 }
 
 // here we can get the notification preferences of the user (like should send to slack/email/discord, how many times to send, what type of contents to send)
-func (m *NotificationManager) CheckUserNotificationPreferences(userID string) {
-
-}
-
-// we will categorize the notifications based on the type of the notification
-func (m *NotificationManager) GetPreferencesBasedOnCategory() {
-
-}
-
-func (m *NotificationManager) SendEmail(userId string, body string) {
-	smtpConfig, err := m.GetSmtp(userId)
-	fmt.Println(smtpConfig)
+func (m *NotificationManager) CheckUserNotificationPreferences(userID string, category NotificationCategory, notificationType NotificationPayloadType) (bool, error) {
+	uuidUserID, err := uuid.Parse(userID)
 	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
+		return false, fmt.Errorf("invalid user ID: %w", err)
 	}
-	from := smtpConfig.Username
-	pass := smtpConfig.Password
-	to := smtpConfig.FromEmail
 
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject: Hello there\n\n" +
-		body
-
-	err = smtp.SendMail(smtpConfig.Host+":"+fmt.Sprint(smtpConfig.Port),
-		smtp.PlainAuth("", from, pass, smtpConfig.Host),
-		from, []string{to}, []byte(msg))
+	var preferenceID uuid.UUID
+	err = m.db.NewSelect().
+		Model((*shared_types.NotificationPreferences)(nil)).
+		Column("id").
+		Where("user_id = ?", uuidUserID).
+		Where("deleted_at IS NULL").
+		Scan(m.ctx, &preferenceID)
 
 	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
+		return false, fmt.Errorf("failed to fetch user preferences: %w", err)
 	}
-	log.Println("Successfully sended to " + to)
+
+	var storageCategory string
+	switch category {
+	case NotificationCategoryAuthentication:
+		storageCategory = "security"
+	case NotificationCategoryOrganization:
+		storageCategory = "activity"
+	default:
+		return false, fmt.Errorf("unsupported notification category: %s", category)
+	}
+
+	var storageType string
+	switch notificationType {
+	case NotificationPayloadTypePasswordReset:
+		storageType = "password-changes"
+	case NotificationPayloadTypeVerificationEmail:
+		storageType = "security-alerts"
+	case NotificationPayloadTypeUpdateUserRole:
+		storageType = "team-updates"
+	default:
+		return false, fmt.Errorf("unsupported notification type: %s", notificationType)
+	}
+
+	var preferenceItem shared_types.PreferenceItem
+	err = m.db.NewSelect().
+		Model(&preferenceItem).
+		Where("preference_id = ?", preferenceID).
+		Where("category = ?", storageCategory).
+		Where("type = ?", storageType).
+		Scan(m.ctx)
+
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch preference item: %w", err)
+	}
+
+	return preferenceItem.Enabled, nil
 }
 
-type ResetEmailData struct {
-	ResetURL string
+func (m *NotificationManager) shouldSendEmail(userID string, category string, notificationType string) (bool, error) {
+	uuidUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return false, fmt.Errorf("invalid user ID: %w", err)
+	}
+
+	var preferenceID uuid.UUID
+	err = m.db.NewSelect().
+		Model((*shared_types.NotificationPreferences)(nil)).
+		Column("id").
+		Where("user_id = ?", uuidUserID).
+		Where("deleted_at IS NULL").
+		Scan(m.ctx, &preferenceID)
+
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch user preferences: %w", err)
+	}
+
+	var preferenceItem shared_types.PreferenceItem
+	err = m.db.NewSelect().
+		Model(&preferenceItem).
+		Where("preference_id = ?", preferenceID).
+		Where("category = ?", category).
+		Where("type = ?", notificationType).
+		Scan(m.ctx)
+
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch preference item: %w", err)
+	}
+
+	return preferenceItem.Enabled, nil
 }
 
-func (m *NotificationManager) SendPasswordResetEmail(userID string, token string) {
+func (m *NotificationManager) SendEmailWithTemplate(userID string, emailData EmailData) error {
+	shouldSend, err := m.shouldSendEmail(userID, emailData.Category, emailData.Type)
+	if err != nil {
+		return fmt.Errorf("failed to check email preferences: %w", err)
+	}
+
+	if !shouldSend {
+		return nil
+	}
+
 	smtpConfig, err := m.GetSmtp(userID)
 	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
+		return fmt.Errorf("smtp error: %w", err)
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Printf("error getting working directory: %s", err)
-		return
+		return fmt.Errorf("error getting working directory: %w", err)
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/password_reset.html"))
+	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/"+emailData.Template))
 	if err != nil {
-		log.Printf("template parsing error: %s", err)
-		return
+		return fmt.Errorf("template parsing error: %w", err)
 	}
 
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, emailData.Data); err != nil {
+		return fmt.Errorf("template execution error: %w", err)
+	}
+
+	from := smtpConfig.Username
+	to := []string{smtpConfig.FromEmail}
+
+	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
+		"From: %s\r\n"+
+		"To: %s\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: %s\r\n"+
+		"\r\n"+
+		"%s", emailData.Subject, from, smtpConfig.FromEmail, emailData.ContentType, body.String()))
+
+	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
+	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
+
+	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
+	return nil
+}
+
+func (m *NotificationManager) SendPasswordResetEmail(userID string, token string) error {
 	resetURL := fmt.Sprintf("http://localhost:3000/reset-password?token=%s", token)
 	data := ResetEmailData{
 		ResetURL: resetURL,
 	}
 
-	var body bytes.Buffer
-	if err := tmpl.Execute(&body, data); err != nil {
-		log.Printf("template execution error: %s", err)
-		return
+	emailData := EmailData{
+		Subject:     "Password Reset Request",
+		Template:    "password_reset.html",
+		Data:        data,
+		ContentType: "text/html; charset=UTF-8",
+		Category:    string(shared_types.SecurityCategory),
+		Type:        "password-changes",
 	}
 
-	from := smtpConfig.Username
-	to := []string{smtpConfig.FromEmail}
-	subject := "Password Reset Request"
-
-	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
-		"From: %s\r\n"+
-		"To: %s\r\n"+
-		"MIME-Version: 1.0\r\n"+
-		"Content-Type: text/html; charset=UTF-8\r\n"+
-		"\r\n"+
-		"%s", subject, from, smtpConfig.FromEmail, body.String()))
-
-	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
-	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
-
-	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+	if err := m.SendEmailWithTemplate(userID, emailData); err != nil {
 		log.Printf("Failed to send password reset email: %s", err)
-		return
+		return err
 	}
 
-	log.Printf("Password reset email sent successfully to %s", smtpConfig.FromEmail)
+	log.Printf("Password reset email sent successfully")
+	return nil
 }
 
-func (s *NotificationManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, error) {
-	config := &shared_types.SMTPConfigs{}
-	err := s.db.NewSelect().Model(config).Where("user_id = ?", ID).Scan(s.ctx)
-	if err != nil {
-		return nil, err
-	}
-	return config, nil
-}
-
-func (m *NotificationManager) SendVerificationEmail(userID string, token string) {
-	smtpConfig, err := m.GetSmtp(userID)
-	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
-	}
-
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Printf("error getting working directory: %s", err)
-		return
-	}
-	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/verification_email.html"))
-	if err != nil {
-		log.Printf("template parsing error: %s", err)
-		return
-	}
-
+func (m *NotificationManager) SendVerificationEmail(userID string, token string) error {
 	resetURL := fmt.Sprintf("http://localhost:3000/verify-email?token=%s", token)
 	data := ResetEmailData{
 		ResetURL: resetURL,
 	}
 
-	var body bytes.Buffer
-	if err := tmpl.Execute(&body, data); err != nil {
-		log.Printf("template execution error: %s", err)
-		return
+	emailData := EmailData{
+		Subject:     "Verification Email",
+		Template:    "verification_email.html",
+		Data:        data,
+		ContentType: "text/html; charset=UTF-8",
+		Category:    string(shared_types.SecurityCategory),
+		Type:        "security-alerts",
 	}
 
-	from := smtpConfig.Username
-	to := []string{smtpConfig.FromEmail}
-	subject := "Verification Email"
-
-	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
-		"From: %s\r\n"+
-		"To: %s\r\n"+
-		"MIME-Version: 1.0\r\n"+
-		"Content-Type: text/html; charset=UTF-8\r\n"+
-		"\r\n"+
-		"%s", subject, from, smtpConfig.FromEmail, body.String()))
-
-	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
-	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
-
-	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+	if err := m.SendEmailWithTemplate(userID, emailData); err != nil {
 		log.Printf("Failed to send verification email: %s", err)
-		return
+		return err
 	}
 
-	log.Printf("Verification email sent successfully to %s", smtpConfig.FromEmail)
+	log.Printf("Verification email sent successfully")
+	return nil
 }
 
-func (m *NotificationManager) SendUpdateUserRoleEmail(userID string, organizationID string, updatedUserID string) {
-	smtpConfig, err := m.GetSmtp(userID)
-	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
-	}
-
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Printf("error getting working directory: %s", err)
-		return
-	}
-	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/update_user_role.html"))
-	if err != nil {
-		log.Printf("template parsing error: %s", err)
-		return
-	}
-
+func (m *NotificationManager) SendUpdateUserRoleEmail(userID string, organizationID string, updatedUserID string) error {
 	data := UpdateUserRoleData{
 		OrganizationID: organizationID,
 		UserID:         updatedUserID,
 	}
 
-	var body bytes.Buffer
-	if err := tmpl.Execute(&body, data); err != nil {
-		log.Printf("template execution error: %s", err)
-		return
+	emailData := EmailData{
+		Subject:     "User Role Updated",
+		Template:    "update_user_role.html",
+		Data:        data,
+		ContentType: "text/html; charset=UTF-8",
+		Category:    string(shared_types.ActivityCategory),
+		Type:        "team-updates",
 	}
 
-	from := smtpConfig.Username
-	to := []string{smtpConfig.FromEmail}
-	subject := "User Role Updated"
-
-	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
-		"From: %s\r\n"+
-		"To: %s\r\n"+
-		"MIME-Version: 1.0\r\n"+
-		"Content-Type: text/html; charset=UTF-8\r\n"+
-		"\r\n"+
-		"%s", subject, from, smtpConfig.FromEmail, body.String()))
-
-	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
-	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
-
-	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+	if err := m.SendEmailWithTemplate(userID, emailData); err != nil {
 		log.Printf("Failed to send update user role email: %s", err)
-		return
+		return err
 	}
 
-	log.Printf("Update user role email sent successfully to %s", smtpConfig.FromEmail)
+	log.Printf("Update user role email sent successfully")
+	return nil
+}
+
+func (m *NotificationManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, error) {
+	config := &shared_types.SMTPConfigs{}
+	err := m.db.NewSelect().Model(config).Where("user_id = ?", ID).Scan(m.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }

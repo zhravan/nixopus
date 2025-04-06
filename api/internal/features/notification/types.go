@@ -237,3 +237,16 @@ type PreferenceItem struct {
 	Type         string    `json:"type"`
 	Enabled      bool      `json:"enabled"`
 }
+
+type EmailData struct {
+	Subject     string      `json:"subject"`
+	Template    string      `json:"template"`
+	Data        interface{} `json:"data"`
+	ContentType string      `json:"content_type"`
+	Category    string      `json:"category"`
+	Type        string      `json:"type"`
+}
+
+type ResetEmailData struct {
+	ResetURL string `json:"reset_url"`
+}

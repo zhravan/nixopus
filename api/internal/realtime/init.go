@@ -127,7 +127,7 @@ func (s *SocketServer) HandleHTTP(w http.ResponseWriter, r *http.Request) {
 	defer s.handleDisconnect(conn)
 
 	log.Printf("User authenticated: %s", user.ID)
-	s.readLoop(conn, user)
+	s.readLoop(conn)
 }
 
 // handleDisconnect handles the disconnection of a client.

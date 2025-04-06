@@ -77,14 +77,11 @@ func NewSocketServer(deployController *deploy.DeployController, db *bun.DB, ctx 
 		dashboardMonitors:   make(map[*websocket.Conn]*dashboard.DashboardMonitor),
 		applicationMonitors: make(map[*websocket.Conn]*realtime.ApplicationMonitor),
 	}
-
-	notificationChan, err := pgListener.ListenToApplicationChanges(ctx)
+	err = StartListeningAndNotify(&server.postgres_listener, ctx, server)
 	if err != nil {
-		return nil, fmt.Errorf("failed to listen for PostgreSQL notifications: %w", err)
+		log.Printf("Error initializing postgres listener: %v", err)
+		return nil, err
 	}
-
-	go server.handleNotifications(notificationChan)
-
 	return server, nil
 }
 

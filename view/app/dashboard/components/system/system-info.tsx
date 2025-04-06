@@ -3,7 +3,7 @@
 import React from 'react';
 import { Server } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SystemStatsType } from '../../hooks/use-monitor';
+import { SystemStatsType } from '@/redux/types/monitor';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface SystemInfoCardProps {

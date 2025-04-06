@@ -7,10 +7,59 @@
     "logout": "Cerrar sesión"
   },
   "auth": {
-    "login": "Iniciar sesión",
+    "login": {
+      "title": "Iniciar Sesión",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar Sesión",
+      "errors": {
+        "loginFailed": "Error al iniciar sesión",
+        "invalidCredentials": "Correo electrónico o contraseña inválidos",
+        "requiredFields": "El correo electrónico y la contraseña son requeridos"
+      }
+    },
     "register": "Registrarse",
     "email": "Correo electrónico",
-    "password": "Contraseña"
+    "password": "Contraseña",
+    "resetPassword": {
+      "title": "Restablecer Contraseña",
+      "description": "Por favor ingrese su nueva contraseña a continuación.",
+      "newPassword": "Nueva Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "submit": "Restablecer Contraseña",
+      "submitting": "Restableciendo Contraseña...",
+      "success": "Contraseña restablecida exitosamente",
+      "errors": {
+        "invalidLink": "Enlace de restablecimiento inválido",
+        "resetFailed": "Error al restablecer la contraseña",
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "passwordRequirements": {
+          "minLength": "La contraseña debe tener al menos 8 caracteres",
+          "uppercase": "La contraseña debe contener al menos una letra mayúscula",
+          "lowercase": "La contraseña debe contener al menos una letra minúscula",
+          "number": "La contraseña debe contener al menos un número",
+          "specialChar": "La contraseña debe contener al menos un carácter especial"
+        }
+      }
+    },
+    "verifyEmail": {
+      "title": "Verificación de Correo Electrónico",
+      "description": "Por favor espere mientras verificamos su dirección de correo electrónico",
+      "loading": "Verificando su correo electrónico...",
+      "success": {
+        "title": "Correo Verificado",
+        "message": "¡Correo electrónico verificado exitosamente! Ahora puede iniciar sesión."
+      },
+      "error": {
+        "title": "Verificación Fallida",
+        "message": "Error al verificar el correo electrónico. El enlace puede haber expirado o ser inválido.",
+        "invalidLink": "Enlace de verificación inválido"
+      },
+      "buttons": {
+        "goToLogin": "Ir a Iniciar Sesión",
+        "backToLogin": "Volver a Iniciar Sesión"
+      }
+    }
   },
   "settings": {
     "title": "Configuración",

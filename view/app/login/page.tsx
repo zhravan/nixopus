@@ -2,8 +2,10 @@
 import { LoginForm } from '@/components/features/login-form';
 import useLogin from './hooks/use-login';
 import { ErrorBoundary } from '@/components/ui/error-handler';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const {
     email,
     password,
@@ -26,7 +28,7 @@ export default function LoginPage() {
           isLoading={isLoading}
         />
       </div>
-      {error && <ErrorBoundary errors={[{ error, title: 'Login Error' }]} />}
+      {error && <ErrorBoundary errors={[{ error, title: t('auth.login.errors.loginFailed') }]} />}
     </div>
   );
 }

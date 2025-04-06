@@ -92,8 +92,9 @@ func NewSocketServer(deployController *deploy.DeployController, db *bun.DB, ctx 
 // It verifies the authorization token and authenticates the user.
 //
 // Parameters:
-//   w - the http.ResponseWriter for the response.
-//   r - the http.Request from the client.
+//
+//	w - the http.ResponseWriter for the response.
+//	r - the http.Request from the client.
 //
 // Returns:
 //   - nil if the connection is successfully upgraded.

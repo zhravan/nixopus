@@ -47,30 +47,31 @@ func (s *SocketServer) readLoop(conn *websocket.Conn, user *types.User) {
 		}
 
 		switch msg.Action {
-		case "ping":
+		case types.PING:
 			s.handlePing(conn)
 
-		case "subscribe":
+		case types.SUBSCRIBE:
 			s.handleSubscribe(conn, msg, user)
 
-		case "unsubscribe":
+		case types.UNSUBSCRIBE:
 			s.handleUnsubscribe(conn, msg, user)
 
-		case "authenticate":
+		case types.AUTHENTICATE:
 			user = s.handleAuthenticate(conn, msg)
 
-		case "terminal":
+		case types.TERMINAL:
 			s.handleTerminal(conn, msg, user)
 
-		case "terminal_resize":
+		case types.TERMINAL_RESIZE:
 			s.handleTerminalResize(conn, msg, user)
 
-		case "dashboard_monitor":
+		case types.DASHBOARD_MONITOR:
 			s.handleDashboardMonitor(conn, msg, user)
 
-		case "stop_dashboard_monitor":
+		case types.STOP_DASHBOARD_MONITOR:
 			s.handleStopDashboardMonitor(conn, user)
-		case "monitor_application":
+
+		case types.MONITOR_APPLICATION:
 			s.handleMonitorApplication(conn, msg, user)
 
 		default:

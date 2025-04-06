@@ -100,10 +100,10 @@ func (c *PostgresListener) ListenToApplicationChanges(ctx context.Context) (<-ch
 // StartListeningAndNotify starts listening for PostgreSQL notifications and notifies the server.
 //
 // Parameters:
-//   pgListener - the PostgresListener instance to use
-//   ctx - the context to use
-//   server - the server to notify
 //
+//	pgListener - the PostgresListener instance to use
+//	ctx - the context to use
+//	server - the server to notify
 func StartListeningAndNotify(pgListener *PostgresListener, ctx context.Context, server *SocketServer) error {
 	notificationChan, err := pgListener.ListenToApplicationChanges(ctx)
 	if err != nil {
@@ -156,6 +156,7 @@ func (s *SocketServer) handleNotifications(notificationChan <-chan *PostgresNoti
 				"data":           parsedPayload.Data,
 			}
 
+			// we will broadcast the message to the topic here so all the clients who are subscribed to the topic will receive the message
 			s.BroadcastToTopic(MonitorApplicationDeployment, resourceID, messageData)
 		}
 	}

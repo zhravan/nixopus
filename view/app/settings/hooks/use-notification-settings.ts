@@ -8,8 +8,10 @@ import {
 } from '@/redux/services/settings/notificationApi';
 import { CreateSMTPConfigRequest, UpdateSMTPConfigRequest } from '@/redux/types/notification';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 function useNotificationSettings() {
+  const { t } = useTranslation();
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
   const {
     data: smtpConfigs,
@@ -51,9 +53,9 @@ function useNotificationSettings() {
       } else {
         await handleCreateSMTPConfiguration(smtpConfig);
       }
-      toast.success('Email configuration saved successfully');
+      toast.success(t('settings.notifications.messages.emailConfigSaved'));
     } catch (error) {
-      toast.error('Failed to save email configuration');
+      toast.error(t('settings.notifications.messages.emailConfigFailed'));
     }
   };
 
@@ -64,9 +66,9 @@ function useNotificationSettings() {
         type: id,
         enabled: enabled
       });
-      toast.success('Preferences updated successfully');
+      toast.success(t('settings.notifications.messages.preferencesUpdated'));
     } catch (error) {
-      toast.error('Failed to update preferences');
+      toast.error(t('settings.notifications.messages.preferencesFailed'));
     }
   };
 

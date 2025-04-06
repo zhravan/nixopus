@@ -25,6 +25,7 @@ import { useResourcePermissions } from '@/lib/permission';
 import EditUserDialog from './EditUserDialog';
 import { UserTypes } from '@/redux/types/orgs';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
+import { useTranslation } from '@/hooks/use-translation';
 
 type EditUser = {
   id: string;
@@ -50,6 +51,7 @@ function TeamMembers({
   getRoleBadgeVariant,
   onUpdateUser
 }: TeamMembersProps) {
+  const { t } = useTranslation();
   const loggedInUser = useAppSelector((state) => state.auth.user);
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
   const { canUpdate: canUpdateUser, canDelete: canDeleteUser } = useResourcePermissions(
@@ -111,11 +113,13 @@ function TeamMembers({
           >
             {isExpanded ? (
               <>
-                Show Less <ChevronUpIcon className="ml-1 h-3 w-3" />
+                {t('settings.teams.members.actions.showLess')}{' '}
+                <ChevronUpIcon className="ml-1 h-3 w-3" />
               </>
             ) : (
               <>
-                Show More <ChevronDownIcon className="ml-1 h-3 w-3" />
+                {t('settings.teams.members.actions.showMore')}{' '}
+                <ChevronDownIcon className="ml-1 h-3 w-3" />
               </>
             )}
           </Button>
@@ -128,18 +132,20 @@ function TeamMembers({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Team Members</CardTitle>
-          <CardDescription>Manage users and their roles in your team.</CardDescription>
+          <CardTitle>{t('settings.teams.members.title')}</CardTitle>
+          <CardDescription>{t('settings.teams.members.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Permissions</TableHead>
+                <TableHead>{t('settings.teams.members.table.headers.user')}</TableHead>
+                <TableHead>{t('settings.teams.members.table.headers.role')}</TableHead>
+                <TableHead>{t('settings.teams.members.table.headers.permissions')}</TableHead>
                 {(canUpdateUser || canDeleteUser) && (
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">
+                    {t('settings.teams.members.table.headers.actions')}
+                  </TableHead>
                 )}
               </TableRow>
             </TableHeader>
@@ -180,7 +186,7 @@ function TeamMembers({
                             <>
                               <DropdownMenuItem onClick={() => handleEditUser(user)}>
                                 <PencilIcon className="h-4 w-4 mr-2" />
-                                Edit User
+                                {t('settings.teams.members.actions.edit')}
                               </DropdownMenuItem>
                             </>
                           )}
@@ -194,7 +200,7 @@ function TeamMembers({
                               }}
                             >
                               <TrashIcon className="h-4 w-4 mr-2" />
-                              Remove User
+                              {t('settings.teams.members.actions.remove')}
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -219,14 +225,20 @@ function TeamMembers({
 
       {userToRemove && (
         <DeleteDialog
-          title={`Remove ${userToRemove.name}`}
-          description={`Are you sure you want to remove ${userToRemove.name} from the team? This action cannot be undone.`}
+          title={t('settings.teams.members.deleteDialog.title').replace(
+            '{name}',
+            userToRemove.name
+          )}
+          description={t('settings.teams.members.deleteDialog.description').replace(
+            '{name}',
+            userToRemove.name
+          )}
           onConfirm={() => {
             handleRemoveUser(userToRemove.id);
             setUserToRemove(null);
             setIsDeleteDialogOpen(false);
           }}
-          confirmText="Remove User"
+          confirmText={t('settings.teams.members.deleteDialog.confirm')}
           variant="destructive"
           icon={TrashIcon}
           open={isDeleteDialogOpen}

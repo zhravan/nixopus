@@ -56,6 +56,13 @@
       "avatar": {
         "title": "Profile",
         "description": "Manage your public profile"
+      },
+      "errors": {
+        "emptyUsername": "Username cannot be empty",
+        "sameUsername": "Please enter a different username",
+        "updateFailed": "Failed to update username. Please try again.",
+        "resetEmailFailed": "Failed to send reset email",
+        "imageNotImplemented": "Not yet implemented"
       }
     },
     "security": {
@@ -139,6 +146,211 @@
         },
         "success": "Domain added successfully",
         "error": "Failed to add domain"
+      }
+    },
+    "notifications": {
+      "page": {
+        "title": "Notifications",
+        "description": "Manage your notification preferences and channels",
+        "accessDenied": {
+          "title": "Access Denied",
+          "description": "You don't have permission to view notification settings"
+        },
+        "tabs": {
+          "channels": "Channels",
+          "preferences": "Preferences"
+        },
+        "permissions": {
+          "update": "You do not have permission to update notification settings",
+          "create": "You do not have permission to create notification settings"
+        }
+      },
+      "channels": {
+        "email": {
+          "title": "Email",
+          "description": "Configure SMTP settings to send email notifications",
+          "fields": {
+            "smtpServer": {
+              "label": "SMTP Server",
+              "placeholder": "smtp.example.com"
+            },
+            "port": {
+              "label": "Port",
+              "placeholder": "587"
+            },
+            "username": {
+              "label": "Username",
+              "placeholder": "your-email@example.com"
+            },
+            "password": {
+              "label": "Password",
+              "placeholder": "Enter your SMTP password"
+            },
+            "fromEmail": {
+              "label": "From Email",
+              "placeholder": "notifications@example.com"
+            },
+            "fromName": {
+              "label": "From Name",
+              "placeholder": "Your Organization Name"
+            }
+          },
+          "buttons": {
+            "save": "Save"
+          }
+        }
+      },
+      "preferences": {
+        "activity": {
+          "title": "Activity Notifications",
+          "description": "Notifications about activity in your team"
+        },
+        "security": {
+          "title": "Security Notifications",
+          "description": "Important alerts about deployed applications and errors"
+        },
+        "updates": {
+          "title": "Updates & Marketing",
+          "description": "Stay informed about our product and services"
+        }
+      },
+      "messages": {
+        "emailConfigSaved": "Email configuration saved successfully",
+        "emailConfigFailed": "Failed to save email configuration",
+        "preferencesUpdated": "Preferences updated successfully",
+        "preferencesFailed": "Failed to update preferences"
+      }
+    },
+    "teams": {
+      "addMember": {
+        "button": "Add User",
+        "dialog": {
+          "title": "Add New User",
+          "description": "Add a new user to your organization",
+          "fields": {
+            "name": {
+              "label": "Name",
+              "placeholder": "Enter user's name"
+            },
+            "email": {
+              "label": "Email",
+              "placeholder": "Enter user's email"
+            },
+            "role": {
+              "label": "Role",
+              "placeholder": "Select a role",
+              "options": {
+                "admin": "Admin",
+                "member": "Member",
+                "viewer": "Viewer"
+              }
+            },
+            "password": {
+              "label": "Password",
+              "placeholder": "Enter user's password"
+            }
+          },
+          "buttons": {
+            "cancel": "Cancel",
+            "add": "Add User"
+          }
+        }
+      },
+      "editTeam": {
+        "dialog": {
+          "title": "Edit Team Details",
+          "description": "Team details helps you identify your team",
+          "fields": {
+            "name": {
+              "label": "Name",
+              "placeholder": "Enter team name"
+            },
+            "description": {
+              "label": "Description",
+              "placeholder": "Enter team description"
+            }
+          },
+          "buttons": {
+            "cancel": "Cancel",
+            "update": "Update",
+            "updating": "Updating..."
+          }
+        }
+      },
+      "editUser": {
+        "dialog": {
+          "title": "Edit User Role",
+          "description": "Update role for {name}",
+          "fields": {
+            "role": {
+              "label": "Role",
+              "placeholder": "Select a role"
+            }
+          },
+          "buttons": {
+            "cancel": "Cancel",
+            "save": "Save Changes"
+          },
+          "errors": {
+            "noRole": "Please select a role"
+          }
+        }
+      },
+      "recentActivity": {
+        "title": "Recent Activities",
+        "description": "Recent changes to your organization",
+        "loading": "Loading recent activities...",
+        "error": "Failed to load recent activities",
+        "noActivities": "No recent activities found",
+        "actions": {
+          "create": "{username} created a new {resource}",
+          "update": "{username} updated a {resource}",
+          "delete": "{username} deleted a {resource}",
+          "default": "{username} accessed a {resource}"
+        }
+      },
+      "members": {
+        "title": "Team Members",
+        "description": "Manage users and their roles in your team",
+        "table": {
+          "headers": {
+            "user": "User",
+            "role": "Role",
+            "permissions": "Permissions",
+            "actions": "Actions"
+          }
+        },
+        "actions": {
+          "edit": "Edit User",
+          "remove": "Remove User",
+          "showMore": "Show More",
+          "showLess": "Show Less"
+        },
+        "deleteDialog": {
+          "title": "Remove {name}",
+          "description": "Are you sure you want to remove {name} from the team? This action cannot be undone.",
+          "confirm": "Remove User"
+        }
+      },
+      "stats": {
+        "title": "Team Stats",
+        "description": "Overview of your team",
+        "totalMembers": "Total Members",
+        "owners": "Owners",
+        "members": "Members",
+        "viewers": "Viewers"
+      },
+      "noMembers": "No team members found",
+      "messages": {
+        "userAdded": "User added successfully",
+        "userAddFailed": "Failed to add user",
+        "userRemoved": "User removed successfully",
+        "userRemoveFailed": "Failed to remove user",
+        "userUpdated": "User updated successfully",
+        "userUpdateFailed": "Failed to update user",
+        "teamUpdated": "Team details updated successfully",
+        "teamUpdateFailed": "Failed to update team details",
+        "requiredFields": "Team name and description are required"
       }
     }
   },

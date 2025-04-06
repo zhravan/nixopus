@@ -9,8 +9,10 @@ import {
 import { UserTypes } from '@/redux/types/orgs';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 function useTeamSettings() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<any>([]);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Member', password: '' });
@@ -74,9 +76,9 @@ function useTeamSettings() {
     try {
       const user = await createUser(tempUser as any);
       await refetchUsers();
-      toast.success('User added successfully');
+      toast.success(t('settings.teams.messages.userAdded'));
     } catch (error) {
-      toast.error('Failed to add user');
+      toast.error(t('settings.teams.messages.userAddFailed'));
     }
     setNewUser({ name: '', email: '', role: 'Member', password: '' });
     setIsAddUserDialogOpen(false);
@@ -89,9 +91,9 @@ function useTeamSettings() {
         organization_id: activeOrganization?.id || ''
       });
       await refetchUsers();
-      toast.success('User removed successfully');
+      toast.success(t('settings.teams.messages.userRemoved'));
     } catch (error) {
-      toast.error('Failed to remove user');
+      toast.error(t('settings.teams.messages.userRemoveFailed'));
     }
   };
 
@@ -103,9 +105,9 @@ function useTeamSettings() {
         role_name: role
       });
       await refetchUsers();
-      toast.success('User updated successfully');
+      toast.success(t('settings.teams.messages.userUpdated'));
     } catch (error) {
-      toast.error('Failed to update user');
+      toast.error(t('settings.teams.messages.userUpdateFailed'));
     }
   };
 
@@ -127,7 +129,7 @@ function useTeamSettings() {
   const handleUpdateTeam = async () => {
     setEditTeamDialogOpen(false);
     if (teamName.length <= 0 || teamDescription.length <= 0) {
-      toast.error('Team name and description are required');
+      toast.error(t('settings.teams.messages.requiredFields'));
       setTeamName(activeOrganization?.name || '');
       setTeamDescription(activeOrganization?.description || '');
       return;
@@ -144,9 +146,9 @@ function useTeamSettings() {
           description: teamDescription
         });
         await refetchUsers();
-        toast.success('Team details updated successfully');
+        toast.success(t('settings.teams.messages.teamUpdated'));
       } catch (error) {
-        toast.error('Failed to update team details');
+        toast.error(t('settings.teams.messages.teamUpdateFailed'));
         setTeamName(activeOrganization?.name || '');
         setTeamDescription(activeOrganization?.description || '');
       }

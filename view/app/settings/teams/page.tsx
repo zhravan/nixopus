@@ -8,8 +8,10 @@ import TeamMembers from './components/TeamMembers';
 import EditTeam from './components/EditTeam';
 import { useResourcePermissions } from '@/lib/permission';
 import { useAppSelector } from '@/redux/hooks';
+import { useTranslation } from '@/hooks/use-translation';
 
 function Page() {
+  const { t } = useTranslation();
   const {
     users,
     isAddUserDialogOpen,
@@ -82,7 +84,7 @@ function Page() {
           onUpdateUser={handleUpdateUser}
         />
       ) : (
-        <div className="text-center text-muted-foreground">No team members found.</div>
+        <div className="text-center text-muted-foreground">{t('settings.teams.noMembers')}</div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

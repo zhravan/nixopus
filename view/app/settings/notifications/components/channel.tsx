@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/use-translation';
 
 export interface NotificationChannelField {
   id: string;
@@ -20,6 +21,7 @@ export interface NotificationChannelProps {
   configData?: Record<string, string>;
   onSave?: (data: Record<string, string>) => void;
   isLoading?: boolean;
+  channelType: 'email' | 'slack' | 'webhook';
 }
 
 const NotificationChannelCard: React.FC<NotificationChannelProps> = ({
@@ -28,8 +30,10 @@ const NotificationChannelCard: React.FC<NotificationChannelProps> = ({
   icon,
   configData = {},
   onSave,
-  isLoading
+  isLoading,
+  channelType
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<Record<string, string>>(configData);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
@@ -38,31 +42,46 @@ const NotificationChannelCard: React.FC<NotificationChannelProps> = ({
   }, [configData]);
 
   const getChannelFields = (): NotificationChannelField[] => {
-    switch (title) {
-      case 'Email':
+    switch (channelType) {
+      case 'email':
         return [
           {
             id: 'smtpServer',
-            label: 'SMTP Server',
-            placeholder: 'smtp.example.com',
+            label: t('settings.notifications.channels.email.fields.smtpServer.label'),
+            placeholder: t('settings.notifications.channels.email.fields.smtpServer.placeholder'),
             required: true
           },
-          { id: 'port', label: 'Port', placeholder: '587', required: true },
-          { id: 'username', label: 'Username', placeholder: 'your@email.com', required: true },
+          {
+            id: 'port',
+            label: t('settings.notifications.channels.email.fields.port.label'),
+            placeholder: t('settings.notifications.channels.email.fields.port.placeholder'),
+            required: true
+          },
+          {
+            id: 'username',
+            label: t('settings.notifications.channels.email.fields.username.label'),
+            placeholder: t('settings.notifications.channels.email.fields.username.placeholder'),
+            required: true
+          },
           {
             id: 'password',
-            label: 'Password',
-            placeholder: '••••••••',
+            label: t('settings.notifications.channels.email.fields.password.label'),
+            placeholder: t('settings.notifications.channels.email.fields.password.placeholder'),
             type: 'password',
             required: true
           },
           {
             id: 'fromEmail',
-            label: 'From Email',
-            placeholder: 'notifications@yourdomain.com',
+            label: t('settings.notifications.channels.email.fields.fromEmail.label'),
+            placeholder: t('settings.notifications.channels.email.fields.fromEmail.placeholder'),
             required: true
           },
-          { id: 'fromName', label: 'From Name', placeholder: 'Your App Name', required: true }
+          {
+            id: 'fromName',
+            label: t('settings.notifications.channels.email.fields.fromName.label'),
+            placeholder: t('settings.notifications.channels.email.fields.fromName.placeholder'),
+            required: true
+          }
         ];
       default:
         return [];
@@ -107,11 +126,11 @@ const NotificationChannelCard: React.FC<NotificationChannelProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div className="space-y-2" key={field.id}>
-                <Label htmlFor={`${title.toLowerCase()}-${field.id}`}>
+                <Label htmlFor={`${channelType}-${field.id}`}>
                   {field.label} {field.required && <span className="text-red-500">*</span>}
                 </Label>
                 <Input
-                  id={`${title.toLowerCase()}-${field.id}`}
+                  id={`${channelType}-${field.id}`}
                   type={field.type || 'text'}
                   value={formData[field.id] || ''}
                   onChange={(e) => handleInputChange(field.id, e.target.value)}
@@ -123,7 +142,7 @@ const NotificationChannelCard: React.FC<NotificationChannelProps> = ({
 
           <div className="pt-2 flex space-x-2 justify-end">
             <Button onClick={handleSave} disabled={!isFormValid || isLoading}>
-              Save Configuration
+              {t('settings.notifications.channels.email.buttons.save')}
             </Button>
           </div>
         </div>

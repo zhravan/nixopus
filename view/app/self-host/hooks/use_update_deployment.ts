@@ -10,6 +10,7 @@ import { UpdateDeploymentRequest } from '@/redux/types/applications';
 import { useGetAllDomainsQuery } from '@/redux/services/settings/domainsApi';
 import { parsePort } from '../utils/parsePort';
 import { useAppSelector } from '@/redux/hooks';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface UseUpdateDeploymentProps {
   name?: string;
@@ -36,6 +37,7 @@ function useUpdateDeployment({
   DockerfilePath = '/Dockerfile',
   base_path = '/'
 }: UseUpdateDeploymentProps = {}) {
+  const { t } = useTranslation();
   const { isReady, message, sendJsonMessage } = useWebSocket();
   const [updateDeployment, { isLoading }] = useUpdateDeploymentMutation();
   const router = useRouter();
@@ -45,8 +47,10 @@ function useUpdateDeployment({
   const deploymentFormSchema = z.object({
     name: z
       .string()
-      .min(3, { message: 'Application name must be at least 3 characters.' })
-      .regex(/^[a-zA-Z0-9_-]+$/, { message: 'Application name must be a valid name.' })
+      .min(3, { message: t('selfHost.deployForm.fields.applicationName.minLength') })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: t('selfHost.deployForm.fields.applicationName.invalidFormat')
+      })
       .optional(),
     pre_run_command: z.string().optional(),
     post_run_command: z.string().optional(),
@@ -121,29 +125,39 @@ function useUpdateDeployment({
 
       if (data?.id) {
         router.push('/self-host/application/' + data.id);
-        toast.success('Deployment updated successfully');
+        toast.success(t('selfHost.deployForm.success.update'));
       }
     } catch (error) {
-      toast.error('Failed to update deployment');
+      toast.error(t('selfHost.deployForm.errors.updateFailed'));
     }
   }
 
   const validateEnvVar = (
     input: string
   ): { isValid: boolean; error?: string; key?: string; value?: string } => {
-    if (!input.trim()) return { isValid: false, error: 'Input cannot be empty' };
+    if (!input.trim())
+      return {
+        isValid: false,
+        error: t('selfHost.deployForm.fields.environmentVariables.emptyInput')
+      };
 
     const regex = /^([^=]+)=(.*)$/;
     const isValid = regex.test(input);
 
     if (!isValid) {
-      return { isValid: false, error: 'Must be in format KEY=VALUE' };
+      return {
+        isValid: false,
+        error: t('selfHost.deployForm.fields.environmentVariables.invalidFormat')
+      };
     }
 
     const [, key] = input.match(regex) as RegExpMatchArray;
 
     if (!key.trim()) {
-      return { isValid: false, error: 'Key cannot be empty' };
+      return {
+        isValid: false,
+        error: t('selfHost.deployForm.fields.environmentVariables.emptyKey')
+      };
     }
 
     return {

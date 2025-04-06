@@ -17,50 +17,51 @@ import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
 import { useNavigationState } from '@/hooks/use_navigation_state';
 import { hasPermission } from '@/lib/permission';
 import { setActiveOrganization } from '@/redux/features/users/userSlice';
+import { useTranslation } from '@/hooks/use-translation';
 
 const data = {
   navMain: [
     {
-      title: 'Dashboard',
+      title: 'navigation.dashboard',
       url: '/dashboard',
       icon: Home,
       resource: 'dashboard'
     },
     {
-      title: 'Self Host',
+      title: 'navigation.selfHost',
       url: '/self-host',
       icon: Package,
       resource: 'deploy'
     },
     {
-      title: 'File Manager',
+      title: 'navigation.fileManager',
       url: '/file-manager',
       icon: Folder,
       resource: 'file-manager'
     },
     {
-      title: 'Settings',
+      title: 'navigation.settings',
       url: '/settings/general',
       icon: SettingsIcon,
       resource: 'settings',
       items: [
         {
-          title: 'General',
+          title: 'navigation.general',
           url: '/settings/general',
           resource: 'settings'
         },
         {
-          title: 'Notifications',
+          title: 'navigation.notifications',
           url: '/settings/notifications',
           resource: 'notification'
         },
         {
-          title: 'Team',
+          title: 'navigation.team',
           url: '/settings/teams',
           resource: 'organization'
         },
         {
-          title: 'Domains',
+          title: 'navigation.domains',
           url: '/settings/domains',
           resource: 'domain'
         }
@@ -73,6 +74,7 @@ export function AppSidebar({
   toggleAddTeamModal,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { toggleAddTeamModal?: () => void }) {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const { isLoading, refetch } = useGetUserOrganizationsQuery();
   const organizations = useAppSelector((state) => state.user.organizations);
@@ -101,19 +103,28 @@ export function AppSidebar({
 
   const filteredNavItems = React.useMemo(
     () =>
-      data.navMain.filter((item) => {
-        if (!item.resource) return false;
+      data.navMain
+        .filter((item) => {
+          if (!item.resource) return false;
 
-        if (item.items) {
-          const filteredSubItems = item.items.filter(
-            (subItem) => subItem.resource && hasAnyPermission(subItem.resource)
-          );
-          return filteredSubItems.length > 0;
-        }
+          if (item.items) {
+            const filteredSubItems = item.items.filter(
+              (subItem) => subItem.resource && hasAnyPermission(subItem.resource)
+            );
+            return filteredSubItems.length > 0;
+          }
 
-        return hasAnyPermission(item.resource);
-      }),
-    [data.navMain, hasAnyPermission]
+          return hasAnyPermission(item.resource);
+        })
+        .map((item) => ({
+          ...item,
+          title: t(item.title),
+          items: item.items?.map((subItem) => ({
+            ...subItem,
+            title: t(subItem.title)
+          }))
+        })),
+    [data.navMain, hasAnyPermission, t]
   );
 
   React.useEffect(() => {

@@ -10,10 +10,17 @@
   },
   "auth": {
     "login": {
-      "title": "Iniciar Sesión",
-      "email": "Correo Electrónico",
+      "title": "Bienvenido de nuevo",
+      "description": "Inicia sesión en tu cuenta de Nixopus",
+      "email": "Correo electrónico",
       "password": "Contraseña",
-      "submit": "Iniciar Sesión",
+      "submit": "Iniciar sesión",
+      "emailPlaceholder": "m@ejemplo.com",
+      "loading": "Cargando...",
+      "terms": "Al hacer clic en continuar, aceptas nuestros",
+      "termsOfService": "Términos de Servicio",
+      "and": "y",
+      "privacyPolicy": "Política de Privacidad",
       "errors": {
         "loginFailed": "Error al iniciar sesión",
         "invalidCredentials": "Correo electrónico o contraseña inválidos",
@@ -402,6 +409,24 @@
         "teamUpdated": "Detalles del equipo actualizados exitosamente",
         "teamUpdateFailed": "Error al actualizar los detalles del equipo",
         "requiredFields": "El nombre y la descripción del equipo son requeridos"
+      },
+      "createTeam": {
+        "title": "Crear Equipo",
+        "description": "Crea un nuevo equipo para colaborar con otros",
+        "fields": {
+          "name": {
+            "label": "Nombre",
+            "placeholder": "Ingresa el nombre del equipo"
+          },
+          "description": {
+            "label": "Descripción",
+            "placeholder": "Ingresa la descripción del equipo"
+          }
+        },
+        "buttons": {
+          "create": "Crear",
+          "creating": "Creando..."
+        }
       }
     }
   },
@@ -526,6 +551,420 @@
         "move": "Mover",
         "delete": "Mover a Papelera"
       }
+    }
+  },
+  "selfHost": {
+    "deployment": {
+      "title": "Detalles del Despliegue",
+      "logs": {
+        "title": "Registros del Despliegue",
+        "refresh": "Actualizar Registros",
+        "loading": "Cargando registros...",
+        "noLogs": "No hay registros disponibles",
+        "pagination": {
+          "previous": "Anterior",
+          "next": "Siguiente",
+          "page": "Página {current} de {total}"
+        }
+      }
+    },
+    "application": {
+      "accessDenied": {
+        "title": "Acceso Denegado",
+        "description": "No tienes permiso para ver los detalles de la aplicación"
+      },
+      "tabs": {
+        "monitoring": "Monitoreo",
+        "configuration": "Configuración",
+        "deployments": "Despliegues",
+        "logs": "Registros"
+      }
+    },
+    "page": {
+      "title": "Aplicaciones Autoalojadas",
+      "description": "Administra tus aplicaciones autoalojadas",
+      "accessDenied": {
+        "title": "Acceso Denegado",
+        "description": "No tienes permiso para ver las aplicaciones autoalojadas"
+      },
+      "createButton": "Crear",
+      "loading": "Cargando aplicaciones...",
+      "noApplications": "No se encontraron aplicaciones",
+      "search": {
+        "placeholder": "Buscar aplicaciones..."
+      },
+      "sort": {
+        "name": "Nombre",
+        "created": "Creado",
+        "updated": "Actualizado",
+        "status": "Estado"
+      }
+    },
+    "configuration": {
+      "fields": {
+        "applicationName": {
+          "label": "Nombre de la Aplicación",
+          "description": "Nombre de la aplicación"
+        },
+        "port": {
+          "label": "Puerto",
+          "description": "Puerto en el que estará disponible tu aplicación"
+        },
+        "basePath": {
+          "label": "Ruta Base",
+          "description": "La ruta del contexto de compilación para tu aplicación"
+        },
+        "dockerfilePath": {
+          "label": "Ruta del Dockerfile",
+          "description": "Ruta del dockerfile relativa a la ruta base"
+        },
+        "environmentVariables": {
+          "label": "Variables de Entorno",
+          "description": "Escribe CLAVE=VALOR y presiona Enter para agregar",
+          "placeholder": "NODE_ENV=production"
+        },
+        "buildVariables": {
+          "label": "Variables de Compilación",
+          "description": "Escribe CLAVE=VALOR y presiona Enter para agregar",
+          "placeholder": "DEBUG=false"
+        },
+        "preRunCommands": {
+          "label": "Comandos Pre Ejecución",
+          "description": "Comandos a ejecutar antes del despliegue",
+          "placeholder": "npm install"
+        },
+        "postRunCommands": {
+          "label": "Comandos Post Ejecución",
+          "description": "Comandos a ejecutar después del despliegue",
+          "placeholder": "npm run test"
+        },
+        "environment": {
+          "label": "Entorno",
+          "description": "Entorno del despliegue"
+        },
+        "branch": {
+          "label": "Rama",
+          "description": "Rama desde donde quieres desplegar"
+        },
+        "domain": {
+          "label": "Dominio",
+          "description": "Dominio en el que está disponible tu aplicación"
+        },
+        "buildPack": {
+          "label": "Paquete de Compilación",
+          "description": "Paquete de compilación usado para la aplicación"
+        }
+      },
+      "buttons": {
+        "update": "Actualizar Despliegue",
+        "updating": "Actualizando..."
+      }
+    },
+    "deployments": {
+      "list": {
+        "title": "Despliegues",
+        "noDeployments": "No se encontraron despliegues",
+        "card": {
+          "status": {
+            "completed": "Completado"
+          },
+          "runTime": "Tiempo de Ejecución",
+          "viewButton": "Ver",
+          "rollback": {
+            "title": "Revertir despliegue"
+          }
+        }
+      },
+      "chart": {
+        "title": "Estadísticas de Despliegues",
+        "description": "Estado actual de todos los despliegues",
+        "status": {
+          "building": "En Construcción",
+          "deployed": "Desplegado",
+          "deploying": "Desplegando",
+          "failed": "Fallido"
+        },
+        "total": "Total de despliegues: {count}"
+      }
+    },
+    "applicationDetails": {
+      "header": {
+        "actions": {
+          "restart": {
+            "button": "Reiniciar Aplicación",
+            "success": "Reinicio de aplicación iniciado",
+            "error": "Error al reiniciar la aplicación",
+            "permissionError": "No tienes permiso para reiniciar aplicaciones"
+          },
+          "delete": {
+            "button": "Eliminar",
+            "dialog": {
+              "title": "Eliminar {name}",
+              "description": "¿Estás seguro de que quieres eliminar {name}? Esta acción no se puede deshacer."
+            },
+            "success": "Aplicación eliminada correctamente",
+            "error": "Error al eliminar la aplicación",
+            "permissionError": "No tienes permiso para eliminar aplicaciones"
+          },
+          "redeploy": {
+            "button": "Re-Desplegar",
+            "forceButton": "Forzar Despliegue Sin Caché",
+            "success": "Re-despliegue de aplicación iniciado",
+            "error": "Error al re-desplegar la aplicación",
+            "permissionError": "No tienes permiso para re-desplegar aplicaciones"
+          },
+          "open": "Abrir aplicación en nueva pestaña"
+        }
+      }
+    },
+    "logViewer": {
+      "title": "Visor de Registros",
+      "description": "Registros de instalación en tiempo real",
+      "actions": {
+        "fetchMore": "Cargar Más",
+        "refresh": "Actualizar",
+        "fullscreen": "Pantalla Completa",
+        "exitFullscreen": "Salir de Pantalla Completa",
+        "download": "Descargar",
+        "search": {
+          "placeholder": "Buscar registros...",
+          "previous": "Anterior",
+          "next": "Siguiente",
+          "results": "{current} de {total}"
+        },
+        "filter": {
+          "level": {
+            "label": "Filtrar por nivel",
+            "all": "Todos los Niveles"
+          },
+          "time": {
+            "label": "Rango de tiempo",
+            "all": "Todo el Tiempo",
+            "5m": "Últimos 5 minutos",
+            "15m": "Últimos 15 minutos",
+            "1h": "Última hora",
+            "24h": "Últimas 24 horas"
+          }
+        },
+        "autoScroll": "Desplazamiento Automático"
+      }
+    },
+    "deployForm": {
+      "accessDenied": {
+        "title": "Acceso Denegado",
+        "description": "No tienes permiso para desplegar nuevas aplicaciones"
+      },
+      "success": {
+        "update": "Despliegue actualizado exitosamente"
+      },
+      "errors": {
+        "createFailed": "Error al crear el despliegue",
+        "updateFailed": "Error al actualizar el despliegue"
+      },
+      "fields": {
+        "applicationName": {
+          "label": "Nombre de la Aplicación",
+          "description": "Nombre de la aplicación",
+          "placeholder": "Nombre de la aplicación"
+        },
+        "environment": {
+          "label": "Entorno",
+          "description": "Los entornos te ayudan a desplegar en diferentes espacios",
+          "placeholder": "Entorno",
+          "options": {
+            "staging": "Staging",
+            "production": "Producción",
+            "development": "Desarrollo"
+          }
+        },
+        "basePath": {
+          "label": "Ruta Base",
+          "description": "La ruta del contexto de compilación para tu aplicación",
+          "placeholder": "/"
+        },
+        "dockerfilePath": {
+          "label": "Ruta del Dockerfile",
+          "description": "Ruta del dockerfile relativa a la ruta base",
+          "placeholder": "Dockerfile"
+        },
+        "branch": {
+          "label": "Rama",
+          "description": "Rama desde donde quieres desplegar",
+          "placeholder": "Rama"
+        },
+        "port": {
+          "label": "Puerto",
+          "description": "Puerto en el que estará disponible tu aplicación",
+          "placeholder": "3000"
+        },
+        "domain": {
+          "label": "Dominio",
+          "description": "Dominio en el que estará disponible tu aplicación",
+          "placeholder": "Dominio"
+        },
+        "buildPack": {
+          "label": "Paquete de Compilación",
+          "description": "Elige el que mejor se adapte a la estructura de tu aplicación",
+          "placeholder": "Paquete de Compilación",
+          "options": {
+            "dockerfile": "Dockerfile",
+            "dockerCompose": "DockerCompose",
+            "static": "Estático"
+          }
+        },
+        "envVariables": {
+          "label": "Variables de Entorno",
+          "description": "Escribe CLAVE=VALOR y presiona Enter para agregar",
+          "placeholder": "NODE_ENV=production"
+        },
+        "buildVariables": {
+          "label": "Variables de Compilación",
+          "description": "Escribe CLAVE=VALOR y presiona Enter para agregar",
+          "placeholder": "DEBUG=false"
+        },
+        "preRunCommands": {
+          "label": "Comandos Pre Ejecución",
+          "description": "Comandos a ejecutar antes del despliegue",
+          "placeholder": "npm install"
+        },
+        "postRunCommands": {
+          "label": "Comandos Post Ejecución",
+          "description": "Comandos a ejecutar después del despliegue",
+          "placeholder": "npm run test"
+        }
+      },
+      "submit": "Desplegar",
+      "validation": {
+        "applicationName": {
+          "minLength": "El nombre de la aplicación debe tener al menos 3 caracteres.",
+          "invalidFormat": "El nombre de la aplicación debe ser un nombre válido."
+        },
+        "environment": {
+          "invalidValue": "El nombre del entorno debe ser producción, staging o desarrollo."
+        },
+        "branch": {
+          "minLength": "El nombre de la rama debe tener al menos 3 caracteres.",
+          "invalidFormat": "El nombre de la rama debe ser un nombre válido."
+        },
+        "port": {
+          "invalidFormat": "El puerto debe ser un número."
+        },
+        "domain": {
+          "minLength": "El nombre del dominio debe tener al menos 3 caracteres.",
+          "invalidFormat": "El nombre del dominio debe ser un nombre de dominio válido."
+        },
+        "repository": {
+          "minLength": "El nombre del repositorio debe tener al menos 3 caracteres.",
+          "invalidFormat": "El nombre del repositorio debe ser un nombre válido."
+        },
+        "buildPack": {
+          "invalidValue": "El paquete de compilación debe ser Dockerfile, DockerCompose o Static."
+        },
+        "envVariables": {
+          "emptyInput": "La entrada no puede estar vacía",
+          "invalidFormat": "Debe estar en formato CLAVE=VALOR",
+          "emptyKey": "La clave no puede estar vacía"
+        }
+      }
+    },
+    "githubInstaller": {
+      "title": "Instalar Aplicación de GitHub",
+      "description": "Conectemos con la aplicación que acabamos de crear",
+      "connectButton": "Conectar GitHub",
+      "terms": "Al conectar, aceptas nuestros Términos de Servicio y Política de Privacidad."
+    },
+    "githubManifest": {
+      "title": "Crear Aplicación de GitHub",
+      "appName": {
+        "label": "Nombre de la Aplicación",
+        "placeholder": "Ingresa el nombre de la aplicación",
+        "generate": "Generar nuevo nombre"
+      },
+      "createButton": "Crear Aplicación de GitHub",
+      "status": {
+        "redirecting": "Redirigiendo a GitHub...",
+        "converting": "Configurando tu Aplicación de GitHub...",
+        "success": "¡Aplicación de GitHub creada exitosamente!"
+      }
+    },
+    "repositories": {
+      "title": "Repositorios",
+      "noRepositories": "No se encontraron repositorios",
+      "search": {
+        "placeholder": "Buscar repositorios..."
+      },
+      "sort": {
+        "name": "Nombre",
+        "created": "Creado",
+        "updated": "Actualizado",
+        "stars": "Estrellas"
+      }
+    },
+    "repositoryCard": {
+      "viewOnGithub": "Ver en GitHub",
+      "unnamed": "Repositorio Sin Nombre",
+      "visibility": {
+        "private": "Privado",
+        "public": "Público"
+      },
+      "topics": {
+        "more": "+{count} más"
+      }
+    },
+    "create": {
+      "title": "Repositorio",
+      "description": "Configura cómo deseas desplegar tu aplicación",
+      "accessDenied": {
+        "title": "Acceso Denegado",
+        "description": "No tienes permiso para crear aplicaciones autoalojadas"
+      }
+    },
+    "githubCallback": {
+      "processing": "Procesando instalación de GitHub...",
+      "success": "¡Conectado a GitHub exitosamente!",
+      "error": {
+        "invalidParams": "Parámetros de instalación inválidos",
+        "installationFailed": "Error en la instalación"
+      }
+    }
+  },
+  "terminal": {
+    "title": "Terminal",
+    "shortcut": "⌘J",
+    "close": "Cerrar Terminal"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "selfHost": "Autoalojado",
+    "fileManager": "Gestor de Archivos",
+    "settings": "Configuración",
+    "general": "General",
+    "notifications": "Notificaciones",
+    "team": "Equipo",
+    "domains": "Dominios",
+    "layout": {
+      "breadcrumbs": {
+        "home": "Inicio",
+        "dashboard": "Panel de Control",
+        "selfHost": "Autoalojado",
+        "fileManager": "Gestor de Archivos",
+        "settings": "Configuración",
+        "general": "General",
+        "notifications": "Notificaciones",
+        "team": "Equipo",
+        "domains": "Dominios"
+      },
+      "terminal": {
+        "togglePosition": "Cambiar Posición del Terminal (Ctrl+T)"
+      }
+    }
+  },
+  "user": {
+    "menu": {
+      "sponsor": "Patrocinar",
+      "help": "Ayuda",
+      "reportIssue": "Reportar un problema",
+      "logout": "Cerrar sesión"
     }
   }
 }

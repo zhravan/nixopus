@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useCreateDeploymentMutation } from '@/redux/services/deploy/applicationsApi';
 import { toast } from 'sonner';
 import { useAppSelector } from '@/redux/hooks';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface DeploymentFormValues {
   application_name: string;
@@ -46,30 +47,41 @@ function useCreateDeployment({
   const { isReady, message, sendJsonMessage } = useWebSocket();
   const [createDeployment, { isLoading }] = useCreateDeploymentMutation();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const deploymentFormSchema = z.object({
     application_name: z
       .string()
-      .min(3, { message: 'Application name must be at least 3 characters.' })
-      .regex(/^[a-zA-Z0-9_-]+$/, { message: 'Application name must be a valid name.' }),
+      .min(3, { message: t('selfHost.deployForm.validation.applicationName.minLength') })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: t('selfHost.deployForm.validation.applicationName.invalidFormat')
+      }),
     environment: z
       .enum([Environment.Production, Environment.Staging, Environment.Development])
       .refine((value) => value === 'production' || value === 'staging' || value === 'development', {
-        message: 'Environment name must be production, staging, or development.'
+        message: t('selfHost.deployForm.validation.environment.invalidValue')
       }),
     branch: z
       .string()
-      .min(3, { message: 'Branch name must be at least 3 characters.' })
-      .regex(/^[a-zA-Z0-9_-]+$/, { message: 'Branch name must be a valid name.' }),
-    port: z.string().regex(/^[0-9]+$/, { message: 'Port must be a number.' }),
+      .min(3, { message: t('selfHost.deployForm.validation.branch.minLength') })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: t('selfHost.deployForm.validation.branch.invalidFormat')
+      }),
+    port: z
+      .string()
+      .regex(/^[0-9]+$/, { message: t('selfHost.deployForm.validation.port.invalidFormat') }),
     domain: z
       .string()
-      .min(3, { message: 'Domain name must be at least 3 characters.' })
-      .regex(/^[a-zA-Z0-9.-]+$/, { message: 'Domain name must be a valid domain name.' }),
+      .min(3, { message: t('selfHost.deployForm.validation.domain.minLength') })
+      .regex(/^[a-zA-Z0-9.-]+$/, {
+        message: t('selfHost.deployForm.validation.domain.invalidFormat')
+      }),
     repository: z
       .string()
-      .min(3, { message: 'Repository name must be at least 3 characters.' })
-      .regex(/^[a-zA-Z0-9_-]+$/, { message: 'Repository name must be a valid name.' }),
+      .min(3, { message: t('selfHost.deployForm.validation.repository.minLength') })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: t('selfHost.deployForm.validation.repository.invalidFormat')
+      }),
     build_pack: z
       .enum([BuildPack.Dockerfile, BuildPack.DockerCompose, BuildPack.Static])
       .refine(
@@ -78,7 +90,7 @@ function useCreateDeployment({
           value === BuildPack.DockerCompose ||
           value === BuildPack.Static,
         {
-          message: 'Build pack must be Dockerfile, DockerCompose, or Static.'
+          message: t('selfHost.deployForm.validation.buildPack.invalidValue')
         }
       ),
     env_variables: z.record(z.string(), z.string()).optional().default({}),
@@ -165,26 +177,30 @@ function useCreateDeployment({
         router.push('/self-host/application/' + data.id + '?logs=true');
       }
     } catch (error) {
-      toast.error('Failed to create deployment');
+      toast.error(t('selfHost.deployForm.errors.createFailed'));
     }
   }
 
   const validateEnvVar = (
     input: string
   ): { isValid: boolean; error?: string; key?: string; value?: string } => {
-    if (!input.trim()) return { isValid: false, error: 'Input cannot be empty' };
+    if (!input.trim())
+      return { isValid: false, error: t('selfHost.deployForm.validation.envVariables.emptyInput') };
 
     const regex = /^([^=]+)=(.*)$/;
     const isValid = regex.test(input);
 
     if (!isValid) {
-      return { isValid: false, error: 'Must be in format KEY=VALUE' };
+      return {
+        isValid: false,
+        error: t('selfHost.deployForm.validation.envVariables.invalidFormat')
+      };
     }
 
     const [, key] = input.match(regex) as RegExpMatchArray;
 
     if (!key.trim()) {
-      return { isValid: false, error: 'Key cannot be empty' };
+      return { isValid: false, error: t('selfHost.deployForm.validation.envVariables.emptyKey') };
     }
 
     return {

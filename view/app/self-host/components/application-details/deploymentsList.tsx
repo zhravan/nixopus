@@ -5,8 +5,10 @@ import { ApplicationDeployment } from '@/redux/types/applications';
 import { Undo, Eye, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { useTranslation } from '@/hooks/use-translation';
 
 function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[] }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [rollBackApplication, { isLoading }] = useRollbackApplicationMutation();
 
@@ -47,14 +49,17 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
                         : deployment.container_name}
                     </CardTitle>
                     <CardDescription>
-                      <span className="text-xs">{deployment.status?.status || 'Completed'}</span>
+                      <span className="text-xs">
+                        {deployment.status?.status ||
+                          t('selfHost.deployments.list.card.status.completed')}
+                      </span>
                     </CardDescription>
                   </div>
                   <Button
                     size="icon"
                     onClick={() => rollBackApplication({ id: deployment.id })}
                     disabled={isLoading}
-                    title="Rollback deployment"
+                    title={t('selfHost.deployments.list.card.rollback.title')}
                   >
                     <Undo className="h-4 w-4" />
                   </Button>
@@ -65,7 +70,7 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
                 <div className="flex flex-col space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" /> Run Time:
+                      <Clock className="h-4 w-4" /> {t('selfHost.deployments.list.card.runTime')}:
                     </span>
                     <span className="font-medium">
                       {calculateRunTime(
@@ -84,7 +89,7 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
                     );
                   }}
                 >
-                  <Eye className="h-4 w-4 mr-2" /> View
+                  <Eye className="h-4 w-4 mr-2" /> {t('selfHost.deployments.list.card.viewButton')}
                 </Button>
               </CardContent>
             </Card>
@@ -92,7 +97,7 @@ function DeploymentsList({ deployments }: { deployments?: ApplicationDeployment[
         </div>
       ) : (
         <div className="text-center py-8 rounded-lg border border-gray-200">
-          <p>No deployments found</p>
+          <p>{t('selfHost.deployments.list.noDeployments')}</p>
         </div>
       )}
     </div>

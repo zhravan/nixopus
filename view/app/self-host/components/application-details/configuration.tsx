@@ -9,6 +9,7 @@ import useUpdateDeployment from '../../hooks/use_update_deployment';
 import { parsePort } from '../../utils/parsePort';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface DeployConfigureProps {
   application_name?: string;
@@ -43,6 +44,7 @@ export const DeployConfigureForm = ({
   dockerFilePath = '/Dockerfile',
   base_path = '/'
 }: DeployConfigureProps) => {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const canUpdate = hasPermission(user, 'deploy', 'update', activeOrg?.id);
@@ -74,58 +76,82 @@ export const DeployConfigureForm = ({
     return (
       <div className="space-y-8">
         <div className="grid sm:grid-cols-2 gap-4">
-          {renderReadOnlyField('Application Name', application_name, 'Application name')}
-          {renderReadOnlyField('Port', port, 'Port on which your application will be available')}
           {renderReadOnlyField(
-            'Base Path',
-            base_path,
-            'The build context path for your application'
+            t('selfHost.configuration.fields.applicationName.label'),
+            application_name,
+            t('selfHost.configuration.fields.applicationName.description')
           )}
           {renderReadOnlyField(
-            'Dockerfile Path',
+            t('selfHost.configuration.fields.port.label'),
+            port,
+            t('selfHost.configuration.fields.port.description')
+          )}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.basePath.label'),
+            base_path,
+            t('selfHost.configuration.fields.basePath.description')
+          )}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.dockerfilePath.label'),
             dockerFilePath,
-            'Path of the dockerfile relative to the base path'
+            t('selfHost.configuration.fields.dockerfilePath.description')
           )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           {renderReadOnlyField(
-            'Environment Variables',
+            t('selfHost.configuration.fields.environmentVariables.label'),
             Object.entries(env_variables)
               .map(([key, value]) => `${key}=${value}`)
               .join('\n'),
-            'Environment variables for the application'
+            t('selfHost.configuration.fields.environmentVariables.description')
           )}
           {renderReadOnlyField(
-            'Build Variables',
+            t('selfHost.configuration.fields.buildVariables.label'),
             Object.entries(build_variables)
               .map(([key, value]) => `${key}=${value}`)
               .join('\n'),
-            'Build variables for the application'
+            t('selfHost.configuration.fields.buildVariables.description')
           )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           {renderReadOnlyField(
-            'Pre Run Commands',
+            t('selfHost.configuration.fields.preRunCommands.label'),
             pre_run_commands,
-            'Commands to run before deployment'
+            t('selfHost.configuration.fields.preRunCommands.description')
           )}
           {renderReadOnlyField(
-            'Post Run Commands',
+            t('selfHost.configuration.fields.postRunCommands.label'),
             post_run_commands,
-            'Commands to run after deployment'
+            t('selfHost.configuration.fields.postRunCommands.description')
           )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          {renderReadOnlyField('Environment', environment, 'Environment of the deployment')}
-          {renderReadOnlyField('Branch', branch, 'Branch from where you want to deploy')}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.environment.label'),
+            environment,
+            t('selfHost.configuration.fields.environment.description')
+          )}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.branch.label'),
+            branch,
+            t('selfHost.configuration.fields.branch.description')
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          {renderReadOnlyField('Domain', domain, 'Domain on which your application is available')}
-          {renderReadOnlyField('Build Pack', build_pack, 'Build pack used for the application')}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.domain.label'),
+            domain,
+            t('selfHost.configuration.fields.domain.description')
+          )}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.buildPack.label'),
+            build_pack,
+            t('selfHost.configuration.fields.buildPack.description')
+          )}
         </div>
       </div>
     );
@@ -137,32 +163,32 @@ export const DeployConfigureForm = ({
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Application Name"
+            label={t('selfHost.configuration.fields.applicationName.label')}
             name="name"
-            description="Application name"
-            placeholder="Application name"
+            description={t('selfHost.configuration.fields.applicationName.description')}
+            placeholder={t('selfHost.configuration.fields.applicationName.label')}
           />
           <FormInputField
             form={form}
-            label="Port"
+            label={t('selfHost.configuration.fields.port.label')}
             name="port"
-            description="Port on which your application will be available"
+            description={t('selfHost.configuration.fields.port.description')}
             placeholder="3000"
             validator={(value) => parsePort(value) !== null}
           />
           <FormInputField
             form={form}
-            label="Base Path"
+            label={t('selfHost.configuration.fields.basePath.label')}
             name="base_path"
-            description="The build context path for your application"
+            description={t('selfHost.configuration.fields.basePath.description')}
             placeholder="/"
             required={false}
           />
           <FormInputField
             form={form}
-            label="Dockerfile Path"
+            label={t('selfHost.configuration.fields.dockerfilePath.label')}
             name="DockerfilePath"
-            description="Path of the dockerfile relative to the base path"
+            description={t('selfHost.configuration.fields.dockerfilePath.description')}
             placeholder="Dockerfile"
             required={false}
           />
@@ -171,20 +197,20 @@ export const DeployConfigureForm = ({
         <div className="grid sm:grid-cols-2 gap-4">
           <FormSelectTagInputField
             form={form}
-            label="Environment Variables"
+            label={t('selfHost.configuration.fields.environmentVariables.label')}
             name="environment_variables"
-            description="Type KEY=VALUE and press Enter to add"
-            placeholder="NODE_ENV=production"
+            description={t('selfHost.configuration.fields.environmentVariables.description')}
+            placeholder={t('selfHost.configuration.fields.environmentVariables.placeholder')}
             required={false}
             validator={validateEnvVar}
             defaultValues={env_variables}
           />
           <FormSelectTagInputField
             form={form}
-            label="Build Variables"
+            label={t('selfHost.configuration.fields.buildVariables.label')}
             name="build_variables"
-            description="Type KEY=VALUE and press Enter to add"
-            placeholder="DEBUG=false"
+            description={t('selfHost.configuration.fields.buildVariables.description')}
+            placeholder={t('selfHost.configuration.fields.buildVariables.placeholder')}
             required={false}
             validator={validateEnvVar}
             defaultValues={build_variables}
@@ -194,34 +220,52 @@ export const DeployConfigureForm = ({
         <div className="grid sm:grid-cols-2 gap-4">
           <FormInputField
             form={form}
-            label="Pre Run Commands"
+            label={t('selfHost.configuration.fields.preRunCommands.label')}
             name="pre_run_command"
-            description="Commands to run before deployment"
-            placeholder="npm install"
+            description={t('selfHost.configuration.fields.preRunCommands.description')}
+            placeholder={t('selfHost.configuration.fields.preRunCommands.placeholder')}
             required={false}
           />
           <FormInputField
             form={form}
-            label="Post Run Commands"
+            label={t('selfHost.configuration.fields.postRunCommands.label')}
             name="post_run_command"
-            description="Commands to run after deployment"
-            placeholder="npm run test"
+            description={t('selfHost.configuration.fields.postRunCommands.description')}
+            placeholder={t('selfHost.configuration.fields.postRunCommands.placeholder')}
             required={false}
           />
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          {renderReadOnlyField('Environment', environment, 'Environment of the deployment')}
-          {renderReadOnlyField('Branch', branch, 'Branch from where you want to deploy')}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.environment.label'),
+            environment,
+            t('selfHost.configuration.fields.environment.description')
+          )}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.branch.label'),
+            branch,
+            t('selfHost.configuration.fields.branch.description')
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          {renderReadOnlyField('Domain', domain, 'Domain on which your application is available')}
-          {renderReadOnlyField('Build Pack', build_pack, 'Build pack used for the application')}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.domain.label'),
+            domain,
+            t('selfHost.configuration.fields.domain.description')
+          )}
+          {renderReadOnlyField(
+            t('selfHost.configuration.fields.buildPack.label'),
+            build_pack,
+            t('selfHost.configuration.fields.buildPack.description')
+          )}
         </div>
 
         <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
-          {isLoading ? 'Updating...' : 'Update Deployment'}
+          {isLoading
+            ? t('selfHost.configuration.buttons.updating')
+            : t('selfHost.configuration.buttons.update')}
         </Button>
       </form>
     </Form>

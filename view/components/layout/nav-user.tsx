@@ -29,6 +29,7 @@ import { GithubConnectorApi } from '@/redux/services/connector/githubConnectorAp
 import { deployApi } from '@/redux/services/deploy/applicationsApi';
 import { fileManagersApi } from '@/redux/services/file-manager/fileManagersApi';
 import { auditApi } from '@/redux/services/audit';
+import { useTranslation } from '@/hooks/use-translation';
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -36,6 +37,7 @@ export function NavUser({ user }: { user: User }) {
   const router = useRouter();
   const [logoutMutation] = useLogoutMutation();
   const { refreshToken } = useAppSelector((state) => state.auth);
+  const { t } = useTranslation();
 
   const clearLocalStorage = () => {
     const keys = [
@@ -147,20 +149,20 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSponsor}>
               <Heart className="text-red-500" />
-              Sponsor
+              {t('user.menu.sponsor')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleHelp}>
               <HelpCircle />
-              Help
+              {t('user.menu.help')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleReportIssue}>
               <AlertCircle />
-              Report an issue
+              {t('user.menu.reportIssue')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
-              Log out
+              {t('user.menu.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

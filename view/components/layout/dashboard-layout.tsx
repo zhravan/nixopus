@@ -17,6 +17,7 @@ import React, { useEffect } from 'react';
 import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { useTranslation } from '@/hooks/use-translation';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -25,6 +26,7 @@ enum TERMINAL_POSITION {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     addTeamModalOpen,
     setAddTeamModalOpen,
@@ -73,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       <React.Fragment key={idx}>
                         <BreadcrumbItem className="hidden md:block">
                           <BreadcrumbLink onClick={() => router.push(breadcrumb.href)}>
-                            {breadcrumb.label}
+                            {t(`layout.breadcrumbs.${breadcrumb.label.toLowerCase()}`)}
                           </BreadcrumbLink>
                         </BreadcrumbItem>
                         {idx < breadcrumbs.length - 1 && (

@@ -10,8 +10,10 @@ import { Application } from '@/redux/types/applications';
 import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
+import { useTranslation } from '@/hooks/use-translation';
 
 function page() {
+  const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const {
@@ -40,10 +42,8 @@ function page() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
-          <p className="text-muted-foreground">
-            You don't have permission to view self-hosted applications
-          </p>
+          <h2 className="text-2xl font-bold">{t('selfHost.page.accessDenied.title')}</h2>
+          <p className="text-muted-foreground">{t('selfHost.page.accessDenied.description')}</p>
         </div>
       </div>
     );
@@ -72,7 +72,7 @@ function page() {
           sortConfig={sortConfig}
           onSortChange={onSortChange}
           sortOptions={sortOptions}
-          label="Applications"
+          label={t('selfHost.page.title')}
           className="mt-5 mb-5 justify-between items-center"
           children={
             canCreate && (
@@ -82,7 +82,7 @@ function page() {
                   router.push('/self-host/create');
                 }}
               >
-                Create
+                {t('selfHost.page.createButton')}
               </Button>
             )
           }

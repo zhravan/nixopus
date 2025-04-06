@@ -21,14 +21,15 @@ import {
 } from '@/redux/services/settings/domainsApi';
 import { Domain } from '@/redux/types/domain';
 import { useAppSelector } from '@/redux/hooks';
+import { useTranslation } from '@/hooks/use-translation';
 
 const domainFormSchema = z.object({
   domainName: z
     .string()
-    .min(3, { message: 'Domain name must be at least 3 characters.' })
+    .min(3, { message: 'settings.domains.update.form.validation.minLength' })
     .refine(
       (domain) => /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(domain),
-      { message: 'Please enter a valid domain name (e.g., example.com).' }
+      { message: 'settings.domains.update.form.validation.invalidFormat' }
     )
 });
 
@@ -40,6 +41,7 @@ interface UpdateDomainDialogProps {
 }
 
 function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps) {
+  const { t } = useTranslation();
   const [createDomain, { isLoading }] = useCreateDomainMutation();
   const [updateDomain, { isLoading: isUpdating }] = useUpdateDomainMutation();
   const form = useForm({
@@ -60,9 +62,9 @@ function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps
       } else {
         await updateDomain({ name: data.domainName, id: id });
       }
-      toast.success('Domain added successfully');
+      toast.success(t('settings.domains.update.success'));
     } catch (error) {
-      toast.error('Failed to add domain');
+      toast.error(t('settings.domains.update.error'));
     } finally {
       form.reset();
       setOpen(false);
@@ -73,13 +75,15 @@ function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps
     <Dialog open={open} onOpenChange={setOpen}>
       {!id && (
         <DialogTrigger asChild>
-          <Button variant="outline">Add Domain</Button>
+          <Button variant="outline">{t('settings.domains.update.addButton')}</Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{!id ? 'Add Domain' : 'Update Domain'}</DialogTitle>
-          <DialogDescription>Domain will help to deploy your applications</DialogDescription>
+          <DialogTitle>
+            {!id ? t('settings.domains.update.addTitle') : t('settings.domains.update.updateTitle')}
+          </DialogTitle>
+          <DialogDescription>{t('settings.domains.update.description')}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -89,7 +93,7 @@ function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="example.com" {...field} />
+                    <Input placeholder={t('settings.domains.update.form.placeholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,10 +108,12 @@ function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps
                   setOpen(false);
                 }}
               >
-                Cancel
+                {t('settings.domains.update.buttons.cancel')}
               </Button>
               <Button type="submit" disabled={isLoading || isUpdating}>
-                {isLoading || isUpdating ? 'Saving...' : 'Save'}
+                {isLoading || isUpdating
+                  ? t('settings.domains.update.buttons.saving')
+                  : t('settings.domains.update.buttons.save')}
               </Button>
             </DialogFooter>
           </form>

@@ -5,12 +5,14 @@ import { Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SystemStatsType } from '@/redux/types/monitor';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface LoadAverageCardProps {
   systemStats: SystemStatsType;
 }
 
 const LoadAverageCard: React.FC<LoadAverageCardProps> = ({ systemStats }) => {
+  const { t } = useTranslation();
   const { load } = systemStats;
 
   return (
@@ -18,14 +20,29 @@ const LoadAverageCard: React.FC<LoadAverageCardProps> = ({ systemStats }) => {
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
           <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-          Load Average
+          {t('dashboard.load.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-1 sm:space-y-2">
-          <LoadBar label="1 minute" value={load.oneMin} />
-          <LoadBar label="5 minutes" value={load.fiveMin} />
-          <LoadBar label="15 minutes" value={load.fifteenMin} />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {t('dashboard.load.labels.oneMin')}
+            </span>
+            <span className="font-medium">{load.oneMin.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {t('dashboard.load.labels.fiveMin')}
+            </span>
+            <span className="font-medium">{load.fiveMin.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {t('dashboard.load.labels.fifteenMin')}
+            </span>
+            <span className="font-medium">{load.fifteenMin.toFixed(2)}</span>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -54,25 +71,42 @@ const LoadBar: React.FC<LoadBarProps> = ({ label, value }) => (
 
 export default LoadAverageCard;
 
-export const LoadAverageCardSkeleton: React.FC = () => {
+export function LoadAverageCardSkeleton() {
+  const { t } = useTranslation();
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
           <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-          Load Average
+          {t('dashboard.load.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-1 sm:space-y-2">
-          <LoadBarSkeleton label="1 minute" />
-          <LoadBarSkeleton label="5 minutes" />
-          <LoadBarSkeleton label="15 minutes" />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {t('dashboard.load.labels.oneMin')}
+            </span>
+            <Skeleton className="h-4 w-12" />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {t('dashboard.load.labels.fiveMin')}
+            </span>
+            <Skeleton className="h-4 w-12" />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {t('dashboard.load.labels.fifteenMin')}
+            </span>
+            <Skeleton className="h-4 w-12" />
+          </div>
         </div>
       </CardContent>
     </Card>
   );
-};
+}
 
 interface LoadBarSkeletonProps {
   label: string;

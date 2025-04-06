@@ -5,12 +5,15 @@ import { HardDrive } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SystemStatsType } from '@/redux/types/monitor';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface DiskUsageCardProps {
   systemStats: SystemStatsType | null;
 }
 
 const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
+  const { t } = useTranslation();
+
   if (!systemStats) {
     return <DiskUsageCardSkeleton />;
   }
@@ -22,7 +25,7 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
           <HardDrive className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-          Disk Usage
+          {t('dashboard.disk.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -34,18 +37,26 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{disk.used.toFixed(2)} GB used</span>
-            <span>{disk.percentage.toFixed(2)}%</span>
-            <span>{disk.total.toFixed(2)} GB total</span>
+            <span>{t('dashboard.disk.used').replace('{value}', disk.used.toFixed(2))}</span>
+            <span>
+              {t('dashboard.disk.percentage').replace('{value}', disk.percentage.toFixed(2))}
+            </span>
+            <span>{t('dashboard.disk.total').replace('{value}', disk.total.toFixed(2))}</span>
           </div>
           <div className="text-xs font-mono text-muted-foreground mt-1 sm:mt-2">
             <table className="min-w-full">
               <thead>
                 <tr>
-                  <th className="text-left pr-1 sm:pr-2">Mount</th>
-                  <th className="text-right pr-1 sm:pr-2">Size</th>
-                  <th className="text-right pr-1 sm:pr-2">Used</th>
-                  <th className="text-right">%</th>
+                  <th className="text-left pr-1 sm:pr-2">
+                    {t('dashboard.disk.table.headers.mount')}
+                  </th>
+                  <th className="text-right pr-1 sm:pr-2">
+                    {t('dashboard.disk.table.headers.size')}
+                  </th>
+                  <th className="text-right pr-1 sm:pr-2">
+                    {t('dashboard.disk.table.headers.used')}
+                  </th>
+                  <th className="text-right">{t('dashboard.disk.table.headers.percentage')}</th>
                 </tr>
               </thead>
               <tbody className="text-xxs sm:text-xs">
@@ -71,12 +82,14 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
 export default DiskUsageCard;
 
 const DiskUsageCardSkeleton = () => {
+  const { t } = useTranslation();
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
           <HardDrive className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-          Disk Usage
+          {t('dashboard.disk.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -93,10 +106,16 @@ const DiskUsageCardSkeleton = () => {
             <table className="min-w-full">
               <thead>
                 <tr>
-                  <th className="text-left pr-1 sm:pr-2">Mount</th>
-                  <th className="text-right pr-1 sm:pr-2">Size</th>
-                  <th className="text-right pr-1 sm:pr-2">Used</th>
-                  <th className="text-right">%</th>
+                  <th className="text-left pr-1 sm:pr-2">
+                    {t('dashboard.disk.table.headers.mount')}
+                  </th>
+                  <th className="text-right pr-1 sm:pr-2">
+                    {t('dashboard.disk.table.headers.size')}
+                  </th>
+                  <th className="text-right pr-1 sm:pr-2">
+                    {t('dashboard.disk.table.headers.used')}
+                  </th>
+                  <th className="text-right">{t('dashboard.disk.table.headers.percentage')}</th>
                 </tr>
               </thead>
               <tbody className="text-xxs sm:text-xs">

@@ -5,12 +5,14 @@ import { BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SystemStatsType } from '@/redux/types/monitor';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface MemoryUsageCardProps {
   systemStats: SystemStatsType;
 }
 
 const MemoryUsageCard: React.FC<MemoryUsageCardProps> = ({ systemStats }) => {
+  const { t } = useTranslation();
   const { memory } = systemStats;
 
   return (
@@ -18,7 +20,7 @@ const MemoryUsageCard: React.FC<MemoryUsageCardProps> = ({ systemStats }) => {
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
           <BarChart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-          Memory Usage
+          {t('dashboard.memory.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -30,9 +32,11 @@ const MemoryUsageCard: React.FC<MemoryUsageCardProps> = ({ systemStats }) => {
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{memory.used} MB used</span>
-            <span>{memory.percentage}%</span>
-            <span>{memory.total} MB total</span>
+            <span>{t('dashboard.memory.used').replace('{value}', memory.used.toString())}</span>
+            <span>
+              {t('dashboard.memory.percentage').replace('{value}', memory.percentage.toString())}
+            </span>
+            <span>{t('dashboard.memory.total').replace('{value}', memory.total.toString())}</span>
           </div>
           <div className="text-xs text-muted-foreground mt-1 sm:mt-2 line-clamp-2 sm:line-clamp-none">
             {memory.rawInfo}
@@ -45,13 +49,15 @@ const MemoryUsageCard: React.FC<MemoryUsageCardProps> = ({ systemStats }) => {
 
 export default MemoryUsageCard;
 
-export const MemoryUsageCardSkeleton: React.FC = () => {
+export function MemoryUsageCardSkeleton() {
+  const { t } = useTranslation();
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
           <BarChart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-          Memory Usage
+          {t('dashboard.memory.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -70,4 +76,4 @@ export const MemoryUsageCardSkeleton: React.FC = () => {
       </CardContent>
     </Card>
   );
-};
+}

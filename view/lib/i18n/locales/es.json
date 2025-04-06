@@ -358,5 +358,65 @@
     "en": "Inglés",
     "es": "Español",
     "fr": "Francés"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "description": "Monitorea tu servidor",
+    "containers": {
+      "title": "Contenedores",
+      "table": {
+        "headers": {
+          "id": "ID",
+          "name": "Nombre",
+          "image": "Imagen",
+          "status": "Estado",
+          "ports": "Puertos",
+          "created": "Creado"
+        },
+        "noContainers": "No se encontraron contenedores",
+        "morePorts": "+{count} más"
+      }
+    },
+    "disk": {
+      "title": "Uso del Disco",
+      "used": "{value} GB usado",
+      "total": "{value} GB total",
+      "percentage": "{value}%",
+      "table": {
+        "headers": {
+          "mount": "Montaje",
+          "size": "Tamaño",
+          "used": "Usado",
+          "percentage": "%"
+        }
+      }
+    },
+    "load": {
+      "title": "Promedio de Carga",
+      "labels": {
+        "oneMin": "1 minuto",
+        "fiveMin": "5 minutos",
+        "fifteenMin": "15 minutos"
+      }
+    },
+    "memory": {
+      "title": "Uso de Memoria",
+      "used": "{value} MB usado",
+      "total": "{value} MB total",
+      "percentage": "{value}%"
+    },
+    "errors": {
+      "parseMessage": "Error al analizar el mensaje",
+      "unknownError": "Error desconocido ocurrido",
+      "connectionLost": "Conexión perdida. Intentando reconectar...",
+      "reconnectFailed": "Error al reconectar. Por favor intente más tarde."
+    },
+    "system": {
+      "title": "Información del Sistema",
+      "osType": "Tipo de SO",
+      "cpu": "CPU",
+      "uptime": "Tiempo de Actividad",
+      "lastUpdated": "Última Actualización"
+    }
   }
 }

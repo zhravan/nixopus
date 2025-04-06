@@ -12,8 +12,10 @@ import { Badge } from '@/components/ui/badge';
 import { ContainerData } from '@/redux/types/monitor';
 import getStatusColor from '../utils/get-status-color';
 import truncateId from '../utils/truncate-id';
+import { useTranslation } from '@/hooks/use-translation';
 
 const ContainersTable = ({ containersData }: { containersData: ContainerData[] }) => {
+  const { t } = useTranslation();
   const hasContainers = containersData && containersData.length > 0;
 
   return (
@@ -21,12 +23,14 @@ const ContainersTable = ({ containersData }: { containersData: ContainerData[] }
       <Table className="border-0">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Image</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Ports</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead className="w-[100px]">
+              {t('dashboard.containers.table.headers.id')}
+            </TableHead>
+            <TableHead>{t('dashboard.containers.table.headers.name')}</TableHead>
+            <TableHead>{t('dashboard.containers.table.headers.image')}</TableHead>
+            <TableHead>{t('dashboard.containers.table.headers.status')}</TableHead>
+            <TableHead>{t('dashboard.containers.table.headers.ports')}</TableHead>
+            <TableHead>{t('dashboard.containers.table.headers.created')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,7 +69,10 @@ const ContainersTable = ({ containersData }: { containersData: ContainerData[] }
                         ))}
                         {container.Ports.length > 2 && (
                           <span className="text-xs text-gray-500">
-                            +{container.Ports.length - 2} more
+                            {t('dashboard.containers.table.morePorts').replace(
+                              '{count}',
+                              String(container.Ports.length - 2)
+                            )}
                           </span>
                         )}
                       </div>
@@ -80,7 +87,7 @@ const ContainersTable = ({ containersData }: { containersData: ContainerData[] }
           ) : (
             <TableRow>
               <TableCell colSpan={7} className="text-center py-6 text-gray-500">
-                No containers found
+                {t('dashboard.containers.table.noContainers')}
               </TableCell>
             </TableRow>
           )}

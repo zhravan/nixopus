@@ -352,5 +352,65 @@
     "en": "Anglais",
     "es": "Espagnol",
     "fr": "Français"
+  },
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "description": "Surveillez votre serveur",
+    "containers": {
+      "title": "Conteneurs",
+      "table": {
+        "headers": {
+          "id": "ID",
+          "name": "Nom",
+          "image": "Image",
+          "status": "État",
+          "ports": "Ports",
+          "created": "Créé"
+        },
+        "noContainers": "Aucun conteneur trouvé",
+        "morePorts": "+{count} de plus"
+      }
+    },
+    "disk": {
+      "title": "Utilisation du Disque",
+      "used": "{value} Go utilisé",
+      "total": "{value} Go total",
+      "percentage": "{value}%",
+      "table": {
+        "headers": {
+          "mount": "Point de Montage",
+          "size": "Taille",
+          "used": "Utilisé",
+          "percentage": "%"
+        }
+      }
+    },
+    "load": {
+      "title": "Charge Moyenne",
+      "labels": {
+        "oneMin": "1 minute",
+        "fiveMin": "5 minutes",
+        "fifteenMin": "15 minutes"
+      }
+    },
+    "memory": {
+      "title": "Utilisation de la Mémoire",
+      "used": "{value} Mo utilisé",
+      "total": "{value} Mo total",
+      "percentage": "{value}%"
+    },
+    "errors": {
+      "parseMessage": "Échec de l'analyse du message",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "connectionLost": "Connexion perdue. Tentative de reconnexion...",
+      "reconnectFailed": "Échec de la reconnexion. Veuillez réessayer plus tard."
+    },
+    "system": {
+      "title": "Informations Système",
+      "osType": "Type d'OS",
+      "cpu": "CPU",
+      "uptime": "Temps de Fonctionnement",
+      "lastUpdated": "Dernière Mise à Jour"
+    }
   }
 }

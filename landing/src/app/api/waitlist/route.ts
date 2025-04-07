@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error processing waitlist signup:", error);
     return NextResponse.json(
-      { error: "Failed to process signup" },
+      { error: "Error processing waitlist signup" },
       { status: 500 }
     );
   }

@@ -18,9 +18,9 @@ export const Navbar = () => {
               <Image
                 src="/nixopus_logo_transparent.png"
                 alt="Nixopus Logo"
-                width={32}
-                height={32}
-                className="h-8 w-auto"
+                width={64}
+                height={64}
+                className="h-16 w-auto"
               />
             </Link>
             

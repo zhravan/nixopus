@@ -8,6 +8,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Nixopus - Server Management Platform",
   description: "Self hosting, terminal access, file management, and monitoring & alerting in one platform.",
+  icons: {
+    icon: "/nixopus_logo_transparent.png",
+    apple: "/nixopus_logo_transparent.png",
+  },
 };
 
 export default function RootLayout({

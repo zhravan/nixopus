@@ -2,6 +2,7 @@
 import MenuIcon from '../assets/icons/menu.svg';
 import Link from 'next/link';
 import { useState } from 'react';
+import Image from "next/image";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,10 +15,12 @@ export const Navbar = () => {
         <div className="container">
           <div className="py-4 flex items-center justify-between">
             <Link href="/" className="relative group">
-              <img 
-                src="/nixopus_logo_transparent.png" 
-                alt="Nixopus Logo" 
-                className="h-24 w-24 relative mt-1 object-contain transition-transform duration-300 group-hover:scale-105"
+              <Image
+                src="/logo.svg"
+                alt="Nixopus Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
               />
             </Link>
             

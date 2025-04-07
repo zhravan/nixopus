@@ -30,13 +30,13 @@ export const Navbar = () => {
             </button>
 
             <nav className={`text-white gap-6 items-center ${isMenuOpen ? 'flex flex-col absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-sm py-4' : 'hidden sm:flex'}`}>
-              <Link 
+              {/* <Link 
                 href="https://github.com/raghavyuva/nixopus" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className='text-opacity-60 text-white hover:text-opacity-100 hover:text-indigo-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-white/5'
               >
-                About
+                GitHub
               </Link>
               <Link 
                 href="https://docs.nixopus.com" 
@@ -44,29 +44,13 @@ export const Navbar = () => {
                 rel="noopener noreferrer" 
                 className='text-opacity-60 text-white hover:text-opacity-100 hover:text-purple-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-white/5'
               >
-                Features
-              </Link>
-              <Link 
-                href="https://github.com/raghavyuva/nixopus/releases" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className='text-opacity-60 text-white hover:text-opacity-100 hover:text-pink-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-white/5'
-              >
-                Changelogs
-              </Link>
-              <Link 
-                href="https://docs.nixopus.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className='text-opacity-60 text-white hover:text-opacity-100 hover:text-indigo-300 transition-all duration-300 px-4 py-2 rounded-lg hover:bg-white/5'
-              >
                 Docs
-              </Link>
+              </Link> */}
               <Link 
-                href="/try" 
+                href="#waitlist" 
                 className='bg-gradient-to-r from-indigo-500 to-purple-500 py-2 px-6 rounded-lg text-white hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20'
               >
-                Try now
+                Join Waitlist
               </Link>
             </nav>
           </div>

@@ -16,7 +16,7 @@ export const Navbar = () => {
           <div className="py-4 flex items-center justify-between">
             <Link href="/" className="relative group">
               <Image
-                src="/logo.svg"
+                src="/nixopus_logo_transparent.png"
                 alt="Nixopus Logo"
                 width={32}
                 height={32}
@@ -24,13 +24,13 @@ export const Navbar = () => {
               />
             </Link>
             
-            <button 
+            {/* <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className='border border-white/20 h-10 w-10 inline-flex justify-center items-center rounded-lg sm:hidden hover:bg-gradient-to-r hover:from-indigo-500/10 hover:to-purple-500/10 transition-all duration-300'
               aria-label="Toggle menu"
             >
               <MenuIcon className="text-white" />
-            </button>
+            </button> */}
 
             <nav className={`text-white gap-6 items-center ${isMenuOpen ? 'flex flex-col absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-sm py-4' : 'hidden sm:flex'}`}>
               {/* <Link 

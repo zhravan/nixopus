@@ -4,16 +4,17 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "./lib/utils";
 
-export const WaitlistForm = () => {
+type FormStatus = "idle" | "loading" | "success" | "error";
+
+export default function WaitlistForm() {
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<FormStatus>("idle");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+    setStatus("loading");
+    setError("");
 
     try {
       const response = await fetch("/api/waitlist", {
@@ -24,21 +25,19 @@ export const WaitlistForm = () => {
         body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setIsSuccess(true);
-        setEmail("");
-      } else {
-        setError(data.error || "Failed to join waitlist. Please try again.");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to join waitlist");
       }
-    } catch (error) {
-      setError("Something went wrong. Please try again later.");
-      console.error("Error submitting form:", error);
-    } finally {
-      setIsSubmitting(false);
+
+      setStatus("success");
+    } catch (err) {
+      setStatus("error");
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
+
+  const isDisabled = status === "loading" || status === "success";
 
   return (
     <motion.div
@@ -58,14 +57,14 @@ export const WaitlistForm = () => {
           </p>
         </div>
 
-        {isSuccess ? (
+        {status === "success" ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
           >
             <h3 className="text-lg sm:text-xl font-semibold text-emerald-400 mb-4">Thank you!</h3>
-            <p className="text-sm sm:text-base text-white/70">We'll keep you updated on our launch progress.</p>
+            <p className="text-sm sm:text-base text-white/70">We&apos;ll keep you updated on our launch progress.</p>
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -82,6 +81,7 @@ export const WaitlistForm = () => {
                   "text-sm sm:text-base text-white placeholder:text-white/50",
                   "focus:outline-none focus:ring-2 focus:ring-indigo-500/50",
                 )}
+                disabled={isDisabled}
               />
               {error && (
                 <motion.p
@@ -95,7 +95,6 @@ export const WaitlistForm = () => {
             </div>
             <button
               type="submit"
-              disabled={isSubmitting}
               className={cn(
                 "w-full px-6 sm:px-8 py-3 sm:py-4 rounded-lg",
                 "bg-gradient-to-r from-indigo-500 to-purple-500",
@@ -105,12 +104,13 @@ export const WaitlistForm = () => {
                 "transition-all duration-300",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
+              disabled={isDisabled}
             >
-              {isSubmitting ? "Joining..." : "Join Waitlist"}
+              {status === "loading" ? "Joining..." : "Join Waitlist"}
             </button>
           </form>
         )}
       </div>
     </motion.div>
   );
-}; 
+} 

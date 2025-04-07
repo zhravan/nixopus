@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import Hero from "@/components/Hero";
 // import { FeaturesSectionDemo } from "@/components/Features";
-import { WaitlistForm } from "@/components/WaitlistForm";
+import WaitlistForm from "@/components/WaitlistForm";
 
 export default function Home() {
   return (

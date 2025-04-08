@@ -12,55 +12,10 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 )
 
-type Caddy struct {
-	Logger   *logger.Logger
-	Endpoint string
-	RootDir  string
-	Domain   string
-	Port     string
-	client   *http.Client
-	FileServerType FileServerType
-}
-
-type FileServerType string
-
-const (
-	FileServer FileServerType = "file_server"
-	ReverseProxy FileServerType = "reverse_proxy"
-)
-
-type CaddyConfig struct {
-	Apps struct {
-		HTTP struct {
-			Servers map[string]Server `json:"servers"`
-		} `json:"http"`
-	} `json:"apps"`
-}
-
-type Server struct {
-	Listen []string `json:"listen"`
-	Routes []Route  `json:"routes"`
-}
-
-type Route struct {
-	Handle []Handle `json:"handle"`
-	Match  []Match  `json:"match"`
-}
-
-type Handle struct {
-	Handler string   `json:"handler"`
-	Root    string   `json:"root,omitempty"`
-	Browse  struct{} `json:"browse,omitempty"`
-}
-
-type Match struct {
-	Host []string `json:"host"`
-}
-
 func NewCaddy(logger *logger.Logger, rootDir string, domain string, port string, fileServerType FileServerType) *Caddy {
 	endpoint := os.Getenv("CADDY_ENDPOINT")
 	if endpoint == "" {
-		endpoint = "http://localhost:2019"
+		endpoint = "http://127.0.0.1:2019"
 	}
 	return &Caddy{
 		Logger:   logger,
@@ -85,8 +40,36 @@ func (c *Caddy) Serve() error {
 		return fmt.Errorf("failed to get current config: %w", err)
 	}
 
+	var handle interface{}
+	if c.FileServerType == FileServer {
+		handle = FileServerHandle{
+			Handler: string(c.FileServerType),
+			Root:    c.RootDir,
+			Browse:  struct{}{},
+		}
+	} else {
+		subroute := SubrouteHandle{
+			Handler: "subroute",
+			Routes: []Route{
+				{
+					Handle: []interface{}{
+						ReverseProxyHandle{
+							Handler: string(c.FileServerType),
+							Upstreams: []Upstream{
+								{
+									Dial: "127.0.0.1:" + c.Port,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		handle = subroute
+	}
+
 	serverConfig := Server{
-		// Listen: []string{":" + c.Port},
+		Listen: []string{":80"},
 		Routes: []Route{
 			{
 				Match: []Match{
@@ -94,14 +77,11 @@ func (c *Caddy) Serve() error {
 						Host: []string{c.Domain},
 					},
 				},
-				Handle: []Handle{
-					{
-						Handler: string(c.FileServerType),
-						Root:    c.RootDir,
-						Browse:  struct{}{},
-					},
-				},
+				Handle: []interface{}{handle},
 			},
+		},
+		AutomaticHTTPS: AutomaticHTTPS{
+			Disable: false,
 		},
 	}
 

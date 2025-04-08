@@ -81,7 +81,7 @@ services:
     ports:
       - "2019:2019"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./api/helpers/Caddyfile:/etc/caddy/Caddyfile
     networks:
       - nixopus-network
 

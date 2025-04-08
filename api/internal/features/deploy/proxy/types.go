@@ -32,8 +32,8 @@ type CaddyConfig struct {
 }
 
 type Server struct {
-	Listen []string `json:"listen,omitempty"`
-	Routes []Route  `json:"routes,omitempty"`
+	Listen         []string       `json:"listen,omitempty"`
+	Routes         []Route        `json:"routes,omitempty"`
 	AutomaticHTTPS AutomaticHTTPS `json:"automatic_https,omitempty"`
 }
 

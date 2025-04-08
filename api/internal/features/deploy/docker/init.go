@@ -64,17 +64,23 @@ func NewDockerServiceWithClient(cli *client.Client, ctx context.Context, logger 
 // the correct API version negotiation.
 func NewDockerClient() *client.Client {
 	cli, err := client.NewClientWithOpts(
-		client.FromEnv,
+		client.WithHost("unix:///var/run/docker.sock"),
 		client.WithAPIVersionNegotiation(),
-		client.WithTLSClientConfigFromEnv(),
 	)
 	if err != nil {
 		cli, err = client.NewClientWithOpts(
 			client.FromEnv,
 			client.WithAPIVersionNegotiation(),
+			client.WithTLSClientConfigFromEnv(),
 		)
 		if err != nil {
-			panic(err)
+			cli, err = client.NewClientWithOpts(
+				client.FromEnv,
+				client.WithAPIVersionNegotiation(),
+			)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 

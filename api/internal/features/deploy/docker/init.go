@@ -63,9 +63,19 @@ func NewDockerServiceWithClient(cli *client.Client, ctx context.Context, logger 
 // NewDockerClient creates a new docker client with the environment variables and
 // the correct API version negotiation.
 func NewDockerClient() *client.Client {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+		client.WithTLSClientConfigFromEnv(),
+	)
 	if err != nil {
-		panic(err)
+		cli, err = client.NewClientWithOpts(
+			client.FromEnv,
+			client.WithAPIVersionNegotiation(),
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return cli

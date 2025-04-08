@@ -43,6 +43,11 @@ func CorsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		if r.Header.Get("Upgrade") == "websocket" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

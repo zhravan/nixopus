@@ -3,10 +3,13 @@ package service
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	// "github.com/docker/docker/api/types/image"
+
 	"github.com/google/uuid"
+	"github.com/raghavyuva/nixopus-api/internal/features/deploy/proxy"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/ssh"
@@ -71,6 +74,8 @@ func (s *DeployService) Deployer(d DeployerConfig) error {
 		err = s.handleDockerfileDeployment(d)
 	case shared_types.DockerCompose:
 		err = s.handleDockerComposeDeployment(d)
+	case shared_types.Static:
+		err = s.handleStaticDeployment(d)
 	default:
 		return types.ErrInvalidBuildPack
 	}
@@ -137,6 +142,22 @@ func (s *DeployService) handleDockerComposeDeployment(d DeployerConfig) error {
 	}
 
 	s.addLog(d.application.ID, "Docker Compose deployment completed successfully", d.deployment_config.ID)
+	return nil
+}
+
+func (s *DeployService) handleStaticDeployment(d DeployerConfig) error {
+	s.addLog(d.application.ID, "Using static file deployment strategy", d.deployment_config.ID)
+
+	caddyProxy := proxy.NewCaddy(&s.logger, d.contextPath, d.application.Domain, strconv.Itoa(d.application.Port), proxy.FileServer)
+	if err := caddyProxy.Serve(); err != nil {
+		s.addLog(d.application.ID, fmt.Sprintf("Failed to start Caddy proxy: %v", err), d.deployment_config.ID)
+		return err
+	}
+	s.addLog(d.application.ID, "Caddy proxy started successfully", d.deployment_config.ID)
+
+	s.updateStatus(d.deployment_config.ID, shared_types.Deployed, d.appStatus.ID)
+	s.addLog(d.application.ID, types.LogDeploymentCompletedSuccessfully, d.deployment_config.ID)
+	s.addLog(d.application.ID, fmt.Sprintf("Application %s is available at %s", d.application.Name, d.application.Domain), d.deployment_config.ID)
 	return nil
 }
 

@@ -229,35 +229,66 @@
           "title": "Email",
           "description": "Configure SMTP settings to send email notifications",
           "fields": {
-            "smtpServer": {
+            "smtp_host": {
               "label": "SMTP Server",
               "placeholder": "smtp.example.com"
             },
-            "port": {
+            "smtp_port": {
               "label": "Port",
               "placeholder": "587"
             },
-            "username": {
+            "smtp_username": {
               "label": "Username",
               "placeholder": "your-email@example.com"
             },
-            "password": {
+            "smtp_password": {
               "label": "Password",
-              "placeholder": "Enter your SMTP password"
+              "placeholder": "••••••••"
             },
-            "fromEmail": {
+            "smtp_from_email": {
               "label": "From Email",
               "placeholder": "notifications@example.com"
             },
-            "fromName": {
+            "smtp_from_name": {
               "label": "From Name",
               "placeholder": "Your Organization Name"
             }
           },
           "buttons": {
-            "save": "Save"
+            "save": "Save Configuration"
           }
-        }
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Configure Slack notifications",
+          "fields": {
+            "webhook_secret": {
+              "label": "Webhook Secret",
+              "placeholder": "Enter your Slack webhook secret"
+            },
+            "channel_id": {
+              "label": "Channel ID",
+              "placeholder": "Enter your Slack channel ID"
+            }
+          },
+          "buttons": {
+            "save": "Save Configuration"
+          }
+        },
+        "discord": {
+          "title": "Discord",
+          "description": "Configure Discord settings to send notifications",
+          "fields": {
+            "webhook_url": {
+              "label": "Webhook URL",
+              "placeholder": "Enter your Discord webhook URL"
+            }
+          },
+          "buttons": {
+            "save": "Save Configuration"
+          }
+        },
+        "save": "Save Configuration"
       },
       "preferences": {
         "activity": {
@@ -274,8 +305,18 @@
         }
       },
       "messages": {
-        "emailConfigSaved": "Email configuration saved successfully",
-        "emailConfigFailed": "Failed to save email configuration",
+        "email": {
+          "success": "Email configuration saved successfully",
+          "error": "Failed to save email configuration"
+        },
+        "slack": {
+          "success": "Slack configuration saved successfully",
+          "error": "Failed to save Slack configuration"
+        },
+        "discord": {
+          "success": "Discord configuration saved successfully",
+          "error": "Failed to save Discord configuration"
+        },
         "preferencesUpdated": "Preferences updated successfully",
         "preferencesFailed": "Failed to update preferences"
       }

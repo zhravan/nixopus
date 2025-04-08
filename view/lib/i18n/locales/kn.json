@@ -209,75 +209,109 @@
     },
     "notifications": {
       "page": {
-        "title": "ಅಧಿಸೂಚನೆಗಳು",
-        "description": "ನಿಮ್ಮ ಅಧಿಸೂಚನೆ ಆದ್ಯತೆಗಳು ಮತ್ತು ಚಾನೆಲ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+        "title": "ಅ thಣಿಸುವಿಕೆಗಳು",
+        "description": "ನಿಮ್ಮ ಆದ್ಯತೆಗಳು ಮತ್ತು ಅ thಣಿಸುವಿಕೆ ಚಾನಲ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
         "accessDenied": {
           "title": "ಪ್ರವೇಶ ನಿರಾಕರಿಸಲಾಗಿದೆ",
-          "description": "ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ"
+          "description": "ಅ thಣಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನೋಡಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ"
         },
         "tabs": {
-          "channels": "ಚಾನೆಲ್‌ಗಳು",
+          "channels": "ಚಾನಲ್‌ಗಳು",
           "preferences": "ಆದ್ಯತೆಗಳು"
         },
         "permissions": {
-          "update": "ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ನವೀಕರಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ",
-          "create": "ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ರಚಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ"
+          "update": "ಅ thಣಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನವೀಕರಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ",
+          "create": "ಅ thಣಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ರಚಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ"
+        },
+        "messages": {
+          "emailConfigSaved": "ಇಮೇಲ್ ಸಂರಚನೆ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ",
+          "emailConfigFailed": "ಇಮೇಲ್ ಸಂರಚನೆಯನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ",
+          "webhookConfigSaved": "ವೆಬ್ಹುಕ್ ಸಂರಚನೆ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ",
+          "webhookConfigUpdated": "ವೆಬ್ಹುಕ್ ಸಂರಚನೆ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+          "webhookConfigDeleted": "ವೆಬ್ಹುಕ್ ಸಂರಚನೆ ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ",
+          "webhookConfigFailed": "ವೆಬ್ಹುಕ್ ಸಂರಚನೆಯನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ",
+          "preferencesUpdated": "ಅ thಣಿಸುವಿಕೆ ಆದ್ಯತೆಗಳು ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+          "preferencesFailed": "ಅ thಣಿಸುವಿಕೆ ಆದ್ಯತೆಗಳನ್ನು ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ"
         }
       },
       "channels": {
         "email": {
           "title": "ಇಮೇಲ್",
-          "description": "ಇಮೇಲ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಲು SMTP ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
+          "description": "ಇಮೇಲ್ ಮೂಲಕ ಅ thಣಿಸುವಿಕೆಗಳನ್ನು ಕಳುಹಿಸಲು SMTP ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
           "fields": {
-            "smtpServer": {
+            "smtp_host": {
               "label": "SMTP ಸರ್ವರ್",
-              "placeholder": "smtp.example.com"
+              "placeholder": "smtp.ಉದಾಹರಣೆ.com"
             },
-            "port": {
+            "smtp_port": {
               "label": "ಪೋರ್ಟ್",
               "placeholder": "587"
             },
-            "username": {
-              "label": "ಬಳಕೆದಾರಹೆಸರು",
-              "placeholder": "your-email@example.com"
+            "smtp_username": {
+              "label": "ಬಳಕೆದಾರ ಹೆಸರು",
+              "placeholder": "ಬಳಕೆದಾರ@ಉದಾಹರಣೆ.com"
             },
-            "password": {
+            "smtp_password": {
               "label": "ಪಾಸ್ವರ್ಡ್",
-              "placeholder": "ನಿಮ್ಮ SMTP ಪಾಸ್ವರ್ಡ್ ಅನ್ನು ನಮೂದಿಸಿ"
+              "placeholder": "••••••••"
             },
-            "fromEmail": {
-              "label": "ಇಮೇಲ್‌ನಿಂದ",
-              "placeholder": "notifications@example.com"
+            "smtp_from_email": {
+              "label": "ಕಳುಹಿಸುವ ಇಮೇಲ್",
+              "placeholder": "ಅ thಣಿಸುವಿಕೆಗಳು@ಉದಾಹರಣೆ.com"
             },
-            "fromName": {
-              "label": "ಹೆಸರಿನಿಂದ",
-              "placeholder": "ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಹೆಸರು"
+            "smtp_from_name": {
+              "label": "ಕಳುಹಿಸುವ ಹೆಸರು",
+              "placeholder": "ಅ thಣಿಸುವಿಕೆ ವ್ಯವಸ್ಥೆ"
             }
           },
           "buttons": {
-            "save": "ಉಳಿಸಿ"
+            "save": "ಸಂರಚನೆಯನ್ನು ಉಳಿಸಿ"
+          }
+        },
+        "slack": {
+          "title": "ಸ್ಲ್ಯಾಕ್",
+          "description": "ಸ್ಲ್ಯಾಕ್ ಅ thಣಿಸುವಿಕೆಗಳನ್ನು ಸಂರಚಿಸಿ",
+          "fields": {
+            "webhook_secret": {
+              "label": "ವೆಬ್ಹುಕ್ ರಹಸ್ಯ",
+              "placeholder": "ನಿಮ್ಮ ಸ್ಲ್ಯಾಕ್ ವೆಬ್ಹುಕ್ ರಹಸ್ಯವನ್ನು ನಮೂದಿಸಿ"
+            },
+            "channel_id": {
+              "label": "ಚಾನಲ್ ID",
+              "placeholder": "ನಿಮ್ಮ ಸ್ಲ್ಯಾಕ್ ಚಾನಲ್ ID ಅನ್ನು ನಮೂದಿಸಿ"
+            }
+          },
+          "buttons": {
+            "save": "ಸಂರಚನೆಯನ್ನು ಉಳಿಸಿ"
+          }
+        },
+        "discord": {
+          "title": "ಡಿಸ್ಕಾರ್ಡ್",
+          "description": "ನಿಮ್ಮ ಡಿಸ್ಕಾರ್ಡ್ ಚಾನಲ್‌ಗೆ ಅ thಣಿಸುವಿಕೆಗಳನ್ನು ಕಳುಹಿಸಲು ಡಿಸ್ಕಾರ್ಡ್ ವೆಬ್ಹುಕ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
+          "fields": {
+            "webhook_url": {
+              "label": "ವೆಬ್ಹುಕ್ URL",
+              "placeholder": "https://discord.com/api/webhooks/..."
+            }
+          },
+          "buttons": {
+            "save": "ಸಂರಚನೆಯನ್ನು ಉಳಿಸಿ"
           }
         }
       },
       "preferences": {
         "activity": {
-          "title": "ಚಟುವಟಿಕೆ ಅಧಿಸೂಚನೆಗಳು",
-          "description": "ನಿಮ್ಮ ತಂಡದಲ್ಲಿ ಚಟುವಟಿಕೆಯ ಬಗ್ಗೆ ಅಧಿಸೂಚನೆಗಳು"
+          "title": "ಚಟುವಟಿಕೆ ಅ thಣಿಸುವಿಕೆಗಳು",
+          "description": "ನಿಮ್ಮ ತಂಡದಲ್ಲಿ ಚಟುವಟಿಕೆಗಳ ಬಗ್ಗೆ ಅ thಣಿಸುವಿಕೆಗಳು"
         },
         "security": {
-          "title": "ಸುರಕ್ಷತೆ ಅಧಿಸೂಚನೆಗಳು",
-          "description": "ನಿಯೋಜಿಸಿದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ದೋಷಗಳ ಬಗ್ಗೆ ಪ್ರಮುಖ ಎಚ್ಚರಿಕೆಗಳು"
+          "title": "ಸುರಕ್ಷತೆ ಅ thಣಿಸುವಿಕೆಗಳು",
+          "description": "ನಿಯೋಜಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ದೋಷಗಳ ಬಗ್ಗೆ ಪ್ರಮುಖ ಎಚ್ಚರಿಕೆಗಳು"
         },
         "updates": {
           "title": "ನವೀಕರಣಗಳು ಮತ್ತು ಮಾರ್ಕೆಟಿಂಗ್",
-          "description": "ನಮ್ಮ ಉತ್ಪನ್ನ ಮತ್ತು ಸೇವೆಗಳ ಬಗ್ಗೆ ಮಾಹಿತಿ ಪಡೆಯಿರಿ"
+          "description": "ನಮ್ಮ ಉತ್ಪನ್ನಗಳು ಮತ್ತು ಸೇವೆಗಳ ಬಗ್ಗೆ ತಿಳಿದುಕೊಳ್ಳಿ"
         }
-      },
-      "messages": {
-        "emailConfigSaved": "ಇಮೇಲ್ ಕಾನ್ಫಿಗರೇಶನ್ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ",
-        "emailConfigFailed": "ಇಮೇಲ್ ಕಾನ್ಫಿಗರೇಶನ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ",
-        "preferencesUpdated": "ಆದ್ಯತೆಗಳು ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
-        "preferencesFailed": "ಆದ್ಯತೆಗಳನ್ನು ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ"
       }
     },
     "teams": {

@@ -29,7 +29,12 @@ export enum USER_NOTIFICATION_SETTINGS {
   DELETE_SMTP = 'v1/notification/smtp',
 
   GET_PREFERENCES = 'v1/notification/preferences',
-  UPDATE_PREFERENCES = 'v1/notification/preferences'
+  UPDATE_PREFERENCES = 'v1/notification/preferences',
+
+  GET_WEBHOOK = 'v1/notification/webhook',
+  CREATE_WEBHOOK = 'v1/notification/webhook',
+  UPDATE_WEBHOOK = 'v1/notification/webhook',
+  DELETE_WEBHOOK = 'v1/notification/webhook'
 }
 
 export enum DOMAIN_SETTINGS {

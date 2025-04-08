@@ -217,6 +217,12 @@ func (router *Router) NotificationRoutes(s *fuego.Server, notificationController
 	preferenceGroup := fuego.Group(s, "/preferences")
 	fuego.Post(preferenceGroup, "", notificationController.UpdatePreference)
 	fuego.Get(preferenceGroup, "", notificationController.GetPreferences)
+
+	webhookGroup := fuego.Group(s, "/webhook")
+	fuego.Post(webhookGroup, "", notificationController.CreateWebhookConfig)
+	fuego.Get(webhookGroup, "/{type}", notificationController.GetWebhookConfig)
+	fuego.Put(webhookGroup, "", notificationController.UpdateWebhookConfig)
+	fuego.Delete(webhookGroup, "", notificationController.DeleteWebhookConfig)
 }
 
 func (router *Router) DomainRoutes(s *fuego.Server, domainsGroup *fuego.Server, domainController *domain.DomainsController) {

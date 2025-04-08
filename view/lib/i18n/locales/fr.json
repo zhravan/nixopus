@@ -212,7 +212,7 @@
         "title": "Notifications",
         "description": "Gérez vos préférences et canaux de notification",
         "accessDenied": {
-          "title": "Accès Refusé",
+          "title": "Accès refusé",
           "description": "Vous n'avez pas la permission de voir les paramètres de notification"
         },
         "tabs": {
@@ -222,54 +222,94 @@
         "permissions": {
           "update": "Vous n'avez pas la permission de mettre à jour les paramètres de notification",
           "create": "Vous n'avez pas la permission de créer les paramètres de notification"
+        },
+        "messages": {
+          "emailConfigSaved": "Configuration de messagerie enregistrée avec succès",
+          "emailConfigFailed": "Échec de l'enregistrement de la configuration de messagerie",
+          "webhookConfigSaved": "Configuration du webhook enregistrée avec succès",
+          "webhookConfigUpdated": "Configuration du webhook mise à jour avec succès",
+          "webhookConfigDeleted": "Configuration du webhook supprimée avec succès",
+          "webhookConfigFailed": "Échec de l'enregistrement de la configuration du webhook",
+          "preferencesUpdated": "Préférences de notification mises à jour avec succès",
+          "preferencesFailed": "Échec de la mise à jour des préférences de notification"
         }
       },
       "channels": {
         "email": {
           "title": "E-mail",
-          "description": "Configurer les paramètres SMTP pour envoyer des notifications par e-mail",
+          "description": "Configurez les paramètres SMTP pour envoyer des notifications par e-mail",
           "fields": {
-            "smtpServer": {
+            "smtp_host": {
               "label": "Serveur SMTP",
               "placeholder": "smtp.exemple.com"
             },
-            "port": {
+            "smtp_port": {
               "label": "Port",
               "placeholder": "587"
             },
-            "username": {
+            "smtp_username": {
               "label": "Nom d'utilisateur",
-              "placeholder": "votre-email@exemple.com"
+              "placeholder": "utilisateur@exemple.com"
             },
-            "password": {
+            "smtp_password": {
               "label": "Mot de passe",
-              "placeholder": "Entrez votre mot de passe SMTP"
+              "placeholder": "••••••••"
             },
-            "fromEmail": {
+            "smtp_from_email": {
               "label": "E-mail d'expédition",
               "placeholder": "notifications@exemple.com"
             },
-            "fromName": {
+            "smtp_from_name": {
               "label": "Nom d'expédition",
-              "placeholder": "Nom de votre Organisation"
+              "placeholder": "Système de Notifications"
             }
           },
           "buttons": {
-            "save": "Enregistrer"
+            "save": "Enregistrer la configuration"
+          }
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Configurez les notifications Slack",
+          "fields": {
+            "webhook_secret": {
+              "label": "Secret du webhook",
+              "placeholder": "Entrez votre secret de webhook Slack"
+            },
+            "channel_id": {
+              "label": "ID du canal",
+              "placeholder": "Entrez l'ID de votre canal Slack"
+            }
+          },
+          "buttons": {
+            "save": "Enregistrer la configuration"
+          }
+        },
+        "discord": {
+          "title": "Discord",
+          "description": "Configurez le webhook Discord pour envoyer des notifications à votre canal Discord",
+          "fields": {
+            "webhook_url": {
+              "label": "URL du webhook",
+              "placeholder": "https://discord.com/api/webhooks/..."
+            }
+          },
+          "buttons": {
+            "save": "Enregistrer la configuration"
           }
         }
       },
       "preferences": {
         "activity": {
-          "title": "Notifications d'Activité",
+          "title": "Notifications d'activité",
           "description": "Notifications concernant l'activité dans votre équipe"
         },
         "security": {
-          "title": "Notifications de Sécurité",
+          "title": "Notifications de sécurité",
           "description": "Alertes importantes concernant les applications déployées et les erreurs"
         },
         "updates": {
-          "title": "Mises à Jour et Marketing",
+          "title": "Mises à jour et marketing",
           "description": "Restez informé de nos produits et services"
         }
       }

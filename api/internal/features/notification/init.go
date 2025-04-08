@@ -3,9 +3,11 @@ package notification
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
+	"net/http"
 	"net/smtp"
 	"os"
 	"path/filepath"
@@ -13,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	"github.com/slack-go/slack"
 	"github.com/uptrace/bun"
 )
 
@@ -67,12 +70,16 @@ func (m *NotificationManager) Start() {
 						fmt.Printf("Password Reset Notification - %+v", payload)
 						if data, ok := payload.Data.(NotificationPasswordResetData); ok {
 							m.SendPasswordResetEmail(payload.UserID, data.Token)
+							m.SendSlackNotification(payload.UserID, "Password reset requested")
+							m.SendDiscordNotification(payload.UserID, "Password reset requested")
 						}
 					}
 					if payload.Type == NotificationPayloadTypeVerificationEmail {
 						fmt.Printf("Verification Email Notification - %+v", payload)
 						if data, ok := payload.Data.(NotificationVerificationEmailData); ok {
 							m.SendVerificationEmail(payload.UserID, data.Token)
+							m.SendSlackNotification(payload.UserID, "Email verification requested")
+							m.SendDiscordNotification(payload.UserID, "Email verification requested")
 						}
 					}
 				case NotificationCategoryOrganization:
@@ -81,6 +88,8 @@ func (m *NotificationManager) Start() {
 						fmt.Printf("Update User Role Notification - %+v", payload)
 						if data, ok := payload.Data.(NotificationOrganizationData); ok {
 							m.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
+							m.SendSlackNotification(payload.UserID, fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
+							m.SendDiscordNotification(payload.UserID, fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
 						}
 					}
 				}
@@ -319,4 +328,47 @@ func (m *NotificationManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, err
 		return nil, err
 	}
 	return config, nil
+}
+
+func (m *NotificationManager) SendSlackNotification(userID string, message string) error {
+	if m.Channels.Slack == nil || m.Channels.Slack.SlackClient == nil {
+		return nil
+	}
+
+	_, _, err := m.Channels.Slack.SlackClient.PostMessage(
+		m.Channels.Slack.ChannelID,
+		slack.MsgOptionText(message, false),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to send slack notification: %w", err)
+	}
+
+	return nil
+}
+
+func (m *NotificationManager) SendDiscordNotification(userID string, message string) error {
+	if m.Channels.Discord == nil || m.Channels.Discord.WebhookUrl == "" {
+		return nil
+	}
+
+	payload := map[string]interface{}{
+		"content": message,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal discord payload: %w", err)
+	}
+
+	resp, err := http.Post(m.Channels.Discord.WebhookUrl, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to send discord message: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("discord webhook returned non-200 status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }

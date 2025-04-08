@@ -5,11 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-fuego/fuego"
-	"github.com/go-fuego/fuego/option"
-	"github.com/go-fuego/fuego/param"
 	"github.com/joho/godotenv"
-	"github.com/raghavyuva/nixopus-api/internal/cache"
 	audit "github.com/raghavyuva/nixopus-api/internal/features/audit/controller"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	authService "github.com/raghavyuva/nixopus-api/internal/features/auth/service"
@@ -36,14 +34,12 @@ import (
 )
 
 type Router struct {
-	app   *storage.App
-	cache cache.CacheRepository
+	app *storage.App
 }
 
-func NewRouter(app *storage.App, cache cache.CacheRepository) *Router {
+func NewRouter(app *storage.App) *Router {
 	return &Router{
-		app:   app,
-		cache: cache,
+		app: app,
 	}
 }
 
@@ -62,6 +58,15 @@ func (router *Router) Routes() {
 			// middleware.LoggingMiddleware,
 			// middleware.RateLimiter
 		),
+		fuego.WithSecurity(openapi3.SecuritySchemes{
+			"bearerAuth": &openapi3.SecuritySchemeRef{
+				Value: openapi3.NewSecurityScheme().
+					WithType("http").
+					WithScheme("bearer").
+					WithBearerFormat("JWT").
+					WithDescription("Enter your JWT token in the format: Bearer <token>"),
+			},
+		}),
 		fuego.WithAddr(":"+PORT),
 	)
 
@@ -86,14 +91,14 @@ func (router *Router) Routes() {
 	router.AuthRoutes(authController, authGroup)
 
 	fuego.Use(server, func(next http.Handler) http.Handler {
-		return middleware.AuthMiddleware(next, router.app, router.cache)
+		return middleware.AuthMiddleware(next, router.app)
 	})
 
 	fuego.Use(server, func(next http.Handler) http.Handler {
 		return middleware.AuditMiddleware(next, router.app, l)
 	})
 
-	s := fuego.Group(server, "/api/v1", option.Header("Authorization", "Bearer token", param.Required()))
+	s := fuego.Group(server, "/api/v1")
 
 	authProtectedGroup := fuego.Group(server, "/api/v1/auth")
 	router.AuthenticatedAuthRoutes(authProtectedGroup, authController)

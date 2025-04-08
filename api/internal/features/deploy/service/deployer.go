@@ -95,6 +95,13 @@ func (s *DeployService) handleDockerfileDeployment(d DeployerConfig) error {
 		return err
 	}
 
+	caddyProxy := proxy.NewCaddy(&s.logger, d.contextPath, d.application.Domain, strconv.Itoa(d.application.Port), proxy.ReverseProxy)
+	if err := caddyProxy.Serve(); err != nil {
+		s.addLog(d.application.ID, fmt.Sprintf("Failed to start Caddy proxy: %v", err), d.deployment_config.ID)
+		return err
+	}
+	s.addLog(d.application.ID, "Caddy proxy started successfully", d.deployment_config.ID)
+
 	return nil
 }
 
@@ -148,7 +155,7 @@ func (s *DeployService) handleDockerComposeDeployment(d DeployerConfig) error {
 func (s *DeployService) handleStaticDeployment(d DeployerConfig) error {
 	s.addLog(d.application.ID, "Using static file deployment strategy", d.deployment_config.ID)
 
-	caddyProxy := proxy.NewCaddy(&s.logger, d.contextPath, d.application.Domain, strconv.Itoa(d.application.Port), proxy.FileServer)
+	caddyProxy := proxy.NewCaddy(&s.logger, d.contextPath, d.application.Domain, strconv.Itoa(443), proxy.FileServer)
 	if err := caddyProxy.Serve(); err != nil {
 		s.addLog(d.application.ID, fmt.Sprintf("Failed to start Caddy proxy: %v", err), d.deployment_config.ID)
 		return err

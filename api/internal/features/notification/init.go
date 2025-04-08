@@ -3,6 +3,7 @@ package notification
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -48,21 +49,6 @@ func (m *NotificationManager) Start() {
 		for {
 			select {
 			case payload := <-m.PayloadChan:
-				shouldSend, err := m.CheckUserNotificationPreferences(
-					payload.UserID,
-					NotificationCategory(payload.Category),
-					NotificationPayloadType(payload.Type),
-				)
-				if err != nil {
-					log.Printf("Failed to check notification preferences: %v", err)
-					continue
-				}
-
-				if !shouldSend {
-					log.Printf("Notification skipped due to user preferences: %+v", payload)
-					continue
-				}
-
 				switch payload.Category {
 				case NotificationCategoryAuthentication:
 					fmt.Printf("Authentication Notification - %+v", payload)
@@ -80,6 +66,34 @@ func (m *NotificationManager) Start() {
 							m.SendVerificationEmail(payload.UserID, data.Token)
 							m.SendSlackNotification(payload.UserID, "Email verification requested")
 							m.SendDiscordNotification(payload.UserID, "Email verification requested")
+						}
+					}
+					if payload.Type == NotificationPayloadTypeLogin {
+						fmt.Printf("Login Notification - %+v", payload)
+						if data, ok := payload.Data.(NotificationAuthenticationData); ok {
+							shouldSend, err := m.CheckUserNotificationPreferences(payload.UserID, NotificationCategoryAuthentication, "security-alerts")
+							if err != nil {
+								log.Printf("Failed to check notification preferences: %s", err)
+							}
+							if shouldSend {
+								err := m.SendEmailWithTemplate(payload.UserID, EmailData{
+									Subject:  "Login Notification",
+									Template: "login_notification.html",
+									Data: map[string]interface{}{
+										"IP":       data.IP,
+										"Browser":  data.Browser,
+										"Email":    data.Email,
+										"UserName": data.UserName,
+									},
+									Type:     "security-alerts",
+									ContentType: "text/html; charset=UTF-8",
+									Category: string(shared_types.SecurityCategory),
+								})
+								if err != nil {
+									log.Printf("Failed to send login notification email: %s", err)
+								}
+								m.SendDiscordNotification(payload.UserID, fmt.Sprintf("User %s logged in from %s", data.Email, data.IP))
+							}
 						}
 					}
 				case NotificationCategoryOrganization:
@@ -110,7 +124,7 @@ func (m *NotificationManager) SendNotification(payload NotificationPayload) {
 }
 
 // here we can get the notification preferences of the user (like should send to slack/email/discord, how many times to send, what type of contents to send)
-func (m *NotificationManager) CheckUserNotificationPreferences(userID string, category NotificationCategory, notificationType NotificationPayloadType) (bool, error) {
+func (m *NotificationManager) CheckUserNotificationPreferences(userID string, category NotificationCategory, notificationType string) (bool, error) {
 	uuidUserID, err := uuid.Parse(userID)
 	if err != nil {
 		return false, fmt.Errorf("invalid user ID: %w", err)
@@ -140,11 +154,11 @@ func (m *NotificationManager) CheckUserNotificationPreferences(userID string, ca
 
 	var storageType string
 	switch notificationType {
-	case NotificationPayloadTypePasswordReset:
+	case "password-changes":
 		storageType = "password-changes"
-	case NotificationPayloadTypeVerificationEmail:
+	case "security-alerts":
 		storageType = "security-alerts"
-	case NotificationPayloadTypeUpdateUserRole:
+	case "team-updates":
 		storageType = "team-updates"
 	default:
 		return false, fmt.Errorf("unsupported notification type: %s", notificationType)
@@ -347,9 +361,15 @@ func (m *NotificationManager) SendSlackNotification(userID string, message strin
 }
 
 func (m *NotificationManager) SendDiscordNotification(userID string, message string) error {
-	if m.Channels.Discord == nil || m.Channels.Discord.WebhookUrl == "" {
-		return nil
+	webhookConfig := &shared_types.WebhookConfig{}
+	err := m.db.NewSelect().Model(webhookConfig).Where("user_id = ?", userID).Where("type = ?", "discord").Scan(m.ctx)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		return fmt.Errorf("failed to get discord webhook config: %w", err)
 	}
+	webhookURL := webhookConfig.WebhookURL
 
 	payload := map[string]interface{}{
 		"content": message,
@@ -360,7 +380,7 @@ func (m *NotificationManager) SendDiscordNotification(userID string, message str
 		return fmt.Errorf("failed to marshal discord payload: %w", err)
 	}
 
-	resp, err := http.Post(m.Channels.Discord.WebhookUrl, "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("failed to send discord message: %w", err)
 	}

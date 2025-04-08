@@ -19,27 +19,25 @@ import {
   useSidebar
 } from '@/components/ui/sidebar';
 import { UserOrganization } from '@/redux/types/orgs';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { setActiveOrganization } from '@/redux/features/users/userSlice';
+import { useAppSelector } from '@/redux/hooks';
 import { DeleteDialog } from './delete-dialog';
 import { useDeleteOrganizationMutation } from '@/redux/services/users/userApi';
+import useTeamSwitcher from '@/hooks/use-team-switcher';
 
 export function TeamSwitcher({
   teams,
-  toggleAddTeamModal,
   refetch
 }: {
   teams?: UserOrganization[] | [];
-  toggleAddTeamModal?: () => void;
   refetch: () => void;
 }) {
   const { isMobile } = useSidebar();
   const user = useAppSelector((state) => state.auth.user);
   const isAdmin = React.useMemo(() => user?.type === 'admin', [user]);
   const activeTeam = useAppSelector((state) => state.user.activeOrganization);
-  const dispatch = useAppDispatch();
   const [deleteOrganization] = useDeleteOrganizationMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const { toggleAddTeamModal, handleTeamChange } = useTeamSwitcher();
 
   if (!teams || teams.length === 0) {
     return null;
@@ -51,10 +49,6 @@ export function TeamSwitcher({
     return null;
   }
 
-  const handleTeamChange = (team: UserOrganization) => {
-    dispatch(setActiveOrganization(team.organization));
-  };
-
   const handleDeleteOrganization = async () => {
     if (teams.length <= 1) {
       return;
@@ -63,7 +57,7 @@ export function TeamSwitcher({
     try {
       await deleteOrganization(displayTeam.id).unwrap();
       const remainingTeams = teams.filter((team) => team.organization.id !== displayTeam.id);
-      dispatch(setActiveOrganization(remainingTeams?.[0]?.organization || null));
+      handleTeamChange(remainingTeams[0]);
       await refetch();
       setIsDeleteDialogOpen(false);
     } catch (error) {

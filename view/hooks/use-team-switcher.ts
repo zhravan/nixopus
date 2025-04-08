@@ -1,7 +1,12 @@
-import { useAppSelector } from '@/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { useCreateOrganizationMutation } from '@/redux/services/users/userApi';
 import React from 'react';
 import { toast } from 'sonner';
+import { setActiveOrganization } from '@/redux/features/users/userSlice';
+import { domainsApi } from '@/redux/services/settings/domainsApi';
+import { GithubConnectorApi } from '@/redux/services/connector/githubConnectorApi';
+import { deployApi } from '@/redux/services/deploy/applicationsApi';
+import { notificationApi } from '@/redux/services/settings/notificationApi';
 
 function useTeamSwitcher() {
   const [open, setOpen] = React.useState(false);
@@ -10,6 +15,19 @@ function useTeamSwitcher() {
   const [teamName, setTeamName] = React.useState('');
   const [teamDescription, setTeamDescription] = React.useState('');
   const [createOrganization, { isLoading }] = useCreateOrganizationMutation();
+  const dispatch = useAppDispatch();
+
+  const handleTeamChange = async (team: any) => {
+    dispatch(setActiveOrganization(team.organization));
+    try {
+      dispatch(domainsApi.util.invalidateTags([{ type: 'Domains', id: 'LIST' }]));
+      dispatch(GithubConnectorApi.util.invalidateTags([{ type: 'GithubConnector', id: 'LIST' }]));
+      dispatch(deployApi.util.invalidateTags([{ type: 'Deploy', id: 'LIST' }]));
+      dispatch(notificationApi.util.invalidateTags([{ type: 'Notification', id: 'LIST' }]));
+    } catch (error) {
+      console.error('Failed to invalidate cache:', error);
+    }
+  };
 
   const toggleAddTeamModal = () => {
     setOpen(!open);
@@ -82,7 +100,8 @@ function useTeamSwitcher() {
     teamDescription,
     handleTeamNameChange,
     handleTeamDescriptionChange,
-    isLoading
+    isLoading,
+    handleTeamChange
   };
 }
 

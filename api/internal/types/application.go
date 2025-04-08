@@ -13,6 +13,7 @@ type Application struct {
 	Name                 string                   `json:"name" bun:"name,notnull"`
 	Port                 int                      `json:"port" bun:"port,notnull"`
 	Environment          Environment              `json:"environment" bun:"environment,notnull"`
+	ProxyServer          ProxyServer              `json:"proxy_server" bun:"proxy_server,notnull,default:caddy"`
 	BuildVariables       string                   `json:"build_variables" bun:"build_variables,notnull"`
 	EnvironmentVariables string                   `json:"environment_variables" bun:"environment_variables,notnull"`
 	BuildPack            BuildPack                `json:"build_pack" bun:"build_pack,notnull"`
@@ -102,6 +103,13 @@ const (
 	Development Environment = "development"
 	Staging     Environment = "staging"
 	Production  Environment = "production"
+)
+
+type ProxyServer string
+
+const (
+	Nginx ProxyServer = "nginx"
+	Caddy ProxyServer = "caddy"
 )
 
 type BuildPack string

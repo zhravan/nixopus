@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-fuego/fuego"
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/utils"
@@ -43,9 +44,18 @@ func (c *DeployController) HandleDeploy(f fuego.ContextWithBody[types.CreateDepl
 		}
 	}
 
+	organizationID := utils.GetOrganizationID(f.Request())
+	if organizationID == uuid.Nil {
+		c.logger.Log(logger.Error, "organization not found", "name: "+data.Name)
+		return nil, fuego.HTTPError{
+			Err:    nil,
+			Status: http.StatusUnauthorized,
+		}
+	}
+
 	c.logger.Log(logger.Info, "attempting to create deployment", "name: "+data.Name+", user_id: "+user.ID.String())
 
-	application, err := c.service.CreateDeployment(&data, user.ID)
+	application, err := c.service.CreateDeployment(&data, user.ID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "failed to create deployment", "name: "+data.Name+", error: "+err.Error())
 		return nil, fuego.HTTPError{
@@ -100,9 +110,18 @@ func (c *DeployController) UpdateApplication(f fuego.ContextWithBody[types.Updat
 		}
 	}
 
+	organizationID := utils.GetOrganizationID(f.Request())
+	if organizationID == uuid.Nil {
+		c.logger.Log(logger.Error, "organization not found", "id: "+data.ID.String())
+		return nil, fuego.HTTPError{
+			Err:    nil,
+			Status: http.StatusUnauthorized,
+		}
+	}
+
 	c.logger.Log(logger.Info, "attempting to update application", "id: "+data.ID.String()+", user_id: "+user.ID.String())
 
-	application, err := c.service.UpdateDeployment(&data, user.ID)
+	application, err := c.service.UpdateDeployment(&data, user.ID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "failed to update application", "id: "+data.ID.String()+", error: "+err.Error())
 		return nil, fuego.HTTPError{
@@ -214,9 +233,18 @@ func (c *DeployController) ReDeployApplication(f fuego.ContextWithBody[types.ReD
 		}
 	}
 
+	organizationID := utils.GetOrganizationID(f.Request())
+	if organizationID == uuid.Nil {
+		c.logger.Log(logger.Error, "organization not found", "id: "+data.ID.String())
+		return nil, fuego.HTTPError{
+			Err:    nil,
+			Status: http.StatusUnauthorized,
+		}
+	}
+
 	c.logger.Log(logger.Info, "attempting to redeploy application", "id: "+data.ID.String()+", user_id: "+user.ID.String())
 
-	application, err := c.service.ReDeployApplication(&data, user.ID)
+	application, err := c.service.ReDeployApplication(&data, user.ID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "failed to redeploy application", "id: "+data.ID.String()+", error: "+err.Error())
 		return nil, fuego.HTTPError{
@@ -290,9 +318,18 @@ func (c *DeployController) HandleRollback(f fuego.ContextWithBody[types.Rollback
 		}
 	}
 
+	organizationID := utils.GetOrganizationID(f.Request())
+	if organizationID == uuid.Nil {
+		c.logger.Log(logger.Error, "organization not found", "id: "+data.ID.String())
+		return nil, fuego.HTTPError{
+			Err:    nil,
+			Status: http.StatusUnauthorized,
+		}
+	}
+
 	c.logger.Log(logger.Info, "attempting to rollback application", "id: "+data.ID.String()+", user_id: "+user.ID.String())
 
-	err = c.service.RollbackDeployment(&data, user.ID)
+	err = c.service.RollbackDeployment(&data, user.ID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "failed to rollback application", "id: "+data.ID.String()+", error: "+err.Error())
 		return nil, fuego.HTTPError{
@@ -349,7 +386,15 @@ func (c *DeployController) HandleRestart(f fuego.ContextWithBody[types.RestartDe
 
 	c.logger.Log(logger.Info, "attempting to restart application", "id: "+data.ID.String()+", user_id: "+user.ID.String())
 
-	err = c.service.RestartDeployment(&data, user.ID)
+	organizationID := utils.GetOrganizationID(f.Request())
+	if organizationID == uuid.Nil {
+		c.logger.Log(logger.Error, "organization not found", "id: "+data.ID.String())
+		return nil, fuego.HTTPError{
+			Err:    nil,
+			Status: http.StatusUnauthorized,
+		}
+	}
+	err = c.service.RestartDeployment(&data, user.ID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "failed to restart application", "id: "+data.ID.String()+", error: "+err.Error())
 		return nil, fuego.HTTPError{

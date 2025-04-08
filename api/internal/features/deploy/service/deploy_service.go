@@ -12,8 +12,8 @@ import (
 
 // CreateDeployment creates a new application deployment in the database
 // and starts the deployment process in a separate goroutine.
-func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
-	application := createApplicationFromDeploymentRequest(deployment, userID, nil)
+func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) (shared_types.Application, error) {
+	application := createApplicationFromDeploymentRequest(deployment, userID, organizationID, nil)
 
 	deploy_config, err := s.prepareDeploymentConfig(application, userID, shared_types.DeploymentTypeCreate, false, false)
 	if err != nil {
@@ -27,8 +27,8 @@ func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentReque
 
 // UpdateDeployment updates an existing application deployment
 // in the database and starts the deployment process in a separate goroutine.
-func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
-	application, err := s.storage.GetApplicationById(deployment.ID.String())
+func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) (shared_types.Application, error) {
+	application, err := s.storage.GetApplicationById(deployment.ID.String(), organizationID)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -46,8 +46,8 @@ func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentReque
 }
 
 // ReDeployApplication redeploys an existing application
-func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployApplicationRequest, userID uuid.UUID) (shared_types.Application, error) {
-	application, err := s.storage.GetApplicationById(redeployRequest.ID.String())
+func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployApplicationRequest, userID uuid.UUID, organizationID uuid.UUID) (shared_types.Application, error) {
+	application, err := s.storage.GetApplicationById(redeployRequest.ID.String(), organizationID)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
@@ -134,13 +134,13 @@ func (s *DeployService) DeleteDeployment(deployment *types.DeleteDeploymentReque
 	return s.storage.DeleteDeployment(deployment, userID)
 }
 
-func (s *DeployService) RollbackDeployment(deployment *types.RollbackDeploymentRequest, userID uuid.UUID) error {
+func (s *DeployService) RollbackDeployment(deployment *types.RollbackDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) error {
 	deployment_details, err := s.storage.GetApplicationDeploymentById(deployment.ID.String())
 	if err != nil {
 		return err
 	}
 
-	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()))
+	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()), organizationID)
 	if err != nil {
 		return err
 	}
@@ -157,13 +157,13 @@ func (s *DeployService) RollbackDeployment(deployment *types.RollbackDeploymentR
 	return nil
 }
 
-func (s *DeployService) RestartDeployment(deployment *types.RestartDeploymentRequest, userID uuid.UUID) error {
+func (s *DeployService) RestartDeployment(deployment *types.RestartDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) error {
 	deployment_details, err := s.storage.GetApplicationDeploymentById(deployment.ID.String())
 	if err != nil {
 		return err
 	}
 
-	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()))
+	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()), organizationID)
 	if err != nil {
 		return err
 	}

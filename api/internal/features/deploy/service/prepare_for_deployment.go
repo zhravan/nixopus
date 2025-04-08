@@ -13,7 +13,7 @@ import (
 // and a user ID. It populates the application's fields with the corresponding
 // values from the request, and sets the CreatedAt and UpdatedAt fields to the
 // current time.
-func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRequest, userID uuid.UUID, createdAt *time.Time) shared_types.Application {
+func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID, createdAt *time.Time) shared_types.Application {
 	timeValue := time.Now()
 	if createdAt != nil {
 		timeValue = *createdAt
@@ -37,6 +37,7 @@ func createApplicationFromDeploymentRequest(deployment *types.CreateDeploymentRe
 		UpdatedAt:            time.Now(),
 		DockerfilePath:       deployment.DockerfilePath,
 		BasePath:             deployment.BasePath,
+		OrganizationID:       organizationID,
 	}
 
 	return application

@@ -24,9 +24,9 @@ type DeployRepository interface {
 	AddApplication(application *shared_types.Application) error
 	AddApplicationLogs(applicationLogs *shared_types.ApplicationLogs) error
 	AddApplicationStatus(applicationStatus *shared_types.ApplicationStatus) error
-	GetApplications(page int, pageSize int, userID uuid.UUID) ([]shared_types.Application, int, error)
+	GetApplications(page int, pageSize int, userID uuid.UUID, organizationID uuid.UUID) ([]shared_types.Application, int, error)
 	UpdateApplicationStatus(applicationStatus *shared_types.ApplicationStatus) error
-	GetApplicationById(id string) (shared_types.Application, error)
+	GetApplicationById(id string, organizationID uuid.UUID) (shared_types.Application, error)
 	AddApplicationDeployment(deployment *shared_types.ApplicationDeployment) error
 	AddApplicationDeploymentStatus(deployment_status *shared_types.ApplicationDeploymentStatus) error
 	UpdateApplicationDeploymentStatus(applicationStatus *shared_types.ApplicationDeploymentStatus) error
@@ -147,7 +147,7 @@ func (s *DeployStorage) AddApplicationLogs(applicationLogs *shared_types.Applica
 	return nil
 }
 
-func (s *DeployStorage) GetApplications(page, pageSize int, userID uuid.UUID) ([]shared_types.Application, int, error) {
+func (s *DeployStorage) GetApplications(page, pageSize int, userID uuid.UUID, organizationID uuid.UUID) ([]shared_types.Application, int, error) {
 	var applications []shared_types.Application
 
 	offset := (page - 1) * pageSize
@@ -167,7 +167,7 @@ func (s *DeployStorage) GetApplications(page, pageSize int, userID uuid.UUID) ([
 		Order("created_at DESC").
 		Limit(pageSize).
 		Offset(offset).
-		Where("user_id = ?", userID).
+		Where("user_id = ? AND organization_id = ?", userID, organizationID).
 		Scan(s.Ctx)
 
 	if err != nil {
@@ -177,7 +177,7 @@ func (s *DeployStorage) GetApplications(page, pageSize int, userID uuid.UUID) ([
 	return applications, totalCount, nil
 }
 
-func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application, error) {
+func (s *DeployStorage) GetApplicationById(id string, organizationID uuid.UUID) (shared_types.Application, error) {
 	var application shared_types.Application
 
 	err := s.DB.NewSelect().
@@ -188,7 +188,7 @@ func (s *DeployStorage) GetApplicationById(id string) (shared_types.Application,
 		}).
 		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
 		Relation("Deployments.Status").
-		Where("a.id = ?", id).
+		Where("a.id = ? AND a.organization_id = ?", id, organizationID).
 		Scan(s.Ctx)
 
 	if err != nil {

@@ -15,26 +15,12 @@ import (
 func (s *DeployService) CreateDeployment(deployment *types.CreateDeploymentRequest, userID uuid.UUID) (shared_types.Application, error) {
 	application := createApplicationFromDeploymentRequest(deployment, userID, nil)
 
-	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
-		Type:              shared_types.DeploymentTypeCreate,
-		Force:             false,
-		ForceWithoutCache: false,
-	})
+	deploy_config, err := s.prepareDeploymentConfig(application, userID, shared_types.DeploymentTypeCreate, false, false)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
 
-	deploy_config := DeployerConfig{
-		application:       application,
-		deployment:        deployRequest,
-		userID:            userID,
-		contextPath:       "",
-		appStatus:         deployStatus,
-		deployment_config: &deployment_config,
-	}
-
 	go s.StartDeploymentInBackground(deploy_config)
-
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
 	return application, nil
 }
@@ -49,26 +35,12 @@ func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentReque
 
 	application = createApplicationFromExistingApplicationAndUpdateRequest(application, deployment)
 
-	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
-		Type:              shared_types.DeploymentTypeUpdate,
-		Force:             false,
-		ForceWithoutCache: false,
-	})
+	deploy_config, err := s.prepareDeploymentConfig(application, userID, shared_types.DeploymentTypeUpdate, false, false)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
 
-	deploy_config := DeployerConfig{
-		application:       application,
-		deployment:        deployRequest,
-		userID:            userID,
-		contextPath:       "",
-		appStatus:         deployStatus,
-		deployment_config: &deployment_config,
-	}
-
 	go s.StartDeploymentInBackground(deploy_config)
-
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
 	return application, nil
 }
@@ -80,26 +52,12 @@ func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployAppli
 		return shared_types.Application{}, err
 	}
 
-	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
-		Type:              shared_types.DeploymentTypeReDeploy,
-		Force:             redeployRequest.Force,
-		ForceWithoutCache: redeployRequest.ForceWithoutCache,
-	})
+	deploy_config, err := s.prepareDeploymentConfig(application, userID, shared_types.DeploymentTypeReDeploy, redeployRequest.Force, redeployRequest.ForceWithoutCache)
 	if err != nil {
 		return shared_types.Application{}, err
 	}
 
-	deploy_config := DeployerConfig{
-		application:       application,
-		deployment:        deployRequest,
-		userID:            userID,
-		contextPath:       "",
-		appStatus:         deployStatus,
-		deployment_config: &deployment_config,
-	}
-
 	go s.StartDeploymentInBackground(deploy_config)
-
 	s.logger.Log(logger.Info, types.LogDeploymentStarted, "")
 	return application, nil
 }
@@ -181,33 +139,21 @@ func (s *DeployService) RollbackDeployment(deployment *types.RollbackDeploymentR
 	if err != nil {
 		return err
 	}
-	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()))
 
+	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()))
 	if err != nil {
 		return err
 	}
 
 	deployStatus := createDeploymentStatus(deployment.ID)
-
 	s.updateStatus(deployment_details.ID, shared_types.Deploying, deployStatus.ID)
 
-	deployRequest := shared_types.DeploymentRequestConfig{
-		Type:              shared_types.DeploymentTypeRollback,
-		Force:             false,
-		ForceWithoutCache: false,
-	}
-
-	deploy_config := DeployerConfig{
-		application:       application_details,
-		deployment:        &deployRequest,
-		userID:            userID,
-		contextPath:       "",
-		appStatus:         deployStatus,
-		deployment_config: &deployment_details,
+	deploy_config, err := s.prepareDeploymentConfig(application_details, userID, shared_types.DeploymentTypeRollback, false, false)
+	if err != nil {
+		return err
 	}
 
 	go s.StartDeploymentInBackground(deploy_config)
-
 	return nil
 }
 
@@ -216,33 +162,40 @@ func (s *DeployService) RestartDeployment(deployment *types.RestartDeploymentReq
 	if err != nil {
 		return err
 	}
-	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()))
 
+	application_details, err := s.storage.GetApplicationById(string(deployment_details.ApplicationID.String()))
 	if err != nil {
 		return err
 	}
 
 	deployStatus := createDeploymentStatus(deployment.ID)
-
 	s.updateStatus(deployment_details.ID, shared_types.Deploying, deployStatus.ID)
 
-	deployRequest := shared_types.DeploymentRequestConfig{
-		Type:              shared_types.DeploymentTypeRestart,
-		Force:             false,
-		ForceWithoutCache: false,
+	deploy_config, err := s.prepareDeploymentConfig(application_details, userID, shared_types.DeploymentTypeRestart, false, false)
+	if err != nil {
+		return err
 	}
 
-	deploy_config := DeployerConfig{
-		application:       application_details,
-		deployment:        &deployRequest,
+	s.StartDeploymentInBackground(deploy_config)
+	return nil
+}
+
+func (s *DeployService) prepareDeploymentConfig(application shared_types.Application, userID uuid.UUID, deploymentType shared_types.DeploymentType, force, forceWithoutCache bool) (DeployerConfig, error) {
+	deployRequest, deployStatus, deployment_config, err := s.createAndPrepareDeployment(application, shared_types.DeploymentRequestConfig{
+		Type:              deploymentType,
+		Force:             force,
+		ForceWithoutCache: forceWithoutCache,
+	})
+	if err != nil {
+		return DeployerConfig{}, err
+	}
+
+	return DeployerConfig{
+		application:       application,
+		deployment:        deployRequest,
 		userID:            userID,
 		contextPath:       "",
 		appStatus:         deployStatus,
-		deployment_config: &deployment_details,
-	}
-
-	// we will not run it in the background since it is a restart of the application
-	s.StartDeploymentInBackground(deploy_config)
-
-	return nil
+		deployment_config: &deployment_config,
+	}, nil
 }

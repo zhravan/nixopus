@@ -17,13 +17,6 @@ func (c *DeployController) HandleDeploy(f fuego.ContextWithBody[types.CreateDepl
 
 	data, err := f.Body()
 	if err != nil {
-		if err == io.EOF {
-			c.logger.Log(logger.Error, "empty request body received", "deployment details are required")
-			return nil, fuego.HTTPError{
-				Err:    types.ErrMissingName,
-				Status: http.StatusBadRequest,
-			}
-		}
 		c.logger.Log(logger.Error, "failed to read request body", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    err,

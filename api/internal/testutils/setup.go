@@ -217,7 +217,7 @@ func (s *TestSetup) CreateTestUserAndOrg() (*types.User, *types.Organization, er
 		Type:     "admin",
 	}
 
-	authResponse, err := s.AuthService.Register(registrationRequest)
+	authResponse, err := s.AuthService.Register(registrationRequest,"admin")
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create test user: %w", err)
 	}

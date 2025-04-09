@@ -18,7 +18,7 @@ func TestLogin(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	_, err := setup.AuthService.Register(registerRequest)
+	_, err := setup.AuthService.Register(registerRequest,"app_user")
 	assert.NoError(t, err)
 
 	tests := []struct {

@@ -18,7 +18,7 @@ func TestRefreshToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := setup.AuthService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest,"app_user")
 	assert.NoError(t, err)
 
 	tests := []struct {
@@ -81,7 +81,7 @@ func TestRefreshTokenWithRevokedToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := setup.AuthService.Register(registerRequest)
+	registerResponse, err := setup.AuthService.Register(registerRequest,"app_user")
 	assert.NoError(t, err)
 
 	err = setup.AuthService.Logout(registerResponse.RefreshToken)

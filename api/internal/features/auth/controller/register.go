@@ -20,7 +20,7 @@ func (c *AuthController) Register(f fuego.ContextWithBody[types.RegisterRequest]
 		}
 	}
 
-	userResponse, err := c.service.Register(registration_request,"admin")
+	userResponse, err := c.service.Register(registration_request, "admin")
 	if err != nil {
 		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return nil, nil
@@ -50,7 +50,7 @@ func (c *AuthController) CreateUser(s fuego.ContextWithBody[types.RegisterReques
 		}
 	}
 
-	userResponse, err := c.service.Register(registration_request,"app_user")
+	userResponse, err := c.service.Register(registration_request, "app_user")
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,

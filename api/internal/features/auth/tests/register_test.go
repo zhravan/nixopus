@@ -53,7 +53,7 @@ func TestRegister(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			response, err := setup.AuthService.Register(tt.request,"admin")
+			response, err := setup.AuthService.Register(tt.request, "admin")
 
 			if tt.expectError {
 				assert.Error(t, err)
@@ -81,7 +81,7 @@ func TestRegisterWithOrganization(t *testing.T) {
 		Type:     "admin",
 	}
 
-	response, err := setup.AuthService.Register(request,"admin")
+	response, err := setup.AuthService.Register(request, "admin")
 	assert.NoError(t, err)
 
 	assert.NotEmpty(t, response.User.ID)

@@ -18,7 +18,7 @@ func TestResetPassword(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := setup.AuthService.Register(registerRequest,"app_user")
+	registerResponse, err := setup.AuthService.Register(registerRequest, "app_user")
 	assert.NoError(t, err)
 
 	user, resetToken, err := setup.AuthService.GeneratePasswordResetLink(&registerResponse.User)
@@ -77,7 +77,7 @@ func TestResetPasswordWithExpiredToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := setup.AuthService.Register(registerRequest,"app_user")
+	registerResponse, err := setup.AuthService.Register(registerRequest, "app_user")
 	assert.NoError(t, err)
 
 	user, resetToken, err := setup.AuthService.GeneratePasswordResetLink(&registerResponse.User)

@@ -18,7 +18,7 @@ func TestVerifyToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := setup.AuthService.Register(registerRequest,"app_user")
+	registerResponse, err := setup.AuthService.Register(registerRequest, "app_user")
 	assert.NoError(t, err)
 
 	verificationToken, err := setup.AuthService.GenerateVerificationToken(registerResponse.User.ID.String())
@@ -80,7 +80,7 @@ func TestVerifyTokenWithExpiredToken(t *testing.T) {
 		Type:     "viewer",
 	}
 
-	registerResponse, err := setup.AuthService.Register(registerRequest,"app_user")
+	registerResponse, err := setup.AuthService.Register(registerRequest, "app_user")
 	assert.NoError(t, err)
 
 	verificationToken, err := setup.AuthService.GenerateVerificationToken(registerResponse.User.ID.String())

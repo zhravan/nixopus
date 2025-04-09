@@ -73,7 +73,7 @@ func (router *Router) Routes() {
 	healthGroup := fuego.Group(server, "/api/v1/health")
 	router.BasicRoutes(healthGroup)
 
-	notificationManager := notification.NewNotificationManager(notification.NewNotificationChannels(), router.app.Store.DB)
+	notificationManager := notification.NewNotificationManager(router.app.Store.DB)
 	notificationManager.Start()
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
 	router.WebSocketServer(server, deployController)

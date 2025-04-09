@@ -50,59 +50,16 @@ func (m *NotificationManager) Start() {
 				case NotificationCategoryAuthentication:
 					fmt.Printf("Authentication Notification - %+v", payload)
 					if payload.Type == NotificationPayloadTypePasswordReset {
-						fmt.Printf("Password Reset Notification - %+v", payload)
-						if data, ok := payload.Data.(NotificationPasswordResetData); ok {
-							m.emailManager.SendPasswordResetEmail(payload.UserID, data.Token)
-							m.slackManager.SendNotification("Password reset requested")
-							m.discordManager.SendNotification("Password reset requested")
-						}
+						m.SendPasswordResetNotification(payload)
 					}
 					if payload.Type == NotificationPayloadTypeVerificationEmail {
-						fmt.Printf("Verification Email Notification - %+v", payload)
-						if data, ok := payload.Data.(NotificationVerificationEmailData); ok {
-							m.emailManager.SendVerificationEmail(payload.UserID, data.Token)
-							m.slackManager.SendNotification("Email verification requested")
-							m.discordManager.SendNotification("Email verification requested")
-						}
+						m.SendVerificationEmailNotification(payload)
 					}
 					if payload.Type == NotificationPayloadTypeLogin {
-						fmt.Printf("Login Notification - %+v", payload)
-						if data, ok := payload.Data.(NotificationAuthenticationData); ok {
-							shouldSend, err := m.prefManager.CheckUserNotificationPreferences(payload.UserID, string(NotificationCategoryAuthentication), "security-alerts")
-							if err != nil {
-								log.Printf("Failed to check notification preferences: %s", err)
-							}
-							if shouldSend {
-								err := m.emailManager.SendEmailWithTemplate(payload.UserID, email.EmailData{
-									Subject:  "Login Notification",
-									Template: "login_notification.html",
-									Data: map[string]interface{}{
-										"IP":       data.IP,
-										"Browser":  data.Browser,
-										"Email":    data.Email,
-										"UserName": data.UserName,
-									},
-									Type:        "security-alerts",
-									ContentType: "text/html; charset=UTF-8",
-									Category:    string(shared_types.SecurityCategory),
-								})
-								if err != nil {
-									log.Printf("Failed to send login notification email: %s", err)
-								}
-								m.discordManager.SendNotification(fmt.Sprintf("User %s logged in from %s", data.Email, data.IP))
-							}
-						}
+						m.SendLoginNotification(payload)
 					}
 				case NotificationCategoryOrganization:
-					fmt.Printf("Organization Notification - %+v", payload)
-					if payload.Type == NotificationPayloadTypeUpdateUserRole {
-						fmt.Printf("Update User Role Notification - %+v", payload)
-						if data, ok := payload.Data.(NotificationOrganizationData); ok {
-							m.emailManager.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
-							m.slackManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
-							m.discordManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
-						}
-					}
+					m.SendOrganizationNotification(payload)
 				}
 			case <-m.ctx.Done():
 				return
@@ -118,4 +75,63 @@ func (m *NotificationManager) Stop() {
 // SendNotification sends a notification
 func (m *NotificationManager) SendNotification(payload NotificationPayload) {
 	m.PayloadChan <- payload
+}
+
+// SendLoginNotification sends a login notification to the user
+func (m *NotificationManager) SendLoginNotification(payload NotificationPayload) {
+	fmt.Printf("Login Notification - %+v", payload)
+	if data, ok := payload.Data.(NotificationAuthenticationData); ok {
+		shouldSend, err := m.prefManager.CheckUserNotificationPreferences(payload.UserID, string(NotificationCategoryAuthentication), "login-alerts")
+		if err != nil {
+			log.Printf("Failed to check notification preferences: %s", err)
+		}
+		if shouldSend {
+			err := m.emailManager.SendEmailWithTemplate(payload.UserID, email.EmailData{
+				Subject:  "Login Notification",
+				Template: "login_notification.html",
+				Data: map[string]interface{}{
+					"IP":       data.IP,
+					"Browser":  data.Browser,
+					"Email":    data.Email,
+					"UserName": data.UserName,
+				},
+				Type:        "login-alerts",
+				ContentType: "text/html; charset=UTF-8",
+				Category:    string(shared_types.SecurityCategory),
+			})
+			if err != nil {
+				log.Printf("Failed to send login notification email: %s", err)
+			}
+		}
+	}
+}
+
+// SendPasswordResetNotification sends a password reset notification to the user
+func (m *NotificationManager) SendPasswordResetNotification(payload NotificationPayload) {
+	fmt.Printf("Password Reset Notification - %+v", payload)
+
+	// we need not to check the notification preferences for password reset notifications
+	if data, ok := payload.Data.(NotificationPasswordResetData); ok {
+		m.emailManager.SendPasswordResetEmail(payload.UserID, data.Token)
+	}
+}
+
+// SendVerificationEmailNotification sends a verification email notification to the user
+func (m *NotificationManager) SendVerificationEmailNotification(payload NotificationPayload) {
+	fmt.Printf("Verification Email Notification - %+v", payload)
+	if data, ok := payload.Data.(NotificationVerificationEmailData); ok {
+		m.emailManager.SendVerificationEmail(payload.UserID, data.Token)
+	}
+}
+
+// SendOrganizationNotification sends an organization related notification to the user
+func (m *NotificationManager) SendOrganizationNotification(payload NotificationPayload) {
+	fmt.Printf("Organization Notification - %+v", payload)
+	if payload.Type == NotificationPayloadTypeUpdateUserRole {
+		if data, ok := payload.Data.(NotificationOrganizationData); ok {
+			m.emailManager.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
+			m.slackManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
+			m.discordManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
+		}
+	}
 }

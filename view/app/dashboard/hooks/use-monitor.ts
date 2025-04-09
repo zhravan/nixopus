@@ -1,18 +1,16 @@
 'use client';
 import { useWebSocket } from '@/hooks/socket-provider';
-import { useTranslation } from '@/hooks/use-translation';
 import { ContainerData, SystemStatsType } from '@/redux/types/monitor';
 import { useEffect, useState, useRef } from 'react';
-import { toast } from 'sonner';
 
 function use_monitor() {
   const { sendJsonMessage, message, isReady } = useWebSocket();
   const [containersData, setContainersData] = useState<ContainerData[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStatsType | null>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const isInitializedRef = useRef(false);
-  const { t } = useTranslation();
 
   useEffect(() => {
     if (message) {
@@ -26,21 +24,23 @@ function use_monitor() {
 
         if (parsedMessage.action === 'get_containers' && parsedMessage.data) {
           setContainersData(parsedMessage.data);
+          setLastError(null);
         } else if (parsedMessage.action === 'get_system_stats' && parsedMessage.data) {
           setSystemStats(parsedMessage.data);
+          setLastError(null);
         } else if (parsedMessage.action === 'error') {
+          setLastError(parsedMessage.error || 'Unknown error occurred');
           if (isMonitoring) {
             stopMonitoring();
             setTimeout(startMonitoring, 5000);
           }
         }
       } catch (error) {
-        toast.error(t('toasts.errors.realtimeMonitor'), {
-          description: error instanceof Error ? error.message : 'Unknown error'
-        });
+        console.error('Error parsing WebSocket message:', error);
+        setLastError('Failed to parse message');
       }
     }
-  }, [message, t]);
+  }, [message]);
 
   const startMonitoring = () => {
     if (!isMonitoring) {
@@ -52,6 +52,7 @@ function use_monitor() {
         }
       });
       setIsMonitoring(true);
+      setLastError(null);
     }
   };
 
@@ -77,7 +78,7 @@ function use_monitor() {
   }, [isReady]);
 
   useEffect(() => {
-    if (isReady && !isMonitoring) {
+    if (isReady && !isMonitoring && lastError) {
       reconnectTimeoutRef.current = setTimeout(() => {
         startMonitoring();
       }, 5000);
@@ -87,12 +88,13 @@ function use_monitor() {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [isReady, isMonitoring]);
+  }, [isReady, isMonitoring, lastError]);
 
   return {
     containersData,
     systemStats,
     isMonitoring,
+    lastError,
     startMonitoring,
     stopMonitoring
   };

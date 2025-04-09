@@ -2,6 +2,7 @@ package preferences
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -36,28 +37,24 @@ func (m *PreferenceManager) CheckUserNotificationPreferences(userID string, cate
 		Scan(m.ctx, &preferenceID)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return true, nil
+		}
 		return false, fmt.Errorf("failed to fetch user preferences: %w", err)
-	}
-
-	var storageCategory string
-	switch category {
-	case "security":
-		storageCategory = "security"
-	case "activity":
-		storageCategory = "activity"
-	default:
-		return false, fmt.Errorf("unsupported notification category: %s", category)
 	}
 
 	var preferenceItem shared_types.PreferenceItem
 	err = m.db.NewSelect().
 		Model(&preferenceItem).
 		Where("preference_id = ?", preferenceID).
-		Where("category = ?", storageCategory).
+		Where("category = ?", category).
 		Where("type = ?", notificationType).
 		Scan(m.ctx)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return true, nil
+		}
 		return false, fmt.Errorf("failed to fetch preference item: %w", err)
 	}
 

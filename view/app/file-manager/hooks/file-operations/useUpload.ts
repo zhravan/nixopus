@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { useUploadFileMutation } from '@/redux/services/file-manager/fileManagersApi';
 import useFileManager from '../ui/useFileManager';
+import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface FileObject {
   id: string;
@@ -9,6 +11,7 @@ interface FileObject {
 }
 
 export default function use_file_upload() {
+  const { t } = useTranslation();
   const [files, setFiles] = useState<FileObject[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,27 +57,31 @@ export default function use_file_upload() {
     }));
 
     setFiles((prev) => [...prev, ...fileObjects]);
-    uploadFiles(fileObjects);
+    handleUpload();
   };
 
-  const uploadFiles = async (fileObjects: FileObject[]) => {
-    for (const fileObj of fileObjects) {
+  const handleUpload = async () => {
+    for (const fileObj of files) {
       try {
-        const formData = new FormData();
-        formData.append('file', fileObj.file);
-        formData.append('path', currentPath);
-
         await uploadFile({ file: fileObj.file, path: currentPath });
         setFiles((prev) => prev.filter((f) => f.id !== fileObj.id));
       } catch (error) {
-        console.error('Failed to upload file:', error);
+        toast.error(t('toasts.errors.uploadFile'), {
+          description: error instanceof Error ? error.message : 'Unknown error'
+        });
       }
     }
     refetch();
   };
 
   const deleteFile = (id: string) => {
-    setFiles((prev) => prev.filter((file) => file.id !== id));
+    try {
+      setFiles((prev) => prev.filter((file) => file.id !== id));
+    } catch (error) {
+      toast.error(t('toasts.errors.deleteFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   return {

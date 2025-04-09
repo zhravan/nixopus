@@ -6,6 +6,8 @@ import subprocess
 import platform
 from pathlib import Path
 import re
+from validation import Validation
+from environment import EnvironmentSetup
 
 class Installer:
     def __init__(self):
@@ -21,26 +23,9 @@ class Installer:
             print("Please run the script with sudo privileges")
             sys.exit(1)
     
-    def ask_email(self):
-        email = input("Please enter your email: ")
-        if not email:
-            print("Error: Email is required")
-            sys.exit(1)
-        return email
-    
-    def ask_password(self):
-        password = input("Please enter your password: ")
-        if not password:
-            print("Error: Password is required")
-            sys.exit(1)
-        return password
-    
     def ask_domain(self):
         domain = input("Please enter the domain in which you want to run the application (e.g. nixopus.com): ")
-        if not domain:
-            print("Error: Domain is required")
-            sys.exit(1)
-        return domain
+        return Validation.validate_domain(domain)
     
     def check_docker_version(self):
         docker_version = subprocess.check_output(["docker", "--version"]).decode()
@@ -74,37 +59,12 @@ class Installer:
             return False
         return tuple(map(int, version.group().split('.'))) >= tuple(map(int, required_version.split('.')))
 
-    def setup_environment(self):
-        print("\nSetting up environment variables...")
-        
-        if not self.env_sample.exists():
-            print("Error: .env.sample file not found")
-            sys.exit(1)
-
-        if self.env_file.exists():
-            print("Warning: .env file already exists")
-            if input("Do you want to overwrite it? (y/n): ").lower() != 'y':
-                print("Using existing .env file")
-                return
-
-        env_vars = {}
-        with open(self.env_sample) as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    key, default = line.split('=', 1)
-                    env_vars[key] = default
-
-        print("\nPlease provide the following configuration values:")
-        for key, default in env_vars.items():
-            value = input(f"{key} [{default}]: ").strip()
-            env_vars[key] = value if value else default
-
-        with open(self.env_file, 'w') as f:
-            for key, value in env_vars.items():
-                f.write(f"{key}={value}\n")
-
+    def setup_environment(self, domain):
+        print("\nSetting up environment...")
+        env_setup = EnvironmentSetup(domain)
+        env_vars = env_setup.setup_environment()
         print("Environment setup completed!")
+        return env_vars
 
     def start_services(self):
         print("\nStarting services...")
@@ -134,27 +94,37 @@ class Installer:
 def main():
     installer = Installer()
     
-    print("Nixopus Installation Script")
-    print("===========================")
+    print("\033[36m  _   _ _ _                           \033[0m")
+    print("\033[36m | \ | (_)                          \033[0m")
+    print("\033[36m |  \| |___  _____  _ __  _   _ ___ \033[0m")
+    print("\033[36m | . \` | \ \/ / _ \| '_ \| | | / __|\033[0m")
+    print("\033[36m | |\  | |>  < (_) | |_) | |_| \__ \033[0m")
+    print("\033[36m |_| \_|_/_/\_\___/| .__/ \__,_|___/\033[0m")
+    print("\033[36m                   | |              \033[0m")
+    print("\033[36m                   |_|              \033[0m")
+    print("")
     
     installer.ask_for_sudo()
-    email = installer.ask_email()
-    password = installer.ask_password()
     domain = installer.ask_domain()
     
     installer.check_system_requirements()
-    installer.setup_environment()
+    env_vars = installer.setup_environment(domain)
     installer.start_services()
     installer.verify_installation()
     
     print("\nInstallation completed successfully!")
     print("You can access the application at:")
-    print(f"- API: https://{domain}/api")
+    print(f"- API: https://api.{domain}/api")
     print(f"- View: https://{domain}")
     
-    print("\nYou can now login with the following credentials:")
-    print(f"Email: {email}")
-    print(f"Password: {password}")
+    print("\nGenerated credentials:")
+    print(f"Database:")
+    print(f"  Name: {env_vars['DB_NAME']}")
+    print(f"  Username: {env_vars['USERNAME']}")
+    print(f"  Password: {env_vars['PASSWORD']}")
+    print(f"SSH:")
+    print(f"  Username: {env_vars['SSH_USER']}")
+    print(f"  Private Key: {env_vars['SSH_PRIVATE_KEY']}")
 
 if __name__ == "__main__":
     main() 

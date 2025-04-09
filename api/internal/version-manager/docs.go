@@ -16,7 +16,6 @@ type VersionInfo struct {
 	Changes     []string  `json:"changes,omitempty"`
 }
 
-
 type VersionDocumentation struct {
 	Versions []VersionInfo `json:"versions"`
 }

@@ -1,16 +1,20 @@
 package email
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/preferences"
 	"github.com/raghavyuva/nixopus-api/internal/types"
-	"github.com/uptrace/bun"
-
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+	"github.com/uptrace/bun"
+	"net/smtp"
 )
 
 type EmailManager struct {
@@ -66,21 +70,50 @@ func (m *EmailManager) SendEmailWithTemplate(userID string, data EmailData) erro
 		return fmt.Errorf("failed to fetch user: %w", err)
 	}
 
-	// TODO: Implement actual email sending logic here
 	log.Printf("Sending email to %s with subject %s", user.Email, data.Subject)
+
+	smtpConfig, err := m.GetSmtp(userID)
+	if err != nil {
+		return fmt.Errorf("smtp error: %w", err)
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("error getting working directory: %w", err)
+	}
+
+	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/"+data.Template))
+	if err != nil {
+		return fmt.Errorf("template parsing error: %w", err)
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data.Data); err != nil {
+		return fmt.Errorf("template execution error: %w", err)
+	}
+
+	from := smtpConfig.Username
+	to := []string{smtpConfig.FromEmail}
+
+	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
+		"From: %s\r\n"+
+		"To: %s\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: %s\r\n"+
+		"\r\n"+
+		"%s", data.Subject, from, smtpConfig.FromEmail, data.ContentType, body.String()))
+
+	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
+	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
+
+	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
 	return nil
 }
 
 func (m *EmailManager) SendPasswordResetEmail(userID string, token string) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(types.SecurityCategory), "password-changes")
-	if err != nil {
-		return fmt.Errorf("failed to check notification preferences: %w", err)
-	}
-
-	if !shouldSend {
-		return nil
-	}
-
 	resetURL := fmt.Sprintf("http://localhost:3000/reset-password?token=%s", token)
 	data := ResetEmailData{
 		ResetURL: resetURL,
@@ -168,4 +201,13 @@ func (m *EmailManager) SendUpdateUserRoleEmail(userID string, organizationID str
 
 	log.Printf("Update user role email sent successfully")
 	return nil
+}
+
+func (m *EmailManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, error) {
+	config := &shared_types.SMTPConfigs{}
+	err := m.db.NewSelect().Model(config).Where("user_id = ?", ID).Scan(m.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }

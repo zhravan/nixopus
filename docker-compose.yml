@@ -16,7 +16,7 @@ services:
       - DB_NAME=${DB_NAME}
       - USERNAME=${USERNAME}
       - PASSWORD=${PASSWORD}
-      - HOST_NAME=${HOST_NAME:-nixopus-db}
+      - HOST_NAME=nixopus-db
       - DB_PORT=${DB_PORT:-5432}
       - SSL_MODE=${SSL_MODE:-disable}
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
@@ -40,7 +40,8 @@ services:
     networks:
       - nixopus-network
     depends_on:
-      - nixopus-db
+      nixopus-db:
+        condition: service_healthy
 
   nixopus-db:
     image: postgres:14-alpine
@@ -56,6 +57,11 @@ services:
       - ./data:/var/lib/postgresql/data
     networks:
       - nixopus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   
   nixopus-test-db:
     image: postgres:14-alpine
@@ -76,6 +82,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+        - PORT=${NEXT_PUBLIC_PORT:-7443}
     container_name: nixopus-view-container
     ports:
       - "${NEXT_PUBLIC_PORT:-7443}:${NEXT_PUBLIC_PORT:-7443}"
@@ -83,6 +90,7 @@ services:
     environment:
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
       - NEXT_PUBLIC_WEBSOCKET_URL=${NEXT_PUBLIC_WEBSOCKET_URL}
+      - PORT=${NEXT_PUBLIC_PORT:-7443}
     volumes:
       - ./logs:/app/logs
     networks:
@@ -90,6 +98,7 @@ services:
   
   nixopus-caddy:
     image: caddy:latest
+    container_name: nixopus-caddy-container
     ports:
       - "2019:2019"
       - "80:80"

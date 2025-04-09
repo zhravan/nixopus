@@ -1009,5 +1009,21 @@
       "reportIssue": "Report an issue",
       "logout": "Log out"
     }
+  },
+  "toasts": {
+    "errors": {
+      "realtimeMonitor": "Error connecting to realtime monitor service",
+      "setFileToCopy": "Error setting file to copy",
+      "moveFile": "Error moving file",
+      "copyFile": "Error copying file",
+      "renameFile": "Error renaming file",
+      "startRenaming": "Error starting renaming",
+      "navigateToFile": "Error navigating to file",
+      "createNewFolder": "Error creating new folder",
+      "uploadFile": "Failed to upload file",
+      "deleteFile": "Error deleting file",
+      "setEmail": "Error setting email",
+      "setPassword": "Error setting password"
+    }
   }
 }

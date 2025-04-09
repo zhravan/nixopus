@@ -23,11 +23,23 @@ function useLogin() {
   }, [authenticated, user, router]);
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
+    try {
+      setEmail(event.target.value);
+    } catch (error) {
+      toast.error(t('toasts.errors.setEmail'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
+    try {
+      setPassword(event.target.value);
+    } catch (error) {
+      toast.error(t('toasts.errors.setPassword'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   const handleLogin = async () => {

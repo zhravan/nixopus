@@ -9,8 +9,10 @@ import {
   useUploadFileMutation
 } from '@/redux/services/file-manager/fileManagersApi';
 import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
-
+import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 function use_file_manager() {
+  const { t } = useTranslation();
   const [currentPath, setCurrentPath] = useState('/');
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   const [showHidden, setShowHidden] = useState(false);
@@ -48,32 +50,34 @@ function use_file_manager() {
   }, [currentPath, refetch]);
 
   const fileClicked = (filePath: string | number | boolean) => {
-    router.push(`/file-manager?path=${encodeURIComponent(filePath)}`);
+    try {
+      router.push(`/file-manager?path=${encodeURIComponent(filePath)}`);
+    } catch (error) {
+      toast.error(t('toasts.errors.navigateToFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   const createNewFolder = async () => {
-    if (!currentPath) return;
-
-    const newFolders = files?.filter(
-      (item) => item.file_type === FileType.Directory && /^New Folder \d+$/.test(item.name)
-    );
-
-    let highestNumber = 0;
-    newFolders?.forEach((folder) => {
-      const match = folder.name.match(/^New Folder (\d+)$/);
-      if (match) {
-        const number = parseInt(match[1], 10);
-        if (number > highestNumber) {
-          highestNumber = number;
-        }
-      }
+    const existingFolders = files?.filter((file: FileData) => file.name.startsWith('New Folder'));
+    const numbers = existingFolders?.map((folder: FileData) => {
+      const match = folder.name.match(/New Folder (\d+)/);
+      return match ? parseInt(match[1]) : 0;
     });
+    const highestNumber = numbers?.length ? Math.max(...numbers) : 0;
 
     const newFolderName = `New Folder ${highestNumber + 1}`;
 
-    await createDirectory({ path: currentPath, name: newFolderName });
-    setSelectedPath(`${currentPath}/${newFolderName}`);
-    refetch();
+    try {
+      await createDirectory({ path: currentPath, name: newFolderName });
+      setSelectedPath(`${currentPath}/${newFolderName}`);
+      refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.createNewFolder'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   const handleKeyboardShortcuts = (e: KeyboardEvent) => {
@@ -129,6 +133,13 @@ function use_file_manager() {
       e.preventDefault();
       createNewFolder();
     }
+
+    if (e.key === 'F2' && selectedPath) {
+      const file = files?.find((f: FileData) => f.path === selectedPath);
+      if (file) {
+        handleFileMove(file.path, `${file.path}/renamed`);
+      }
+    }
   };
 
   useEffect(() => {
@@ -163,7 +174,24 @@ function use_file_manager() {
       await uploadFile({ file, path: currentPath });
       refetch();
     } catch (error) {
-      console.error('Failed to upload file:', error);
+      toast.error(t('toasts.errors.uploadFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
+  const handleFileDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    for (const file of droppedFiles) {
+      try {
+        await uploadFile({ file, path: currentPath });
+        refetch();
+      } catch (error) {
+        toast.error(t('toasts.errors.uploadFile'), {
+          description: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
     }
   };
 
@@ -193,7 +221,8 @@ function use_file_manager() {
     setFileToMove,
     setSelectedPath,
     files,
-    handleFileUpload
+    handleFileUpload,
+    handleFileDrop
   };
 }
 

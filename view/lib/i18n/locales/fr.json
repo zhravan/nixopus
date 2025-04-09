@@ -992,5 +992,21 @@
       "reportIssue": "Signaler un problème",
       "logout": "Se déconnecter"
     }
+  },
+  "toasts": {
+    "errors": {
+      "realtimeMonitor": "Erreur de connexion au service de surveillance en temps réel",
+      "setFileToCopy": "Erreur lors de la définition du fichier à copier",
+      "moveFile": "Erreur lors du déplacement du fichier",
+      "copyFile": "Erreur lors de la copie du fichier",
+      "renameFile": "Erreur lors du renommage du fichier",
+      "startRenaming": "Erreur lors du début du renommage",
+      "navigateToFile": "Erreur lors de la navigation vers le fichier",
+      "createNewFolder": "Erreur lors de la création du nouveau dossier",
+      "uploadFile": "Erreur lors du téléchargement du fichier",
+      "deleteFile": "Erreur lors de la suppression du fichier",
+      "setEmail": "Erreur lors de la définition de l'email",
+      "setPassword": "Erreur lors de la définition du mot de passe"
+    }
   }
 }

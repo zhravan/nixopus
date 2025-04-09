@@ -5,8 +5,11 @@ import {
   useDeleteDirectoryMutation,
   useMoveOrRenameDirectoryMutation
 } from '@/redux/services/file-manager/fileManagersApi';
+import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 export const useFileOperations = (file: FileData, refetch: () => void) => {
+  const { t } = useTranslation();
   const [moveOrRenameDirectory] = useMoveOrRenameDirectoryMutation();
   const [deleteDirectory] = useDeleteDirectoryMutation();
   const [calculateDirectorySize, { isLoading: isSizeLoading, data: fileSize }] =
@@ -23,39 +26,47 @@ export const useFileOperations = (file: FileData, refetch: () => void) => {
   }, [isDialogOpen, file.path, calculateDirectorySize]);
 
   const handleRename = async () => {
-    if (editedFileName !== file.name && editedFileName.trim() !== '') {
-      const from_path = file.path;
-      const to_path = from_path.replace(file.name, editedFileName);
+    if (editedFileName !== file.name) {
       try {
+        const from_path = file.path;
+        const to_path = file.path.replace(file.name, editedFileName);
         await moveOrRenameDirectory({ from_path, to_path });
         refetch();
       } catch (error) {
-        console.error('Error renaming file:', error);
+        toast.error(t('toasts.errors.renameFile'), {
+          description: error instanceof Error ? error.message : 'Unknown error'
+        });
         setEditedFileName(file.name);
       }
     } else {
-      setEditedFileName(file.name);
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
-  const onDeleteFolder = async () => {
+  const handleDelete = async () => {
     try {
       await deleteDirectory({ path: file.path });
       refetch();
     } catch (error) {
-      console.error('Error deleting file:', error);
+      toast.error(t('toasts.errors.deleteFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   };
 
   const startRenaming = () => {
-    setIsEditing(true);
-    setEditedFileName(file.name);
+    try {
+      setIsEditing(true);
+      setEditedFileName(file.name);
+    } catch (error) {
+      toast.error(t('toasts.errors.startRenaming'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
       handleRename();
     } else if (e.key === 'Escape') {
       setIsEditing(false);
@@ -65,7 +76,24 @@ export const useFileOperations = (file: FileData, refetch: () => void) => {
 
   const handleTextDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditing(true);
+    try {
+      setIsEditing(true);
+    } catch (error) {
+      toast.error(t('toasts.errors.startRenaming'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
+  const onDeleteFolder = async () => {
+    try {
+      await deleteDirectory({ path: file.path });
+      refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.deleteFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   return {
@@ -78,9 +106,10 @@ export const useFileOperations = (file: FileData, refetch: () => void) => {
     isSizeLoading,
     fileSize,
     handleRename,
-    onDeleteFolder,
+    handleDelete,
     startRenaming,
     handleKeyDown,
-    handleTextDoubleClick
+    handleTextDoubleClick,
+    onDeleteFolder
   };
 };

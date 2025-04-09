@@ -56,7 +56,7 @@ class EnvironmentSetup:
 
         daemon_config = {
             "tls": True,
-            "tlscacert": str(self.docker_certs_dir / "ca.pem"),
+            "tlscacert": str(self.docker_certs_dir / "cert.pem"),
             "tlscert": str(self.docker_certs_dir / "cert.pem"),
             "tlskey": str(self.docker_certs_dir / "key.pem"),
             "hosts": [
@@ -68,7 +68,22 @@ class EnvironmentSetup:
         with open(docker_config_dir / "daemon.json", "w") as f:
             json.dump(daemon_config, f, indent=2)
 
-        subprocess.run(["systemctl", "restart", "docker"], check=True)
+        try:
+            status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
+            print("\nDocker service status before restart:")
+            print(status.stdout)
+
+            subprocess.run(["systemctl", "restart", "docker"], check=True)
+            
+            status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
+            print("\nDocker service status after restart:")
+            print(status.stdout)
+
+        except subprocess.CalledProcessError as e:
+            journal = subprocess.run(["journalctl", "-u", "docker", "-n", "50"], capture_output=True, text=True)
+            print("\nDocker service error logs:")
+            print(journal.stdout)
+            raise Exception(f"Failed to restart Docker service. Error: {e.stderr}\nJournal logs: {journal.stdout}")
 
     def setup_environment(self):
         db_name = f"nixopus_{self.generate_random_string(8)}"

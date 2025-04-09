@@ -127,6 +127,12 @@ class EnvironmentSetup:
             for key, value in env_vars.items():
                 f.write(f"{key}={value}\n")
 
+        # copy to api/.env
+        api_env_file = self.project_root / "api" / ".env"
+        with open(api_env_file, 'w') as f:
+            for key, value in env_vars.items():
+                f.write(f"{key}={value}\n")
+
         self.env_file.chmod(0o600)
         private_key_path.chmod(0o600)
         public_key_path.chmod(0o644)

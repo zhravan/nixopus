@@ -16,7 +16,7 @@ func (s *DeployService) GetApplications(page string, pageSize string, organizati
 	if err != nil {
 		return nil, 0, err
 	}
-	applications, totalCount, err := s.storage.GetApplications(pageNum, pageSizeNum,organizationID)
+	applications, totalCount, err := s.storage.GetApplications(pageNum, pageSizeNum, organizationID)
 	if err != nil {
 		return nil, 0, err
 	}

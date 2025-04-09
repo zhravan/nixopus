@@ -85,6 +85,7 @@ func (m *NotificationManager) SendLoginNotification(payload NotificationPayload)
 		if err != nil {
 			log.Printf("Failed to check notification preferences: %s", err)
 		}
+		fmt.Printf("Should send login notification: %t for user %s and type %s", shouldSend, payload.UserID, string(NotificationCategoryAuthentication))
 		if shouldSend {
 			err := m.emailManager.SendEmailWithTemplate(payload.UserID, email.EmailData{
 				Subject:  "Login Notification",

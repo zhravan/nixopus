@@ -31,6 +31,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/middleware"
 	"github.com/raghavyuva/nixopus-api/internal/realtime"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
+	api "github.com/raghavyuva/nixopus-api/internal/version-manager"
 )
 
 type Router struct {
@@ -50,12 +51,19 @@ func (router *Router) Routes() {
 	}
 	PORT := os.Getenv("PORT")
 
+	docs := api.NewVersionDocumentation()
+	if err := docs.Save("api/versions.json"); err != nil {
+		log.Printf("Warning: Failed to save version documentation: %v", err)
+	}
+
 	l := logger.NewLogger()
 	server := fuego.NewServer(
 		fuego.WithGlobalMiddlewares(
 			middleware.RecoveryMiddleware,
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
+			api.VersionMiddleware,
+			api.MigrationMiddleware,
 			// middleware.RateLimiter
 		),
 		fuego.WithSecurity(openapi3.SecuritySchemes{
@@ -70,7 +78,8 @@ func (router *Router) Routes() {
 		fuego.WithAddr(":"+PORT),
 	)
 
-	healthGroup := fuego.Group(server, "/api/v1/health")
+	apiV1 := api.NewVersion(api.CurrentVersion)
+	healthGroup := fuego.Group(server, apiV1.Path+"/health")
 	router.BasicRoutes(healthGroup)
 
 	notificationManager := notification.NewNotificationManager(router.app.Store.DB)
@@ -87,7 +96,7 @@ func (router *Router) Routes() {
 	orgService := organization_service.NewOrganizationService(router.app.Store, router.app.Ctx, l, orgStorage)
 	authService := authService.NewAuthService(userStorage, l, permService, roleService, orgService, router.app.Ctx)
 	authController := auth.NewAuthController(router.app.Ctx, l, notificationManager, *authService)
-	authGroup := fuego.Group(server, "/api/v1/auth")
+	authGroup := fuego.Group(server, apiV1.Path+"/auth")
 	router.AuthRoutes(authController, authGroup)
 
 	fuego.Use(server, func(next http.Handler) http.Handler {
@@ -98,21 +107,21 @@ func (router *Router) Routes() {
 		return middleware.AuditMiddleware(next, router.app, l)
 	})
 
-	s := fuego.Group(server, "/api/v1")
+	apiV1Group := fuego.Group(server, apiV1.Path)
 
-	authProtectedGroup := fuego.Group(server, "/api/v1/auth")
+	authProtectedGroup := fuego.Group(server, apiV1.Path+"/auth")
 	router.AuthenticatedAuthRoutes(authProtectedGroup, authController)
 
 	userController := user.NewUserController(router.app.Store, router.app.Ctx, l)
-	userGroup := fuego.Group(s, "/user")
+	userGroup := fuego.Group(apiV1Group, "/user")
 	fuego.Use(userGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "user")
 	})
 	router.UserRoutes(userGroup, userController)
 
 	domainController := domain.NewDomainsController(router.app.Store, router.app.Ctx, l, notificationManager)
-	domainGroup := fuego.Group(s, "/domain")
-	domainsAllGroup := fuego.Group(s, "/domains")
+	domainGroup := fuego.Group(apiV1Group, "/domain")
+	domainsAllGroup := fuego.Group(apiV1Group, "/domains")
 	fuego.Use(domainGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "domain")
 	})
@@ -122,41 +131,41 @@ func (router *Router) Routes() {
 	router.DomainRoutes(domainGroup, domainsAllGroup, domainController)
 
 	githubConnectorController := githubConnector.NewGithubConnectorController(router.app.Store, router.app.Ctx, l, notificationManager)
-	githubConnectorGroup := fuego.Group(s, "/github-connector")
+	githubConnectorGroup := fuego.Group(apiV1Group, "/github-connector")
 	fuego.Use(githubConnectorGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "github-connector")
 	})
 	router.GithubConnectorRoutes(githubConnectorGroup, githubConnectorController)
 
 	notifController := notificationController.NewNotificationController(router.app.Store, router.app.Ctx, l, notificationManager)
-	notificationGroup := fuego.Group(s, "/notification")
+	notificationGroup := fuego.Group(apiV1Group, "/notification")
 	fuego.Use(notificationGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "notification")
 	})
 	router.NotificationRoutes(notificationGroup, notifController)
 
 	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, l, notificationManager)
-	organizationGroup := fuego.Group(s, "/organizations")
+	organizationGroup := fuego.Group(apiV1Group, "/organizations")
 	fuego.Use(organizationGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "organization")
 	})
 	router.OrganizationRoutes(organizationGroup, organizationController)
 
 	fileManagerController := file_manager.NewFileManagerController(router.app.Ctx, l, notificationManager)
-	fileManagerGroup := fuego.Group(s, "/file-manager")
+	fileManagerGroup := fuego.Group(apiV1Group, "/file-manager")
 	fuego.Use(fileManagerGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "file-manager")
 	})
 	router.FileManagerRoutes(fileManagerGroup, fileManagerController)
 
-	deployGroup := fuego.Group(s, "/deploy")
+	deployGroup := fuego.Group(apiV1Group, "/deploy")
 	fuego.Use(deployGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "deploy")
 	})
 	router.DeployRoutes(deployGroup, deployController)
 
 	auditController := audit.NewAuditController(router.app.Store.DB, router.app.Ctx, l)
-	auditGroup := fuego.Group(s, "/audit")
+	auditGroup := fuego.Group(apiV1Group, "/audit")
 	fuego.Use(auditGroup, func(next http.Handler) http.Handler {
 		return middleware.RBACMiddleware(next, router.app, "audit")
 	})
@@ -167,6 +176,14 @@ func (router *Router) Routes() {
 
 func (s *Router) BasicRoutes(fs *fuego.Server) {
 	fuego.Get(fs, "", health.HealthCheck)
+	versionGroup := fuego.Group(fs, "/versions")
+	fuego.Get(versionGroup, "", func(c fuego.ContextNoBody) (interface{}, error) {
+		docs := api.NewVersionDocumentation()
+		if err := docs.Load("api/versions.json"); err != nil {
+			return nil, err
+		}
+		return docs, nil
+	})
 }
 
 func (router *Router) WebSocketServer(f *fuego.Server, deployController *deploy.DeployController) {

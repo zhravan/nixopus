@@ -22,26 +22,23 @@ import { deployApi } from './services/deploy/applicationsApi';
 import { fileManagersApi } from './services/file-manager/fileManagersApi';
 import { auditApi } from './services/audit';
 
-const createNoopStorage = () => {
-  return {
-    getItem(_key: string) {
-      return Promise.resolve(null);
-    },
-    setItem(_key: string, value: any) {
-      return Promise.resolve(value);
-    },
-    removeItem(_key: string) {
-      return Promise.resolve();
-    }
-  };
-};
+const createNoopStorage = () => ({
+  getItem: (_key: string) => Promise.resolve(null),
+  setItem: (_key: string, value: any) => Promise.resolve(value),
+  removeItem: (_key: string) => Promise.resolve()
+});
 
 const storage = typeof window !== 'undefined' ? createWebStorage('local') : createNoopStorage();
 
 const persistConfig = {
   key: 'root',
+  version: 1,
   storage,
-  whitelist: ['auth']
+  whitelist: ['auth', 'user'],
+  migrate: (state: any) => {
+    if (!state) return Promise.resolve(undefined);
+    return Promise.resolve(state);
+  }
 };
 
 const rootReducer = combineReducers({
@@ -58,9 +55,11 @@ const rootReducer = combineReducers({
   [auditApi.reducerPath]: auditApi.reducer
 });
 
-const appReducer = (state: any, action: any) => {
+type RootReducer = ReturnType<typeof rootReducer>;
+
+const appReducer = (state: RootReducer | undefined, action: { type: string }) => {
   if (action.type === 'RESET_STATE') {
-    state = undefined;
+    return rootReducer(undefined, action);
   }
   return rootReducer(state, action);
 };
@@ -73,8 +72,10 @@ const storeOptions: ConfigureStoreOptions = {
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
-      }
-    }).concat(
+      },
+      immutableCheck: process.env.NODE_ENV === 'development',
+      thunk: true
+    }).concat([
       authApi.middleware,
       userApi.middleware,
       notificationApi.middleware,
@@ -83,7 +84,8 @@ const storeOptions: ConfigureStoreOptions = {
       deployApi.middleware,
       fileManagersApi.middleware,
       auditApi.middleware
-    )
+    ]),
+  devTools: process.env.NODE_ENV === 'development'
 };
 
 export const store = configureStore(storeOptions);

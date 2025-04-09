@@ -8,12 +8,14 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-type DeleteDirectoryRequest struct {
-	Path string `json:"path"`
+type CopyDirectory struct {
+	FromPath string `json:"from_path"`
+	ToPath   string `json:"to_path"`
 }
 
-func (c *FileManagerController) DeleteDirectory(f fuego.ContextWithBody[DeleteDirectoryRequest]) (*shared_types.Response, error) {
+func (c *FileManagerController) CopyDirectory(f fuego.ContextWithBody[CopyDirectory]) (*shared_types.Response, error) {
 	request, err := f.Body()
+
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
@@ -21,7 +23,7 @@ func (c *FileManagerController) DeleteDirectory(f fuego.ContextWithBody[DeleteDi
 		}
 	}
 
-	err = c.service.DeleteDirectory(request.Path)
+	err = c.service.CopyDirectory(request.FromPath, request.ToPath)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
@@ -32,6 +34,6 @@ func (c *FileManagerController) DeleteDirectory(f fuego.ContextWithBody[DeleteDi
 
 	return &shared_types.Response{
 		Status:  "success",
-		Message: "Directory deleted successfully",
+		Message: "Directory copied successfully",
 	}, nil
 }

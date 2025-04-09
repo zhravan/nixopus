@@ -261,8 +261,9 @@ func (router *Router) FileManagerRoutes(f *fuego.Server, fileManagerController *
 	fuego.Get(f, "", fileManagerController.ListFiles)
 	fuego.Post(f, "/create-directory", fileManagerController.CreateDirectory)
 	fuego.Post(f, "/move-directory", fileManagerController.MoveDirectory)
+	fuego.Post(f, "/copy-directory", fileManagerController.CopyDirectory)
 	fuego.Post(f, "/upload", fileManagerController.UploadFile)
-	fuego.Delete(f, "", fileManagerController.DeleteFile)
+	fuego.Delete(f, "/delete-directory", fileManagerController.DeleteDirectory)
 }
 
 func (router *Router) OrganizationRoutes(f *fuego.Server, organizationController *organization.OrganizationsController) {

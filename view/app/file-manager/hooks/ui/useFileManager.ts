@@ -6,11 +6,13 @@ import { useSearchable } from '@/hooks/use-searchable';
 import {
   useCreateDirectoryMutation,
   useGetFilesInPathQuery,
-  useUploadFileMutation
+  useUploadFileMutation,
+  useDeleteDirectoryMutation
 } from '@/redux/services/file-manager/fileManagersApi';
 import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/use-translation';
+
 function use_file_manager() {
   const { t } = useTranslation();
   const [currentPath, setCurrentPath] = useState('/');
@@ -22,6 +24,7 @@ function use_file_manager() {
   const [fileToMove, setFileToMove] = useState<FileData | undefined>();
   const [createDirectory] = useCreateDirectoryMutation();
   const [uploadFile] = useUploadFileMutation();
+  const [deleteDirectory] = useDeleteDirectoryMutation();
   const router = useRouter();
   const path = useSearchParams().get('path');
   const { data: files, isLoading, refetch } = useGetFilesInPathQuery({ path: currentPath });
@@ -114,11 +117,6 @@ function use_file_manager() {
       }
     }
 
-    if (e.key === 'Delete' && selectedFile) {
-      e.preventDefault();
-      // TODO : Implement delete functionality
-    }
-
     if (isModifierKey && e.key === 'h') {
       e.preventDefault();
       setShowHidden(!showHidden);
@@ -195,6 +193,17 @@ function use_file_manager() {
     }
   };
 
+  const handleDelete = async (path: string) => {
+    try {
+      await deleteDirectory({ path });
+      refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.deleteFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
   return {
     currentPath,
     layout,
@@ -222,7 +231,8 @@ function use_file_manager() {
     setSelectedPath,
     files,
     handleFileUpload,
-    handleFileDrop
+    handleFileDrop,
+    handleDelete
   };
 }
 

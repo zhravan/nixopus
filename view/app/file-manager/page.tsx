@@ -27,11 +27,14 @@ import useFileManager from './hooks/ui/useFileManager';
 import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
 import { useTranslation } from '@/hooks/use-translation';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
+import { FileData } from '@/redux/types/files';
 
 function FileManager() {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
+  const [fileToDelete, setFileToDelete] = React.useState<FileData | null>(null);
 
   const {
     currentPath,
@@ -59,7 +62,8 @@ function FileManager() {
     setFileToMove,
     setSelectedPath,
     files,
-    handleFileUpload
+    handleFileUpload,
+    handleDelete
   } = useFileManager();
 
   const canRead = hasPermission(user, 'file-manager', 'read', activeOrg?.id);
@@ -219,13 +223,41 @@ function FileManager() {
               </span>
             </ContextMenuItem>
             {canDelete && (
-              <ContextMenuItem>
+              <ContextMenuItem
+                onSelect={() =>
+                  setFileToDelete(
+                    selectedPath ? files?.find((f) => f.path === selectedPath) || null : null
+                  )
+                }
+              >
                 <TrashIcon className="mr-2 h-5 w-5" />
                 <span>{t('fileManager.item.actions.delete')}</span>
               </ContextMenuItem>
             )}
           </ContextMenuContent>
         </ContextMenu>
+        <DeleteDialog
+          title={t('fileManager.deleteDialog.title')}
+          description={
+            fileToDelete?.file_type === 'Directory'
+              ? t('fileManager.deleteDialog.descriptionDirectory', {
+                  name: fileToDelete.name || ''
+                })
+              : t('fileManager.deleteDialog.descriptionFile', { name: fileToDelete?.name || '' })
+          }
+          onConfirm={() => {
+            if (fileToDelete) {
+              handleDelete(fileToDelete.path);
+              setFileToDelete(null);
+            }
+          }}
+          open={!!fileToDelete}
+          onOpenChange={(open) => !open && setFileToDelete(null)}
+          variant="destructive"
+          confirmText={t('fileManager.deleteDialog.confirm')}
+          cancelText={t('fileManager.deleteDialog.cancel')}
+          icon={TrashIcon}
+        />
       </div>
     </div>
   );

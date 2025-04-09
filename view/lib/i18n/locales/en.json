@@ -597,7 +597,14 @@
         "pasteHere": "Paste here"
       }
     },
-    "noFiles": "No files found"
+    "noFiles": "No files found",
+    "deleteDialog": {
+      "title": "Delete Confirmation",
+      "descriptionFile": "Are you sure you want to delete the file '{name}'? This action cannot be undone.",
+      "descriptionDirectory": "Are you sure you want to delete the directory '{name}' and all its contents? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
   },
   "selfHost": {
     "deployment": {

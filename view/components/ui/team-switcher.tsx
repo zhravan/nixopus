@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
@@ -22,18 +21,24 @@ import { DeleteDialog } from './delete-dialog';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import { useAppSelector } from '@/redux/hooks';
 import { UserOrganization } from '@/redux/types/orgs';
+import { useResourcePermissions } from '@/lib/permission';
 
 export function TeamSwitcher({ refetch }: { refetch: () => void }) {
   const { isMobile } = useSidebar();
   const teams = useAppSelector((state) => state.user.organizations);
+  const user = useAppSelector((state) => state.auth.user);
+  const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
+  const { canCreate: canCreateOrg, canDelete: canDeleteOrg } = useResourcePermissions(
+    user,
+    'organization',
+    activeOrganization?.id
+  );
   const {
     toggleAddTeamModal,
     handleTeamChange,
     handleDeleteOrganization,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
-    activeTeam,
-    isAdmin,
     displayTeam
   } = useTeamSwitcher();
 
@@ -90,30 +95,27 @@ export function TeamSwitcher({ refetch }: { refetch: () => void }) {
                     <GroupIcon className="size-4 shrink-0" />
                   </div>
                   {team.organization.name}
-                  {index < 9 && <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>}
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              {isAdmin && (
-                <>
-                  <DropdownMenuItem className="gap-2 p-2" onClick={toggleAddTeamModal}>
-                    <div className="bg-background flex size-6 items-center justify-center rounded-md border">
-                      <Plus className="size-4" />
-                    </div>
-                    <div className="text-muted-foreground font-medium">Add team</div>
-                  </DropdownMenuItem>
-                  {teams.length > 1 && (
-                    <DropdownMenuItem
-                      className="gap-2 p-2 text-destructive"
-                      onClick={() => setIsDeleteDialogOpen(true)}
-                    >
-                      <div className="bg-background flex size-6 items-center justify-center rounded-md border">
-                        <Trash2 className="size-4" />
-                      </div>
-                      <div className="text-muted-foreground font-medium">Delete team</div>
-                    </DropdownMenuItem>
-                  )}
-                </>
+              {canCreateOrg || (canDeleteOrg && <DropdownMenuSeparator />)}
+              {canCreateOrg && (
+                <DropdownMenuItem className="gap-2 p-2" onClick={toggleAddTeamModal}>
+                  <div className="bg-background flex size-6 items-center justify-center rounded-md border">
+                    <Plus className="size-4" />
+                  </div>
+                  <div className="text-muted-foreground font-medium">Add team</div>
+                </DropdownMenuItem>
+              )}
+              {teams.length > 1 && canDeleteOrg && (
+                <DropdownMenuItem
+                  className="gap-2 p-2 text-destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  <div className="bg-background flex size-6 items-center justify-center rounded-md border">
+                    <Trash2 className="size-4" />
+                  </div>
+                  <div className="text-muted-foreground font-medium">Delete team</div>
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

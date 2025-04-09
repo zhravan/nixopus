@@ -18,53 +18,32 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@/components/ui/sidebar';
-import { UserOrganization } from '@/redux/types/orgs';
-import { useAppSelector } from '@/redux/hooks';
 import { DeleteDialog } from './delete-dialog';
-import { useDeleteOrganizationMutation } from '@/redux/services/users/userApi';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
+import { useAppSelector } from '@/redux/hooks';
+import { UserOrganization } from '@/redux/types/orgs';
 
-export function TeamSwitcher({
-  teams,
-  refetch
-}: {
-  teams?: UserOrganization[] | [];
-  refetch: () => void;
-}) {
+export function TeamSwitcher({ refetch }: { refetch: () => void }) {
   const { isMobile } = useSidebar();
-  const user = useAppSelector((state) => state.auth.user);
-  const isAdmin = React.useMemo(() => user?.type === 'admin', [user]);
-  const activeTeam = useAppSelector((state) => state.user.activeOrganization);
-  const [deleteOrganization] = useDeleteOrganizationMutation();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const { toggleAddTeamModal, handleTeamChange } = useTeamSwitcher();
+  const teams = useAppSelector((state) => state.user.organizations);
+  const {
+    toggleAddTeamModal,
+    handleTeamChange,
+    handleDeleteOrganization,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    activeTeam,
+    isAdmin,
+    displayTeam
+  } = useTeamSwitcher();
 
   if (!teams || teams.length === 0) {
     return null;
   }
 
-  const displayTeam = activeTeam || (teams.length > 0 ? teams[0].organization : null);
-
   if (!displayTeam) {
     return null;
   }
-
-  const handleDeleteOrganization = async () => {
-    if (teams.length <= 1) {
-      return;
-    }
-
-    try {
-      await deleteOrganization(displayTeam.id).unwrap();
-      const remainingTeams = teams.filter((team) => team.organization.id !== displayTeam.id);
-      handleTeamChange(remainingTeams[0]);
-      await refetch();
-      setIsDeleteDialogOpen(false);
-    } catch (error) {
-      console.error('Failed to delete organization:', error);
-    }
-  };
-
   return (
     <>
       <DeleteDialog
@@ -101,7 +80,7 @@ export function TeamSwitcher({
               sideOffset={4}
             >
               <DropdownMenuLabel className="text-muted-foreground text-xs">Teams</DropdownMenuLabel>
-              {teams.map((team, index) => (
+              {teams.map((team: UserOrganization, index: number) => (
                 <DropdownMenuItem
                   key={team.organization.id}
                   onClick={() => handleTeamChange(team)}

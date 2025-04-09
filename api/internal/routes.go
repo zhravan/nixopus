@@ -55,7 +55,7 @@ func (router *Router) Routes() {
 		fuego.WithGlobalMiddlewares(
 			middleware.RecoveryMiddleware,
 			middleware.CorsMiddleware,
-			// middleware.LoggingMiddleware,
+			middleware.LoggingMiddleware,
 			// middleware.RateLimiter
 		),
 		fuego.WithSecurity(openapi3.SecuritySchemes{

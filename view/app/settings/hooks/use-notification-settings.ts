@@ -159,14 +159,32 @@ function useNotificationSettings() {
 
   const getPreferenceTypeFromId = (
     id: string
-  ): 'password-changes' | 'security-alerts' | 'team-updates' => {
-    if (id.includes('password')) {
-      return 'password-changes';
+  ):
+    | 'password-changes'
+    | 'security-alerts'
+    | 'team-updates'
+    | 'login-alerts'
+    | 'product-updates'
+    | 'newsletter'
+    | 'marketing' => {
+    switch (id) {
+      case 'password-changes':
+        return 'password-changes';
+      case 'security-alerts':
+        return 'security-alerts';
+      case 'login-alerts':
+        return 'login-alerts';
+      case 'product-updates':
+        return 'product-updates';
+      case 'newsletter':
+        return 'newsletter';
+      case 'marketing':
+        return 'marketing';
+      case 'team-updates':
+        return 'team-updates';
+      default:
+        return 'team-updates';
     }
-    if (id.includes('security')) {
-      return 'security-alerts';
-    }
-    return 'team-updates';
   };
 
   return {

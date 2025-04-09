@@ -28,7 +28,7 @@ export function TeamSwitcher({ refetch }: { refetch: () => void }) {
   const teams = useAppSelector((state) => state.user.organizations);
   const user = useAppSelector((state) => state.auth.user);
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
-  const { canCreate: canCreateOrg, canDelete: canDeleteOrg } = useResourcePermissions(
+  const { canDelete: canDeleteOrg } = useResourcePermissions(
     user,
     'organization',
     activeOrganization?.id
@@ -41,6 +41,13 @@ export function TeamSwitcher({ refetch }: { refetch: () => void }) {
     setIsDeleteDialogOpen,
     displayTeam
   } = useTeamSwitcher();
+
+  const canCreateOrg = () => {
+    if (user.type === 'admin') {
+      return true;
+    }
+    return false;
+  };
 
   if (!teams || teams.length === 0) {
     return null;
@@ -97,8 +104,8 @@ export function TeamSwitcher({ refetch }: { refetch: () => void }) {
                   {team.organization.name}
                 </DropdownMenuItem>
               ))}
-              {canCreateOrg || (canDeleteOrg && <DropdownMenuSeparator />)}
-              {canCreateOrg && (
+              {canCreateOrg() || (canDeleteOrg && <DropdownMenuSeparator />)}
+              {canCreateOrg() && (
                 <DropdownMenuItem className="gap-2 p-2" onClick={toggleAddTeamModal}>
                   <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                     <Plus className="size-4" />

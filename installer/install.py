@@ -25,7 +25,9 @@ class Installer:
     
     def ask_domain(self):
         domain = input("Please enter the domain in which you want to run the application (e.g. nixopus.com): ")
-        return Validation.validate_domain(domain)
+        validation = Validation()
+        validation.validate_domain(domain)
+        return domain
     
     def check_docker_version(self):
         docker_version = subprocess.check_output(["docker", "--version"]).decode()

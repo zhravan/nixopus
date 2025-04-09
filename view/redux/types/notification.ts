@@ -49,7 +49,14 @@ export interface CategoryPreferences {
 
 export interface UpdatePreferenceRequest {
   category: 'activity' | 'security' | 'update';
-  type: 'password-changes' | 'security-alerts' | 'team-updates';
+  type:
+    | 'password-changes'
+    | 'security-alerts'
+    | 'team-updates'
+    | 'login-alerts'
+    | 'product-updates'
+    | 'newsletter'
+    | 'marketing';
   enabled: boolean;
 }
 

@@ -38,7 +38,7 @@ func (m *PreferenceManager) CheckUserNotificationPreferences(userID string, cate
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return true, nil
+			return false, nil
 		}
 		return false, fmt.Errorf("failed to fetch user preferences: %w", err)
 	}
@@ -53,7 +53,7 @@ func (m *PreferenceManager) CheckUserNotificationPreferences(userID string, cate
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return true, nil
+			return false, nil
 		}
 		return false, fmt.Errorf("failed to fetch preference item: %w", err)
 	}

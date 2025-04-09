@@ -31,9 +31,10 @@ services:
     image: postgres:14-alpine
     container_name: nixopus-db-container
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
+      - POSTGRES_USER=${USERNAME}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - "${DB_PORT:-5432}:5432"

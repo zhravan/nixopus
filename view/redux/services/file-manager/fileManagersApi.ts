@@ -31,14 +31,6 @@ export const fileManagersApi = createApi({
       }),
       transformResponse: (response: any) => response
     }),
-    deleteFile: builder.mutation<any, { path: string }>({
-      query: ({ path }) => ({
-        url: FILEMANAGERURLS.DELETE_FILE,
-        method: 'DELETE',
-        body: { path }
-      }),
-      transformResponse: (response: any) => response
-    }),
     moveOrRenameDirectory: builder.mutation<any, { from_path: string; to_path: string }>({
       query: ({ from_path, to_path }) => ({
         url: FILEMANAGERURLS.MOVE_FOLDER_FILES_RECURSIVELY_OR_RENAME,
@@ -52,14 +44,6 @@ export const fileManagersApi = createApi({
         url: FILEMANAGERURLS.COPY_FOLDER_FILES_RECURSIVELY,
         method: 'POST',
         body: { from_path, to_path }
-      }),
-      transformResponse: (response: any) => response
-    }),
-    createFile: builder.mutation<any, { path: string; name: string }>({
-      query: ({ path, name }) => ({
-        url: FILEMANAGERURLS.CREATE_FILE,
-        method: 'POST',
-        body: { path, name }
       }),
       transformResponse: (response: any) => response
     }),
@@ -92,10 +76,8 @@ export const {
   useGetFilesInPathQuery,
   useCreateDirectoryMutation,
   useDeleteDirectoryMutation,
-  useDeleteFileMutation,
   useMoveOrRenameDirectoryMutation,
   useCopyFileOrDirectoryMutation,
-  useCreateFileMutation,
   useCalculateDirectorySizeMutation,
   useUploadFileMutation
 } = fileManagersApi;

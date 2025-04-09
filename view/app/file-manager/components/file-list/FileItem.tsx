@@ -14,6 +14,7 @@ import { formatFileSize } from '@/app/self-host/utils/formatFileSize';
 import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 import { useFileOperations } from '../../hooks/file-operations/useOperations';
 import { useTranslation } from '@/hooks/use-translation';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 
 interface FileItemProps {
   file: FileData;
@@ -55,13 +56,15 @@ export function FileItem({
     isSizeLoading,
     fileSize,
     handleRename,
-    onDeleteFolder,
+    handleDelete,
     startRenaming,
     handleKeyDown,
-    handleTextDoubleClick
+    handleTextDoubleClick,
+    onDeleteFolder
   } = useFileOperations(file, refetch);
 
   const { handleCopyFile, handleFileMove } = useFileManagerActionsHook();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
   const renderFileName = () =>
     isEditing ? (
@@ -151,7 +154,7 @@ export function FileItem({
           </>
         )}
         {canDelete && (
-          <ContextMenuItem onSelect={onDeleteFolder}>
+          <ContextMenuItem onSelect={() => setIsDeleteDialogOpen(true)}>
             <TrashIcon className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.delete')}
           </ContextMenuItem>
         )}
@@ -159,6 +162,21 @@ export function FileItem({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <FileInfo file={file} isLoading={isSizeLoading} fileSize={fileSize || null} />
       </Dialog>
+      <DeleteDialog
+        title={t('fileManager.deleteDialog.title')}
+        description={
+          type === 'folder'
+            ? t('fileManager.deleteDialog.descriptionDirectory', { name: file.name })
+            : t('fileManager.deleteDialog.descriptionFile', { name: file.name })
+        }
+        onConfirm={onDeleteFolder}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        variant="destructive"
+        confirmText={t('fileManager.deleteDialog.confirm')}
+        cancelText={t('fileManager.deleteDialog.cancel')}
+        icon={TrashIcon}
+      />
     </ContextMenu>
   );
 }

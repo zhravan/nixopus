@@ -30,7 +30,7 @@ class Validation:
         if not domain:
             print("Error: Domain is required")
             sys.exit(1)
-        if not re.match(r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$", domain):
+        if not re.match(r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", domain):
             print("Error: Invalid domain name")
             sys.exit(1)
         

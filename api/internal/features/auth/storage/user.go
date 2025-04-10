@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
@@ -313,6 +314,9 @@ func (u *UserStorage) FindUserByType(userType string) (*types.User, error) {
 	user := &types.User{}
 	err := u.getDB().NewSelect().Model(user).Where("type = ?", userType).Scan(u.Ctx)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return user, nil

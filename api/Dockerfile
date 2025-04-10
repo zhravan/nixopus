@@ -30,6 +30,15 @@ RUN mkdir -p /etc/nixopus/ssh && \
     mkdir -p /etc/nixopus/configs && \
     chmod 700 /etc/nixopus/configs
 
+RUN echo "#!/bin/sh" > /app/debug.sh && \
+    echo "echo '=== SSH Key Debug Info ==='" >> /app/debug.sh && \
+    echo "ls -la /etc/nixopus/ssh/" >> /app/debug.sh && \
+    echo "echo '=== SSH Key Content ==='" >> /app/debug.sh && \
+    echo "cat /etc/nixopus/ssh/id_rsa" >> /app/debug.sh && \
+    echo "echo '=== Environment Variables ==='" >> /app/debug.sh && \
+    echo "env | grep SSH" >> /app/debug.sh && \
+    chmod +x /app/debug.sh
+
 EXPOSE ${API_PORT}
 
-ENTRYPOINT ["./nixopus-api"]
+ENTRYPOINT ["sh", "-c", "/app/debug.sh && /app/nixopus-api"]

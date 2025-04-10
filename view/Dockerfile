@@ -2,12 +2,12 @@ FROM node:18-alpine AS builder
 
 ARG NEXT_PUBLIC_BASE_URL
 ARG NEXT_PUBLIC_WEBSOCKET_URL
-ARG PORT=7443
+ARG NEXT_PUBLIC_PORT=7443
 
 ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_WEBSOCKET_URL=$NEXT_PUBLIC_WEBSOCKET_URL
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=$PORT
+ENV NEXT_PUBLIC_PORT=$NEXT_PUBLIC_PORT
 
 WORKDIR /app
 
@@ -22,15 +22,10 @@ RUN yarn build && \
 
 FROM node:18-alpine AS runner
 
-ARG PORT=7443
-ENV PORT=$PORT
+ARG NEXT_PUBLIC_PORT=7443
+ENV NEXT_PUBLIC_PORT=$NEXT_PUBLIC_PORT
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup -g 1001 nixopus && \
-    adduser -u 1001 -G nixopus -s /bin/sh -D nixopus && \
-    apk add --no-cache docker-cli && \
-    rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
@@ -48,6 +43,6 @@ RUN mkdir -p .next/cache && \
 
 USER nixopus
 
-EXPOSE ${PORT}
+EXPOSE ${NEXT_PUBLIC_PORT}
 
 CMD ["yarn", "start"]

@@ -34,6 +34,7 @@ type AuthRepository interface {
 	GetVerificationToken(token string) (string, time.Time, error)
 	DeleteVerificationToken(token string) error
 	UpdateUserEmailVerification(userID string, verified bool) error
+	FindUserByType(userType string) (*types.User, error)
 }
 
 func (u *UserStorage) WithTx(tx bun.Tx) AuthRepository {
@@ -300,4 +301,19 @@ func (u *UserStorage) UserBelongsToOrganization(userID string, organizationID st
 		return false, fmt.Errorf("failed to check organization membership: %w", err)
 	}
 	return count > 0, nil
+}
+
+// FindUserByType finds a user by their type in the database.
+//
+// The function takes a user type as input and queries the database to find
+// the associated user. If the user type is found, it returns a pointer to the
+// `types.User` object. If the user type is not found or if the query fails, it
+// returns an error.
+func (u *UserStorage) FindUserByType(userType string) (*types.User, error) {
+	user := &types.User{}
+	err := u.getDB().NewSelect().Model(user).Where("type = ?", userType).Scan(u.Ctx)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

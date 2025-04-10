@@ -78,3 +78,8 @@ var (
 	ErrUserDoesNotBelongToOrganization    = errors.New("user does not belong to organization")
 	ErrNoRoleAssigned                     = errors.New("no role assigned")
 )
+
+const (
+	UserTypeAdmin = "admin"
+	UserTypeUser  = "app_user"
+)

@@ -172,23 +172,32 @@ class Installer:
                     "--max-time", "30",
                     "--retry", "3",
                     "--retry-delay", "5",
-                    "--insecure",  # Only for initial setup, should be removed in production
+                    "--insecure",
+                    "-w", "%{http_code}",
                     "-d", f'{{"email": "{email}", "password": "{password}", "type": "admin", "username": "{username}", "organization": ""}}'
                 ], capture_output=True, text=True, check=False)
                 
-                if result.returncode == 0:
+                # Split the output to separate status code and response body
+                status_code = result.stdout[-3:]
+                response_body = result.stdout[:-3]
+                
+                if status_code == "200":
                     try:
-                        response = json.loads(result.stdout)
+                        response = json.loads(response_body)
                         if response.get("success"):
                             print("✓ Admin setup completed successfully")
                             return
                         else:
                             error_msg = response.get("error", "Unknown error")
+                            if "admin already registered" in error_msg.lower():
+                                print("✓ Admin already exists")
+                                return
                             print(f"✗ API Error: {error_msg}")
                     except json.JSONDecodeError:
                         print("✗ Invalid response from API")
                 else:
-                    print(f"✗ HTTP Error: {result.stderr}")
+                    print(f"✗ HTTP Error: Status code {status_code}")
+                    print(f"Response: {response_body}")
                 
                 if attempt < max_retries - 1:
                     print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")

@@ -72,6 +72,10 @@ class Installer:
     def start_services(self):
         print("\nStarting services...")
         try:
+            os.environ["DOCKER_HOST"] = "tcp://localhost:2376"
+            os.environ["DOCKER_TLS_VERIFY"] = "1"
+            os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
+            
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             subprocess.run(compose_cmd + ["up", "--build", "-d"], check=True, cwd=self.project_root)
         except subprocess.CalledProcessError as e:

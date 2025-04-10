@@ -62,6 +62,8 @@ class EnvironmentSetup:
     def setup_docker_certs(self):
         self.docker_certs_dir.mkdir(parents=True, exist_ok=True)
         
+        local_ip = self.get_local_ip()
+        
         subprocess.run([
             "openssl", "genrsa", "-out", str(self.docker_certs_dir / "ca-key.pem"), "4096"
         ], check=True)
@@ -77,8 +79,11 @@ class EnvironmentSetup:
             "openssl", "genrsa", "-out", str(self.docker_certs_dir / "server-key.pem"), "4096"
         ], check=True)
         
+        with open(self.docker_certs_dir / "extfile.cnf", "w") as f:
+            f.write(f"subjectAltName = DNS:localhost,IP:{local_ip},IP:127.0.0.1\n")
+        
         subprocess.run([
-            "openssl", "req", "-subj", "/CN=nixopus", "-new",
+            "openssl", "req", "-subj", f"/CN={local_ip}", "-new",
             "-key", str(self.docker_certs_dir / "server-key.pem"),
             "-out", str(self.docker_certs_dir / "server.csr")
         ], check=True)
@@ -88,10 +93,10 @@ class EnvironmentSetup:
             "-in", str(self.docker_certs_dir / "server.csr"),
             "-CA", str(self.docker_certs_dir / "ca.pem"),
             "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
-            "-CAcreateserial", "-out", str(self.docker_certs_dir / "server-cert.pem")
+            "-CAcreateserial", "-out", str(self.docker_certs_dir / "server-cert.pem"),
+            "-extfile", str(self.docker_certs_dir / "extfile.cnf")
         ], check=True)
         
-
         subprocess.run([
             "openssl", "genrsa", "-out", str(self.docker_certs_dir / "key.pem"), "4096"
         ], check=True)

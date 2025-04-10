@@ -18,7 +18,7 @@ function useBreadCrumbs() {
 
     return pathname.startsWith('/dashboard')
       ? [...crumblist]
-      : [{ href: '/', label: 'Dashboard' }, ...crumblist];
+      : [{ href: '/dashboard', label: 'Dashboard' }, ...crumblist];
   };
 
   return { getBreadcrumbs };

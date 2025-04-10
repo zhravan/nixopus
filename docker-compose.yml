@@ -39,7 +39,7 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - ${DB_VOLUME:-/etc/nixopus/db}:/var/lib/postgresql/data
     networks:
       - nixopus-network
     healthcheck:
@@ -90,8 +90,8 @@ services:
       - "443:443"
     volumes:
       - ./api/helpers/Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy_data:/data
-      - ./caddy_config:/config
+      - ${CADDY_DATA_VOLUME:-/etc/nixopus/caddy}:/data
+      - ${CADDY_CONFIG_VOLUME:-/etc/nixopus/caddy}:/config
     networks:
       - nixopus-network
 

@@ -28,7 +28,11 @@ RUN mkdir -p /etc/nixopus/ssh && \
     mkdir -p /etc/nixopus/docker-certs && \
     chmod 700 /etc/nixopus/docker-certs && \
     mkdir -p /etc/nixopus/configs && \
-    chmod 700 /etc/nixopus/configs
+    chmod 700 /etc/nixopus/configs && \
+    mkdir -p /etc/nixopus/db && \
+    chmod 700 /etc/nixopus/db && \
+    mkdir -p /etc/nixopus/caddy && \
+    chmod 700 /etc/nixopus/caddy
 
 EXPOSE ${API_PORT}
 

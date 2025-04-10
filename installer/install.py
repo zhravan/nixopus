@@ -149,6 +149,7 @@ def main():
     env_vars = installer.setup_environment(domain)
     installer.start_services()
     installer.verify_installation()
+    installer.setup_caddy()
     
     print("\n======== Installation completed successfully! ========")
     print("======== You can access the application at: ========")

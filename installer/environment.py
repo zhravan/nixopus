@@ -216,8 +216,8 @@ class EnvironmentSetup:
                 print(result.stderr)
                 raise Exception("Failed to check Docker service status")
 
-            print("\nDocker service status:")
-            print(result.stdout)
+            # print("\nDocker service status:")
+            # print(result.stdout)
 
         except Exception as e:
             result = subprocess.run(["journalctl", "-u", "docker", "-n", "50"], capture_output=True, text=True)
@@ -251,6 +251,7 @@ class EnvironmentSetup:
             "API_PORT": str(api_port),
             "NEXT_PUBLIC_BASE_URL": f"https://api.{self.domain}/api",
             "NEXT_PUBLIC_WEBSOCKET_URL": f"wss://api.{self.domain}/ws",
+            "NEXT_PUBLIC_WEBHOOK_URL": f"https://api.{self.domain}/webhook",
             "NEXT_PUBLIC_PORT": str(next_public_port),
             "MOUNT_PATH": "/etc/nixopus/configs",
             "PORT": str(api_port),
@@ -261,7 +262,10 @@ class EnvironmentSetup:
             "DOCKER_HOST": f"tcp://{local_ip}:2376",
             "DOCKER_TLS_VERIFY": "1",
             "DOCKER_CERT_PATH": str(self.docker_certs_dir),
-            "CADDY_ENDPOINT": "http://localhost:2019"
+            "CADDY_ENDPOINT": "http://localhost:2019",
+            "CADDY_DATA_VOLUME": str(self.config_dir / "caddy" / "data"),
+            "CADDY_CONFIG_VOLUME": str(self.config_dir / "caddy" / "config"),
+            "DB_VOLUME": str(self.config_dir / "db")
         }
 
         with open(self.env_file, 'w') as f:

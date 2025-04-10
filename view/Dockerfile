@@ -47,4 +47,4 @@ USER nixopus
 
 EXPOSE ${NEXT_PUBLIC_PORT}
 
-CMD ["yarn", "start"]
+CMD ["yarn", "start", "-p", "${NEXT_PUBLIC_PORT}"]

@@ -105,7 +105,8 @@ def main():
     print("\033[36m                   | |              \033[0m")
     print("\033[36m                   |_|              \033[0m")
     print("")
-    
+    print("Welcome to the Nixopus installer!")
+    print("This script will install Nixopus on your system. Hold on tight!")
     installer.ask_for_sudo()
     domain = installer.ask_domain()
     

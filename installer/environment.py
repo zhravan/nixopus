@@ -148,16 +148,9 @@ class EnvironmentSetup:
             json.dump(daemon_config, f, indent=2)
 
         try:
-            # Stop docker service first
             subprocess.run(["systemctl", "stop", "docker"], check=True)
-            
-            # Start docker service
             subprocess.run(["systemctl", "start", "docker"], check=True)
-            
-            # Wait for docker to be ready
             time.sleep(5)
-            
-            # Verify docker is running
             status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
             print("\nDocker service status:")
             print(status.stdout)
@@ -216,6 +209,12 @@ class EnvironmentSetup:
         with open(api_env_file, 'w') as f:
             for key, value in env_vars.items():
                 f.write(f"{key}={value}\n")
+        
+        # copy to view/.env
+        view_env_file = self.project_root / "view" / ".env"
+        with open(view_env_file, 'w') as f:
+            for key, value in env_vars.items():
+                f.write(f"{key}={value}\n")
 
         self.env_file.chmod(0o600)
         private_key_path.chmod(0o600)
@@ -224,4 +223,4 @@ class EnvironmentSetup:
         for cert_file in self.docker_certs_dir.glob("*"):
             cert_file.chmod(0o600)
 
-        return env_vars 
+        return env_vars

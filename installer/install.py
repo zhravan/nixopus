@@ -9,6 +9,7 @@ import re
 from validation import Validation
 from environment import EnvironmentSetup
 import shutil
+import json
 
 class Installer:
     def __init__(self):
@@ -41,6 +42,11 @@ class Installer:
         if not self._version_check(compose_version, self.required_compose_version):
             print(f"Error: Docker Compose version {self.required_compose_version} or higher is required")
             sys.exit(1)
+            
+    def check_curl_installed(self):
+        if not shutil.which("curl"):
+            print("Error: Curl is not installed")
+            sys.exit(1)
 
     def check_system_requirements(self):
         print("Checking system requirements...")
@@ -53,7 +59,8 @@ class Installer:
 
         self.check_docker_version()
         self.check_docker_compose_version()
-        
+        self.check_curl_installed()
+
         print("System requirements check passed!")
 
     def _version_check(self, version_string, required_version):
@@ -97,6 +104,27 @@ class Installer:
         except subprocess.CalledProcessError as e:
             print(f"Error verifying installation: {e}")
             sys.exit(1)
+    
+    def setup_caddy(self):
+        print("\nSetting up Proxy...")
+        try:
+            with open('api/helpers/caddy.json', 'r') as f:
+                config = json.dumps(json.load(f))
+            
+            result = subprocess.run(
+                ['curl', '-X', 'POST', 'http://localhost:2019/load',
+                 '-H', 'Content-Type: application/json',
+                 '-d', config],
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode == 0:
+                print("✓ Caddy configuration loaded successfully")
+            else:
+                print(f"✗ Failed to load Caddy configuration: {result.stderr}")
+        except Exception as e:
+            print(f"✗ Error setting up Caddy: {str(e)}")
 
 def main():
     installer = Installer()
@@ -109,9 +137,11 @@ def main():
     print("\033[36m |_| \_|_/_/\_\___/| .__/ \__,_|___/\033[0m")
     print("\033[36m                   | |              \033[0m")
     print("\033[36m                   |_|              \033[0m")
-    print("")
-    print("Welcome to the Nixopus installer!")
-    print("This script will install Nixopus on your system. Hold on tight!")
+    print("\n")
+    print("======= Welcome to the Nixopus installer! =======")
+    print("======== This script will install Nixopus on your system. Hold on tight! ========")
+    
+    
     installer.ask_for_sudo()
     domain = installer.ask_domain()
     
@@ -120,17 +150,17 @@ def main():
     installer.start_services()
     installer.verify_installation()
     
-    print("\nInstallation completed successfully!")
-    print("You can access the application at:")
-    print(f"- API: https://api.{domain}/api")
-    print(f"- View: https://{domain}")
+    print("\n======== Installation completed successfully! ========")
+    print("======== You can access the application at: ========")
+    print(f"======== API: https://api.{domain}/api ========")
+    print(f"======== View: https://{domain} ========")
     
-    print("\nGenerated credentials:")
-    print(f"Database:")
+    print("\n======== Generated credentials: ========")
+    print(f"======== Database: ========")
     print(f"  Name: {env_vars['DB_NAME']}")
     print(f"  Username: {env_vars['USERNAME']}")
     print(f"  Password: {env_vars['PASSWORD']}")
-    print(f"SSH:")
+    print(f"======== SSH: ========")
     print(f"  Username: {env_vars['SSH_USER']}")
     print(f"  Private Key: {env_vars['SSH_PRIVATE_KEY']}")
 

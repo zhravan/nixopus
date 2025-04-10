@@ -10,6 +10,7 @@ from validation import Validation
 from environment import EnvironmentSetup
 import shutil
 import json
+import secrets
 
 class Installer:
     def __init__(self):
@@ -30,6 +31,19 @@ class Installer:
         validation = Validation()
         validation.validate_domain(domain)
         return domain
+    
+    def generate_strong_password(self):
+        return secrets.token_urlsafe(16)
+
+    def ask_admin_credentials(self):
+        email = input("Please enter the email for the admin: ")
+        validation = Validation()
+        validation.validate_email(email)
+        password = input("Please enter the password for the admin(generates a strong password if left blank): ")
+        if not password:
+            password = self.generate_strong_password()
+        validation.validate_password(password)
+        return email, password
     
     def check_docker_version(self):
         try:
@@ -141,6 +155,19 @@ class Installer:
                 print(result.stderr)
         except Exception as e:
             print(f"✗ Error setting up Caddy: {str(e)}")
+    
+    def setup_admin(self, email, password, env_vars):
+        print("\nSetting up admin...")
+        try:
+            api_port = env_vars.get('API_PORT', '8443')
+            username = email.split('@')[0]
+            subprocess.run([
+                "docker", "exec", "-it", "nixopus-api-container", "sh", "-c",
+                f"curl -X POST http://localhost:{api_port}/api/v1/auth/register -H 'Content-Type: application/json' -d '{{\"email\": \"{email}\", \"password\": \"{password}\", \"type\": \"admin\", \"username\": \"{username}\", \"organization\": \"\"}}'"
+            ], check=True)
+            print("✓ Admin setup completed successfully")
+        except Exception as e:
+            print(f"✗ Error setting up admin: {str(e)}")
 
 def main():
     installer = Installer()
@@ -154,32 +181,32 @@ def main():
     print("\033[36m                   | |              \033[0m")
     print("\033[36m                   |_|              \033[0m")
     print("\n")
-    print("======= Welcome to the Nixopus installer! =======")
-    print("======== This script will install Nixopus on your system. Hold on tight! ========")
-    
+    print("\033[1mWelcome to Nixopus Installation Wizard\033[0m")
+    print("This wizard will guide you through the installation process of Nixopus.")
+    print("Please follow the prompts carefully to complete the setup.\n")
     
     installer.ask_for_sudo()
     domain = installer.ask_domain()
-    
+    email, password = installer.ask_admin_credentials()
     installer.check_system_requirements()
     env_vars = installer.setup_environment(domain)
     installer.start_services()
     installer.verify_installation()
     installer.setup_caddy()
+    installer.setup_admin(email, password, env_vars)
     
-    print("\n======== Installation completed successfully! ========")
-    print("======== You can access the application at: ========")
-    print(f"======== API: https://api.{domain}/api ========")
-    print(f"======== View: https://{domain} ========")
+    print("\n\033[1mInstallation Complete!\033[0m")
+    print("\n\033[1mAccess Information:\033[0m")
+    print(f"• Nixopus is now installed and running on: {domain}")
     
-    print("\n======== Generated credentials: ========")
-    print(f"======== Database: ========")
-    print(f"  Name: {env_vars['DB_NAME']}")
-    print(f"  Username: {env_vars['USERNAME']}")
-    print(f"  Password: {env_vars['PASSWORD']}")
-    print(f"======== SSH: ========")
-    print(f"  Username: {env_vars['SSH_USER']}")
-    print(f"  Private Key: {env_vars['SSH_PRIVATE_KEY']}")
+    print("\n\033[1mAdmin Credentials:\033[0m")
+    print(f"• Email: {email}")
+    print(f"• Password: {password}")
+    print("\n\033[1mImportant:\033[0m Please save these credentials securely. You will need them to log in.")
+    print("\n\033[1mThank you for installing Nixopus!\033[0m")
+    print("\n\033[1mPlease visit the documentation at https://docs.nixopus.com for more information.\033[0m")
+    print("\n\033[1mIf you have any questions, please visit the community forum at https://community.nixopus.com\033[0m")
+    print("\n\033[1mSee you in the community!\033[0m")
 
 if __name__ == "__main__":
     main() 

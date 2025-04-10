@@ -23,6 +23,13 @@ COPY --from=builder /app/bin/nixopus-api .
 COPY --from=builder /app/migrations ./migrations
 COPY ../.env .
 
+RUN mkdir -p /etc/nixopus/ssh && \
+    chmod 700 /etc/nixopus/ssh && \
+    mkdir -p /etc/nixopus/docker-certs && \
+    chmod 700 /etc/nixopus/docker-certs && \
+    mkdir -p /etc/nixopus/configs && \
+    chmod 700 /etc/nixopus/configs
+
 EXPOSE ${API_PORT}
 
 ENTRYPOINT ["./nixopus-api"]

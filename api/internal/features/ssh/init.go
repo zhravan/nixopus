@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -114,27 +113,27 @@ func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {
 	return client, nil
 }
 
-func (s *SSH) ConnectWithPrivateKeyProtected() (*goph.Client, error) {
-	auth, err := goph.Key(s.PrivateKeyProtected, "")
+// func (s *SSH) ConnectWithPrivateKeyProtected() (*goph.Client, error) {
+// 	auth, err := goph.Key(s.PrivateKeyProtected, "")
 
-	if err != nil {
-		log.Fatalf("SSH connection failed: %v", err)
-	}
+// 	if err != nil {
+// 		log.Fatalf("SSH connection failed: %v", err)
+// 	}
 
-	client, err := goph.NewConn(&goph.Config{
-		User:     s.User,
-		Addr:     s.Host,
-		Port:     uint(s.Port),
-		Auth:     auth,
-		Callback: ssh.InsecureIgnoreHostKey(),
-	})
-	if err != nil {
-		log.Fatalf("SSH connection failed: %v", err)
-	}
+// 	client, err := goph.NewConn(&goph.Config{
+// 		User:     s.User,
+// 		Addr:     s.Host,
+// 		Port:     uint(s.Port),
+// 		Auth:     auth,
+// 		Callback: ssh.InsecureIgnoreHostKey(),
+// 	})
+// 	if err != nil {
+// 		log.Fatalf("SSH connection failed: %v", err)
+// 	}
 
-	defer client.Close()
-	return client, nil
-}
+// 	defer client.Close()
+// 	return client, nil
+// }
 
 func (s *SSH) RunCommand(cmd string) (string, error) {
 	client, err := s.Connect()

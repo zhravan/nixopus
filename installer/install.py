@@ -71,7 +71,7 @@ class Installer:
     def start_services(self):
         print("\nStarting services...")
         try:
-            subprocess.run(["docker-compose", "up", "-d"], check=True, cwd=self.project_root)
+            subprocess.run(["docker-compose", "up", "--build", "-d"], check=True, cwd=self.project_root)
             print("Services started successfully!")
         except subprocess.CalledProcessError as e:
             print(f"Error starting services: {e}")

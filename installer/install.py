@@ -156,10 +156,9 @@ class Installer:
         except Exception as e:
             print(f"✗ Error setting up Caddy: {str(e)}")
     
-    def setup_admin(self, email, password, env_vars):
+    def setup_admin(self, email, password, domain):
         print("\nSetting up admin...")
         try:
-            domain = env_vars.get('DOMAIN')
             username = email.split('@')[0]
             subprocess.run([
                 "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
@@ -194,7 +193,7 @@ def main():
     installer.start_services()
     installer.verify_installation()
     installer.setup_caddy()
-    installer.setup_admin(email, password, env_vars)
+    installer.setup_admin(email, password, domain)
     
     print("\n\033[1mInstallation Complete!\033[0m")
     print("\n\033[1mAccess Information:\033[0m")

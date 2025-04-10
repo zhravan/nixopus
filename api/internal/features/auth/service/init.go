@@ -51,4 +51,5 @@ type AuthServiceInterface interface {
 	VerifyToken(token string) (string, error)
 	MarkEmailAsVerified(userID string) error
 	GetUserByID(userID string) (*shared_types.User, error)
+	IsAdminRegistered() (bool, error)
 }

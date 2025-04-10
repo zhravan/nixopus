@@ -55,7 +55,19 @@ class EnvironmentSetup:
         public_key_path = self.ssh_dir / "id_rsa.pub"
         
         if not private_key_path.exists():
-            subprocess.run(["ssh-keygen", "-t", "rsa", "-b", "4096", "-f", str(private_key_path), "-N", ""], check=True)
+            try:
+                result = subprocess.run(
+                    ["ssh-keygen", "-t", "rsa", "-b", "4096", "-f", str(private_key_path), "-N", ""],
+                    capture_output=True,
+                    text=True
+                )
+                if result.returncode != 0:
+                    print("Error generating SSH key:")
+                    print(result.stderr)
+                    raise Exception("Failed to generate SSH key")
+            except Exception as e:
+                print(f"Error generating SSH key: {str(e)}")
+                raise
         
         return private_key_path, public_key_path
 
@@ -64,59 +76,96 @@ class EnvironmentSetup:
         
         local_ip = self.get_local_ip()
         
-        subprocess.run([
-            "openssl", "genrsa", "-out", str(self.docker_certs_dir / "ca-key.pem"), "4096"
-        ], check=True)
-        
-        subprocess.run([
-            "openssl", "req", "-new", "-x509", "-days", "365",
-            "-key", str(self.docker_certs_dir / "ca-key.pem"),
-            "-sha256", "-out", str(self.docker_certs_dir / "ca.pem"),
-            "-subj", "/CN=nixopus"
-        ], check=True)
-        
-        subprocess.run([
-            "openssl", "genrsa", "-out", str(self.docker_certs_dir / "server-key.pem"), "4096"
-        ], check=True)
-        
-        with open(self.docker_certs_dir / "extfile.cnf", "w") as f:
-            f.write(f"subjectAltName = DNS:localhost,IP:{local_ip},IP:127.0.0.1\n")
-        
-        subprocess.run([
-            "openssl", "req", "-subj", f"/CN={local_ip}", "-new",
-            "-key", str(self.docker_certs_dir / "server-key.pem"),
-            "-out", str(self.docker_certs_dir / "server.csr")
-        ], check=True)
-        
-        subprocess.run([
-            "openssl", "x509", "-req", "-days", "365",
-            "-in", str(self.docker_certs_dir / "server.csr"),
-            "-CA", str(self.docker_certs_dir / "ca.pem"),
-            "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
-            "-CAcreateserial", "-out", str(self.docker_certs_dir / "server-cert.pem"),
-            "-extfile", str(self.docker_certs_dir / "extfile.cnf")
-        ], check=True)
-        
-        subprocess.run([
-            "openssl", "genrsa", "-out", str(self.docker_certs_dir / "key.pem"), "4096"
-        ], check=True)
-        
-        subprocess.run([
-            "openssl", "req", "-subj", "/CN=client", "-new",
-            "-key", str(self.docker_certs_dir / "key.pem"),
-            "-out", str(self.docker_certs_dir / "client.csr")
-        ], check=True)
-        
-        subprocess.run([
-            "openssl", "x509", "-req", "-days", "365",
-            "-in", str(self.docker_certs_dir / "client.csr"),
-            "-CA", str(self.docker_certs_dir / "ca.pem"),
-            "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
-            "-CAcreateserial", "-out", str(self.docker_certs_dir / "cert.pem")
-        ], check=True)
-        
-        for cert_file in self.docker_certs_dir.glob("*"):
-            cert_file.chmod(0o600)
+        try:
+            result = subprocess.run([
+                "openssl", "genrsa", "-out", str(self.docker_certs_dir / "ca-key.pem"), "4096"
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating CA key:")
+                print(result.stderr)
+                raise Exception("Failed to generate CA key")
+
+            result = subprocess.run([
+                "openssl", "req", "-new", "-x509", "-days", "365",
+                "-key", str(self.docker_certs_dir / "ca-key.pem"),
+                "-sha256", "-out", str(self.docker_certs_dir / "ca.pem"),
+                "-subj", "/CN=nixopus"
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating CA certificate:")
+                print(result.stderr)
+                raise Exception("Failed to generate CA certificate")
+
+            result = subprocess.run([
+                "openssl", "genrsa", "-out", str(self.docker_certs_dir / "server-key.pem"), "4096"
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating server key:")
+                print(result.stderr)
+                raise Exception("Failed to generate server key")
+
+            with open(self.docker_certs_dir / "extfile.cnf", "w") as f:
+                f.write(f"subjectAltName = DNS:localhost,IP:{local_ip},IP:127.0.0.1\n")
+
+            result = subprocess.run([
+                "openssl", "req", "-subj", f"/CN={local_ip}", "-new",
+                "-key", str(self.docker_certs_dir / "server-key.pem"),
+                "-out", str(self.docker_certs_dir / "server.csr")
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating server CSR:")
+                print(result.stderr)
+                raise Exception("Failed to generate server CSR")
+
+            result = subprocess.run([
+                "openssl", "x509", "-req", "-days", "365",
+                "-in", str(self.docker_certs_dir / "server.csr"),
+                "-CA", str(self.docker_certs_dir / "ca.pem"),
+                "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
+                "-CAcreateserial", "-out", str(self.docker_certs_dir / "server-cert.pem"),
+                "-extfile", str(self.docker_certs_dir / "extfile.cnf")
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating server certificate:")
+                print(result.stderr)
+                raise Exception("Failed to generate server certificate")
+
+            result = subprocess.run([
+                "openssl", "genrsa", "-out", str(self.docker_certs_dir / "key.pem"), "4096"
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating client key:")
+                print(result.stderr)
+                raise Exception("Failed to generate client key")
+
+            result = subprocess.run([
+                "openssl", "req", "-subj", "/CN=client", "-new",
+                "-key", str(self.docker_certs_dir / "key.pem"),
+                "-out", str(self.docker_certs_dir / "client.csr")
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating client CSR:")
+                print(result.stderr)
+                raise Exception("Failed to generate client CSR")
+
+            result = subprocess.run([
+                "openssl", "x509", "-req", "-days", "365",
+                "-in", str(self.docker_certs_dir / "client.csr"),
+                "-CA", str(self.docker_certs_dir / "ca.pem"),
+                "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
+                "-CAcreateserial", "-out", str(self.docker_certs_dir / "cert.pem")
+            ], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error generating client certificate:")
+                print(result.stderr)
+                raise Exception("Failed to generate client certificate")
+
+            for cert_file in self.docker_certs_dir.glob("*"):
+                cert_file.chmod(0o600)
+
+        except Exception as e:
+            print(f"Error setting up Docker certificates: {str(e)}")
+            raise
 
     def get_local_ip(self):
         try:
@@ -148,18 +197,33 @@ class EnvironmentSetup:
             json.dump(daemon_config, f, indent=2)
 
         try:
-            subprocess.run(["systemctl", "stop", "docker"], check=True)
-            subprocess.run(["systemctl", "start", "docker"], check=True)
-            time.sleep(5)
-            status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
-            print("\nDocker service status:")
-            print(status.stdout)
+            result = subprocess.run(["systemctl", "stop", "docker"], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error stopping Docker service:")
+                print(result.stderr)
+                raise Exception("Failed to stop Docker service")
 
-        except subprocess.CalledProcessError as e:
-            journal = subprocess.run(["journalctl", "-u", "docker", "-n", "50"], capture_output=True, text=True)
+            result = subprocess.run(["systemctl", "start", "docker"], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error starting Docker service:")
+                print(result.stderr)
+                raise Exception("Failed to start Docker service")
+
+            time.sleep(5)
+            result = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error checking Docker service status:")
+                print(result.stderr)
+                raise Exception("Failed to check Docker service status")
+
+            print("\nDocker service status:")
+            print(result.stdout)
+
+        except Exception as e:
+            result = subprocess.run(["journalctl", "-u", "docker", "-n", "50"], capture_output=True, text=True)
             print("\nDocker service error logs:")
-            print(journal.stdout)
-            raise Exception(f"Failed to restart Docker service. Error: {e.stderr}\nJournal logs: {journal.stdout}")
+            print(result.stdout)
+            raise Exception(f"Failed to manage Docker service. Error: {str(e)}\nJournal logs: {result.stdout}")
 
     def setup_environment(self):
         db_name = f"nixopus_{self.generate_random_string(8)}"

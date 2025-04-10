@@ -43,11 +43,11 @@ services:
     networks:
       - nixopus-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${USERNAME} -d ${DB_NAME}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${USERNAME} -d ${DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 5
-  
+
   nixopus-test-db:
     image: postgres:14-alpine
     container_name: nixopus-test-db-container
@@ -60,13 +60,16 @@ services:
       - POSTGRES_DB=${TEST_DB_NAME:-nixopus_test}
     networks:
       - nixopus-network
-  
+
   nixopus-view:
     build:
       context: ./view
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_PORT=${NEXT_PUBLIC_PORT:-7443}
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://api.nixopus.com}
+        - NEXT_PUBLIC_WEBSOCKET_URL=${NEXT_PUBLIC_WEBSOCKET_URL:-wss://api.nixopus.com/ws}
+        - NEXT_PUBLIC_WEBHOOK_URL=${NEXT_PUBLIC_WEBHOOK_URL:-https://api.nixopus.com/webhook}
     container_name: nixopus-view-container
     ports:
       - "${NEXT_PUBLIC_PORT:-7443}:${NEXT_PUBLIC_PORT:-7443}"
@@ -77,7 +80,7 @@ services:
       - ./logs:/app/logs
     networks:
       - nixopus-network
-  
+
   nixopus-caddy:
     image: caddy:latest
     container_name: nixopus-caddy-container

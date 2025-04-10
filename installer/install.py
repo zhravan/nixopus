@@ -32,15 +32,19 @@ class Installer:
         return domain
     
     def check_docker_version(self):
-        docker_version = subprocess.check_output(["docker", "--version"]).decode()
-        if not self._version_check(docker_version, self.required_docker_version):
+        try:
+            subprocess.run(["docker", "--version"], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
             print(f"Error: Docker version {self.required_docker_version} or higher is required")
+            print(e.stderr.decode())
             sys.exit(1)
             
     def check_docker_compose_version(self):
-        compose_version = subprocess.check_output(["docker-compose", "--version"]).decode()
-        if not self._version_check(compose_version, self.required_compose_version):
+        try:
+            subprocess.run(["docker-compose", "--version"], check=True, capture_output=True)
+        except subprocess.CalledProcessError as e:
             print(f"Error: Docker Compose version {self.required_compose_version} or higher is required")
+            print(e.stderr.decode())
             sys.exit(1)
             
     def check_curl_installed(self):
@@ -84,15 +88,26 @@ class Installer:
             os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
             
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
-            subprocess.run(compose_cmd + ["up", "--build", "-d"], check=True, cwd=self.project_root)
-        except subprocess.CalledProcessError as e:
-            print(f"Error starting services: {e}")
+            result = subprocess.run(compose_cmd + ["up", "--build", "-d"], capture_output=True, text=True, cwd=self.project_root)
+            
+            if result.returncode != 0:
+                print("Error starting services:")
+                print(result.stderr)
+                sys.exit(1)
+        except Exception as e:
+            print(f"Error starting services: {str(e)}")
             sys.exit(1)
 
     def verify_installation(self):
         print("\nVerifying installation...")
         try:
-            containers = subprocess.check_output(["docker", "ps"]).decode()
+            result = subprocess.run(["docker", "ps"], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("Error verifying installation:")
+                print(result.stderr)
+                sys.exit(1)
+                
+            containers = result.stdout
             required_containers = ["nixopus-api-container", "nixopus-db-container", "nixopus-view-container"]
             
             for container in required_containers:
@@ -101,8 +116,8 @@ class Installer:
                     sys.exit(1)
 
             print("Installation verified successfully!")
-        except subprocess.CalledProcessError as e:
-            print(f"Error verifying installation: {e}")
+        except Exception as e:
+            print(f"Error verifying installation: {str(e)}")
             sys.exit(1)
     
     def setup_caddy(self):
@@ -122,7 +137,8 @@ class Installer:
             if result.returncode == 0:
                 print("✓ Caddy configuration loaded successfully")
             else:
-                print(f"✗ Failed to load Caddy configuration: {result.stderr}")
+                print("✗ Failed to load Caddy configuration:")
+                print(result.stderr)
         except Exception as e:
             print(f"✗ Error setting up Caddy: {str(e)}")
 

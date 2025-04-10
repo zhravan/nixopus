@@ -85,13 +85,19 @@ func parsePort(port string) uint64 {
 
 func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {
 	if s.PrivateKey == "" {
-		return nil, fmt.Errorf("private key path is required for SSH connection")
+		return nil, fmt.Errorf("private key is required for SSH connection")
 	}
 
-	// Read the private key file
-	keyBytes, err := os.ReadFile(s.PrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read private key file: %w", err)
+	var keyBytes []byte
+	var err error
+
+	if _, err := os.Stat(s.PrivateKey); err == nil {
+		keyBytes, err = os.ReadFile(s.PrivateKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read private key file: %w", err)
+		}
+	} else {
+		keyBytes = []byte(s.PrivateKey)
 	}
 
 	auth, err := goph.Key(string(keyBytes), "")

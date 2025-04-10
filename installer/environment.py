@@ -19,6 +19,34 @@ class EnvironmentSetup:
     def generate_random_string(self, length=12):
         alphabet = string.ascii_letters + string.digits
         return ''.join(secrets.choice(alphabet) for _ in range(length))
+    
+    def setup_authorized_keys(self):
+        """Add the generated SSH public key to authorized_keys file."""
+        try:
+            ssh_config_dir = Path.home() / ".ssh"
+            ssh_config_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+            authorized_keys_path = ssh_config_dir / "authorized_keys"
+            
+            _, public_key_path = self.generate_ssh_key()
+            with open(public_key_path, 'r') as pk_file:
+                public_key_content = pk_file.read().strip()
+                
+            if authorized_keys_path.exists():
+                with open(authorized_keys_path, 'r') as auth_file:
+                    existing_content = auth_file.read()
+                    if public_key_content in existing_content:
+                        print(f"SSH key already in {authorized_keys_path}")
+                        return
+                        
+            with open(authorized_keys_path, 'a+') as auth_file:
+                auth_file.write(f"\n{public_key_content}\n")
+                
+            authorized_keys_path.chmod(0o600)
+            print(f"Added SSH key to {authorized_keys_path}")
+            
+        except Exception as e:
+            print(f"Error setting up authorized_keys: {str(e)}")
+            raise
 
     def generate_ssh_key(self):
         self.ssh_dir.mkdir(parents=True, exist_ok=True)
@@ -95,6 +123,7 @@ class EnvironmentSetup:
         db_port = 5432 
 
         private_key_path, public_key_path = self.generate_ssh_key()
+        self.setup_authorized_keys()
         local_ip = self.get_local_ip()
 
         self.setup_docker_certs()

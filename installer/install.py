@@ -11,6 +11,7 @@ from environment import EnvironmentSetup
 import shutil
 import json
 import secrets
+import time
 
 class Installer:
     def __init__(self):
@@ -158,16 +159,54 @@ class Installer:
     
     def setup_admin(self, email, password, domain):
         print("\nSetting up admin...")
-        try:
-            username = email.split('@')[0]
-            subprocess.run([
-                "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
-                "-H", "Content-Type: application/json",
-                "-d", f'{{"email": "{email}", "password": "{password}", "type": "admin", "username": "{username}", "organization": ""}}'
-            ], check=True)
-            print("✓ Admin setup completed successfully")
-        except Exception as e:
-            print(f"✗ Error setting up admin: {str(e)}")
+        max_retries = 3
+        retry_delay = 5  
+        
+        for attempt in range(max_retries):
+            try:
+                username = email.split('@')[0]
+                result = subprocess.run([
+                    "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
+                    "-H", "Content-Type: application/json",
+                    "--connect-timeout", "10",
+                    "--max-time", "30",
+                    "--retry", "3",
+                    "--retry-delay", "5",
+                    "--insecure",  # Only for initial setup, should be removed in production
+                    "-d", f'{{"email": "{email}", "password": "{password}", "type": "admin", "username": "{username}", "organization": ""}}'
+                ], capture_output=True, text=True, check=False)
+                
+                if result.returncode == 0:
+                    try:
+                        response = json.loads(result.stdout)
+                        if response.get("success"):
+                            print("✓ Admin setup completed successfully")
+                            return
+                        else:
+                            error_msg = response.get("error", "Unknown error")
+                            print(f"✗ API Error: {error_msg}")
+                    except json.JSONDecodeError:
+                        print("✗ Invalid response from API")
+                else:
+                    print(f"✗ HTTP Error: {result.stderr}")
+                
+                if attempt < max_retries - 1:
+                    print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")
+                    time.sleep(retry_delay)
+                
+            except subprocess.TimeoutExpired:
+                print("✗ Request timed out")
+                if attempt < max_retries - 1:
+                    print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")
+                    time.sleep(retry_delay)
+            except Exception as e:
+                print(f"✗ Error setting up admin: {str(e)}")
+                if attempt < max_retries - 1:
+                    print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")
+                    time.sleep(retry_delay)
+        
+        print("✗ Failed to setup admin after multiple attempts")
+        sys.exit(1)
 
 def main():
     installer = Installer()

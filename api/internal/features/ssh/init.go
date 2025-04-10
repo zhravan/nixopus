@@ -88,19 +88,7 @@ func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {
 		return nil, fmt.Errorf("private key is required for SSH connection")
 	}
 
-	var keyBytes []byte
-	var err error
-
-	if _, err := os.Stat(s.PrivateKey); err == nil {
-		keyBytes, err = os.ReadFile(s.PrivateKey)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read private key file: %w", err)
-		}
-	} else {
-		keyBytes = []byte(s.PrivateKey)
-	}
-
-	auth, err := goph.Key(string(keyBytes), "")
+	auth, err := goph.Key(s.PrivateKey, "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create SSH auth from private key: %w", err)
 	}

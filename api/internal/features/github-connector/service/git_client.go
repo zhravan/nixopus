@@ -36,7 +36,7 @@ func NewDefaultGitClient(logger logger.Logger, ssh *ssh.SSH) *DefaultGitClient {
 
 // Clone clones a git repository to the specified path
 func (g *DefaultGitClient) Clone(repoURL, destinationPath string) error {
-	client, err := g.ssh.ConnectWithPassword()
+	client, err := g.ssh.Connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect via SSH: %w", err)
 	}
@@ -54,7 +54,7 @@ func (g *DefaultGitClient) Clone(repoURL, destinationPath string) error {
 
 // Pull updates a git repository from remote
 func (g *DefaultGitClient) Pull(repoURL, destinationPath string) error {
-	client, err := g.ssh.ConnectWithPassword()
+	client, err := g.ssh.Connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect via SSH: %w", err)
 	}
@@ -119,7 +119,7 @@ func (g *DefaultGitClient) GetLatestCommitHash(repoURL string, accessToken strin
 // SetHeadToCommitHash sets the HEAD of the repository to a specific commit hash
 func (g *DefaultGitClient) SetHeadToCommitHash(repoURL, destinationPath, commitHash string) error {
 	// Connect to SSH
-	client, err := g.ssh.ConnectWithPassword()
+	client, err := g.ssh.Connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect via SSH: %w", err)
 	}

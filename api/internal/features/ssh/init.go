@@ -33,6 +33,10 @@ func NewSSH() *SSH {
 }
 
 func (s *SSH) ConnectWithPassword() (*goph.Client, error) {
+	if s.Password == "" {
+		return nil, fmt.Errorf("password is required for SSH connection")
+	}
+
 	auth := goph.Password(s.Password)
 
 	client, err := goph.NewConn(&goph.Config{
@@ -43,7 +47,27 @@ func (s *SSH) ConnectWithPassword() (*goph.Client, error) {
 		Callback: ssh.InsecureIgnoreHostKey(),
 	})
 	if err != nil {
-		log.Fatalf("SSH connection failed: %v", err)
+		return nil, fmt.Errorf("failed to establish SSH connection with password: %w", err)
+	}
+
+	return client, nil
+}
+
+func (s *SSH) Connect() (*goph.Client, error) {
+	if s.User == "" || s.Host == "" {
+		return nil, fmt.Errorf("user and host are required for SSH connection")
+	}
+
+	client, err := s.ConnectWithPrivateKey()
+	if err == nil {
+		return client, nil
+	}
+
+	fmt.Printf("private key connection failed: %v\n", err)
+
+	client, err = s.ConnectWithPassword()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect with both private key and password: %w", err)
 	}
 
 	return client, nil
@@ -61,10 +85,19 @@ func parsePort(port string) uint64 {
 }
 
 func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {
-	auth, err := goph.Key(s.PrivateKey, "")
+	if s.PrivateKey == "" {
+		return nil, fmt.Errorf("private key path is required for SSH connection")
+	}
 
+	// Read the private key file
+	keyBytes, err := os.ReadFile(s.PrivateKey)
 	if err != nil {
-		log.Fatalf("SSH connection failed: %v", err)
+		return nil, fmt.Errorf("failed to read private key file: %w", err)
+	}
+
+	auth, err := goph.Key(string(keyBytes), "")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create SSH auth from private key: %w", err)
 	}
 
 	client, err := goph.NewConn(&goph.Config{
@@ -75,10 +108,9 @@ func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {
 		Callback: ssh.InsecureIgnoreHostKey(),
 	})
 	if err != nil {
-		log.Fatalf("SSH connection failed: %v", err)
+		return nil, fmt.Errorf("failed to establish SSH connection with private key: %w", err)
 	}
 
-	defer client.Close()
 	return client, nil
 }
 
@@ -105,7 +137,7 @@ func (s *SSH) ConnectWithPrivateKeyProtected() (*goph.Client, error) {
 }
 
 func (s *SSH) RunCommand(cmd string) (string, error) {
-	client, err := s.ConnectWithPassword()
+	client, err := s.Connect()
 	if err != nil {
 		return "", err
 	}
@@ -119,7 +151,7 @@ func (s *SSH) RunCommand(cmd string) (string, error) {
 }
 
 func (s *SSH) Terminal() {
-	client, err := s.ConnectWithPassword()
+	client, err := s.Connect()
 	if err != nil {
 		fmt.Print("Failed to connect to ssh")
 		return

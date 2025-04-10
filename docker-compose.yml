@@ -65,9 +65,9 @@ services:
     build:
       context: ./view
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_PORT=${NEXT_PUBLIC_PORT:-7443}
     container_name: nixopus-view-container
-    args:
-      - NEXT_PUBLIC_PORT=${NEXT_PUBLIC_PORT:-7443}
     ports:
       - "${NEXT_PUBLIC_PORT:-7443}:${NEXT_PUBLIC_PORT:-7443}"
     restart: unless-stopped

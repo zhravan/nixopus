@@ -17,6 +17,7 @@ interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
+  isLoading: boolean;
 }
 
 interface AuthPayload {
@@ -102,7 +103,8 @@ const initialState: AuthState = {
   token: null,
   refreshToken: null,
   isAuthenticated: false,
-  isInitialized: false
+  isInitialized: false,
+  isLoading: false
 };
 
 export const authSlice = createSlice({
@@ -147,6 +149,9 @@ export const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(initializeAuth.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(initializeAuth.fulfilled, (state, action) => {
         if (action.payload) {
           state.user = action.payload.user;
@@ -155,9 +160,14 @@ export const authSlice = createSlice({
           state.isAuthenticated = true;
         }
         state.isInitialized = true;
+        state.isLoading = false;
       })
       .addCase(initializeAuth.rejected, (state) => {
         state.isInitialized = true;
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.loginUser.matchPending, (state) => {
+        state.isLoading = true;
       })
       .addMatcher(authApi.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
         console.log('Login successful, payload:', payload);
@@ -184,6 +194,13 @@ export const authSlice = createSlice({
         } else {
           console.error('Login payload missing access token:', payload);
         }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.loginUser.matchRejected, (state) => {
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.refreshToken.matchPending, (state) => {
+        state.isLoading = true;
       })
       .addMatcher(authApi.endpoints.refreshToken.matchFulfilled, (state, { payload }) => {
         if (payload?.access_token) {
@@ -199,11 +216,22 @@ export const authSlice = createSlice({
             expires_in: payload.expires_in
           });
         }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.refreshToken.matchRejected, (state) => {
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.getUserDetails.matchPending, (state) => {
+        state.isLoading = true;
       })
       .addMatcher(authApi.endpoints.getUserDetails.matchFulfilled, (state, { payload }) => {
         if (payload) {
           state.user = payload;
         }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.getUserDetails.matchRejected, (state) => {
+        state.isLoading = false;
       })
       .addMatcher(userApi.endpoints.updateUserName.matchFulfilled, (state, { payload }) => {
         if (payload && state.user) {

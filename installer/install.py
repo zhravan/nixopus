@@ -159,11 +159,12 @@ class Installer:
     def setup_admin(self, email, password, env_vars):
         print("\nSetting up admin...")
         try:
-            api_port = env_vars.get('API_PORT', '8443')
+            domain = env_vars.get('DOMAIN')
             username = email.split('@')[0]
             subprocess.run([
-                "docker", "exec", "-it", "nixopus-api-container", "sh", "-c",
-                f"curl -X POST http://localhost:{api_port}/api/v1/auth/register -H 'Content-Type: application/json' -d '{{\"email\": \"{email}\", \"password\": \"{password}\", \"type\": \"admin\", \"username\": \"{username}\", \"organization\": \"\"}}'"
+                "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
+                "-H", "Content-Type: application/json",
+                "-d", f'{{"email": "{email}", "password": "{password}", "type": "admin", "username": "{username}", "organization": ""}}'
             ], check=True)
             print("✓ Admin setup completed successfully")
         except Exception as e:

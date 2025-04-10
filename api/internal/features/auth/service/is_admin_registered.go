@@ -14,6 +14,8 @@ func (s *AuthService) IsAdminRegistered() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	return user != nil, nil
+	if user == nil {
+		return false, nil
+	}
+	return true, nil
 }

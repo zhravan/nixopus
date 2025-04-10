@@ -17,8 +17,8 @@ services:
       - HOST_NAME=nixopus-db
     volumes:
       - ./logs:/app/logs
-      - ${DOCKER_CERT_PATH}:/etc/docker/certs
-      - ${SSH_PRIVATE_KEY}:/root/.ssh/id_rsa
+      - ${DOCKER_CERT_PATH}:/etc/nixopus/docker-certs
+      - ${SSH_PRIVATE_KEY}:/etc/nixopus/ssh/id_rsa
       - ${MOUNT_PATH:-/etc/nixopus/configs}:/etc/nixopus/configs
       - /var/run/docker.sock:/var/run/docker.sock
     networks:

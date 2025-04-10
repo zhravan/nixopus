@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 from validation import Validation
 from environment import EnvironmentSetup
+import shutil
 
 class Installer:
     def __init__(self):
@@ -71,8 +72,8 @@ class Installer:
     def start_services(self):
         print("\nStarting services...")
         try:
-            subprocess.run(["docker-compose", "up", "--build", "-d"], check=True, cwd=self.project_root)
-            print("Services started successfully!")
+            compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
+            subprocess.run(compose_cmd + ["up", "--build", "-d"], check=True, cwd=self.project_root)
         except subprocess.CalledProcessError as e:
             print(f"Error starting services: {e}")
             sys.exit(1)

@@ -61,13 +61,57 @@ class EnvironmentSetup:
 
     def setup_docker_certs(self):
         self.docker_certs_dir.mkdir(parents=True, exist_ok=True)
+        
         subprocess.run([
-            "openssl", "req", "-newkey", "rsa:4096", "-nodes", "-sha256",
-            "-keyout", str(self.docker_certs_dir / "key.pem"),
-            "-x509", "-days", "365",
-            "-out", str(self.docker_certs_dir / "cert.pem"),
+            "openssl", "genrsa", "-out", str(self.docker_certs_dir / "ca-key.pem"), "4096"
+        ], check=True)
+        
+        subprocess.run([
+            "openssl", "req", "-new", "-x509", "-days", "365",
+            "-key", str(self.docker_certs_dir / "ca-key.pem"),
+            "-sha256", "-out", str(self.docker_certs_dir / "ca.pem"),
             "-subj", "/CN=nixopus"
         ], check=True)
+        
+        subprocess.run([
+            "openssl", "genrsa", "-out", str(self.docker_certs_dir / "server-key.pem"), "4096"
+        ], check=True)
+        
+        subprocess.run([
+            "openssl", "req", "-subj", "/CN=nixopus", "-new",
+            "-key", str(self.docker_certs_dir / "server-key.pem"),
+            "-out", str(self.docker_certs_dir / "server.csr")
+        ], check=True)
+        
+        subprocess.run([
+            "openssl", "x509", "-req", "-days", "365",
+            "-in", str(self.docker_certs_dir / "server.csr"),
+            "-CA", str(self.docker_certs_dir / "ca.pem"),
+            "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
+            "-CAcreateserial", "-out", str(self.docker_certs_dir / "server-cert.pem")
+        ], check=True)
+        
+
+        subprocess.run([
+            "openssl", "genrsa", "-out", str(self.docker_certs_dir / "key.pem"), "4096"
+        ], check=True)
+        
+        subprocess.run([
+            "openssl", "req", "-subj", "/CN=client", "-new",
+            "-key", str(self.docker_certs_dir / "key.pem"),
+            "-out", str(self.docker_certs_dir / "client.csr")
+        ], check=True)
+        
+        subprocess.run([
+            "openssl", "x509", "-req", "-days", "365",
+            "-in", str(self.docker_certs_dir / "client.csr"),
+            "-CA", str(self.docker_certs_dir / "ca.pem"),
+            "-CAkey", str(self.docker_certs_dir / "ca-key.pem"),
+            "-CAcreateserial", "-out", str(self.docker_certs_dir / "cert.pem")
+        ], check=True)
+        
+        for cert_file in self.docker_certs_dir.glob("*"):
+            cert_file.chmod(0o600)
 
     def get_local_ip(self):
         try:
@@ -85,9 +129,9 @@ class EnvironmentSetup:
 
         daemon_config = {
             "tls": True,
-            "tlscacert": str(self.docker_certs_dir / "cert.pem"),
-            "tlscert": str(self.docker_certs_dir / "cert.pem"),
-            "tlskey": str(self.docker_certs_dir / "key.pem"),
+            "tlscacert": str(self.docker_certs_dir / "ca.pem"),
+            "tlscert": str(self.docker_certs_dir / "server-cert.pem"),
+            "tlskey": str(self.docker_certs_dir / "server-key.pem"),
             "hosts": [
                 "unix:///var/run/docker.sock",
                 "tcp://0.0.0.0:2376"
@@ -99,9 +143,16 @@ class EnvironmentSetup:
             json.dump(daemon_config, f, indent=2)
 
         try:
+            # Stop docker service first
             subprocess.run(["systemctl", "stop", "docker"], check=True)
+            
+            # Start docker service
             subprocess.run(["systemctl", "start", "docker"], check=True)
+            
+            # Wait for docker to be ready
             time.sleep(5)
+            
+            # Verify docker is running
             status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
             print("\nDocker service status:")
             print(status.stdout)

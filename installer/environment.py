@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import socket
 import json
+import time
 
 class EnvironmentSetup:
     def __init__(self, domain):
@@ -89,22 +90,20 @@ class EnvironmentSetup:
             "tlskey": str(self.docker_certs_dir / "key.pem"),
             "hosts": [
                 "unix:///var/run/docker.sock",
-                f"tcp://0.0.0.0:2376"
-            ]
+                "tcp://0.0.0.0:2376"
+            ],
+            "tlsverify": True
         }
 
         with open(docker_config_dir / "daemon.json", "w") as f:
             json.dump(daemon_config, f, indent=2)
 
         try:
+            subprocess.run(["systemctl", "stop", "docker"], check=True)
+            subprocess.run(["systemctl", "start", "docker"], check=True)
+            time.sleep(5)
             status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
-            print("\nDocker service status before restart:")
-            print(status.stdout)
-
-            subprocess.run(["systemctl", "restart", "docker"], check=True)
-            
-            status = subprocess.run(["systemctl", "status", "docker"], capture_output=True, text=True)
-            print("\nDocker service status after restart:")
+            print("\nDocker service status:")
             print(status.stdout)
 
         except subprocess.CalledProcessError as e:

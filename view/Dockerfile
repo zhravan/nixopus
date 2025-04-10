@@ -12,7 +12,7 @@ ENV NEXT_PUBLIC_PORT=$NEXT_PUBLIC_PORT
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --network-timeout 600000 --production=false
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
 COPY . .
 
@@ -28,6 +28,8 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 WORKDIR /app
+
+RUN addgroup -S nixopus && adduser -S nixopus -G nixopus
 
 COPY --from=builder --chown=nixopus:nixopus /app/next.config.ts ./
 COPY --from=builder --chown=nixopus:nixopus /app/public ./public

@@ -57,7 +57,7 @@ func (c *Caddy) Serve() error {
 							Handler: string(c.FileServerType),
 							Upstreams: []Upstream{
 								{
-									Dial: "http://" + os.Getenv("SSH_HOST") + ":" + c.Port,
+									Dial: os.Getenv("SSH_HOST") + ":" + c.Port,
 								},
 							},
 						},

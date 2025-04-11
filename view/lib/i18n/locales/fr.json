@@ -472,8 +472,8 @@
     "kn": "Kannada"
   },
   "dashboard": {
-    "title": "Tableau de Bord",
-    "description": "Surveillez votre serveur",
+    "title": "Tableau de bord",
+    "description": "Surveillez vos applications et ressources système",
     "containers": {
       "title": "Conteneurs",
       "table": {
@@ -481,7 +481,7 @@
           "id": "ID",
           "name": "Nom",
           "image": "Image",
-          "status": "État",
+          "status": "Statut",
           "ports": "Ports",
           "created": "Créé"
         },
@@ -490,13 +490,13 @@
       }
     },
     "disk": {
-      "title": "Utilisation du Disque",
+      "title": "Utilisation du disque",
       "used": "{value} Go utilisé",
       "total": "{value} Go total",
       "percentage": "{value}%",
       "table": {
         "headers": {
-          "mount": "Point de Montage",
+          "mount": "Point de montage",
           "size": "Taille",
           "used": "Utilisé",
           "percentage": "%"
@@ -504,7 +504,7 @@
       }
     },
     "load": {
-      "title": "Charge Moyenne",
+      "title": "Charge moyenne",
       "labels": {
         "oneMin": "1 minute",
         "fiveMin": "5 minutes",
@@ -512,7 +512,7 @@
       }
     },
     "memory": {
-      "title": "Utilisation de la Mémoire",
+      "title": "Utilisation de la mémoire",
       "used": "{value} Mo utilisé",
       "total": "{value} Mo total",
       "percentage": "{value}%"
@@ -524,11 +524,15 @@
       "reconnectFailed": "Échec de la reconnexion. Veuillez réessayer plus tard."
     },
     "system": {
-      "title": "Informations Système",
+      "title": "Informations système",
       "osType": "Type d'OS",
       "cpu": "CPU",
-      "uptime": "Temps de Fonctionnement",
-      "lastUpdated": "Dernière Mise à Jour"
+      "uptime": "Temps de fonctionnement",
+      "lastUpdated": "Dernière mise à jour"
+    },
+    "smtpBanner": {
+      "message": "Configurez les paramètres SMTP pour recevoir des notifications",
+      "configure": "Configurer"
     }
   },
   "fileManager": {

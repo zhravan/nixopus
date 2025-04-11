@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useRouter } from 'next/navigation';
 import { CreateTeam } from '@/components/features/create-team';
+import { KeyboardShortcuts } from '@/components/features/keyboard-shortcuts';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import useBreadCrumbs from '@/hooks/use-bread-crumbs';
 import React, { useEffect } from 'react';
@@ -89,6 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </div>
             <div className="flex items-center gap-2 hover:cursor-pointer">
+              <KeyboardShortcuts />
               <img
                 src="/nixopus_logo_transparent.png"
                 className="hover:animate-bounce"

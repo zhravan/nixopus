@@ -68,27 +68,34 @@ func (c *Caddy) Serve() error {
 		handle = subroute
 	}
 
-	serverConfig := Server{
-		Listen: []string{":80"},
-		Routes: []Route{
+	routeConfig := Route{
+		Match: []Match{
 			{
-				Match: []Match{
-					{
-						Host: []string{c.Domain},
-					},
-				},
-				Handle: []interface{}{handle},
+				Host: []string{c.Domain},
 			},
 		},
-		AutomaticHTTPS: AutomaticHTTPS{
-			Disable: false,
-		},
+		Handle: []interface{}{handle},
 	}
 
 	if currentConfig.Apps.HTTP.Servers == nil {
 		currentConfig.Apps.HTTP.Servers = make(map[string]Server)
 	}
-	currentConfig.Apps.HTTP.Servers["srv0"] = serverConfig
+	server := currentConfig.Apps.HTTP.Servers["nixopus"]
+
+	routeExists := false
+	for i, route := range server.Routes {
+		if len(route.Match) > 0 && len(route.Match[0].Host) > 0 && route.Match[0].Host[0] == c.Domain {
+			server.Routes[i] = routeConfig
+			routeExists = true
+			break
+		}
+	}
+
+	if !routeExists {
+		server.Routes = append(server.Routes, routeConfig)
+	}
+
+	currentConfig.Apps.HTTP.Servers["nixopus"] = server
 
 	if err := c.loadConfig(currentConfig); err != nil {
 		return fmt.Errorf("failed to load config: %w", err)

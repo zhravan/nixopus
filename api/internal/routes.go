@@ -259,6 +259,7 @@ func (router *Router) DeployRoutes(f *fuego.Server, deployController *deploy.Dep
 	fuego.Get(f, "/applications", deployController.GetApplications)
 	deploy_application_group := fuego.Group(f, "/application")
 	router.DeployApplicationRoutes(deploy_application_group, deployController)
+	fuego.Post(f, "/webhook", deployController.HandleGithubWebhook)
 }
 
 func (router *Router) DeployApplicationRoutes(f *fuego.Server, deployController *deploy.DeployController) {

@@ -843,7 +843,10 @@
         "domain": {
           "label": "Domaine",
           "description": "Domaine sur lequel votre application sera disponible",
-          "placeholder": "Domaine"
+          "placeholder": "Domaine",
+          "minLength": "Le nom de domaine doit contenir au moins 3 caractères.",
+          "invalidFormat": "Veuillez entrer un nom de domaine valide (exemple: exemple.com).",
+          "notAllowed": "Ce domaine n'est pas autorisé. Vous pouvez l'ajouter dans la section Paramètres > Domaines pour le rendre disponible."
         },
         "buildPack": {
           "label": "Pack de Construction",
@@ -894,7 +897,8 @@
         },
         "domain": {
           "minLength": "Le nom de domaine doit contenir au moins 3 caractères.",
-          "invalidFormat": "Le nom de domaine doit être un nom de domaine valide."
+          "invalidFormat": "Le nom de domaine doit être un nom de domaine valide.",
+          "notAllowed": "Ce domaine n'est pas autorisé. Vous pouvez l'ajouter dans la section Paramètres > Domaines pour le rendre disponible."
         },
         "repository": {
           "minLength": "Le nom du dépôt doit contenir au moins 3 caractères.",

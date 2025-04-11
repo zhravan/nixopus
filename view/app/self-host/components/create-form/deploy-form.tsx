@@ -47,7 +47,7 @@ export const DeployForm = ({
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const canCreate = hasPermission(user, 'deploy', 'create', activeOrg?.id);
 
-  const { validateEnvVar, form, onSubmit, parsePort } = useCreateDeployment({
+  const { validateEnvVar, form, onSubmit, parsePort, validateDomain } = useCreateDeployment({
     application_name,
     environment,
     branch,

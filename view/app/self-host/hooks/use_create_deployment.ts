@@ -43,7 +43,7 @@ function useCreateDeployment({
   base_path = '/'
 }: DeploymentFormValues) {
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
-  const { data: domains } = useGetAllDomainsQuery(activeOrg?.id);
+  const { data: domains } = useGetAllDomainsQuery({ organizationId: activeOrg?.id });
   const { isReady, message, sendJsonMessage } = useWebSocket();
   const [createDeployment, { isLoading }] = useCreateDeploymentMutation();
   const router = useRouter();
@@ -73,9 +73,29 @@ function useCreateDeployment({
     domain: z
       .string()
       .min(3, { message: t('selfHost.deployForm.validation.domain.minLength') })
-      .regex(/^[a-zA-Z0-9.-]+$/, {
-        message: t('selfHost.deployForm.validation.domain.invalidFormat')
-      }),
+      .regex(
+        /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])*$/,
+        {
+          message: t('selfHost.deployForm.validation.domain.invalidFormat')
+        }
+      )
+      .refine(
+        (value) => {
+          if (!domains || !value) return false;
+          return domains.some((d) => {
+            const storedDomain = d.name;
+            if (storedDomain === value) return true;
+            if (storedDomain.startsWith('*.')) {
+              const baseDomain = storedDomain.substring(2);
+              if (value === baseDomain) return true;
+              const subdomainPattern = new RegExp(`^[^.]+\.${baseDomain.replace(/\./g, '\\.')}$`);
+              return subdomainPattern.test(value);
+            }
+            return false;
+          });
+        },
+        { message: t('selfHost.deployForm.validation.domain.notAllowed') }
+      ),
     repository: z
       .string()
       .min(3, { message: t('selfHost.deployForm.validation.repository.minLength') })
@@ -215,7 +235,27 @@ function useCreateDeployment({
     return isNaN(parsedPort) ? null : parsedPort;
   };
 
-  return { validateEnvVar, deploymentFormSchema, form, onSubmit, parsePort };
+  const validateDomain = (domain: string): boolean => {
+    if (!domains || !domain) return false;
+
+    return domains.some((d) => {
+      const storedDomain = d.name;
+
+      if (storedDomain === domain) return true;
+
+      if (storedDomain.startsWith('*.')) {
+        const baseDomain = storedDomain.substring(2);
+        if (domain === baseDomain) return true;
+
+        const subdomainPattern = new RegExp(`^[^.]+\.${baseDomain.replace(/\./g, '\\.')}$`);
+        return subdomainPattern.test(domain);
+      }
+
+      return false;
+    });
+  };
+
+  return { validateEnvVar, deploymentFormSchema, form, onSubmit, parsePort, validateDomain };
 }
 
 export default useCreateDeployment;

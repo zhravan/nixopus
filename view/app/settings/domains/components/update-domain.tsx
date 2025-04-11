@@ -23,16 +23,6 @@ import { Domain } from '@/redux/types/domain';
 import { useAppSelector } from '@/redux/hooks';
 import { useTranslation } from '@/hooks/use-translation';
 
-const domainFormSchema = z.object({
-  domainName: z
-    .string()
-    .min(3, { message: 'settings.domains.update.form.validation.minLength' })
-    .refine(
-      (domain) => /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(domain),
-      { message: 'settings.domains.update.form.validation.invalidFormat' }
-    )
-});
-
 interface UpdateDomainDialogProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,6 +34,25 @@ function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps
   const { t } = useTranslation();
   const [createDomain, { isLoading }] = useCreateDomainMutation();
   const [updateDomain, { isLoading: isUpdating }] = useUpdateDomainMutation();
+
+  const domainFormSchema = z.object({
+    domainName: z
+      .string()
+      .min(3, { message: t('settings.domains.update.form.validation.minLength') })
+      .refine(
+        (domain) => {
+          // Allow wildcard domains (e.g., *.example.com)
+          if (domain.startsWith('*.')) {
+            const baseDomain = domain.substring(2);
+            return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(baseDomain);
+          }
+          // Regular domain validation
+          return /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/.test(domain);
+        },
+        { message: t('settings.domains.update.form.validation.invalidFormat') }
+      )
+  });
+
   const form = useForm({
     resolver: zodResolver(domainFormSchema),
     defaultValues: {

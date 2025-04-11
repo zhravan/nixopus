@@ -174,6 +174,15 @@ class Installer:
         ]
         
         result = subprocess.run(curl_command, capture_output=True, text=True, check=False)
+        
+        if result.returncode != 0:
+            print(f"✗ Curl command failed with error: {result.stderr}")
+            raise Exception("Failed to execute curl command")
+            
+        if not result.stdout:
+            print("✗ No response received from server")
+            raise Exception("Empty response from server")
+            
         print("Response:", result.stdout)
         
         try:
@@ -181,9 +190,12 @@ class Installer:
             if response.get("status") == "success":
                 print("✓ Admin setup completed successfully")
                 return
-            raise Exception(f"API Error: {response.get('message', 'Unknown error')}")
-        except json.JSONDecodeError:
-            raise Exception("Invalid response from API")
+            error_msg = response.get("message", "Unknown error")
+            print(f"✗ API Error: {error_msg}")
+            raise Exception(f"API Error: {error_msg}")
+        except json.JSONDecodeError as e:
+            print(f"✗ Invalid JSON response: {result.stdout}")
+            raise Exception(f"Invalid response from API: {str(e)}")
 
 def main():
     installer = Installer()

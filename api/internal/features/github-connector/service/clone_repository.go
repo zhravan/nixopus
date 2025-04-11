@@ -111,6 +111,15 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 				return "", err
 			}
 		}
+
+		if c.Branch != "" {
+			s.logger.Log(logger.Info, fmt.Sprintf("Switching to branch %s", c.Branch), c.UserID)
+			err = s.gitClient.SwitchBranch(clonePath, c.Branch)
+			if err != nil {
+				s.logger.Log(logger.Error, fmt.Sprintf("Failed to switch to branch %s: %s", c.Branch, err.Error()), "")
+				return "", err
+			}
+		}
 	}
 
 	s.logger.Log(logger.Info, fmt.Sprintf("Context loaded successfully %s", repo_url), c.UserID)

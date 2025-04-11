@@ -18,6 +18,7 @@ import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useTranslation } from '@/hooks/use-translation';
+import Link from 'next/link';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -95,7 +96,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 width={50}
                 height={50}
               />
-              <span className="hidden md:block text-2xl font-mono">Nixopus</span>
+              <Link
+                href="https://nixopus.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden md:block text-2xl font-mono"
+              >
+                Nixopus
+              </Link>
             </div>
           </div>
         </header>

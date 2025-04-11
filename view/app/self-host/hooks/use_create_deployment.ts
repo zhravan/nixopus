@@ -61,12 +61,7 @@ function useCreateDeployment({
       .refine((value) => value === 'production' || value === 'staging' || value === 'development', {
         message: t('selfHost.deployForm.validation.environment.invalidValue')
       }),
-    branch: z
-      .string()
-      .min(3, { message: t('selfHost.deployForm.validation.branch.minLength') })
-      .regex(/^[a-zA-Z0-9_-]+$/, {
-        message: t('selfHost.deployForm.validation.branch.invalidFormat')
-      }),
+    branch: z.string().min(3, { message: t('selfHost.deployForm.validation.branch.minLength') }),
     port: z
       .string()
       .regex(/^[0-9]+$/, { message: t('selfHost.deployForm.validation.port.invalidFormat') }),

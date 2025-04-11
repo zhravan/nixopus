@@ -159,63 +159,32 @@ class Installer:
     
     def setup_admin(self, email, password, domain):
         print("\nSetting up admin...")
-        max_retries = 3
-        retry_delay = 5  
+        username = email.split('@')[0]
+        data = {
+            "email": email,
+            "password": password,
+            "type": "admin",
+            "username": username,
+            "organization": ""
+        }
         
-        for attempt in range(max_retries):
-            try:
-                username = email.split('@')[0]
-                result = subprocess.run([
-                    "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
-                    "-H", "Content-Type: application/json",
-                    "--connect-timeout", "10",
-                    "--max-time", "30",
-                    "--retry", "3",
-                    "--retry-delay", "5",
-                    "--insecure",
-                    "-w", "%{http_code}",
-                    "-d", f'{{"email": "{email}", "password": "{password}", "type": "admin", "username": "{username}", "organization": ""}}'
-                ], capture_output=True, text=True, check=False)
-                
-                # Split the output to separate status code and response body
-                status_code = result.stdout[-3:]
-                response_body = result.stdout[:-3]
-                
-                if status_code == "200":
-                    try:
-                        response = json.loads(response_body)
-                        if response.get("success"):
-                            print("✓ Admin setup completed successfully")
-                            return
-                        else:
-                            error_msg = response.get("error", "Unknown error")
-                            if "admin already registered" in error_msg.lower():
-                                print("✓ Admin already exists")
-                                return
-                            print(f"✗ API Error: {error_msg}")
-                    except json.JSONDecodeError:
-                        print("✗ Invalid response from API")
-                else:
-                    print(f"✗ HTTP Error: Status code {status_code}")
-                    print(f"Response: {response_body}")
-                
-                if attempt < max_retries - 1:
-                    print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")
-                    time.sleep(retry_delay)
-                
-            except subprocess.TimeoutExpired:
-                print("✗ Request timed out")
-                if attempt < max_retries - 1:
-                    print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")
-                    time.sleep(retry_delay)
-            except Exception as e:
-                print(f"✗ Error setting up admin: {str(e)}")
-                if attempt < max_retries - 1:
-                    print(f"Retrying in {retry_delay} seconds... (Attempt {attempt + 2}/{max_retries})")
-                    time.sleep(retry_delay)
+        result = subprocess.run([
+            "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
+            "-H", "Content-Type: application/json",
+            "--connect-timeout", "10",
+            "--max-time", "30",
+            "--insecure",
+            "-d", json.dumps(data)
+        ], capture_output=True, text=True, check=False)
         
-        print("✗ Failed to setup admin after multiple attempts")
-        sys.exit(1)
+        try:
+            response = json.loads(result.stdout)
+            if response.get("status") == "success":
+                print("✓ Admin setup completed successfully")
+                return
+            raise Exception(f"API Error: {response.get('message', 'Unknown error')}")
+        except json.JSONDecodeError:
+            raise Exception("Invalid response from API")
 
 def main():
     installer = Installer()
@@ -241,7 +210,12 @@ def main():
     installer.start_services()
     installer.verify_installation()
     installer.setup_caddy()
-    installer.setup_admin(email, password, domain)
+    
+    try:
+        installer.setup_admin(email, password, domain)
+    except Exception as e:
+        print(f"✗ {str(e)}")
+        sys.exit(1)
     
     print("\n\033[1mInstallation Complete!\033[0m")
     print("\n\033[1mAccess Information:\033[0m")

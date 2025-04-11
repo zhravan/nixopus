@@ -37,9 +37,7 @@ const TourContent = ({ children }: { children: React.ReactNode }) => {
 
   React.useEffect(() => {
     if (!hasSeenTour) {
-      setTimeout(() => {
-        setIsOpen(true);
-      }, 1000);
+      setIsOpen(true);
     }
   }, [hasSeenTour, setIsOpen]);
 
@@ -62,6 +60,11 @@ const TourContent = ({ children }: { children: React.ReactNode }) => {
 export const Tour = ({ children }: { children: React.ReactNode }) => {
   const { stopTour } = useCustomTour();
 
+  const handleClose = () => {
+    stopTour();
+    return true;
+  };
+
   return (
     <TourProvider
       steps={steps}
@@ -73,10 +76,7 @@ export const Tour = ({ children }: { children: React.ReactNode }) => {
       disableKeyboardNavigation={false}
       disableDotsNavigation={false}
       disableFocusLock={false}
-      beforeClose={() => {
-        stopTour();
-        return true;
-      }}
+      beforeClose={handleClose}
       styles={{
         popover: (base: any) => ({
           ...base,

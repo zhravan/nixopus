@@ -907,8 +907,9 @@
           "invalidFormat": "Port must be a number."
         },
         "domain": {
-          "minLength": "Domain name must be at least 3 characters.",
-          "invalidFormat": "Domain name must be a valid domain name."
+          "minLength": "Domain name must be at least 3 characters long.",
+          "invalidFormat": "Please enter a valid domain name (e.g., example.com).",
+          "notAllowed": "This domain is not allowed. You can add it in the Settings > Domains section to make it available."
         },
         "repository": {
           "minLength": "Repository name must be at least 3 characters.",

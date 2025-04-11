@@ -890,7 +890,8 @@
         },
         "domain": {
           "minLength": "El nombre del dominio debe tener al menos 3 caracteres.",
-          "invalidFormat": "El nombre del dominio debe ser un nombre de dominio válido."
+          "invalidFormat": "Por favor ingrese un nombre de dominio válido (ejemplo: ejemplo.com).",
+          "notAllowed": "Este dominio no está permitido. Puede agregarlo en la sección Configuración > Dominios para hacerlo disponible."
         },
         "repository": {
           "minLength": "El nombre del repositorio debe tener al menos 3 caracteres.",

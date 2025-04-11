@@ -18,6 +18,7 @@ type GitClient interface {
 	Pull(repoURL, destinationPath string) error
 	GetLatestCommitHash(repoURL string, accessToken string) (string, error)
 	SetHeadToCommitHash(repoURL, destinationPath, commitHash string) error
+	SwitchBranch(destinationPath, branch string) error
 }
 
 // DefaultGitClient is the default implementation of GitClient
@@ -132,5 +133,23 @@ func (g *DefaultGitClient) SetHeadToCommitHash(repoURL, destinationPath, commitH
 	}
 
 	g.logger.Log(logger.Info, fmt.Sprintf("Successfully checked out commit %s at %s", commitHash, destinationPath), "")
+	return nil
+}
+
+// SwitchBranch switches to the specified branch in the repository
+func (g *DefaultGitClient) SwitchBranch(destinationPath, branch string) error {
+	client, err := g.ssh.Connect()
+	if err != nil {
+		return fmt.Errorf("failed to connect via SSH: %w", err)
+	}
+	defer client.Close()
+
+	cmd := fmt.Sprintf("cd %s && git checkout %s", destinationPath, branch)
+	output, err := client.Run(cmd)
+	if err != nil {
+		return fmt.Errorf("git checkout branch failed: %s, output: %s", err.Error(), output)
+	}
+
+	g.logger.Log(logger.Info, fmt.Sprintf("Successfully switched to branch %s at %s", branch, destinationPath), "")
 	return nil
 }

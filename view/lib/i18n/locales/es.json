@@ -471,8 +471,8 @@
     "kn": "Kannada"
   },
   "dashboard": {
-    "title": "Panel de Control",
-    "description": "Monitorea tu servidor",
+    "title": "Panel de control",
+    "description": "Monitorea tus aplicaciones y recursos del sistema",
     "containers": {
       "title": "Contenedores",
       "table": {
@@ -489,13 +489,13 @@
       }
     },
     "disk": {
-      "title": "Uso del Disco",
+      "title": "Uso del disco",
       "used": "{value} GB usado",
       "total": "{value} GB total",
       "percentage": "{value}%",
       "table": {
         "headers": {
-          "mount": "Montaje",
+          "mount": "Punto de montaje",
           "size": "Tamaño",
           "used": "Usado",
           "percentage": "%"
@@ -503,7 +503,7 @@
       }
     },
     "load": {
-      "title": "Promedio de Carga",
+      "title": "Carga promedio",
       "labels": {
         "oneMin": "1 minuto",
         "fiveMin": "5 minutos",
@@ -511,23 +511,27 @@
       }
     },
     "memory": {
-      "title": "Uso de Memoria",
+      "title": "Uso de memoria",
       "used": "{value} MB usado",
       "total": "{value} MB total",
       "percentage": "{value}%"
     },
     "errors": {
       "parseMessage": "Error al analizar el mensaje",
-      "unknownError": "Error desconocido ocurrido",
+      "unknownError": "Ocurrió un error desconocido",
       "connectionLost": "Conexión perdida. Intentando reconectar...",
-      "reconnectFailed": "Error al reconectar. Por favor intente más tarde."
+      "reconnectFailed": "Error al reconectar. Por favor, inténtalo más tarde."
     },
     "system": {
-      "title": "Información del Sistema",
+      "title": "Información del sistema",
       "osType": "Tipo de SO",
       "cpu": "CPU",
-      "uptime": "Tiempo de Actividad",
-      "lastUpdated": "Última Actualización"
+      "uptime": "Tiempo de actividad",
+      "lastUpdated": "Última actualización"
+    },
+    "smtpBanner": {
+      "message": "Configura los ajustes SMTP para recibir notificaciones",
+      "configure": "Configurar"
     }
   },
   "fileManager": {

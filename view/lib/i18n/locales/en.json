@@ -480,7 +480,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "description": "Monitor your server",
+    "description": "Monitor your applications and system resources",
     "containers": {
       "title": "Containers",
       "table": {
@@ -536,6 +536,10 @@
       "cpu": "CPU",
       "uptime": "Uptime",
       "lastUpdated": "Last Updated"
+    },
+    "smtpBanner": {
+      "message": "Configure SMTP settings to receive notifications",
+      "configure": "Configure"
     }
   },
   "fileManager": {

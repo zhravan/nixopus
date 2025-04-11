@@ -57,7 +57,7 @@ func (c *Caddy) Serve() error {
 							Handler: string(c.FileServerType),
 							Upstreams: []Upstream{
 								{
-									Dial: "127.0.0.1:" + c.Port,
+									Dial: "tcp/host.docker.internal:" + c.Port,
 								},
 							},
 						},

@@ -83,6 +83,18 @@
         "title": "Préférences de Langue",
         "description": "Choisissez votre langue préférée pour l'application",
         "select": "Sélectionner la langue"
+      },
+      "font": "Police",
+      "fontOptions": {
+        "geist": "Geist",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "montserrat": "Montserrat",
+        "spaceGrotesk": "Space Grotesk",
+        "outfit": "Outfit",
+        "jakarta": "Plus Jakarta Sans",
+        "system": "Système"
       }
     },
     "account": {

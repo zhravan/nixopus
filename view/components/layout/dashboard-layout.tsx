@@ -14,12 +14,16 @@ import { CreateTeam } from '@/components/features/create-team';
 import { KeyboardShortcuts } from '@/components/features/keyboard-shortcuts';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import useBreadCrumbs from '@/hooks/use-bread-crumbs';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useTranslation } from '@/hooks/use-translation';
 import Link from 'next/link';
+import { Tour } from '@/components/Tour';
+import { useTour } from '@/hooks/useTour';
+import { Button } from '@/components/ui/button';
+import { HelpCircle } from 'lucide-react';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -45,6 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { isTerminalOpen, toggleTerminal } = useTerminalState();
   const [TerminalPosition, setTerminalPosition] = React.useState(TERMINAL_POSITION.BOTTOM);
   const [fitAddonRef, setFitAddonRef] = React.useState<any | null>(null);
+  const { startTour } = useTour();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -89,7 +94,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </Breadcrumb>
               )}
             </div>
-            <div className="flex items-center gap-2 hover:cursor-pointer">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-auto"
+                onClick={startTour}
+                data-slot="tour-trigger"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
               <KeyboardShortcuts />
               <img
                 src="/nixopus_logo_transparent.png"
@@ -110,48 +124,58 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {addTeamModalOpen && (
-            <CreateTeam
-              open={addTeamModalOpen}
-              setOpen={setAddTeamModalOpen}
-              createTeam={createTeam}
-              teamName={teamName}
-              teamDescription={teamDescription}
-              handleTeamNameChange={handleTeamNameChange}
-              handleTeamDescriptionChange={handleTeamDescriptionChange}
-              isLoading={isLoading}
-            />
-          )}
-          <ResizablePanelGroup
-            direction={TERMINAL_POSITION.BOTTOM === TerminalPosition ? 'vertical' : 'horizontal'}
-            className="flex-grow h-full"
-          >
-            <ResizablePanel defaultSize={80} minSize={30} className="overflow-auto no-scrollbar">
-              <div className="h-full overflow-y-auto no-scrollbar">{children}</div>
-            </ResizablePanel>
-            {isTerminalOpen && <ResizableHandle draggable withHandle />}
-            <ResizablePanel
-              defaultSize={20}
-              minSize={15}
-              maxSize={50}
-              hidden={!isTerminalOpen}
-              onResize={() => {
-                if (fitAddonRef?.current) {
-                  requestAnimationFrame(() => {
-                    fitAddonRef.current.fit();
-                  });
+          <Tour>
+            <div className="flex h-screen">
+              {addTeamModalOpen && (
+                <CreateTeam
+                  open={addTeamModalOpen}
+                  setOpen={setAddTeamModalOpen}
+                  createTeam={createTeam}
+                  teamName={teamName}
+                  teamDescription={teamDescription}
+                  handleTeamNameChange={handleTeamNameChange}
+                  handleTeamDescriptionChange={handleTeamDescriptionChange}
+                  isLoading={isLoading}
+                />
+              )}
+              <ResizablePanelGroup
+                direction={
+                  TERMINAL_POSITION.BOTTOM === TerminalPosition ? 'vertical' : 'horizontal'
                 }
-              }}
-              className="min-h-[200px] flex flex-col"
-            >
-              <Terminal
-                isOpen={isTerminalOpen}
-                toggleTerminal={toggleTerminal}
-                isTerminalOpen={isTerminalOpen}
-                setFitAddonRef={setFitAddonRef}
-              />
-            </ResizablePanel>
-          </ResizablePanelGroup>
+                className="flex-grow h-full"
+              >
+                <ResizablePanel
+                  defaultSize={80}
+                  minSize={30}
+                  className="overflow-auto no-scrollbar"
+                >
+                  <div className="h-full overflow-y-auto no-scrollbar">{children}</div>
+                </ResizablePanel>
+                {isTerminalOpen && <ResizableHandle draggable withHandle />}
+                <ResizablePanel
+                  defaultSize={20}
+                  minSize={15}
+                  maxSize={50}
+                  hidden={!isTerminalOpen}
+                  onResize={() => {
+                    if (fitAddonRef?.current) {
+                      requestAnimationFrame(() => {
+                        fitAddonRef.current.fit();
+                      });
+                    }
+                  }}
+                  className="min-h-[200px] flex flex-col"
+                >
+                  <Terminal
+                    isOpen={isTerminalOpen}
+                    toggleTerminal={toggleTerminal}
+                    isTerminalOpen={isTerminalOpen}
+                    setFitAddonRef={setFitAddonRef}
+                  />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
+          </Tour>
         </div>
       </SidebarInset>
     </SidebarProvider>

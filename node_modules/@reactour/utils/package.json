@@ -1,0 +1,53 @@
+{
+  "name": "@reactour/utils",
+  "version": "0.5.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "license": "MIT",
+  "devDependencies": {
+    "@reactour/tsconfig": "*",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.1",
+    "config": "3.3.9",
+    "react": "^18.2.0",
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@rooks/use-mutation-observer": "^4.11.2",
+    "resize-observer-polyfill": "^1.5.1"
+  },
+  "peerDependencies": {
+    "react": "16.x || 17.x || 18.x"
+  },
+  "scripts": {
+    "build": "tsup index.tsx --format esm,cjs --dts --external react",
+    "dev": "tsup index.tsx --format esm,cjs --watch --dts --external react",
+    "lint": "TIMING=1 eslint **/*.ts* --fix",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "keywords": [
+    "react",
+    "portal",
+    "utilities",
+    "observables",
+    "resize observer",
+    "mutatio observer",
+    "smooth scroll",
+    "get bounding client rect"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elrumordelaluz/reactour.git",
+    "directory": "packages/utils"
+  },
+  "homepage": "https://github.com/elrumordelaluz/reactour/tree/main/packages/utils"
+}

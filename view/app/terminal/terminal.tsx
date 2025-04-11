@@ -104,7 +104,11 @@ export const Terminal: React.FC<TerminalProps> = ({
   }, []);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[#1e1e1e]" ref={containerRef}>
+    <div
+      className="flex h-full flex-col overflow-hidden bg-[#1e1e1e]"
+      ref={containerRef}
+      data-slot="terminal"
+    >
       <div className="flex h-8 items-center justify-between border-b border-[#2d2d2d] px-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-[#cccccc]">{t('terminal.title')}</span>

@@ -161,30 +161,21 @@ class Installer:
         print("\nSetting up admin...")
         username = email.split('@')[0]
         
-        raw_command = f'curl -X POST https://api.{domain}/api/v1/auth/register -H "Content-Type: application/json" --connect-timeout 10 --max-time 30 --insecure -d \'{{"email":"{email}","password":"{password}","type":"admin","username":"{username}","organization":""}}\''
+        raw_command = f'curl -X POST https://api.{domain}/api/v1/auth/register -H "Content-Type: application/json" -d \'{{"email":"{email}","password":"{password}","type":"admin","username":"{username}","organization":""}}\''
         print("Raw command:", raw_command)
         
         curl_command = [
             "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
             "-H", "Content-Type: application/json",
-            "--connect-timeout", "10",
-            "--max-time", "30",
-            "--insecure",
             "-d", f'{{"email":"{email}","password":"{password}","type":"admin","username":"{username}","organization":""}}'
         ]
         
         result = subprocess.run(curl_command, capture_output=True, text=True, check=False)
         
-        if result.returncode != 0:
-            print(f"✗ Curl command failed with error: {result.stderr}")
-            raise Exception("Failed to execute curl command")
-            
         if not result.stdout:
             print("✗ No response received from server")
             raise Exception("Empty response from server")
             
-        print("Response:", result.stdout)
-        
         try:
             response = json.loads(result.stdout)
             if response.get("status") == "success":

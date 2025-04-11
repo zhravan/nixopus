@@ -265,7 +265,8 @@ class EnvironmentSetup:
             "CADDY_ENDPOINT": "http://localhost:2019",
             "CADDY_DATA_VOLUME": str(self.config_dir / "caddy" / "data"),
             "CADDY_CONFIG_VOLUME": str(self.config_dir / "caddy" / "config"),
-            "DB_VOLUME": str(self.config_dir / "db")
+            "DB_VOLUME": str(self.config_dir / "db"),
+            "ALLOWED_ORIGIN": f"https://app.{self.domain}"
         }
 
         with open(self.env_file, 'w') as f:

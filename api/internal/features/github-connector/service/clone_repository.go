@@ -104,10 +104,21 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 				return "", err
 			}
 		} else {
+			s.logger.Log(logger.Info, "Stashing changes", c.UserID)
+			err = s.gitClient.Stash(clonePath)
+			if err != nil {
+				s.logger.Log(logger.Error, fmt.Sprintf("Failed to stash changes: %s", err.Error()), "")
+				return "", err
+			}
 			s.logger.Log(logger.Info, "Pulling repository", c.UserID)
 			err = s.gitClient.Pull(authenticatedURL, clonePath)
 			if err != nil {
 				s.logger.Log(logger.Error, fmt.Sprintf("Failed to pull repository: %s", err.Error()), "")
+				return "", err
+			}
+			err = s.gitClient.ApplyStash(clonePath)
+			if err != nil {
+				s.logger.Log(logger.Error, fmt.Sprintf("Failed to apply stash: %s", err.Error()), "")
 				return "", err
 			}
 		}

@@ -987,7 +987,8 @@
     "general": "Général",
     "notifications": "Notifications",
     "team": "Équipe",
-    "domains": "Domaines"
+    "domains": "Domaines",
+    "update": "Mettre à jour"
   },
   "layout": {
     "breadcrumbs": {

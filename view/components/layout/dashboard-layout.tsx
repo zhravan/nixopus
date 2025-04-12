@@ -24,6 +24,7 @@ import { Tour } from '@/components/Tour';
 import { useTour } from '@/hooks/useTour';
 import { Button } from '@/components/ui/button';
 import { HelpCircle } from 'lucide-react';
+import { UpdateIcon } from '@radix-ui/react-icons';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -66,6 +67,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleUpdate = () => {
+    console.log('update');
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar toggleAddTeamModal={toggleAddTeamModal} />
@@ -95,6 +100,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </div>
             <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={handleUpdate}>
+                <UpdateIcon className="h-4 w-4" />
+                {t('navigation.update')}
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"

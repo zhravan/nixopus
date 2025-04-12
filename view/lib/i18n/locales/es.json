@@ -1004,7 +1004,8 @@
         "general": "General",
         "notifications": "Notificaciones",
         "team": "Equipo",
-        "domains": "Dominios"
+        "domains": "Dominios",
+        "update": "Actualizar"
       },
       "terminal": {
         "togglePosition": "Cambiar Posición del Terminal (Ctrl+T)"

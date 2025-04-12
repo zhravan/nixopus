@@ -1008,7 +1008,8 @@
     "general": "General",
     "notifications": "Notifications",
     "team": "Team",
-    "domains": "Domains"
+    "domains": "Domains",
+    "update": "Update"
   },
   "layout": {
     "breadcrumbs": {

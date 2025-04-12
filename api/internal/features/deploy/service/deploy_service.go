@@ -135,8 +135,8 @@ func (s *DeployService) GetDeploymentById(deploymentID string) (shared_types.App
 	return s.storage.GetApplicationDeploymentById(deploymentID)
 }
 
-func (s *DeployService) DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID) error {
-	application, err := s.storage.GetApplicationById(deployment.ID.String(), userID)
+func (s *DeployService) DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) error {
+	application, err := s.storage.GetApplicationById(deployment.ID.String(), organizationID)
 	if err != nil {
 		return fmt.Errorf("failed to get application details: %w", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-fuego/fuego"
+	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
@@ -49,9 +50,18 @@ func (c *DeployController) DeleteApplication(f fuego.ContextWithBody[types.Delet
 		}
 	}
 
+	organizationID := utils.GetOrganizationID(f.Request())
+	if organizationID == uuid.Nil {
+		c.logger.Log(logger.Error, "organization not found", "")
+		return nil, fuego.HTTPError{
+			Err:    nil,
+			Status: http.StatusUnauthorized,
+		}
+	}
+
 	c.logger.Log(logger.Info, "attempting to delete application", "id: "+data.ID.String()+", user_id: "+user.ID.String())
 
-	err = c.service.DeleteDeployment(&data, user.ID)
+	err = c.service.DeleteDeployment(&data, user.ID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "failed to delete application", "id: "+data.ID.String()+", error: "+err.Error())
 		return nil, fuego.HTTPError{

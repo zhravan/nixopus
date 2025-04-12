@@ -19,8 +19,9 @@ type GitClient interface {
 	GetLatestCommitHash(repoURL string, accessToken string) (string, error)
 	SetHeadToCommitHash(repoURL, destinationPath, commitHash string) error
 	SwitchBranch(destinationPath, branch string) error
-	Stash(destinationPath string) error
-	ApplyStash(destinationPath string) error
+	HasUncommittedChanges(destinationPath string) (bool, error)
+	Stash(destinationPath string) (string, error)
+	ApplyStash(destinationPath, stashID string) error
 }
 
 // DefaultGitClient is the default implementation of GitClient
@@ -156,34 +157,63 @@ func (g *DefaultGitClient) SwitchBranch(destinationPath, branch string) error {
 	return nil
 }
 
-func (g *DefaultGitClient) Stash(destinationPath string) error {
+func (g *DefaultGitClient) HasUncommittedChanges(destinationPath string) (bool, error) {
 	client, err := g.ssh.Connect()
 	if err != nil {
-		return fmt.Errorf("failed to connect via SSH: %w", err)
+		return false, fmt.Errorf("failed to connect via SSH: %w", err)
 	}
 	defer client.Close()
-	cmd := fmt.Sprintf("cd %s && git stash", destinationPath)
+
+	cmd := fmt.Sprintf("cd %s && git status --porcelain", destinationPath)
 	output, err := client.Run(cmd)
 	if err != nil {
-		return fmt.Errorf("git stash failed: %s, output: %s", err.Error(), output)
+		return false, fmt.Errorf("git status failed: %s, output: %s", err.Error(), string(output))
 	}
 
-	g.logger.Log(logger.Info, fmt.Sprintf("Successfully stashed changes at %s", destinationPath), "")
-	return nil
+	return strings.TrimSpace(string(output)) != "", nil
 }
 
-func (g *DefaultGitClient) ApplyStash(destinationPath string) error {
+func (g *DefaultGitClient) Stash(destinationPath string) (string, error) {
+	client, err := g.ssh.Connect()
+	if err != nil {
+		return "", fmt.Errorf("failed to connect via SSH: %w", err)
+	}
+	defer client.Close()
+
+	cmd := fmt.Sprintf("cd %s && git stash push -m 'nixopus-auto-stash'", destinationPath)
+	output, err := client.Run(cmd)
+	if err != nil {
+		return "", fmt.Errorf("git stash push failed: %s, output: %s", err.Error(), string(output))
+	}
+
+	cmd = fmt.Sprintf("cd %s && git stash list --format='%%H' -n 1", destinationPath)
+	stashOutput, err := client.Run(cmd)
+	if err != nil {
+		return "", fmt.Errorf("git stash list failed: %s, output: %s", err.Error(), string(stashOutput))
+	}
+
+	stashID := strings.TrimSpace(string(stashOutput))
+	if stashID == "" {
+		return "", fmt.Errorf("no stash created")
+	}
+
+	g.logger.Log(logger.Info, fmt.Sprintf("Successfully stashed changes at %s with ID %s", destinationPath, stashID), "")
+	return stashID, nil
+}
+
+func (g *DefaultGitClient) ApplyStash(destinationPath, stashID string) error {
 	client, err := g.ssh.Connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect via SSH: %w", err)
 	}
 	defer client.Close()
-	cmd := fmt.Sprintf("cd %s && git stash apply", destinationPath)
+
+	cmd := fmt.Sprintf("cd %s && git stash apply %s", destinationPath, stashID)
 	output, err := client.Run(cmd)
 	if err != nil {
-		return fmt.Errorf("git stash apply failed: %s, output: %s", err.Error(), output)
+		return fmt.Errorf("git stash apply failed: %s, output: %s", err.Error(), string(output))
 	}
 
-	g.logger.Log(logger.Info, fmt.Sprintf("Successfully applied stash at %s", destinationPath), "")
+	g.logger.Log(logger.Info, fmt.Sprintf("Successfully applied stash %s at %s", stashID, destinationPath), "")
 	return nil
 }

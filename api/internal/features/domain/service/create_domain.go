@@ -38,6 +38,11 @@ func (s *DomainsService) CreateDomain(req types.CreateDomainRequest, userID stri
 		return types.CreateDomainResponse{}, err
 	}
 
+	if err := validator.ValidateDomainBelongsToServer(req.Name); err != nil {
+		s.logger.Log(logger.Error, "domain does not belong to server", fmt.Sprintf("domain_name=%s", req.Name))
+		return types.CreateDomainResponse{}, err
+	}
+
 	org, err := s.store.Organization.GetOrganization(req.OrganizationID.String())
 	if err != nil {
 		s.logger.Log(logger.Error, "error while retrieving organization", err.Error())

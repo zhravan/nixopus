@@ -29,6 +29,7 @@ var (
 	ErrFailedToCreateDomain                    = errors.New("failed to create domain")
 	ErrFailedToDeleteDomain                    = errors.New("failed to delete domain")
 	ErrFailedToUpdateDomain                    = errors.New("failed to update domain")
+	ErrDomainDoesNotBelongToServer             = errors.New("domain does not belong to current server")
 )
 
 type CreateDomainRequest struct {

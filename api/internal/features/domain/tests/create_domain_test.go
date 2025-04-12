@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -107,5 +108,52 @@ func TestCreateDomain(t *testing.T) {
 			_, err = service.CreateDomain(req, user.ID.String())
 			assert.Error(t, err, "Expected error for invalid name: %s", name)
 		}
+	})
+
+	t.Run("should not create domain that does not belong to server", func(t *testing.T) {
+		setup := testutils.NewTestSetup()
+		storage := &domainStorage.DomainStorage{DB: setup.DB, Ctx: setup.Ctx}
+		service := domainService.NewDomainsService(setup.Store, setup.Ctx, setup.Logger, storage)
+
+		user, org, err := setup.CreateTestUserAndOrg()
+		assert.NoError(t, err)
+
+		serverHost := os.Getenv("SSH_HOST")
+		if serverHost == "" {
+			serverHost, err = os.Hostname()
+			assert.NoError(t, err)
+		}
+
+		req := domainTypes.CreateDomainRequest{
+			Name:           "example.com", 
+			OrganizationID: org.ID,
+		}
+
+		_, err = service.CreateDomain(req, user.ID.String())
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, domainTypes.ErrDomainDoesNotBelongToServer)
+	})
+
+	t.Run("should create domain that belongs to server", func(t *testing.T) {
+		setup := testutils.NewTestSetup()
+		storage := &domainStorage.DomainStorage{DB: setup.DB, Ctx: setup.Ctx}
+		service := domainService.NewDomainsService(setup.Store, setup.Ctx, setup.Logger, storage)
+
+		user, org, err := setup.CreateTestUserAndOrg()
+		assert.NoError(t, err)
+
+		serverHost := os.Getenv("SSH_HOST")
+		if serverHost == "" {
+			serverHost, err = os.Hostname()
+			assert.NoError(t, err)
+		}
+
+		req := domainTypes.CreateDomainRequest{
+			Name:           "test." + serverHost,
+			OrganizationID: org.ID,
+		}
+
+		_, err = service.CreateDomain(req, user.ID.String())
+		assert.NoError(t, err)
 	})
 }

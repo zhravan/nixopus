@@ -41,6 +41,11 @@ type DockerRepository interface {
 	ComposeUp(composeFilePath string, envVars map[string]string) error
 	ComposeDown(composeFilePath string) error
 	ComposeBuild(composeFilePath string, envVars map[string]string) error
+	RemoveImage(imageName string, opts image.RemoveOptions) error
+}
+
+type DockerClient struct {
+	Client *client.Client
 }
 
 // NewDockerService creates a new instance of DockerService using the default docker client.
@@ -291,4 +296,13 @@ func (s *DockerService) ComposeBuild(composeFilePath string, envVars map[string]
 		return fmt.Errorf("failed to build docker compose services: %v, output: %s", err, output)
 	}
 	return nil
+}
+
+func (s *DockerService) RemoveImage(imageName string, opts image.RemoveOptions) error {
+	ctx := context.Background()
+	_, err := s.Cli.ImageRemove(ctx, imageName, image.RemoveOptions{
+		Force:         opts.Force,
+		PruneChildren: true,
+	})
+	return err
 }

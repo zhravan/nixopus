@@ -1,8 +1,13 @@
 package service
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/github-connector/service"
@@ -131,6 +136,45 @@ func (s *DeployService) GetDeploymentById(deploymentID string) (shared_types.App
 }
 
 func (s *DeployService) DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID) error {
+	application, err := s.storage.GetApplicationById(deployment.ID.String(), userID)
+	if err != nil {
+		return fmt.Errorf("failed to get application details: %w", err)
+	}
+
+	deployments, err := s.storage.GetApplicationDeployments(application.ID)
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to get application deployments", err.Error())
+	} else {
+		for _, dep := range deployments {
+			if dep.ContainerID != "" {
+				s.logger.Log(logger.Info, "Stopping container", dep.ContainerID)
+				if err := s.dockerRepo.StopContainer(dep.ContainerID, container.StopOptions{}); err != nil {
+					s.logger.Log(logger.Error, "Failed to stop container", err.Error())
+				}
+
+				s.logger.Log(logger.Info, "Removing container", dep.ContainerID)
+				if err := s.dockerRepo.RemoveContainer(dep.ContainerID, container.RemoveOptions{Force: true}); err != nil {
+					s.logger.Log(logger.Error, "Failed to remove container", err.Error())
+				}
+			}
+
+			if dep.ContainerImage != "" {
+				s.logger.Log(logger.Info, "Removing image", dep.ContainerImage)
+				if err := s.dockerRepo.RemoveImage(dep.ContainerImage, image.RemoveOptions{Force: true}); err != nil {
+					s.logger.Log(logger.Error, "Failed to remove image", err.Error())
+				}
+			}
+		}
+	}
+
+	repoPath := filepath.Join(os.Getenv("MOUNT_PATH"), userID.String(), string(application.Environment), application.ID.String())
+	s.logger.Log(logger.Info, "Cleaning up repository directory", repoPath)
+
+	err = s.github_service.RemoveRepository(repoPath)
+	if err != nil {
+		s.logger.Log(logger.Error, "Failed to remove repository", err.Error())
+	}
+
 	return s.storage.DeleteDeployment(deployment, userID)
 }
 

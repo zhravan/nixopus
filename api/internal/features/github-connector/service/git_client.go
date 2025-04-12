@@ -22,6 +22,8 @@ type GitClient interface {
 	HasUncommittedChanges(destinationPath string) (bool, error)
 	Stash(destinationPath string) (string, error)
 	ApplyStash(destinationPath, stashID string) error
+	ResetHard(destinationPath string) error
+	RemoveRepository(repoPath string) error
 }
 
 // DefaultGitClient is the default implementation of GitClient
@@ -215,5 +217,38 @@ func (g *DefaultGitClient) ApplyStash(destinationPath, stashID string) error {
 	}
 
 	g.logger.Log(logger.Info, fmt.Sprintf("Successfully applied stash %s at %s", stashID, destinationPath), "")
+	return nil
+}
+
+func (g *DefaultGitClient) ResetHard(destinationPath string) error {
+	client, err := g.ssh.Connect()
+	if err != nil {
+		return fmt.Errorf("failed to connect via SSH: %w", err)
+	}
+	defer client.Close()
+
+	cmd := fmt.Sprintf("cd %s && git reset --hard", destinationPath)
+	output, err := client.Run(cmd)
+	if err != nil {
+		return fmt.Errorf("git reset --hard failed: %s, output: %s", err.Error(), string(output))
+	}
+
+	g.logger.Log(logger.Info, fmt.Sprintf("Successfully reset repository at %s", destinationPath), "")
+	return nil
+}
+
+func (g *DefaultGitClient) RemoveRepository(repoPath string) error {
+	client, err := g.ssh.Connect()
+	if err != nil {
+		return fmt.Errorf("failed to connect via SSH: %w", err)
+	}
+	defer client.Close()
+
+	cmd := fmt.Sprintf("rm -rf %s", repoPath)
+	output, err := client.Run(cmd)
+	if err != nil {
+		return fmt.Errorf("failed to remove repository directory: %s, output: %s", err.Error(), output)
+	}
+
 	return nil
 }

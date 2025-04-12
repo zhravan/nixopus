@@ -34,6 +34,7 @@ type DeployRepository interface {
 	GetApplicationDeploymentById(deploymentID string) (shared_types.ApplicationDeployment, error)
 	DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID) error
 	UpdateApplicationDeployment(deployment *shared_types.ApplicationDeployment) error
+	GetApplicationDeployments(applicationID uuid.UUID) ([]shared_types.ApplicationDeployment, error)
 }
 
 func (s *DeployStorage) IsNameAlreadyTaken(name string) (bool, error) {
@@ -263,4 +264,13 @@ func (s *DeployStorage) DeleteDeployment(deployment *types.DeleteDeploymentReque
 		Where("id = ?", deployment.ID).
 		Exec(s.Ctx)
 	return err
+}
+
+func (s *DeployStorage) GetApplicationDeployments(applicationID uuid.UUID) ([]shared_types.ApplicationDeployment, error) {
+	var deployments []shared_types.ApplicationDeployment
+	err := s.DB.NewSelect().
+		Model(&deployments).
+		Where("application_id = ?", applicationID).
+		Scan(s.Ctx)
+	return deployments, err
 }

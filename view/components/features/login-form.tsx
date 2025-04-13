@@ -82,11 +82,17 @@ export function LoginForm({ ...props }: LoginFormProps) {
       </Card>
       <div className="text-muted-foreground text-center text-xs text-balance">
         {t('auth.login.terms')}{' '}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <a
+          href="https://docs.nixopus.com/license"
+          className="underline underline-offset-4 hover:text-primary"
+        >
           {t('auth.login.termsOfService')}
         </a>{' '}
         {t('auth.login.and')}{' '}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <a
+          href="https://docs.nixopus.com/privacy-policy"
+          className="underline underline-offset-4 hover:text-primary"
+        >
           {t('auth.login.privacyPolicy')}
         </a>
         .

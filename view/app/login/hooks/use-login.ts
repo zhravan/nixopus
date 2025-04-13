@@ -48,7 +48,7 @@ function useLogin() {
         toast.error(t('auth.login.errors.requiredFields'));
         return;
       }
-      await loginUser({ email, password });
+      await loginUser({ email, password }).unwrap();
       router.push('/dashboard');
     } catch (error) {
       toast.error(t('auth.login.errors.loginFailed'));

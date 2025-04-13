@@ -187,9 +187,6 @@ func (s *DeployStorage) GetApplicationById(id string, organizationID uuid.UUID) 
 	err := s.DB.NewSelect().
 		Model(&application).
 		Relation("Status").
-		Relation("Logs", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Order("created_at DESC").Limit(100)
-		}).
 		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
 		Relation("Deployments.Status").
 		Where("a.id = ? AND a.organization_id = ?", id, organizationID).

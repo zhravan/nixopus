@@ -16,8 +16,6 @@ function page() {
       </div>
       <LogViewer
         id={deployment?.id || ''}
-        title={t('selfHost.deployment.logs.title')}
-        description={t('selfHost.deployment.logs.description')}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         isDeployment={true}

@@ -12,8 +12,6 @@ import { useTranslation } from '@/hooks/use-translation';
 
 function LogViewer({
   id,
-  title = 'Log Viewer',
-  description = 'Real-time installation logs',
   onRefresh,
   currentPage = 1,
   setCurrentPage,
@@ -37,8 +35,6 @@ function LogViewer({
     setAutoScroll
   } = useLogViewer({
     id,
-    title,
-    description,
     onRefresh,
     currentPage,
     setCurrentPage,

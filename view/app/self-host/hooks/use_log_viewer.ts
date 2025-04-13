@@ -4,8 +4,6 @@ import { ApplicationLogs, ApplicationLogsResponse } from '@/redux/types/applicat
 
 export interface LogViewerProps {
   id: string;
-  title?: string;
-  description?: string;
   onRefresh?: () => void;
   currentPage?: number;
   setCurrentPage: (page: number) => void;
@@ -14,8 +12,6 @@ export interface LogViewerProps {
 
 function useLogViewer({
   id,
-  title,
-  description,
   onRefresh,
   currentPage = 1,
   setCurrentPage,

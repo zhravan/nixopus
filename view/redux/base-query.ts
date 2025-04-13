@@ -10,7 +10,7 @@ import {
 import { Mutex } from 'async-mutex';
 
 const mutex = new Mutex();
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 1;
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,

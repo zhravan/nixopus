@@ -52,4 +52,13 @@ type AuthServiceInterface interface {
 	MarkEmailAsVerified(userID string) error
 	GetUserByID(userID string) (*shared_types.User, error)
 	IsAdminRegistered() (bool, error)
+	SetupTwoFactor(user *shared_types.User) (types.TwoFactorSetupResponse, error)
+	VerifyTwoFactor(user *shared_types.User, code string) error
+	DisableTwoFactor(user *shared_types.User) error
+	VerifyTwoFactorCode(user *shared_types.User, code string) error
+	GetUserByEmail(email string) (*shared_types.User, error)
+}
+
+func (s *AuthService) GetUserByEmail(email string) (*shared_types.User, error) {
+	return s.storage.FindUserByEmail(email)
 }

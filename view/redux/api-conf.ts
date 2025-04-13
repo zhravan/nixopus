@@ -6,7 +6,11 @@ export enum AUTHURLS {
   RESET_PASSWORD = 'v1/auth/reset-password',
   SEND_VERIFICATION = 'v1/auth/send-verification-email',
   VERIFY_EMAIL = 'v1/auth/verify-email',
-  LOGOUT = 'v1/auth/logout'
+  LOGOUT = 'v1/auth/logout',
+  SETUP_TWO_FACTOR = 'v1/auth/setup-2fa',
+  VERIFY_TWO_FACTOR = 'v1/auth/verify-2fa',
+  DISABLE_TWO_FACTOR = 'v1/auth/disable-2fa',
+  TWO_FACTOR_LOGIN = 'v1/auth/2fa-login'
 }
 
 export enum USERURLS {

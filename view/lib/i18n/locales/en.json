@@ -25,7 +25,16 @@
       "errors": {
         "loginFailed": "Login failed",
         "invalidCredentials": "Invalid email or password",
-        "requiredFields": "Email and password are required"
+        "requiredFields": "Email and password are required",
+        "2faFailed": "Invalid 2FA code"
+      },
+      "2fa": {
+        "title": "Two-Factor Authentication",
+        "description": "Please enter the verification code from your authenticator app",
+        "enterCode": "Verification Code",
+        "codePlaceholder": "Enter 6-digit code",
+        "verifyButton": "Verify",
+        "verifying": "Verifying..."
       }
     },
     "register": "Register",
@@ -149,6 +158,23 @@
             "description": "Check your inbox for a password reset link"
           }
         }
+      },
+      "2fa": {
+        "title": "Two-Factor Authentication",
+        "description": "Add an extra layer of security to your account",
+        "setupButton": "Setup 2FA",
+        "verifyButton": "Verify",
+        "enterCode": "Enter verification code",
+        "codePlaceholder": "Enter 6-digit code",
+        "setupSuccess": "2FA setup successful",
+        "setupError": "Failed to setup 2FA",
+        "verifySuccess": "2FA verification successful",
+        "verifyError": "Invalid verification code",
+        "enabledTitle": "2FA is Enabled",
+        "enabledDescription": "Your account is protected with two-factor authentication",
+        "disableButton": "Disable 2FA",
+        "disableSuccess": "2FA has been disabled",
+        "disableError": "Failed to disable 2FA"
       }
     },
     "domains": {
@@ -482,6 +508,23 @@
           "creating": "Creating..."
         }
       }
+    },
+    "2fa": {
+      "title": "Two-Factor Authentication",
+      "description": "Add an extra layer of security to your account",
+      "setupButton": "Setup 2FA",
+      "verifyButton": "Verify",
+      "enterCode": "Enter verification code",
+      "codePlaceholder": "Enter 6-digit code",
+      "setupSuccess": "2FA setup successful",
+      "setupError": "Failed to setup 2FA",
+      "verifySuccess": "2FA verification successful",
+      "verifyError": "Invalid verification code",
+      "enabledTitle": "2FA is Enabled",
+      "enabledDescription": "Your account is protected with two-factor authentication",
+      "disableButton": "Disable 2FA",
+      "disableSuccess": "2FA has been disabled",
+      "disableError": "Failed to disable 2FA"
     }
   },
   "languages": {

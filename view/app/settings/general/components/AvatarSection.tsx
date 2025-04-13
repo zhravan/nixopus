@@ -22,8 +22,8 @@ function AvatarSection({ onImageChange, user }: AvatarSectionProps) {
         <CardContent className="flex flex-col items-center pt-6">
           <UploadAvatar
             onImageChange={onImageChange}
-            username={user.username}
-            initialImage={user.avatar}
+            username={user?.username}
+            initialImage={user?.avatar}
           />
         </CardContent>
       </Card>

@@ -26,6 +26,7 @@ require (
 	github.com/uptrace/bun v1.2.10
 	github.com/uptrace/bun/dialect/pgdialect v1.2.10
 	github.com/uptrace/bun/extra/bundebug v1.2.10
+	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.36.0
 	golang.org/x/net v0.37.0
 	golang.org/x/time v0.10.0

@@ -25,7 +25,16 @@
       "errors": {
         "loginFailed": "Échec de la connexion",
         "invalidCredentials": "Email ou mot de passe invalide",
-        "requiredFields": "L'email et le mot de passe sont requis"
+        "requiredFields": "L'email et le mot de passe sont requis",
+        "2faFailed": "Code 2FA invalide"
+      },
+      "2fa": {
+        "title": "Authentification à deux facteurs",
+        "description": "Veuillez entrer le code de vérification depuis votre application d'authentification",
+        "enterCode": "Code de vérification",
+        "codePlaceholder": "Entrez le code à 6 chiffres",
+        "verifyButton": "Vérifier",
+        "verifying": "Vérification en cours..."
       }
     },
     "register": "S'inscrire",
@@ -149,6 +158,23 @@
             "description": "Vérifiez votre boîte de réception pour trouver le lien de réinitialisation"
           }
         }
+      },
+      "2fa": {
+        "title": "Authentification à deux facteurs",
+        "description": "Ajoutez une couche de sécurité supplémentaire à votre compte",
+        "setupButton": "Configurer la 2FA",
+        "verifyButton": "Vérifier",
+        "enterCode": "Entrez le code de vérification",
+        "codePlaceholder": "Entrez le code à 6 chiffres",
+        "setupSuccess": "Configuration 2FA réussie",
+        "setupError": "Échec de la configuration 2FA",
+        "verifySuccess": "Vérification 2FA réussie",
+        "verifyError": "Code de vérification invalide",
+        "enabledTitle": "2FA est activée",
+        "enabledDescription": "Votre compte est protégé par l'authentification à deux facteurs",
+        "disableButton": "Désactiver 2FA",
+        "disableSuccess": "2FA a été désactivée",
+        "disableError": "Échec de la désactivation de 2FA"
       }
     },
     "domains": {
@@ -475,6 +501,18 @@
           "creating": "Création en cours..."
         }
       }
+    },
+    "2fa": {
+      "title": "Authentification à Deux Facteurs",
+      "description": "Ajoutez une couche supplémentaire de sécurité à votre compte",
+      "setupButton": "Configurer 2FA",
+      "setupSuccess": "Configuration 2FA initiée avec succès",
+      "setupError": "Échec de la configuration 2FA",
+      "enterCode": "Entrez le code de vérification",
+      "codePlaceholder": "Entrez le code à 6 chiffres",
+      "verifyButton": "Vérifier",
+      "verifySuccess": "Vérification 2FA réussie",
+      "verifyError": "Code de vérification invalide"
     }
   },
   "languages": {

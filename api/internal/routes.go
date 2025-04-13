@@ -214,6 +214,10 @@ func (router *Router) AuthenticatedAuthRoutes(s *fuego.Server, authController *a
 	fuego.Post(s, "/send-verification-email", authController.SendVerificationEmail)
 	fuego.Get(s, "/verify-email", authController.VerifyEmail)
 	fuego.Post(s, "/create-user", authController.CreateUser)
+	fuego.Post(s, "/setup-2fa", authController.SetupTwoFactor)
+	fuego.Post(s, "/verify-2fa", authController.VerifyTwoFactor)
+	fuego.Post(s, "/disable-2fa", authController.DisableTwoFactor)
+	fuego.Post(s, "/2fa-login", authController.TwoFactorLogin)
 }
 
 func (router *Router) UserRoutes(s *fuego.Server, userController *user.UserController) {

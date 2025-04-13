@@ -23,8 +23,17 @@
       "privacyPolicy": "Política de Privacidad",
       "errors": {
         "loginFailed": "Error al iniciar sesión",
-        "invalidCredentials": "Correo electrónico o contraseña inválidos",
-        "requiredFields": "El correo electrónico y la contraseña son requeridos"
+        "invalidCredentials": "Email o contraseña inválidos",
+        "requiredFields": "El email y la contraseña son requeridos",
+        "2faFailed": "Código 2FA inválido"
+      },
+      "2fa": {
+        "title": "Autenticación de dos factores",
+        "description": "Por favor ingrese el código de verificación desde su aplicación de autenticación",
+        "enterCode": "Código de verificación",
+        "codePlaceholder": "Ingrese el código de 6 dígitos",
+        "verifyButton": "Verificar",
+        "verifying": "Verificando..."
       }
     },
     "register": "Registrarse",
@@ -148,6 +157,23 @@
             "description": "Revisa tu bandeja de entrada para encontrar el enlace de restablecimiento"
           }
         }
+      },
+      "2fa": {
+        "title": "Autenticación de dos factores",
+        "description": "Agregue una capa adicional de seguridad a su cuenta",
+        "setupButton": "Configurar 2FA",
+        "verifyButton": "Verificar",
+        "enterCode": "Ingrese el código de verificación",
+        "codePlaceholder": "Ingrese el código de 6 dígitos",
+        "setupSuccess": "Configuración 2FA exitosa",
+        "setupError": "Error al configurar 2FA",
+        "verifySuccess": "Verificación 2FA exitosa",
+        "verifyError": "Código de verificación inválido",
+        "enabledTitle": "2FA está habilitada",
+        "enabledDescription": "Su cuenta está protegida con autenticación de dos factores",
+        "disableButton": "Desactivar 2FA",
+        "disableSuccess": "2FA ha sido desactivada",
+        "disableError": "Error al desactivar 2FA"
       }
     },
     "domains": {
@@ -474,6 +500,18 @@
           "creating": "Creando..."
         }
       }
+    },
+    "2fa": {
+      "title": "Autenticación de Dos Factores",
+      "description": "Agrega una capa adicional de seguridad a tu cuenta",
+      "setupButton": "Configurar 2FA",
+      "setupSuccess": "Configuración de 2FA iniciada exitosamente",
+      "setupError": "Error al configurar 2FA",
+      "enterCode": "Ingresa el código de verificación",
+      "codePlaceholder": "Ingresa el código de 6 dígitos",
+      "verifyButton": "Verificar",
+      "verifySuccess": "Verificación de 2FA exitosa",
+      "verifyError": "Código de verificación inválido"
     }
   },
   "languages": {

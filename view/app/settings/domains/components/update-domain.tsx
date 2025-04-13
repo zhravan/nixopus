@@ -67,16 +67,15 @@ function UpdateDomainDialog({ open, setOpen, id, data }: UpdateDomainDialogProps
         await createDomain({
           name: data.domainName,
           organization_id: activeOrganization?.id || ''
-        });
+        }).unwrap();
       } else {
-        await updateDomain({ name: data.domainName, id: id });
+        await updateDomain({ name: data.domainName, id: id }).unwrap();
       }
       toast.success(t('settings.domains.update.success'));
-    } catch (error) {
-      toast.error(t('settings.domains.update.error'));
-    } finally {
       form.reset();
       setOpen(false);
+    } catch (error) {
+      toast.error(t('settings.domains.update.error'));
     }
   }
 

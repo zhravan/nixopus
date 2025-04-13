@@ -153,8 +153,8 @@
     },
     "domains": {
       "page": {
-        "title": "Server and Domains",
-        "description": "Configure your domains",
+        "title": "Domains",
+        "description": "Domains are used to deploy your applications",
         "noOrganization": {
           "title": "No Organization Selected",
           "description": "Please select an organization to view and manage domains."

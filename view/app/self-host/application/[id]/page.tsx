@@ -71,8 +71,7 @@ function Page() {
         </TabsContent>
         <TabsContent value="logs" className="mt-6">
           <ApplicationLogs
-            logs={application?.logs}
-            onRefresh={() => {}}
+            id={application?.id || ''}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
           />

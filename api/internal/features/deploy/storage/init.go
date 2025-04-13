@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -35,6 +36,8 @@ type DeployRepository interface {
 	DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID) error
 	UpdateApplicationDeployment(deployment *shared_types.ApplicationDeployment) error
 	GetApplicationDeployments(applicationID uuid.UUID) ([]shared_types.ApplicationDeployment, error)
+	GetLogs(applicationID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
+	GetDeploymentLogs(deploymentID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
 }
 
 func (s *DeployStorage) IsNameAlreadyTaken(name string) (bool, error) {
@@ -273,4 +276,88 @@ func (s *DeployStorage) GetApplicationDeployments(applicationID uuid.UUID) ([]sh
 		Where("application_id = ?", applicationID).
 		Scan(s.Ctx)
 	return deployments, err
+}
+
+func (s *DeployStorage) GetLogs(applicationID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error) {
+	offset := (page - 1) * pageSize
+
+	query := s.DB.NewSelect().
+		Model((*shared_types.ApplicationLogs)(nil)).
+		Where("application_id = ?", applicationID)
+
+	if level != "" {
+		query = query.Where("LOWER(log) LIKE LOWER(?)", "%"+level+"%")
+	}
+
+	if !startTime.IsZero() {
+		query = query.Where("created_at >= ?", startTime)
+	}
+
+	if !endTime.IsZero() {
+		query = query.Where("created_at <= ?", endTime)
+	}
+
+	if searchTerm != "" {
+		query = query.Where("LOWER(log) LIKE LOWER(?)", "%"+searchTerm+"%")
+	}
+
+	totalCount, err := query.Count(s.Ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var logs []shared_types.ApplicationLogs
+	err = query.
+		Order("created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Scan(s.Ctx, &logs)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return logs, totalCount, nil
+}
+
+func (s *DeployStorage) GetDeploymentLogs(deploymentID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error) {
+	offset := (page - 1) * pageSize
+
+	query := s.DB.NewSelect().
+		Model((*shared_types.ApplicationLogs)(nil)).
+		Where("application_deployment_id = ?", deploymentID)
+
+	if level != "" {
+		query = query.Where("LOWER(log) LIKE LOWER(?)", "%"+level+"%")
+	}
+
+	if !startTime.IsZero() {
+		query = query.Where("created_at >= ?", startTime)
+	}
+
+	if !endTime.IsZero() {
+		query = query.Where("created_at <= ?", endTime)
+	}
+
+	if searchTerm != "" {
+		query = query.Where("LOWER(log) LIKE LOWER(?)", "%"+searchTerm+"%")
+	}
+
+	totalCount, err := query.Count(s.Ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var logs []shared_types.ApplicationLogs
+	err = query.
+		Order("created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Scan(s.Ctx, &logs)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return logs, totalCount, nil
 }

@@ -161,10 +161,10 @@ export const DeployForm = ({
                 label: t('selfHost.deployForm.fields.buildPack.options.dockerfile'),
                 value: BuildPack.Dockerfile
               },
-              {
-                label: t('selfHost.deployForm.fields.buildPack.options.dockerCompose'),
-                value: BuildPack.DockerCompose
-              },
+              // {
+              //   label: t('selfHost.deployForm.fields.buildPack.options.dockerCompose'),
+              //   value: BuildPack.DockerCompose
+              // },
               {
                 label: t('selfHost.deployForm.fields.buildPack.options.static'),
                 value: BuildPack.Static

@@ -6,13 +6,17 @@ import { FILEMANAGERURLS } from '@/redux/api-conf';
 export const fileManagersApi = createApi({
   reducerPath: 'fileManagersApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['fileManager'],
+  tagTypes: ['FileList', 'FileListAll'],
   endpoints: (builder) => ({
     getFilesInPath: builder.query<FileData[], { path: string }>({
       query: ({ path }) => ({
         url: `${FILEMANAGERURLS.LIST_FILES_AT_PATH}?path=${encodeURIComponent(path)}`,
         method: 'GET'
       }),
+      providesTags: (result, error, { path }) => [
+        { type: 'FileList', id: path },
+        { type: 'FileListAll', id: 'LIST' }
+      ],
       transformResponse: (response: { data: FileData[] }) => response.data
     }),
     createDirectory: builder.mutation<null, { path: string; name: string }>({
@@ -21,6 +25,7 @@ export const fileManagersApi = createApi({
         method: 'POST',
         body: { path: path + '/' + name }
       }),
+      invalidatesTags: (result, error, { path }) => [{ type: 'FileList', id: path }],
       transformResponse: (response: any) => response
     }),
     deleteDirectory: builder.mutation<any, { path: string }>({
@@ -29,6 +34,7 @@ export const fileManagersApi = createApi({
         method: 'DELETE',
         body: { path }
       }),
+      invalidatesTags: (result, error, { path }) => [{ type: 'FileList', id: path.split('/').slice(0, -1).join('/') }],
       transformResponse: (response: any) => response
     }),
     moveOrRenameDirectory: builder.mutation<any, { from_path: string; to_path: string }>({
@@ -37,6 +43,10 @@ export const fileManagersApi = createApi({
         method: 'POST',
         body: { from_path, to_path }
       }),
+      invalidatesTags: (result, error, { from_path, to_path }) => [
+        { type: 'FileList', id: from_path.split('/').slice(0, -1).join('/') },
+        { type: 'FileList', id: to_path.split('/').slice(0, -1).join('/') }
+      ],
       transformResponse: (response: any) => response
     }),
     copyFileOrDirectory: builder.mutation<any, { from_path: string; to_path: string }>({
@@ -45,6 +55,11 @@ export const fileManagersApi = createApi({
         method: 'POST',
         body: { from_path, to_path }
       }),
+      invalidatesTags: (result, error, { from_path, to_path }) => [
+        { type: 'FileList', id: to_path.split('/').slice(0, -1).join('/') },
+        { type: 'FileList', id: from_path.split('/').slice(0, -1).join('/') },
+        { type: 'FileListAll', id: 'LIST' }
+      ],
       transformResponse: (response: any) => response
     }),
     calculateDirectorySize: builder.mutation<any['data'], { path: string }>({
@@ -67,6 +82,7 @@ export const fileManagersApi = createApi({
           body: formData
         };
       },
+      invalidatesTags: (result, error, { path }) => [{ type: 'FileList', id: path }],
       transformResponse: (response: any) => response
     })
   })

@@ -1,15 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FileData, FileType } from '@/redux/types/files';
+import { FileData } from '@/redux/types/files';
 import { useSearchable } from '@/hooks/use-searchable';
-import {
-  useCreateDirectoryMutation,
-  useGetFilesInPathQuery,
-  useUploadFileMutation,
-  useDeleteDirectoryMutation
-} from '@/redux/services/file-manager/fileManagersApi';
-import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
+import { useGetFilesInPathQuery } from '@/redux/services/file-manager/fileManagersApi';
+import { useFileOperations } from '../file-operations/useOperations';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/use-translation';
 
@@ -22,18 +17,37 @@ function use_file_manager() {
   const [selectedFile, setSelectedFile] = useState<FileData | undefined>();
   const [fileToCopy, setFileToCopy] = useState<FileData | undefined>();
   const [fileToMove, setFileToMove] = useState<FileData | undefined>();
-  const [createDirectory] = useCreateDirectoryMutation();
-  const [uploadFile] = useUploadFileMutation();
-  const [deleteDirectory] = useDeleteDirectoryMutation();
+  const [showCopyFeedback, setShowCopyFeedback] = useState(false);
+  const [copyFeedbackMessage, setCopyFeedbackMessage] = useState('');
   const router = useRouter();
   const path = useSearchParams().get('path');
-  const { data: files, isLoading, refetch } = useGetFilesInPathQuery({ path: currentPath });
+  
+  const { data: files, isLoading, refetch } = useGetFilesInPathQuery(
+    { path: currentPath },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true
+    }
+  );
+
   const {
-    handleFilePaste,
-    handleFileMove,
-    isCopyFileOrDirectoryLoading,
-    isMoveOrRenameDirectoryLoading
-  } = useFileManagerActionsHook();
+    handleFileUpload,
+    handleCreateDirectory,
+    handleMove: moveFile,
+    handleCopy: copyFile,
+    handleDelete,
+    calculateSize,
+    isSizeLoading: isCopyFileOrDirectoryLoading,
+    fileSize,
+    handleKeyDown,
+    handleTextDoubleClick,
+    handleRename,
+    startRenaming,
+  } = useFileOperations(() => {
+    refetch();
+  });
+
   const { filteredAndSortedData, searchTerm, handleSearchChange, handleSortChange } = useSearchable(
     files || [],
     ['name', 'created_at', 'updated_at', 'size', 'file_type'],
@@ -51,6 +65,28 @@ function use_file_manager() {
   useEffect(() => {
     refetch();
   }, [currentPath, refetch]);
+
+  const handleCopy = async (fromPath: string, toPath: string) => {
+    try {
+      await copyFile(fromPath, toPath);
+      await refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.copyFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
+  const handleMove = async (fromPath: string, toPath: string) => {
+    try {
+      await moveFile(fromPath, toPath);
+      refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.moveFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
 
   const fileClicked = (filePath: string | number | boolean) => {
     try {
@@ -71,19 +107,11 @@ function use_file_manager() {
     const highestNumber = numbers?.length ? Math.max(...numbers) : 0;
 
     const newFolderName = `New Folder ${highestNumber + 1}`;
-
-    try {
-      await createDirectory({ path: currentPath, name: newFolderName });
-      setSelectedPath(`${currentPath}/${newFolderName}`);
-      refetch();
-    } catch (error) {
-      toast.error(t('toasts.errors.createNewFolder'), {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
+    await handleCreateDirectory(currentPath, newFolderName);
+    setSelectedPath(`${currentPath}/${newFolderName}`);
   };
 
-  const handleKeyboardShortcuts = (e: KeyboardEvent) => {
+  const handleKeyboardShortcuts = async (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
       return;
     }
@@ -94,6 +122,12 @@ function use_file_manager() {
       e.preventDefault();
       if (selectedFile) {
         setFileToCopy(selectedFile);
+        setCopyFeedbackMessage(t('fileManager.copiedToClipboard', { name: selectedFile.name }));
+        setShowCopyFeedback(true);
+        setTimeout(() => {
+          setShowCopyFeedback(false);
+          setCopyFeedbackMessage('');
+        }, 2000);
       }
     }
 
@@ -107,13 +141,41 @@ function use_file_manager() {
     if (isModifierKey && e.key === 'v') {
       e.preventDefault();
       if (fileToCopy) {
-        handleFilePaste(fileToCopy.path, currentPath + '/' + fileToCopy.name);
-        refetch();
-        setFileToCopy(undefined);
+        const fileName = fileToCopy.name;
+        const basePath = currentPath;
+        let newPath = `${basePath}/${fileName}`;
+        let counter = 1;
+
+        while (files?.some(f => f.path === newPath)) {
+          const extension = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')) : '';
+          const baseName = extension ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
+          newPath = `${basePath}/${baseName} (${counter})${extension}`;
+          counter++;
+        }
+
+        try {
+          await handleCopy(fileToCopy.path, newPath);
+          setCopyFeedbackMessage(t('fileManager.copySuccess', { name: fileName }));
+          setShowCopyFeedback(true);
+          setTimeout(() => {
+            setShowCopyFeedback(false);
+            setCopyFeedbackMessage('');
+          }, 2000);
+          setFileToCopy(undefined);
+        } catch (error) {
+          toast.error(t('toasts.errors.copyFile'), {
+            description: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
       } else if (fileToMove) {
-        handleFileMove(fileToMove.path, currentPath + '/' + fileToMove.name);
-        refetch();
-        setFileToMove(undefined);
+        try {
+          await handleMove(fileToMove.path, currentPath + '/' + fileToMove.name);
+          setFileToMove(undefined);
+        } catch (error) {
+          toast.error(t('toasts.errors.moveFile'), {
+            description: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
       }
     }
 
@@ -135,7 +197,7 @@ function use_file_manager() {
     if (e.key === 'F2' && selectedPath) {
       const file = files?.find((f: FileData) => f.path === selectedPath);
       if (file) {
-        handleFileMove(file.path, `${file.path}/renamed`);
+        handleMove(file.path, `${file.path}/renamed`);
       }
     }
   };
@@ -150,8 +212,8 @@ function use_file_manager() {
     currentPath,
     layout,
     showHidden,
-    handleFilePaste,
-    handleFileMove,
+    copyFile,
+    handleMove,
     refetch,
     setFileToCopy,
     setFileToMove,
@@ -165,45 +227,6 @@ function use_file_manager() {
     setSelectedFile(files?.find((file) => file.path === path));
   };
 
-  const handleFileUpload = async (file: File) => {
-    if (!currentPath) return;
-
-    try {
-      await uploadFile({ file, path: currentPath });
-      refetch();
-    } catch (error) {
-      toast.error(t('toasts.errors.uploadFile'), {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  };
-
-  const handleFileDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    for (const file of droppedFiles) {
-      try {
-        await uploadFile({ file, path: currentPath });
-        refetch();
-      } catch (error) {
-        toast.error(t('toasts.errors.uploadFile'), {
-          description: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-  };
-
-  const handleDelete = async (path: string) => {
-    try {
-      await deleteDirectory({ path });
-      refetch();
-    } catch (error) {
-      toast.error(t('toasts.errors.deleteFile'), {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  };
-
   return {
     currentPath,
     layout,
@@ -212,10 +235,11 @@ function use_file_manager() {
     fileToCopy,
     fileToMove,
     isCopyFileOrDirectoryLoading,
-    isMoveOrRenameDirectoryLoading,
+    showCopyFeedback,
+    copyFeedbackMessage,
     handleFileSelect,
-    handleFilePaste,
-    handleFileMove,
+    handleCopy,
+    handleMove,
     handleSearchChange,
     handleSortChange,
     visibleFiles,
@@ -231,8 +255,11 @@ function use_file_manager() {
     setSelectedPath,
     files,
     handleFileUpload,
-    handleFileDrop,
-    handleDelete
+    handleDelete,
+    handleKeyDown,
+    handleTextDoubleClick,
+    handleRename,
+    startRenaming
   };
 }
 

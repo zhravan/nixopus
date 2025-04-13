@@ -235,6 +235,15 @@ func (f *FileManagerService) CopyDirectory(fromPath string, toPath string) error
 	f.logger.Log(logger.Info, "copying directory", fmt.Sprintf("from %s to %s", fromPath, toPath))
 
 	err := f.withSFTPClient(func(client SFTPClient) error {
+		sourceInfo, err := client.Stat(fromPath)
+		if err != nil {
+			return fmt.Errorf("source path %s does not exist: %w", fromPath, err)
+		}
+
+		if !sourceInfo.IsDir() {
+			return f.copyFile(client, fromPath, toPath)
+		}
+
 		if err := client.MkdirAll(toPath); err != nil {
 			return fmt.Errorf("failed to create target directory %s: %w", toPath, err)
 		}
@@ -250,11 +259,11 @@ func (f *FileManagerService) CopyDirectory(fromPath string, toPath string) error
 
 			if file.IsDir() {
 				if err := f.CopyDirectory(sourcePath, targetPath); err != nil {
-					return err
+					return fmt.Errorf("failed to copy directory %s: %w", sourcePath, err)
 				}
 			} else {
 				if err := f.copyFile(client, sourcePath, targetPath); err != nil {
-					return err
+					return fmt.Errorf("failed to copy file %s: %w", sourcePath, err)
 				}
 			}
 		}
@@ -262,7 +271,7 @@ func (f *FileManagerService) CopyDirectory(fromPath string, toPath string) error
 	})
 
 	if err != nil {
-		return err
+		return fmt.Errorf("copy operation failed: %w", err)
 	}
 
 	return nil

@@ -14,7 +14,7 @@ import { useCreateDirectoryMutation } from '@/redux/services/file-manager/fileMa
 import { useTranslation } from '@/hooks/use-translation';
 import { toast } from 'sonner';
 
-interface FileContextMenuProps {
+interface DropDownMenuProps {
   refetch: () => void;
   showHidden: boolean;
   setShowHidden: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,7 +27,7 @@ interface FileContextMenuProps {
   canDelete: boolean;
 }
 
-const FileContextMenu: React.FC<FileContextMenuProps> = ({
+const FileManagerDropDownMenu: React.FC<DropDownMenuProps> = ({
   refetch,
   showHidden,
   setShowHidden,
@@ -74,7 +74,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
                     {t('fileManager.actions.upload')}
                   </DropdownMenuItem>
                 </DialogTrigger>
-                <FileUpload setIsDialogOpen={setIsUploadOpen} />
+                <FileUpload setIsDialogOpen={setIsUploadOpen} currentPath={currentPath} />
               </Dialog>
 
               <DropdownMenuItem onSelect={handleCreateDirectory}>
@@ -103,4 +103,4 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({
   );
 };
 
-export default FileContextMenu;
+export default FileManagerDropDownMenu;

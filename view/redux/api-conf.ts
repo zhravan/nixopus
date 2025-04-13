@@ -62,7 +62,9 @@ export enum DEPLOY {
   DEPLOYMENT = 'v1/deploy/application/deployments',
   DELETE_APPLICATION = 'v1/deploy/application',
   ROLLBACK_APPLICATION = 'v1/deploy/application/rollback',
-  RESTART_APPLICATION = 'v1/deploy/application/restart'
+  RESTART_APPLICATION = 'v1/deploy/application/restart',
+  GET_APPLICATION_LOGS = 'v1/deploy/application/logs/{application_id}',
+  GET_DEPLOYMENT_LOGS = 'v1/deploy/application/deployments/{deployment_id}/logs'
 }
 
 export enum SOCKET_EVENTS {

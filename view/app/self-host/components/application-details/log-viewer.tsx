@@ -4,26 +4,20 @@ import React from 'react';
 import { Card, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { Maximize2, Minimize2, Search, Download, RefreshCw, MoreHorizontal } from 'lucide-react';
 import './logViewer.css';
 import AceEditorComponent from '@/components/ui/ace-editor';
-import useLogViewer, { LogViewerProps, LOG_LEVELS } from '../../hooks/use_log_viewer';
+import useLogViewer, { LogViewerProps } from '../../hooks/use_log_viewer';
 import { useTranslation } from '@/hooks/use-translation';
 
 function LogViewer({
-  logs = '',
+  id,
   title = 'Log Viewer',
   description = 'Real-time installation logs',
   onRefresh,
   currentPage = 1,
-  setCurrentPage
+  setCurrentPage,
+  isDeployment = false
 }: LogViewerProps) {
   const { t } = useTranslation();
   const {
@@ -39,19 +33,16 @@ function LogViewer({
     markers,
     searchTerm,
     setSearchTerm,
-    selectedLevel,
-    setSelectedLevel,
-    timeRange,
-    setTimeRange,
     autoScroll,
     setAutoScroll
   } = useLogViewer({
-    logs,
+    id,
     title,
     description,
     onRefresh,
     currentPage,
-    setCurrentPage
+    setCurrentPage,
+    isDeployment
   });
 
   return (
@@ -107,44 +98,6 @@ function LogViewer({
                 )}
               </div>
               <div className="flex items-center space-x-4">
-                <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={t('selfHost.logViewer.actions.filter.level.label')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">
-                      {t('selfHost.logViewer.actions.filter.level.all')}
-                    </SelectItem>
-                    {LOG_LEVELS?.map((level) => (
-                      <SelectItem key={level.value} value={level.value} className={level.color}>
-                        {level.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={timeRange} onValueChange={setTimeRange}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder={t('selfHost.logViewer.actions.filter.time.label')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">
-                      {t('selfHost.logViewer.actions.filter.time.all')}
-                    </SelectItem>
-                    <SelectItem value="5m">
-                      {t('selfHost.logViewer.actions.filter.time.5m')}
-                    </SelectItem>
-                    <SelectItem value="15m">
-                      {t('selfHost.logViewer.actions.filter.time.15m')}
-                    </SelectItem>
-                    <SelectItem value="1h">
-                      {t('selfHost.logViewer.actions.filter.time.1h')}
-                    </SelectItem>
-                    <SelectItem value="24h">
-                      {t('selfHost.logViewer.actions.filter.time.24h')}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
                 <div className="ml-auto flex items-center space-x-2">
                   <label className="flex items-center space-x-2">
                     <input

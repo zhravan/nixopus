@@ -271,6 +271,8 @@ func (router *Router) DeployApplicationRoutes(f *fuego.Server, deployController 
 	fuego.Get(f, "/deployments/{deployment_id}", deployController.GetDeploymentById)
 	fuego.Post(f, "/rollback", deployController.HandleRollback)
 	fuego.Post(f, "/restart", deployController.HandleRestart)
+	fuego.Get(f, "/logs/{application_id}", deployController.GetLogs)
+	fuego.Get(f, "/deployments/{deployment_id}/logs", deployController.GetDeploymentLogs)
 }
 
 func (router *Router) FileManagerRoutes(f *fuego.Server, fileManagerController *file_manager.FileManagerController) {

@@ -44,6 +44,11 @@ function use_file_manager() {
     handleTextDoubleClick,
     handleRename,
     startRenaming,
+    isEditing,
+    editedFileName,
+    setEditedFileName,
+    isDialogOpen,
+    setIsDialogOpen
   } = useFileOperations(() => {
     refetch();
   });
@@ -259,7 +264,12 @@ function use_file_manager() {
     handleKeyDown,
     handleTextDoubleClick,
     handleRename,
-    startRenaming
+    startRenaming,
+    isEditing,
+    editedFileName,
+    setEditedFileName,
+    isDialogOpen,
+    setIsDialogOpen
   };
 }
 

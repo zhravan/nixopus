@@ -59,7 +59,12 @@ function FileManager() {
     handleKeyDown,
     handleTextDoubleClick,
     handleRename,
-    startRenaming
+    startRenaming,
+    isEditing,
+    editedFileName,
+    setEditedFileName,
+    isDialogOpen,
+    setIsDialogOpen
   } = useFileManager();
 
   const canRead = hasPermission(user, 'file-manager', 'read', activeOrg?.id);
@@ -173,11 +178,11 @@ function FileManager() {
                 index={index}
                 canUpdate={canUpdate}
                 canDelete={canDelete}
-                isEditing={false}
-                editedFileName={''}
-                setEditedFileName={() => {}}
-                isDialogOpen={false}
-                setIsDialogOpen={() => {}}
+                isEditing={isEditing && selectedPath === file.path}
+                editedFileName={editedFileName}
+                setEditedFileName={setEditedFileName}
+                isDialogOpen={isDialogOpen}
+                setIsDialogOpen={setIsDialogOpen}
                 isSizeLoading={false}
                 fileSize={0}
                 handleRename={handleRename}

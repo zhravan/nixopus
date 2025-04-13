@@ -118,13 +118,23 @@ export function useFileOperations(refetch: () => void) {
   };
 
   const handleRename = async (file: FileData) => {
-    if (!isEditing) return;
+    if (!editedFileName || editedFileName === file.name) {
+      setIsEditing(false);
+      return;
+    }
 
     const newPath = file.path.replace(file.name, editedFileName);
     if (newPath !== file.path) {
-      await handleMove(file.path, newPath);
+      try {
+        await moveOrRenameDirectory({ from_path: file.path, to_path: newPath });
+        await refetch();
+        setIsEditing(false);
+      } catch (error) {
+        toast.error(t('toasts.errors.renameFile'), {
+          description: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
     }
-    setIsEditing(false);
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent, file: FileData) => {

@@ -137,3 +137,16 @@ const (
 	DeploymentTypeRollback = "rollback"
 	DeploymentTypeRestart  = "restart"
 )
+
+type WebhookPayload struct {
+	Repository struct {
+		ID       uint64 `json:"id"`
+		FullName string `json:"full_name"`
+	} `json:"repository"`
+	Ref    string `json:"ref"`
+	Before string `json:"before"`
+	After  string `json:"after"`
+	Pusher struct {
+		Name string `json:"name"`
+	} `json:"pusher"`
+}

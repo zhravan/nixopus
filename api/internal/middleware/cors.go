@@ -11,6 +11,11 @@ import (
 // it will call the next handler in the chain.
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/webhook/"{
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		origin := r.Header.Get("Origin")
 		allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
 		fmt.Println("allowedOrigin", allowedOrigin)

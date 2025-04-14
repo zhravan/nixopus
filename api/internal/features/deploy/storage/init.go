@@ -38,6 +38,7 @@ type DeployRepository interface {
 	GetApplicationDeployments(applicationID uuid.UUID) ([]shared_types.ApplicationDeployment, error)
 	GetLogs(applicationID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
 	GetDeploymentLogs(deploymentID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
+	GetApplicationByRepositoryID(repositoryID uint64) (shared_types.Application, error)
 }
 
 func (s *DeployStorage) IsNameAlreadyTaken(name string) (bool, error) {
@@ -357,4 +358,21 @@ func (s *DeployStorage) GetDeploymentLogs(deploymentID string, page, pageSize in
 	}
 
 	return logs, totalCount, nil
+}
+
+func (s *DeployStorage) GetApplicationByRepositoryID(repositoryID uint64) (shared_types.Application, error) {
+	var application shared_types.Application
+	err := s.DB.NewSelect().
+		Model(&application).
+		Relation("Status").
+		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
+		Relation("Deployments.Status").
+		Where("repository = ?", fmt.Sprintf("%d", repositoryID)).
+		Scan(s.Ctx)
+
+	if err != nil {
+		return shared_types.Application{}, fmt.Errorf("failed to get application by repository ID: %w", err)
+	}
+
+	return application, nil
 }

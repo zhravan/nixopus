@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useVerifyEmailMutation } from '@/redux/services/users/authApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,16 +15,20 @@ export default function VerifyEmailPage() {
   const [verifyEmail] = useVerifyEmailMutation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState(t('auth.verifyEmail.loading'));
+  const isVerifying = useRef(false);
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
       setMessage(t('auth.verifyEmail.error.invalidLink'));
       return;
     }
 
+    if (isVerifying.current) return;
+
     const verify = async () => {
+      isVerifying.current = true;
       try {
         await verifyEmail({ token }).unwrap();
         setStatus('success');
@@ -32,11 +36,17 @@ export default function VerifyEmailPage() {
       } catch (error) {
         setStatus('error');
         setMessage(t('auth.verifyEmail.error.message'));
+      } finally {
+        isVerifying.current = false;
       }
     };
 
     verify();
-  }, [searchParams, verifyEmail, t]);
+
+    return () => {
+      isVerifying.current = false;
+    };
+  }, [token]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">

@@ -52,6 +52,12 @@ func (s *SocketServer) verifyToken(tokenString string) (*types.User, error) {
 			return nil, err
 		}
 
+		if user.TwoFactorEnabled {
+			if !claims["2fa_verified"].(bool) {
+				return nil, fmt.Errorf("2FA verification required")
+			}
+		}
+
 		return user, nil
 	}
 

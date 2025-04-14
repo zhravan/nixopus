@@ -9,6 +9,13 @@ import {
   clearAuthTokens
 } from './lib/auth';
 import { defaultLocale, locales } from './lib/i18n/config';
+import { jwtDecode } from 'jwt-decode';
+
+interface DecodedToken {
+  exp: number;
+  '2fa_enabled': boolean;
+  '2fa_verified': boolean;
+}
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -29,7 +36,8 @@ export async function middleware(request: NextRequest) {
     '/static',
     '/favicon.ico',
     '/reset-password',
-    '/verify-email'
+    '/verify-email',
+    '/login'
   ];
 
   // Check if the path is public
@@ -55,9 +63,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for auth token
-  const token = request.cookies.get('token');
+  const token = request.cookies.get('token')?.value;
   if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  try {
+    const decoded = jwtDecode<DecodedToken>(token);
+    if (decoded['2fa_enabled'] && !decoded['2fa_verified']) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  } catch (error) {
+    console.error('Error decoding token:', error);
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

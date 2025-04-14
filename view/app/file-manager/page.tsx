@@ -124,42 +124,44 @@ function FileManager() {
               <span>{copyFeedbackMessage}</span>
             </div>
           )}
-          <div className="mb-6 flex items-center justify-between px-0 lg:px-6">
-            <Header />
-            <div className="relative">
-              <SearchBar
-                searchTerm={searchTerm}
-                handleSearchChange={handleSearchChange}
-                label={t('common.searchFiles')}
-              />
+          <div className="mb-6 flex flex-col gap-4 px-0 lg:px-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <Header />
+              <div className="w-full sm:w-auto">
+                <SearchBar
+                  searchTerm={searchTerm}
+                  handleSearchChange={handleSearchChange}
+                  label={t('common.searchFiles')}
+                />
+              </div>
             </div>
-          </div>
-          <div className="mb-6 flex items-center justify-between px-0 lg:px-6">
-            <Breadcrumbs
-              breadcrumbs={currentPath.split('/').filter(Boolean)}
-              fileClicked={fileClicked}
-            />
-            <div className="flex items-center gap-4">
-              <SortMethods files={visibleFiles} onSortChange={handleSortChange} />
-              <LayoutSwitcher layout={layout} setLayout={setLayout} />
-              <Actions
-                refetch={refetch}
-                showHidden={showHidden}
-                setShowHidden={setShowHidden}
-                currentPath={currentPath}
-                setSelectedPath={setSelectedPath}
-                selectedPath={selectedPath}
-                files={files || []}
-                canCreate={canCreate}
-                canUpdate={canUpdate}
-                canDelete={canDelete}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <Breadcrumbs
+                breadcrumbs={currentPath.split('/').filter(Boolean)}
+                fileClicked={fileClicked}
               />
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                <SortMethods files={visibleFiles} onSortChange={handleSortChange} />
+                <LayoutSwitcher layout={layout} setLayout={setLayout} />
+                <Actions
+                  refetch={refetch}
+                  showHidden={showHidden}
+                  setShowHidden={setShowHidden}
+                  currentPath={currentPath}
+                  setSelectedPath={setSelectedPath}
+                  selectedPath={selectedPath}
+                  files={files || []}
+                  canCreate={canCreate}
+                  canUpdate={canUpdate}
+                  canDelete={canDelete}
+                />
+              </div>
             </div>
           </div>
 
           <div
             className={`grid w-full ${layout === 'grid'
-                ? 'grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 md:gap-4 lg:grid-cols-6 xl:grid-cols-8'
+                ? 'grid-cols-1 gap-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8'
                 : 'grid-cols-1 gap-2'
               }`}
           >

@@ -1,23 +1,16 @@
-import { useWebSocket } from '@/hooks/socket-provider';
-import { SOCKET_EVENTS } from '@/redux/api-conf';
 import { useGetApplicationByIdQuery } from '@/redux/services/deploy/applicationsApi';
-import { SubscribeToTopic } from '@/redux/sockets/socket';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useApplicationWebSocket } from './use_application_websocket';
+import { SOCKET_EVENTS } from '@/redux/api-conf';
+import { Application, ApplicationDeployment, ApplicationDeploymentStatus } from '@/redux/types/applications';
 
 interface WebSocketMessage {
   action: string;
   data: {
     action: string;
     application_id: string;
-    data: {
-      application_deployment_id: string;
-      application_id: string;
-      created_at: string;
-      id: string;
-      log: string;
-      updated_at: string;
-    };
+    data: ApplicationDeployment | ApplicationDeploymentStatus;
     table: string;
   };
   topic: string;
@@ -26,13 +19,27 @@ interface WebSocketMessage {
 function useApplicationDetails() {
   const { id } = useParams();
   const applicationId = id as string;
-  const { data: application } = useGetApplicationByIdQuery(
+  const { data: applicationData } = useGetApplicationByIdQuery(
     { id: applicationId },
     { skip: !applicationId }
   );
+  const [application, setApplication] = useState<Application | undefined>(applicationData);
+  const applicationRef = useRef<Application | undefined>(applicationData);
   const [currentPage, setCurrentPage] = useState(1);
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('logs') === 'true' ? 'logs' : 'monitoring';
+  const { message } = useApplicationWebSocket(applicationId);
+
+  useEffect(() => {
+    if (applicationData) {
+      const initialApplication = {
+        ...applicationData,
+        deployments: applicationData.deployments || []
+      };
+      setApplication(initialApplication);
+      applicationRef.current = initialApplication;
+    }
+  }, [applicationData]);
 
   const parseEnvVariables = (variablesString: string | undefined): Record<string, string> => {
     if (!variablesString) return {};
@@ -46,7 +53,6 @@ function useApplicationDetails() {
           return key && value ? { ...acc, [key]: value } : acc;
         }, {});
     } catch (error) {
-      console.error('Error parsing variables:', error);
       return {};
     }
   };
@@ -59,13 +65,64 @@ function useApplicationDetails() {
     ? parseEnvVariables(application.build_variables)
     : {};
 
+  useEffect(() => {
+    if (!message || !applicationRef.current) return;
+
+    try {
+      const parsedMessage = JSON.parse(message) as WebSocketMessage;
+      
+      if (parsedMessage.action !== 'message' || !parsedMessage.data) return;
+
+      const { action, table, data } = parsedMessage.data;
+      
+      if (!table || !action || !data) return;
+      
+      if (table === 'application_deployment') {
+        const deployment = data as ApplicationDeployment;
+        if (action === 'INSERT') {
+          const updatedApplication = {
+            ...applicationRef.current,
+            deployments: [deployment, ...(applicationRef.current.deployments || [])]
+          };
+          setApplication(updatedApplication);
+          applicationRef.current = updatedApplication;
+        } else if (action === 'UPDATE') {
+          const updatedApplication = {
+            ...applicationRef.current,
+            deployments: (applicationRef.current.deployments || []).map(d => 
+              d.id === deployment.id ? deployment : d
+            )
+          };
+          setApplication(updatedApplication);
+          applicationRef.current = updatedApplication;
+        }
+      } else if (table === 'application_deployment_status') {
+        const status = data as ApplicationDeploymentStatus;
+        if (action === 'INSERT' || action === 'UPDATE') {
+          const updatedApplication = {
+            ...applicationRef.current,
+            deployments: (applicationRef.current.deployments || []).map(d => {
+              if (d.id === status.application_deployment_id) {
+                return { ...d, status };
+              }
+              return d;
+            })
+          };
+          setApplication(updatedApplication);
+          applicationRef.current = updatedApplication;
+        }
+      }
+    } catch (error) {
+    }
+  }, [message]);
+
   return {
+    application,
     currentPage,
     setCurrentPage,
-    application: application ? { ...application } : undefined,
+    defaultTab,
     envVariables,
-    buildVariables,
-    defaultTab
+    buildVariables
   };
 }
 

@@ -1,6 +1,8 @@
 import { useGetApplicationLogsQuery, useGetDeploymentLogsQuery } from '@/redux/services/deploy/applicationsApi';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ApplicationLogs, ApplicationLogsResponse } from '@/redux/types/applications';
+import { useApplicationWebSocket } from './use_application_websocket';
+import { SOCKET_EVENTS } from '@/redux/api-conf';
 
 export interface LogViewerProps {
   id: string;
@@ -27,6 +29,29 @@ function useLogViewer({
   const editorRef = useRef<any>(null);
   const lastLogCountRef = useRef<number>(0);
   const [allLogs, setAllLogs] = useState<ApplicationLogs[]>([]);
+  const { message } = useApplicationWebSocket(id);
+
+  useEffect(() => {
+    if (!message) return;
+
+    try {
+      const parsedMessage = JSON.parse(message);
+      
+      if (!parsedMessage?.topic || !parsedMessage?.data) return;
+      
+      if (parsedMessage.topic.includes(SOCKET_EVENTS.MONITOR_APPLICATION_DEPLOYMENT)) {
+        const { action, table, data } = parsedMessage.data;
+        
+        if (!action || !table || !data) return;
+        
+        if ((action === "INSERT" || action === "UPDATE") && table === "application_logs") {
+          setAllLogs(prevLogs => [...prevLogs, data]);
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
+  }, [message]);
 
   const { data: applicationLogsResponse } = useGetApplicationLogsQuery({
     id: id,
@@ -50,7 +75,7 @@ function useLogViewer({
         setAllLogs(logsResponse.logs);
       } else {
         setAllLogs(prevLogs => {
-          const newLogs = logsResponse.logs.filter(newLog => 
+          const newLogs = logsResponse.logs.filter(newLog =>
             !prevLogs.some(prevLog => prevLog.id === newLog.id)
           );
           return [...newLogs, ...prevLogs];
@@ -61,10 +86,10 @@ function useLogViewer({
 
   const filteredLogs = useMemo(() => {
     if (allLogs.length === 0) return '';
-    const sortedLogs = [...allLogs].sort((a, b) => 
+    const sortedLogs = [...allLogs].sort((a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
-    
+
     return sortedLogs.map((log: ApplicationLogs) => {
       const date = new Date(log.created_at);
       const timestamp = date.toLocaleString();

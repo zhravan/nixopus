@@ -85,6 +85,9 @@ func (router *Router) Routes() {
 	notificationManager := notification.NewNotificationManager(router.app.Store.DB)
 	notificationManager.Start()
 	deployController := deploy.NewDeployController(router.app.Store, router.app.Ctx, l, notificationManager)
+
+	fuego.Post(server, "/webhook/", deployController.HandleGithubWebhook)
+
 	router.WebSocketServer(server, deployController)
 
 	userStorage := &user_storage.UserStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
@@ -263,7 +266,6 @@ func (router *Router) DeployRoutes(f *fuego.Server, deployController *deploy.Dep
 	fuego.Get(f, "/applications", deployController.GetApplications)
 	deploy_application_group := fuego.Group(f, "/application")
 	router.DeployApplicationRoutes(deploy_application_group, deployController)
-	fuego.Post(f, "/webhook", deployController.HandleGithubWebhook)
 }
 
 func (router *Router) DeployApplicationRoutes(f *fuego.Server, deployController *deploy.DeployController) {

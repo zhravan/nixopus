@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/go-fuego/fuego"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
@@ -45,18 +44,7 @@ func (c *DeployController) HandleGithubWebhook(f fuego.ContextNoBody) (*shared_t
 
 	fmt.Printf("payload: %+v\n", string(payload))
 
-	var webhookPayload struct {
-		Repository struct {
-			ID       uint64 `json:"id"`
-			FullName string `json:"full_name"`
-		} `json:"repository"`
-		Ref    string `json:"ref"`
-		Before string `json:"before"`
-		After  string `json:"after"`
-		Pusher struct {
-			Name string `json:"name"`
-		} `json:"pusher"`
-	}
+	var webhookPayload shared_types.WebhookPayload
 
 	if err := json.Unmarshal(payload, &webhookPayload); err != nil {
 		c.logger.Log(logger.Error, "failed to parse webhook payload", err.Error())
@@ -66,19 +54,18 @@ func (c *DeployController) HandleGithubWebhook(f fuego.ContextNoBody) (*shared_t
 		}
 	}
 
-	parts := strings.Split(webhookPayload.Repository.FullName, "/")
-	if len(parts) != 2 {
-		c.logger.Log(logger.Error, "invalid repository name format", webhookPayload.Repository.FullName)
+	err = c.service.HandleGithubWebhook(webhookPayload)
+	if err != nil {
+		c.logger.Log(logger.Error, "failed to handle github webhook", err.Error())
 		return nil, fuego.HTTPError{
-			Err:    fmt.Errorf("invalid repository name format"),
-			Status: http.StatusBadRequest,
+			Err:    err,
+			Status: http.StatusInternalServerError,
 		}
 	}
-
-	c.logger.Log(logger.Info, "deployment created successfully", webhookPayload.Repository.FullName)
+	c.logger.Log(logger.Info, "github webhook handled successfully", webhookPayload.Repository.FullName)
 	return &shared_types.Response{
 		Status:  "success",
-		Message: "Deployment created successfully",
+		Message: "Github webhook handled successfully",
 		Data:    nil,
 	}, nil
 }

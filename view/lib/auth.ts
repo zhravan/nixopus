@@ -58,7 +58,7 @@ export function setAuthTokens(tokens: AuthTokens, ctx?: any): void {
 
   if (ctx?.cookies) {
     ctx.cookies.set('token', access_token, {
-      maxAge: expires_in || 30 * 24 * 60 * 60,
+      maxAge: expires_in || 7 * 24 * 60 * 60,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict'
@@ -66,7 +66,7 @@ export function setAuthTokens(tokens: AuthTokens, ctx?: any): void {
 
     if (refresh_token) {
       ctx.cookies.set('refreshToken', refresh_token, {
-        maxAge: 60 * 24 * 60 * 60,
+        maxAge: 14 * 24 * 60 * 60,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict'
@@ -74,7 +74,7 @@ export function setAuthTokens(tokens: AuthTokens, ctx?: any): void {
     }
   } else {
     setCookie(ctx, 'token', access_token, {
-      maxAge: expires_in || 30 * 24 * 60 * 60,
+      maxAge: expires_in || 7 * 24 * 60 * 60,
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict'
@@ -82,7 +82,7 @@ export function setAuthTokens(tokens: AuthTokens, ctx?: any): void {
 
     if (refresh_token) {
       setCookie(ctx, 'refreshToken', refresh_token, {
-        maxAge: 60 * 24 * 60 * 60,
+        maxAge: 14 * 24 * 60 * 60,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict'

@@ -1,9 +1,7 @@
-import { useWebSocket } from '@/hooks/socket-provider';
-import { SOCKET_EVENTS } from '@/redux/api-conf';
 import { useGetApplicationDeploymentByIdQuery } from '@/redux/services/deploy/applicationsApi';
-import { SubscribeToTopic } from '@/redux/sockets/socket';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useApplicationWebSocket } from './use_application_websocket';
 
 interface WebSocketMessage {
   action: string;
@@ -31,13 +29,7 @@ function useDeploymentDetails() {
     { skip: !deploymentId }
   );
   const [logs, setLogs] = useState(deployment?.logs || []);
-  const { isReady, message, sendJsonMessage } = useWebSocket();
-
-  useEffect(() => {
-    if (deploymentId) {
-      sendJsonMessage(SubscribeToTopic(deploymentId, SOCKET_EVENTS.MONITOR_APPLICATION_DEPLOYMENT));
-    }
-  }, [deploymentId]);
+  const { message } = useApplicationWebSocket(deploymentId || '');
 
   useEffect(() => {
     if (message) {

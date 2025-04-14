@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-fuego/fuego"
@@ -102,8 +103,15 @@ func (router *Router) Routes() {
 	authGroup := fuego.Group(server, apiV1.Path+"/auth")
 	router.AuthRoutes(authController, authGroup)
 
+	// Auth middleware for development environment will be bypassed for swagger UI
 	fuego.Use(server, func(next http.Handler) http.Handler {
-		return middleware.AuthMiddleware(next, router.app)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if os.Getenv("ENV") == "development" && strings.HasPrefix(r.URL.Path, "/swagger") {
+				next.ServeHTTP(w, r)
+				return
+			}
+			middleware.AuthMiddleware(next, router.app).ServeHTTP(w, r)
+		})
 	})
 
 	fuego.Use(server, func(next http.Handler) http.Handler {

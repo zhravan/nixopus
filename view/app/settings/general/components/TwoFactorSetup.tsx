@@ -10,6 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield, Smartphone, CheckCircle2 } from 'lucide-react';
 import { useAppSelector } from '@/redux/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { setTwoFactorEnabled } from '@/redux/features/users/authSlice';
+import { useAppDispatch } from '@/redux/hooks';
 
 export function TwoFactorSetup() {
   const { t } = useTranslation();
@@ -18,11 +20,11 @@ export function TwoFactorSetup() {
   const [verifyTwoFactor] = useVerifyTwoFactorMutation();
   const [disableTwoFactor] = useDisableTwoFactorMutation();
   const user = useAppSelector((state) => state.auth.user);
-
+  const dispatch = useAppDispatch();
   const handleSetup = async () => {
     try {
       const response = await setupTwoFactor().unwrap();
-      console.log('QR Code URI:', response.qr_code);
+      dispatch(setTwoFactorEnabled(true));
       toast.success(t('settings.2fa.setupSuccess'));
     } catch (error) {
       toast.error(t('settings.2fa.setupError'));

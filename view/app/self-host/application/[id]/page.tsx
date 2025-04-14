@@ -16,10 +16,21 @@ function Page() {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
-  const { application, currentPage, setCurrentPage, envVariables, buildVariables, defaultTab } =
-    useApplicationDetails();
+  const {
+    application,
+    currentPage,
+    setCurrentPage,
+    envVariables,
+    buildVariables,
+    defaultTab,
+    deploymentsPage,
+    setDeploymentsPage,
+    deploymentsPerPage,
+    totalDeployments
+  } = useApplicationDetails();
 
   const canRead = hasPermission(user, 'deploy', 'read', activeOrg?.id);
+  const totalPages = Math.ceil(totalDeployments / deploymentsPerPage);
 
   if (!canRead) {
     return (
@@ -49,7 +60,12 @@ function Page() {
           <TabsTrigger value="logs">{t('selfHost.application.tabs.logs')}</TabsTrigger>
         </TabsList>
         <TabsContent value="deployments" className="mt-6">
-          <DeploymentsList deployments={application?.deployments} />
+          <DeploymentsList
+            deployments={application?.deployments}
+            currentPage={deploymentsPage}
+            totalPages={totalPages}
+            onPageChange={setDeploymentsPage}
+          />
         </TabsContent>
         <TabsContent value="configuration" className="mt-6">
           <DeployConfigureForm

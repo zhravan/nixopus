@@ -36,6 +36,7 @@ type DeployRepository interface {
 	DeleteDeployment(deployment *types.DeleteDeploymentRequest, userID uuid.UUID) error
 	UpdateApplicationDeployment(deployment *shared_types.ApplicationDeployment) error
 	GetApplicationDeployments(applicationID uuid.UUID) ([]shared_types.ApplicationDeployment, error)
+	GetPaginatedApplicationDeployments(applicationID uuid.UUID, page, pageSize int) ([]shared_types.ApplicationDeployment, int, error)
 	GetLogs(applicationID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
 	GetDeploymentLogs(deploymentID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
 	GetApplicationByRepositoryID(repositoryID uint64) (shared_types.Application, error)
@@ -189,8 +190,6 @@ func (s *DeployStorage) GetApplicationById(id string, organizationID uuid.UUID) 
 	err := s.DB.NewSelect().
 		Model(&application).
 		Relation("Status").
-		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
-		Relation("Deployments.Status").
 		Where("a.id = ? AND a.organization_id = ?", id, organizationID).
 		Scan(s.Ctx)
 
@@ -275,6 +274,35 @@ func (s *DeployStorage) GetApplicationDeployments(applicationID uuid.UUID) ([]sh
 		Where("application_id = ?", applicationID).
 		Scan(s.Ctx)
 	return deployments, err
+}
+
+func (s *DeployStorage) GetPaginatedApplicationDeployments(applicationID uuid.UUID, page, pageSize int) ([]shared_types.ApplicationDeployment, int, error) {
+	var deployments []shared_types.ApplicationDeployment
+	offset := (page - 1) * pageSize
+
+	totalCount, err := s.DB.NewSelect().
+		Model((*shared_types.ApplicationDeployment)(nil)).
+		Where("application_id = ?", applicationID).
+		Count(s.Ctx)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = s.DB.NewSelect().
+		Model(&deployments).
+		Relation("Status").
+		Where("application_id = ?", applicationID).
+		Order("created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Scan(s.Ctx)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return deployments, totalCount, nil
 }
 
 func (s *DeployStorage) GetLogs(applicationID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error) {

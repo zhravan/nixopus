@@ -134,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <Tour>
-            <div className="flex h-screen">
+            <div className="flex h-[calc(100vh-5rem)]">
               {addTeamModalOpen && (
                 <CreateTeam
                   open={addTeamModalOpen}
@@ -151,7 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 direction={
                   TERMINAL_POSITION.BOTTOM === TerminalPosition ? 'vertical' : 'horizontal'
                 }
-                className="flex-grow h-full"
+                className="flex-grow"
               >
                 <ResizablePanel
                   defaultSize={80}

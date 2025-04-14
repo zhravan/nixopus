@@ -1,8 +1,7 @@
-import { useGetApplicationByIdQuery } from '@/redux/services/deploy/applicationsApi';
+import { useGetApplicationByIdQuery, useGetApplicationDeploymentsQuery } from '@/redux/services/deploy/applicationsApi';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { useApplicationWebSocket } from './use_application_websocket';
-import { SOCKET_EVENTS } from '@/redux/api-conf';
 import { Application, ApplicationDeployment, ApplicationDeploymentStatus } from '@/redux/types/applications';
 
 interface WebSocketMessage {
@@ -19,10 +18,23 @@ interface WebSocketMessage {
 function useApplicationDetails() {
   const { id } = useParams();
   const applicationId = id as string;
+  const [deploymentsPage, setDeploymentsPage] = useState(1);
+  const [deploymentsPerPage] = useState(9);
+  
   const { data: applicationData } = useGetApplicationByIdQuery(
     { id: applicationId },
     { skip: !applicationId }
   );
+
+  const { data: deploymentsData } = useGetApplicationDeploymentsQuery(
+    { 
+      id: applicationId,
+      page: deploymentsPage,
+      limit: deploymentsPerPage
+    },
+    { skip: !applicationId }
+  );
+
   const [application, setApplication] = useState<Application | undefined>(applicationData);
   const applicationRef = useRef<Application | undefined>(applicationData);
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,12 +46,12 @@ function useApplicationDetails() {
     if (applicationData) {
       const initialApplication = {
         ...applicationData,
-        deployments: applicationData.deployments || []
+        deployments: deploymentsData?.deployments || []
       };
       setApplication(initialApplication);
       applicationRef.current = initialApplication;
     }
-  }, [applicationData]);
+  }, [applicationData, deploymentsData]);
 
   const parseEnvVariables = (variablesString: string | undefined): Record<string, string> => {
     if (!variablesString) return {};
@@ -122,8 +134,13 @@ function useApplicationDetails() {
     setCurrentPage,
     defaultTab,
     envVariables,
-    buildVariables
+    buildVariables,
+    deploymentsPage,
+    setDeploymentsPage,
+    deploymentsPerPage,
+    totalDeployments: deploymentsData?.total_count || 0
   };
 }
 
 export default useApplicationDetails;
+

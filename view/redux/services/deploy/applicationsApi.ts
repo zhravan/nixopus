@@ -6,7 +6,8 @@ import {
   ApplicationLogsResponse,
   CreateApplicationRequest,
   ReDeployApplicationRequest,
-  UpdateDeploymentRequest
+  UpdateDeploymentRequest,
+  ApplicationDeployment
 } from '@/redux/types/applications';
 
 export const deployApi = createApi({
@@ -158,6 +159,20 @@ export const deployApi = createApi({
       }),
       transformResponse: (response: { data: ApplicationLogsResponse }) => response.data,
       providesTags: (result, error, arg) => [{ type: 'Deploy' as const, id: arg.id }]
+    }),
+    getApplicationDeployments: builder.query<{ deployments: ApplicationDeployment[]; total_count: number }, { 
+      id: string;
+      page: number;
+      limit: number;
+    }>({
+      query: ({ id, page, limit }) => ({
+        url: `${DEPLOY.GET_APPLICATION_DEPLOYMENTS}?id=${id}&page=${page}&limit=${limit}`,
+        method: 'GET'
+      }),
+      providesTags: [{ type: 'Deploy', id: 'LIST' }],
+      transformResponse: (response: { data: { deployments: ApplicationDeployment[]; total_count: number } }) => {
+        return response.data;
+      }
     })
   })
 });
@@ -173,5 +188,6 @@ export const {
   useRollbackApplicationMutation,
   useRestartApplicationMutation,
   useGetApplicationLogsQuery,
-  useGetDeploymentLogsQuery
+  useGetDeploymentLogsQuery,
+  useGetApplicationDeploymentsQuery
 } = deployApi;

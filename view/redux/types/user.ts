@@ -21,6 +21,7 @@ export interface AuthResponse {
   refresh_token: string;
   expires_in: number;
   user: User;
+  temp_token?: string;
 }
 
 export interface RefreshTokenPayload {

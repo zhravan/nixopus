@@ -5,27 +5,40 @@ import { useLoginUserMutation, useTwoFactorLoginMutation } from '@/redux/service
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { AuthResponse } from '@/redux/types/user';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCredentials } from '@/redux/features/users/authSlice';
+import { RootState } from '@/redux/store';
 
 export default function LoginPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { twoFactor } = useSelector((state: RootState) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
-  const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
   const [twoFactorLogin, { isLoading: isTwoFactorLoading }] = useTwoFactorLoginMutation();
 
   const handleLogin = async () => {
     try {
-      const response = await loginUser({ email, password }).unwrap();
-      console.log(
-        "response",
-        response
-      );
-      if (response.user.two_factor_enabled) {
-        setShowTwoFactor(true);
-      } else {
+      const response = await loginUser({ email, password }).unwrap() as AuthResponse;
+      
+      if (response.temp_token) {
+        dispatch(setCredentials({
+          user: null,
+          token: response.temp_token,
+          tempToken: response.temp_token,
+          expiresIn: response.expires_in,
+        }));
+      } else if (response.access_token) {
+        dispatch(setCredentials({
+          user: response.user,
+          token: response.access_token,
+          refreshToken: response.refresh_token,
+          expiresIn: response.expires_in,
+        }));
         router.push('/dashboard');
       }
     } catch (error) {
@@ -35,8 +48,17 @@ export default function LoginPage() {
 
   const handleTwoFactorLogin = async () => {
     try {
-      await twoFactorLogin({ email, password, code }).unwrap();
-      router.push('/dashboard');
+      const response = await twoFactorLogin({ email, password, code }).unwrap() as AuthResponse;
+      
+      if (response.access_token) {
+        dispatch(setCredentials({
+          user: response.user,
+          token: response.access_token,
+          refreshToken: response.refresh_token,
+          expiresIn: response.expires_in,
+        }));
+        router.push('/dashboard');
+      }
     } catch (error) {
       toast.error(t('auth.login.errors.2faFailed'));
     }
@@ -54,7 +76,7 @@ export default function LoginPage() {
           isLoading={isLoginLoading}
           twoFactorCode={code}
           handleTwoFactorCodeChange={(e) => setCode(e.target.value)}
-          showTwoFactor={showTwoFactor}
+          showTwoFactor={twoFactor.isRequired}
           handleTwoFactorLogin={handleTwoFactorLogin}
           isTwoFactorLoading={isTwoFactorLoading}
         />

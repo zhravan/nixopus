@@ -39,6 +39,7 @@ type DeployRepository interface {
 	GetLogs(applicationID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
 	GetDeploymentLogs(deploymentID string, page, pageSize int, level string, startTime, endTime time.Time, searchTerm string) ([]shared_types.ApplicationLogs, int, error)
 	GetApplicationByRepositoryID(repositoryID uint64) (shared_types.Application, error)
+	GetApplicationByRepositoryIDAndBranch(repositoryID uint64, branch string) ([]shared_types.Application, error)
 }
 
 func (s *DeployStorage) IsNameAlreadyTaken(name string) (bool, error) {
@@ -375,4 +376,21 @@ func (s *DeployStorage) GetApplicationByRepositoryID(repositoryID uint64) (share
 	}
 
 	return application, nil
+}
+
+func (s *DeployStorage) GetApplicationByRepositoryIDAndBranch(repositoryID uint64, branch string) ([]shared_types.Application, error) {
+	var applications []shared_types.Application
+	err := s.DB.NewSelect().
+		Model(&applications).
+		Relation("Status").
+		Relation("Deployments", func(q *bun.SelectQuery) *bun.SelectQuery { return q.Order("created_at DESC") }).
+		Relation("Deployments.Status").
+		Where("repository = ? AND branch = ?", fmt.Sprintf("%d", repositoryID), branch).
+		Scan(s.Ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get applications by repository ID and branch: %w", err)
+	}
+
+	return applications, nil
 }

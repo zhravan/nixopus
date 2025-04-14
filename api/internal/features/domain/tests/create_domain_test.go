@@ -125,7 +125,7 @@ func TestCreateDomain(t *testing.T) {
 		}
 
 		req := domainTypes.CreateDomainRequest{
-			Name:           "example.com", 
+			Name:           "example.com",
 			OrganizationID: org.ID,
 		}
 

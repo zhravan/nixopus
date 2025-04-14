@@ -131,7 +131,7 @@ func (v *Validator) ValidateDomainBelongsToServer(domainName string) error {
 	if err != nil {
 		return types.ErrDomainDoesNotBelongToServer
 	}
-	
+
 	for _, domainIP := range domainIPs {
 		for _, serverIP := range serverIPs {
 			if domainIP.Equal(serverIP) {

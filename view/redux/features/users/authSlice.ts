@@ -173,6 +173,11 @@ export const authSlice = createSlice({
     clearTwoFactor: (state) => {
       state.twoFactor.isRequired = false;
       state.twoFactor.tempToken = undefined;
+    },
+    setTwoFactorEnabled: (state, action: PayloadAction<boolean>) => {
+      if (state.user) {
+        state.user.two_factor_enabled = action.payload;
+      }
     }
   },
   extraReducers: (builder) => {
@@ -300,5 +305,5 @@ export const authSlice = createSlice({
   }
 });
 
-export const { setCredentials, logout, clearTwoFactor } = authSlice.actions;
+export const { setCredentials, logout, clearTwoFactor, setTwoFactorEnabled } = authSlice.actions;
 export default authSlice.reducer;

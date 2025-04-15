@@ -2,11 +2,7 @@ version: '3.8'
 
 services:
   nixopus-api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-      args:
-        - API_PORT=${API_PORT:-8443}
+    image: ghcr.io/${GITHUB_REPOSITORY:-raghavyuva/nixopus}-api:latest
     container_name: nixopus-api-container
     ports:
       - "${API_PORT:-8443}:${API_PORT:-8443}"
@@ -62,14 +58,7 @@ services:
       - nixopus-network
 
   nixopus-view:
-    build:
-      context: ./view
-      dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_PORT=${NEXT_PUBLIC_PORT:-7443}
-        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://api.nixopus.com}
-        - NEXT_PUBLIC_WEBSOCKET_URL=${NEXT_PUBLIC_WEBSOCKET_URL:-wss://api.nixopus.com/ws}
-        - NEXT_PUBLIC_WEBHOOK_URL=${NEXT_PUBLIC_WEBHOOK_URL:-https://api.nixopus.com/webhook}
+    image: ghcr.io/${GITHUB_REPOSITORY:-raghavyuva/nixopus}-view:latest
     container_name: nixopus-view-container
     ports:
       - "${NEXT_PUBLIC_PORT:-7443}:${NEXT_PUBLIC_PORT:-7443}"

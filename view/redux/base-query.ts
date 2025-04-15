@@ -1,4 +1,4 @@
-import { BASE_URL } from '@/redux/conf';
+import { getBaseUrl } from '@/redux/conf';
 import { RootState } from '@/redux/store';
 import {
   BaseQueryFn,
@@ -12,26 +12,28 @@ import { Mutex } from 'async-mutex';
 const mutex = new Mutex();
 const MAX_RETRIES = 1;
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: BASE_URL,
-  prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.token;
-    const organizationId =
-      (getState() as RootState).user.activeOrganization?.id ||
-      (getState() as RootState).auth.user?.organization_users?.[0]?.organization_id;
+let currentBaseUrl: string | undefined;
 
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-    if (organizationId) {
-      headers.set('X-Organization-Id', organizationId);
-    }
-    return headers;
-  },
-  credentials: 'include'
-});
+const customBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
+  if (!currentBaseUrl) {
+    currentBaseUrl = await getBaseUrl();
+  }
 
-const retryableBaseQuery = retry(baseQuery, {
+  const baseQuery = fetchBaseQuery({
+    baseUrl: currentBaseUrl,
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as RootState).auth.token;
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      return headers;
+    },
+  });
+
+  return baseQuery(args, api, extraOptions);
+};
+
+const retryableBaseQuery = retry(customBaseQuery, {
   maxRetries: MAX_RETRIES,
   backoff: async (attempt) => {
     const delay = Math.min(1000 * 2 ** attempt, 30000);
@@ -73,3 +75,5 @@ export const baseQueryWithReauth: BaseQueryFn<
     };
   }
 };
+
+export { customBaseQuery as baseQuery };

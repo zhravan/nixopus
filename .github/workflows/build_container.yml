@@ -36,8 +36,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create .env file
-        run: cp .env.sample .env
+      - name: Create .env files
+        run: |
+          cp .env.sample api/.env
+          cp .env.sample view/.env
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3

@@ -1,6 +1,6 @@
 import { parseCookies, setCookie, destroyCookie } from 'nookies';
 import { jwtDecode } from 'jwt-decode';
-import { BASE_URL } from '@/redux/conf';
+import { BASE_URL, getBaseUrl } from '@/redux/conf';
 import { AUTHURLS } from '@/redux/api-conf';
 
 interface DecodedToken {
@@ -104,7 +104,8 @@ export function clearAuthTokens(ctx?: any): void {
 
 export async function refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
   try {
-    const response = await fetch(`${BASE_URL}/${AUTHURLS.REFRESH_TOKEN}`, {
+    const baseUrl = await getBaseUrl();
+    const response = await fetch(`${baseUrl}/${AUTHURLS.REFRESH_TOKEN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

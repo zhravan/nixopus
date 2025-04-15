@@ -1,6 +1,6 @@
 import { parseCookies, setCookie, destroyCookie } from 'nookies';
 import { jwtDecode } from 'jwt-decode';
-import { BASE_URL, getBaseUrl } from '@/redux/conf';
+import { getBaseUrl } from '@/redux/conf';
 import { AUTHURLS } from '@/redux/api-conf';
 
 interface DecodedToken {

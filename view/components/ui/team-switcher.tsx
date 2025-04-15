@@ -104,7 +104,7 @@ export function TeamSwitcher({ refetch }: { refetch: () => void }) {
                   {team.organization.name}
                 </DropdownMenuItem>
               ))}
-              {canCreateOrg() || (canDeleteOrg && <DropdownMenuSeparator />)}
+              {/* {canCreateOrg() || (canDeleteOrg && <DropdownMenuSeparator />)}
               {canCreateOrg() && (
                 <DropdownMenuItem className="gap-2 p-2" onClick={toggleAddTeamModal}>
                   <div className="bg-background flex size-6 items-center justify-center rounded-md border">
@@ -123,7 +123,7 @@ export function TeamSwitcher({ refetch }: { refetch: () => void }) {
                   </div>
                   <div className="text-muted-foreground font-medium">Delete team</div>
                 </DropdownMenuItem>
-              )}
+              )} */}
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>

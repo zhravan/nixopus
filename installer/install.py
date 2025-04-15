@@ -103,7 +103,25 @@ class Installer:
             os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
             
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
-            result = subprocess.run(compose_cmd + ["up", "--build", "-d"], capture_output=True, text=True, cwd=self.project_root)
+            
+            pull_result = subprocess.run(
+                compose_cmd + ["pull"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root
+            )
+            
+            if pull_result.returncode != 0:
+                print("Error pulling images:")
+                print(pull_result.stderr)
+                sys.exit(1)
+            
+            result = subprocess.run(
+                compose_cmd + ["up", "-d"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root
+            )
             
             if result.returncode != 0:
                 print("Error starting services:")
@@ -116,21 +134,36 @@ class Installer:
     def verify_installation(self):
         print("\nVerifying installation...")
         try:
-            result = subprocess.run(["docker", "ps"], capture_output=True, text=True)
+            result = subprocess.run(["docker", "ps", "--format", "{{.Names}} {{.Status}}"], capture_output=True, text=True)
             if result.returncode != 0:
                 print("Error verifying installation:")
                 print(result.stderr)
                 sys.exit(1)
                 
-            containers = result.stdout
-            required_containers = ["nixopus-api-container", "nixopus-db-container", "nixopus-view-container"]
+            running_containers = result.stdout.splitlines()
+            required_containers = {
+                "nixopus-api-container": "API service",
+                "nixopus-db-container": "Database service",
+                "nixopus-view-container": "View service",
+                "nixopus-caddy-container": "Caddy service"
+            }
             
-            for container in required_containers:
-                if container not in containers:
-                    print(f"Error: {container} is not running")
-                    sys.exit(1)
+            missing_containers = []
+            for container, service_name in required_containers.items():
+                container_running = any(
+                    line.startswith(container) and "Up" in line
+                    for line in running_containers
+                )
+                if not container_running:
+                    missing_containers.append(service_name)
 
-            print("Installation verified successfully!")
+            if missing_containers:
+                print("Error: The following services are not running:")
+                for service in missing_containers:
+                    print(f"  - {service}")
+                sys.exit(1)
+
+            print("✓ All services are running successfully!")
         except Exception as e:
             print(f"Error verifying installation: {str(e)}")
             sys.exit(1)

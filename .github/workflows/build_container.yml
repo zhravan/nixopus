@@ -2,14 +2,14 @@ name: Docker Image Build and Push
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'api/**'
       - 'view/**'
       - 'docker-compose.yml'
       - '.github/workflows/docker.yml'
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'api/**'
       - 'view/**'

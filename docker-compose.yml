@@ -60,6 +60,11 @@ services:
   nixopus-view:
     image: ghcr.io/${GITHUB_REPOSITORY:-raghavyuva/nixopus}-view:latest
     container_name: nixopus-view-container
+    build:
+      args:
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+        - NEXT_PUBLIC_WEBSOCKET_URL=${NEXT_PUBLIC_WEBSOCKET_URL}
+        - NEXT_PUBLIC_PORT=${NEXT_PUBLIC_PORT}
     ports:
       - "${NEXT_PUBLIC_PORT:-7443}:${NEXT_PUBLIC_PORT:-7443}"
     restart: unless-stopped

@@ -1,4 +1,4 @@
-name: Docker Image Build and Push
+name: Container CI/CD
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - 'view/**'
       - 'docker-compose.yml'
       - '.github/workflows/build_container.yml'
+      - '.env.sample'
   pull_request:
     branches: [ master ]
     paths:
@@ -15,11 +16,14 @@ on:
       - 'view/**'
       - 'docker-compose.yml'
       - '.github/workflows/build_container.yml'
+      - '.env.sample'
 
 env:
   REGISTRY: ghcr.io
   API_IMAGE: ${{ github.repository }}-api
   VIEW_IMAGE: ${{ github.repository }}-view
+  API_PORT: 8443
+  NEXT_PUBLIC_PORT: 7443
 
 jobs:
   build-and-push:
@@ -31,6 +35,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: cp .env.sample .env
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -57,6 +64,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
+          build-args: |
+            API_PORT=${{ env.API_PORT }}
 
       - name: Extract metadata for View
         id: meta-view
@@ -75,4 +84,6 @@ jobs:
           context: ./view
           push: true
           tags: ${{ steps.meta-view.outputs.tags }}
-          labels: ${{ steps.meta-view.outputs.labels }} 
+          labels: ${{ steps.meta-view.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_PORT=${{ env.NEXT_PUBLIC_PORT }}

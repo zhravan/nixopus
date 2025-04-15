@@ -125,9 +125,6 @@ func (router *Router) Routes() {
 
 	userController := user.NewUserController(router.app.Store, router.app.Ctx, l)
 	userGroup := fuego.Group(apiV1Group, "/user")
-	fuego.Use(userGroup, func(next http.Handler) http.Handler {
-		return middleware.RBACMiddleware(next, router.app, "user")
-	})
 	router.UserRoutes(userGroup, userController)
 
 	domainController := domain.NewDomainsController(router.app.Store, router.app.Ctx, l, notificationManager)

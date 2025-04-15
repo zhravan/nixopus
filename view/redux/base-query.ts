@@ -21,13 +21,22 @@ const customBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryEr
 
   const baseQuery = fetchBaseQuery({
     baseUrl: currentBaseUrl,
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (headers, { getState, endpoint }) => {
       const token = (getState() as RootState).auth.token;
+      const organizationId =
+        (getState() as RootState).user.activeOrganization?.id ||
+        (getState() as RootState).auth.user?.organization_users?.[0]?.organization_id;
+
       if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+        headers.set('authorization', `Bearer ${token}`);
+      }
+
+      if (organizationId) {
+        headers.set('X-Organization-Id', organizationId);
       }
       return headers;
     },
+    credentials: 'include'
   });
 
   return baseQuery(args, api, extraOptions);

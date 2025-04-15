@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -86,7 +87,8 @@ func AuthMiddleware(next http.Handler, app *storage.App) http.Handler {
 			r = r.WithContext(ctx)
 		}
 
-		ctx := context.WithValue(r.Context(), types.UserContextKey, user)
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, types.UserContextKey, user)
 		ctx = context.WithValue(ctx, types.AuthTokenKey, token)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
@@ -140,10 +142,14 @@ func isAuthEndpoint(path string) bool {
 		"/api/v1/auth/send-verification-email",
 		"/api/v1/auth/reset-password",
 		"/api/v1/auth/request-password-reset",
+		"/api/v1/user",
+		"/api/v1/user/",
+		"/api/v1/user/organizations",
+		"/api/v1/user/name",
 	}
 
 	for _, authPath := range authPaths {
-		if path == authPath {
+		if path == authPath || strings.HasPrefix(path, authPath+"/") {
 			return true
 		}
 	}

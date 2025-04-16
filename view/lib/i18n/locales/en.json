@@ -303,6 +303,9 @@
             "webhook_url": {
               "label": "Webhook URL",
               "placeholder": "Enter your Slack webhook URL"
+            },
+            "is_active": {
+              "label": "Active"
             }
           },
           "buttons": {
@@ -316,6 +319,9 @@
             "webhook_url": {
               "label": "Webhook URL",
               "placeholder": "Enter your Discord webhook URL"
+            },
+            "is_active": {
+              "label": "Active"
             }
           },
           "buttons": {

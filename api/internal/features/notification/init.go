@@ -158,6 +158,7 @@ func (m *NotificationManager) GetWebhookURL(userID string, webhookType string) (
 		Model(&config).
 		Where("type = ?", webhookType).
 		Where("user_id = ?", userID).
+		Where("is_active = ?", true).
 		Scan(m.ctx)
 
 	if err != nil {

@@ -312,6 +312,9 @@
             "webhook_url": {
               "label": "URL del webhook",
               "placeholder": "https://slack.com/api/webhooks/..."
+            },
+            "is_active": {
+              "label": "Activo"
             }
           },
           "buttons": {
@@ -325,6 +328,9 @@
             "webhook_url": {
               "label": "URL del webhook",
               "placeholder": "https://discord.com/api/webhooks/..."
+            },
+            "is_active": {
+              "label": "Activo"
             }
           },
           "buttons": {

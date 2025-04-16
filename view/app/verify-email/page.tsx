@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { toast } from 'sonner';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -48,6 +49,13 @@ export default function VerifyEmailPage() {
     };
   }, [token]);
 
+  useEffect(() => {
+    if (status === 'success') {
+      router.push('/dashboard');
+      toast.success(t('auth.verifyEmail.success.message'));
+    }
+  }, [status]);
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-[350px]">
@@ -58,11 +66,6 @@ export default function VerifyEmailPage() {
         <CardContent className="flex flex-col items-center gap-4">
           {status === 'loading' && <Loader2 className="h-8 w-8 animate-spin" />}
           <p className="text-center">{message}</p>
-          {status === 'success' && (
-            <Button onClick={() => router.push('/login')}>
-              {t('auth.verifyEmail.buttons.goToLogin')}
-            </Button>
-          )}
           {status === 'error' && (
             <Button variant="outline" onClick={() => router.push('/login')}>
               {t('auth.verifyEmail.buttons.backToLogin')}

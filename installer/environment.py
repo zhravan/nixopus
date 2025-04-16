@@ -36,14 +36,14 @@ class EnvironmentSetup:
                 with open(authorized_keys_path, 'r') as auth_file:
                     existing_content = auth_file.read()
                     if public_key_content in existing_content:
-                        print(f"SSH key already in {authorized_keys_path}")
+                        # if the key is already in the file, return
                         return
                         
             with open(authorized_keys_path, 'a+') as auth_file:
                 auth_file.write(f"\n{public_key_content}\n")
                 
             authorized_keys_path.chmod(0o600)
-            print(f"Added SSH key to {authorized_keys_path}")
+            # print(f"Added SSH key to {authorized_keys_path}")
             
         except Exception as e:
             print(f"Error setting up authorized_keys: {str(e)}")

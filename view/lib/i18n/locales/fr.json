@@ -644,7 +644,14 @@
         "pasteHere": "Coller ici"
       }
     },
-    "noFiles": "Aucun fichier trouvé"
+    "noFiles": "Aucun fichier trouvé",
+    "noPermissionCreate": "Vous n'avez pas la permission de créer des fichiers",
+    "noPermissionUpdate": "Vous n'avez pas la permission de mettre à jour des fichiers",
+    "copiedToClipboard": "Copié dans le presse-papiers",
+    "copySuccess": "Fichier copié avec succès",
+    "errors": {
+      "fileExists": "Le fichier existe déjà"
+    }
   },
   "selfHost": {
     "deployment": {
@@ -1059,7 +1066,7 @@
       "moveFile": "Erreur lors du déplacement du fichier",
       "copyFile": "Erreur lors de la copie du fichier",
       "renameFile": "Erreur lors du renommage du fichier",
-      "startRenaming": "Erreur lors du début du renommage",
+      "startRenaming": "Erreur lors du démarrage du renommage",
       "navigateToFile": "Erreur lors de la navigation vers le fichier",
       "createNewFolder": "Erreur lors de la création du nouveau dossier",
       "uploadFile": "Erreur lors du téléchargement du fichier",

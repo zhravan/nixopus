@@ -640,6 +640,13 @@
         "move": "Mover",
         "delete": "Mover a Papelera"
       }
+    },
+    "noPermissionCreate": "No tienes permiso para crear archivos",
+    "noPermissionUpdate": "No tienes permiso para actualizar archivos",
+    "copiedToClipboard": "Copiado al portapapeles",
+    "copySuccess": "Archivo copiado exitosamente",
+    "errors": {
+      "fileExists": "El archivo ya existe"
     }
   },
   "selfHost": {
@@ -1060,14 +1067,14 @@
   },
   "toasts": {
     "errors": {
-      "realtimeMonitor": "Error al conectar con el servicio de monitor en tiempo real",
+      "realtimeMonitor": "Error al conectar con el servicio de monitorización en tiempo real",
       "setFileToCopy": "Error al establecer el archivo para copiar",
       "moveFile": "Error al mover el archivo",
       "copyFile": "Error al copiar el archivo",
       "renameFile": "Error al renombrar el archivo",
       "startRenaming": "Error al iniciar el renombrado",
       "navigateToFile": "Error al navegar al archivo",
-      "createNewFolder": "Error al crear la nueva carpeta",
+      "createNewFolder": "Error al crear nueva carpeta",
       "uploadFile": "Error al subir el archivo",
       "deleteFile": "Error al eliminar el archivo",
       "setEmail": "Error al establecer el correo electrónico",

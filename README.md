@@ -16,9 +16,14 @@ For complete documentation, visit our [Documentation Portal](https://docs.nixopu
 
 We welcome contributions! Please see our [Contributing Guide](https://docs.nixopus.com/contributing/index.md) for more details.
 
-## 💖 Sponsor
-We have given enough time to make nixopus free, Kindly encourage our development and vision towards open source, and be a part of nixopus sponsors.
+## 💖 Sponsorship
+
+We've dedicated significant time to making Nixopus free and accessible. Your support helps us continue our development and vision for open source. Consider becoming a sponsor and join our community of supporters.
 
 ## ⭐ Support
 
 If you find Nixopus useful, please consider giving it a star and sharing it with your network!
+
+## About the Name
+
+Nixopus is derived from the combination of "octopus" and the Linux penguin (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.

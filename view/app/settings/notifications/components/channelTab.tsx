@@ -39,8 +39,7 @@ const emailFormSchema = z.object({
 });
 
 const slackFormSchema = z.object({
-  webhook_secret: z.string().min(1, 'Webhook secret is required'),
-  channel_id: z.string().min(1, 'Channel ID is required')
+  webhook_url: z.string().url('Invalid webhook URL')
 });
 
 const discordFormSchema = z.object({
@@ -73,8 +72,7 @@ const ChannelTab: React.FC<ChannelTabProps> = ({
   const slackForm = useForm<z.infer<typeof slackFormSchema>>({
     resolver: zodResolver(slackFormSchema),
     defaultValues: {
-      webhook_secret: slackConfig?.webhook_secret || '',
-      channel_id: slackConfig?.channel_id || ''
+      webhook_url: slackConfig?.webhook_url || ''
     }
   });
 
@@ -87,8 +85,7 @@ const ChannelTab: React.FC<ChannelTabProps> = ({
 
   useEffect(() => {
     if (slackConfig) {
-      slackForm.setValue('webhook_secret', slackConfig.webhook_secret || '');
-      slackForm.setValue('channel_id', slackConfig.channel_id || '');
+      slackForm.setValue('webhook_url', slackConfig.webhook_url || '');
     }
   }, [slackConfig]);
 
@@ -299,38 +296,17 @@ const ChannelTab: React.FC<ChannelTabProps> = ({
             <form onSubmit={slackForm.handleSubmit(onSubmitSlack)} className="space-y-4">
               <FormField
                 control={slackForm.control}
-                name="webhook_secret"
+                name="webhook_url"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {t('settings.notifications.channels.slack.fields.webhook_secret.label')}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        {...field}
-                        placeholder={t(
-                          'settings.notifications.channels.slack.fields.webhook_secret.placeholder'
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={slackForm.control}
-                name="channel_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t('settings.notifications.channels.slack.fields.channel_id.label')}
+                      {t('settings.notifications.channels.slack.fields.webhook_url.label')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder={t(
-                          'settings.notifications.channels.slack.fields.channel_id.placeholder'
+                          'settings.notifications.channels.slack.fields.webhook_url.placeholder'
                         )}
                       />
                     </FormControl>

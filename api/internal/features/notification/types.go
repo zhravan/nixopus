@@ -245,15 +245,11 @@ type ResetEmailData struct {
 type CreateWebhookConfigRequest struct {
 	Type          string  `json:"type" validate:"required,oneof=slack discord"`
 	WebhookURL    string  `json:"webhook_url"`
-	WebhookSecret *string `json:"webhook_secret,omitempty"`
-	ChannelID     string  `json:"channel_id,omitempty"`
 }
 
 type UpdateWebhookConfigRequest struct {
 	Type          string  `json:"type" validate:"required,oneof=slack discord"`
 	WebhookURL    *string `json:"webhook_url,omitempty"`
-	WebhookSecret *string `json:"webhook_secret,omitempty"`
-	ChannelID     *string `json:"channel_id,omitempty"`
 	IsActive      *bool   `json:"is_active,omitempty"`
 }
 

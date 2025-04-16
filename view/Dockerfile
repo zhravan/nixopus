@@ -36,4 +36,4 @@ USER nixopus
 
 EXPOSE ${NEXT_PUBLIC_PORT}
 
-CMD ["node", "server.js"]
+CMD ["yarn", "start", "-p", "${NEXT_PUBLIC_PORT}"]

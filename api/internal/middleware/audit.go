@@ -41,39 +41,74 @@ func AuditMiddleware(next http.Handler, app *storage.App, l logger.Logger) http.
 		auditAction := getAuditActionFromMethod(r.Method)
 		auditResourceType := getResourceTypeFromPath(r.URL.Path)
 
-		// Skip if the audit action is access (GET requests typically only read data)
 		if auditAction == "access" {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		auditReq := &service.AuditLogRequest{
-			UserID:         user.ID,
-			OrganizationID: orgID,
-			Action:         types.AuditAction(auditAction),
-			ResourceType:   types.AuditResourceType(auditResourceType),
-			ResourceID:     uuid.Nil,
-			OldValues:      nil,
-			NewValues:      nil,
-			Metadata: map[string]interface{}{
-				"path":   r.URL.Path,
-				"method": r.Method,
-			},
-			IPAddress: r.RemoteAddr,
-			UserAgent: r.UserAgent(),
-			RequestID: uuid.New(),
-		}
+		rw := &auditResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		resourceID := getResourceIDFromPath(r.URL.Path)
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(rw, r)
 
-		if err := auditService.LogAction(auditReq); err != nil {
-			l.Log(logger.Warning, "Failed to create audit log", fmt.Sprintf("path: %s, method: %s, user_id: %s, org_id: %s, error: %s",
-				r.URL.Path, r.Method, user.ID, orgID, err.Error()))
-		} else {
-			l.Log(logger.Debug, "Audit log created", fmt.Sprintf("path: %s, method: %s, user_id: %s, org_id: %s",
-				r.URL.Path, r.Method, user.ID, orgID))
+		if rw.statusCode >= 200 && rw.statusCode < 300 {
+			auditReq := &service.AuditLogRequest{
+				UserID:         user.ID,
+				OrganizationID: orgID,
+				Action:         types.AuditAction(auditAction),
+				ResourceType:   types.AuditResourceType(auditResourceType),
+				ResourceID:     resourceID,
+				OldValues:      nil,
+				NewValues:      nil,
+				Metadata: map[string]interface{}{
+					"path":   r.URL.Path,
+					"method": r.Method,
+					"status": rw.statusCode,
+				},
+				IPAddress: r.RemoteAddr,
+				UserAgent: r.UserAgent(),
+				RequestID: uuid.New(),
+			}
+
+			if err := auditService.LogAction(auditReq); err != nil {
+				l.Log(logger.Warning, "Failed to create audit log", fmt.Sprintf("path: %s, method: %s, user_id: %s, org_id: %s, error: %s",
+					r.URL.Path, r.Method, user.ID, orgID, err.Error()))
+			} else {
+				l.Log(logger.Debug, "Audit log created", fmt.Sprintf("path: %s, method: %s, user_id: %s, org_id: %s",
+					r.URL.Path, r.Method, user.ID, orgID))
+			}
 		}
 	})
+}
+
+// auditResponseWriter captures the status code
+type auditResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *auditResponseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+// getResourceIDFromPath extracts the resource ID from the URL path
+func getResourceIDFromPath(path string) uuid.UUID {
+	segments := strings.Split(path, "/")
+	for i, segment := range segments {
+		if i > 0 && isUUID(segments[i-1]) {
+			if id, err := uuid.Parse(segment); err == nil {
+				return id
+			}
+		}
+	}
+	return uuid.Nil
+}
+
+// isUUID checks if a string is a valid UUID
+func isUUID(s string) bool {
+	_, err := uuid.Parse(s)
+	return err == nil
 }
 
 func getAuditActionFromMethod(method string) string {

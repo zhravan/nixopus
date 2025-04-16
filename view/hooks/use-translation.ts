@@ -31,7 +31,7 @@ export function useTranslation() {
     loadTranslations();
   }, []);
 
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string>): string => {
     if (isLoading) return key;
 
     const keys = key.split('.');
@@ -45,7 +45,17 @@ export function useTranslation() {
       }
     }
 
-    return typeof value === 'string' ? value : key;
+    if (typeof value === 'string') {
+      if (params) {
+        return Object.entries(params).reduce(
+          (str, [key, val]) => str.replace(`{${key}}`, val),
+          value
+        );
+      }
+      return value;
+    }
+
+    return key;
   };
 
   return { t, isLoading };

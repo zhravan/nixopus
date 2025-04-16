@@ -23,9 +23,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppSelector } from '@/redux/hooks';
 import { useResourcePermissions } from '@/lib/permission';
 import EditUserDialog from './EditUserDialog';
-import { UserTypes } from '@/redux/types/orgs';
+import { OrganizationUsers, UserTypes } from '@/redux/types/orgs';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { useTranslation } from '@/hooks/use-translation';
+import { User } from '@/redux/types/user';
 
 type EditUser = {
   id: string;
@@ -36,11 +37,20 @@ type EditUser = {
   permissions: string[];
 };
 
+type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
+
+const roleHierarchy: Record<RoleType, number> = {
+  owner: 4,
+  admin: 3,
+  member: 2,
+  viewer: 1
+};
+
 interface TeamMembersProps {
   users: EditUser[];
   handleRemoveUser: (userId: string) => void;
-  getRoleBadgeVariant: (role: string) => 'destructive' | 'default' | 'secondary' | 'outline';
-  onUpdateUser: (userId: string, role: UserTypes) => void;
+  getRoleBadgeVariant: (role: string) => 'default' | 'secondary' | 'destructive' | 'outline';
+  onUpdateUser: (userId: string, role: UserTypes) => Promise<void>;
 }
 
 const MAX_VISIBLE_PERMISSIONS = 3;
@@ -52,7 +62,7 @@ function TeamMembers({
   onUpdateUser
 }: TeamMembersProps) {
   const { t } = useTranslation();
-  const loggedInUser = useAppSelector((state) => state.auth.user);
+  const loggedInUser = useAppSelector((state) => state.auth.user) as User;
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
   const { canUpdate: canUpdateUser, canDelete: canDeleteUser } = useResourcePermissions(
     loggedInUser,
@@ -63,6 +73,30 @@ function TeamMembers({
   const [editingUser, setEditingUser] = useState<EditUser | null>(null);
   const [userToRemove, setUserToRemove] = useState<EditUser | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const getCurrentUserRole = (): RoleType | null => {
+    if (!loggedInUser || !activeOrganization) return null;
+    const orgUser = loggedInUser.organization_users.find(
+      (ou: OrganizationUsers) => ou.organization_id === activeOrganization.id
+    );
+    return (orgUser?.role?.name?.toLowerCase() as RoleType) || null;
+  };
+
+  const canModifyUser = (targetUser: EditUser) => {
+    if (!loggedInUser || !targetUser || !activeOrganization) {
+      return false;
+    }
+
+    const currentUserRole = getCurrentUserRole();
+    const targetUserRole = targetUser.role?.toLowerCase() as RoleType;
+
+    if (!currentUserRole || !targetUserRole) {
+      return false;
+    }
+
+    const canModify = roleHierarchy[currentUserRole] >= roleHierarchy[targetUserRole];
+    return canModify;
+  };
 
   const toggleUserPermissions = (userId: string) => {
     setExpandedUsers((prev) => {
@@ -76,7 +110,10 @@ function TeamMembers({
     });
   };
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: EditUser) => {
+    if (!canModifyUser(user)) {
+      return;
+    }
     setEditingUser({
       ...user,
       permissions: user.permissions
@@ -84,6 +121,10 @@ function TeamMembers({
   };
 
   const handleSaveUser = (userId: string, role: UserTypes) => {
+    const user = users.find((u) => u.id === userId);
+    if (!user || !canModifyUser(user)) {
+      return;
+    }
     onUpdateUser(userId, role);
     setEditingUser(null);
   };
@@ -128,6 +169,16 @@ function TeamMembers({
     );
   };
 
+  const hasEditableActions = (user: EditUser) => {
+    if (loggedInUser.id === user.id) {
+      return false;
+    }
+    const canUpdate = canUpdateUser && canModifyUser(user);
+    const canDelete = canDeleteUser && canModifyUser(user);
+    const hasActions = canUpdate || canDelete;
+    return hasActions;
+  };
+
   return (
     <>
       <Card>
@@ -142,7 +193,7 @@ function TeamMembers({
                 <TableHead>{t('settings.teams.members.table.headers.user')}</TableHead>
                 <TableHead>{t('settings.teams.members.table.headers.role')}</TableHead>
                 <TableHead>{t('settings.teams.members.table.headers.permissions')}</TableHead>
-                {(canUpdateUser || canDeleteUser) && (
+                {users.some((user) => hasEditableActions(user)) && (
                   <TableHead className="text-right">
                     {t('settings.teams.members.table.headers.actions')}
                   </TableHead>
@@ -173,7 +224,7 @@ function TeamMembers({
                     <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
                   </TableCell>
                   <TableCell>{renderPermissions(user.permissions, user.id)}</TableCell>
-                  {(canUpdateUser || canDeleteUser) && loggedInUser.id !== user.id && (
+                  {hasEditableActions(user) && (
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -182,7 +233,7 @@ function TeamMembers({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {canUpdateUser && (
+                          {canUpdateUser && canModifyUser(user) && (
                             <>
                               <DropdownMenuItem onClick={() => handleEditUser(user)}>
                                 <PencilIcon className="h-4 w-4 mr-2" />
@@ -190,8 +241,10 @@ function TeamMembers({
                               </DropdownMenuItem>
                             </>
                           )}
-                          {canUpdateUser && canDeleteUser && <DropdownMenuSeparator />}
-                          {canDeleteUser && (
+                          {canUpdateUser && canDeleteUser && canModifyUser(user) && (
+                            <DropdownMenuSeparator />
+                          )}
+                          {canDeleteUser && canModifyUser(user) && (
                             <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onClick={() => {

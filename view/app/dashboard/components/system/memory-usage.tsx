@@ -11,6 +11,8 @@ interface MemoryUsageCardProps {
   systemStats: SystemStatsType;
 }
 
+const formatGB = (value: number) => `${value.toFixed(2)} GB`;
+
 const MemoryUsageCard: React.FC<MemoryUsageCardProps> = ({ systemStats }) => {
   const { t } = useTranslation();
   const { memory } = systemStats;
@@ -32,13 +34,17 @@ const MemoryUsageCard: React.FC<MemoryUsageCardProps> = ({ systemStats }) => {
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{t('dashboard.memory.used').replace('{value}', memory.used.toString())}</span>
-            <span>
-              {t('dashboard.memory.percentage').replace('{value}', memory.percentage.toString())}
+            <span className="truncate max-w-[80px] sm:max-w-[100px]">
+              {t('dashboard.memory.used').replace('{value}', formatGB(memory.used))}
             </span>
-            <span>{t('dashboard.memory.total').replace('{value}', memory.total.toString())}</span>
+            <span className="truncate max-w-[60px] sm:max-w-[80px]">
+              {t('dashboard.memory.percentage').replace('{value}', memory.percentage.toFixed(1))}
+            </span>
+            <span className="truncate max-w-[80px] sm:max-w-[100px]">
+              {t('dashboard.memory.total').replace('{value}', formatGB(memory.total))}
+            </span>
           </div>
-          <div className="text-xs text-muted-foreground mt-1 sm:mt-2 line-clamp-2 sm:line-clamp-none">
+          <div className="text-xs text-muted-foreground mt-1 sm:mt-2 line-clamp-2 sm:line-clamp-none break-all">
             {memory.rawInfo}
           </div>
         </div>

@@ -89,7 +89,7 @@ func (c *AuthService) GeneratePasswordResetLink(user *shared_types.User) (*share
 	}
 
 	c.logger.Log(logger.Info, "generating password reset link", user.Email)
-	token, err := utils.CreateToken(user.Email, time.Minute*5)
+	token, err := utils.CreateToken(user.Email, time.Minute*5, user.TwoFactorEnabled, true)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateToken.Error(), err.Error())
 		return nil, "", types.ErrFailedToCreateToken

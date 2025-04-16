@@ -146,11 +146,7 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher
-          teams={isLoading ? [] : organizations}
-          toggleAddTeamModal={toggleAddTeamModal}
-          refetch={refetch}
-        />
+        <TeamSwitcher refetch={refetch} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain

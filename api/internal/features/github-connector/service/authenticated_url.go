@@ -51,7 +51,7 @@ func (s *GithubConnectorService) GetClonePath(userID, environment, applicationID
 	clonePath := filepath.Join(repoBaseURL, userID, environment, applicationID)
 	var shouldPull bool
 
-	client, err := s.ssh.ConnectWithPassword()
+	client, err := s.ssh.Connect()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to connect via SSH: %w", err)
 	}

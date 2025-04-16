@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TabsContent } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useTranslation } from '@/hooks/use-translation';
+import { TwoFactorSetup } from '@/app/settings/general/components/TwoFactorSetup';
 
 interface SecuritySectionProps {
   emailSent: boolean;
@@ -60,6 +61,8 @@ function SecuritySection({
           )}
         </CardContent>
       </Card>
+
+      <TwoFactorSetup />
     </TabsContent>
   );
 }

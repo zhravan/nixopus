@@ -25,7 +25,16 @@
       "errors": {
         "loginFailed": "Login failed",
         "invalidCredentials": "Invalid email or password",
-        "requiredFields": "Email and password are required"
+        "requiredFields": "Email and password are required",
+        "2faFailed": "Invalid 2FA code"
+      },
+      "2fa": {
+        "title": "Two-Factor Authentication",
+        "description": "Please enter the verification code from your authenticator app",
+        "enterCode": "Verification Code",
+        "codePlaceholder": "Enter 6-digit code",
+        "verifyButton": "Verify",
+        "verifying": "Verifying..."
       }
     },
     "register": "Register",
@@ -83,6 +92,18 @@
         "title": "Language Preferences",
         "description": "Choose your preferred language for the application",
         "select": "Select language"
+      },
+      "font": "Font",
+      "fontOptions": {
+        "geist": "Geist",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "montserrat": "Montserrat",
+        "spaceGrotesk": "Space Grotesk",
+        "outfit": "Outfit",
+        "jakarta": "Plus Jakarta Sans",
+        "system": "System"
       }
     },
     "account": {
@@ -137,12 +158,29 @@
             "description": "Check your inbox for a password reset link"
           }
         }
+      },
+      "2fa": {
+        "title": "Two-Factor Authentication",
+        "description": "Add an extra layer of security to your account",
+        "setupButton": "Setup 2FA",
+        "verifyButton": "Verify",
+        "enterCode": "Enter verification code",
+        "codePlaceholder": "Enter 6-digit code",
+        "setupSuccess": "2FA setup successful",
+        "setupError": "Failed to setup 2FA",
+        "verifySuccess": "2FA verification successful",
+        "verifyError": "Invalid verification code",
+        "enabledTitle": "2FA is Enabled",
+        "enabledDescription": "Your account is protected with two-factor authentication",
+        "disableButton": "Disable 2FA",
+        "disableSuccess": "2FA has been disabled",
+        "disableError": "Failed to disable 2FA"
       }
     },
     "domains": {
       "page": {
-        "title": "Server and Domains",
-        "description": "Configure your domains",
+        "title": "Domains",
+        "description": "Domains are used to deploy your applications",
         "noOrganization": {
           "title": "No Organization Selected",
           "description": "Please select an organization to view and manage domains."
@@ -229,35 +267,66 @@
           "title": "Email",
           "description": "Configure SMTP settings to send email notifications",
           "fields": {
-            "smtpServer": {
+            "smtp_host": {
               "label": "SMTP Server",
               "placeholder": "smtp.example.com"
             },
-            "port": {
+            "smtp_port": {
               "label": "Port",
               "placeholder": "587"
             },
-            "username": {
+            "smtp_username": {
               "label": "Username",
               "placeholder": "your-email@example.com"
             },
-            "password": {
+            "smtp_password": {
               "label": "Password",
-              "placeholder": "Enter your SMTP password"
+              "placeholder": "••••••••"
             },
-            "fromEmail": {
+            "smtp_from_email": {
               "label": "From Email",
               "placeholder": "notifications@example.com"
             },
-            "fromName": {
+            "smtp_from_name": {
               "label": "From Name",
               "placeholder": "Your Organization Name"
             }
           },
           "buttons": {
-            "save": "Save"
+            "save": "Save Configuration"
           }
-        }
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Configure Slack notifications",
+          "fields": {
+            "webhook_secret": {
+              "label": "Webhook Secret",
+              "placeholder": "Enter your Slack webhook secret"
+            },
+            "channel_id": {
+              "label": "Channel ID",
+              "placeholder": "Enter your Slack channel ID"
+            }
+          },
+          "buttons": {
+            "save": "Save Configuration"
+          }
+        },
+        "discord": {
+          "title": "Discord",
+          "description": "Configure Discord settings to send notifications",
+          "fields": {
+            "webhook_url": {
+              "label": "Webhook URL",
+              "placeholder": "Enter your Discord webhook URL"
+            }
+          },
+          "buttons": {
+            "save": "Save Configuration"
+          }
+        },
+        "save": "Save Configuration"
       },
       "preferences": {
         "activity": {
@@ -274,8 +343,18 @@
         }
       },
       "messages": {
-        "emailConfigSaved": "Email configuration saved successfully",
-        "emailConfigFailed": "Failed to save email configuration",
+        "email": {
+          "success": "Email configuration saved successfully",
+          "error": "Failed to save email configuration"
+        },
+        "slack": {
+          "success": "Slack configuration saved successfully",
+          "error": "Failed to save Slack configuration"
+        },
+        "discord": {
+          "success": "Discord configuration saved successfully",
+          "error": "Failed to save Discord configuration"
+        },
         "preferencesUpdated": "Preferences updated successfully",
         "preferencesFailed": "Failed to update preferences"
       }
@@ -429,6 +508,23 @@
           "creating": "Creating..."
         }
       }
+    },
+    "2fa": {
+      "title": "Two-Factor Authentication",
+      "description": "Add an extra layer of security to your account",
+      "setupButton": "Setup 2FA",
+      "verifyButton": "Verify",
+      "enterCode": "Enter verification code",
+      "codePlaceholder": "Enter 6-digit code",
+      "setupSuccess": "2FA setup successful",
+      "setupError": "Failed to setup 2FA",
+      "verifySuccess": "2FA verification successful",
+      "verifyError": "Invalid verification code",
+      "enabledTitle": "2FA is Enabled",
+      "enabledDescription": "Your account is protected with two-factor authentication",
+      "disableButton": "Disable 2FA",
+      "disableSuccess": "2FA has been disabled",
+      "disableError": "Failed to disable 2FA"
     }
   },
   "languages": {
@@ -439,7 +535,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "description": "Monitor your server",
+    "description": "Monitor your applications and system resources",
     "containers": {
       "title": "Containers",
       "table": {
@@ -495,6 +591,10 @@
       "cpu": "CPU",
       "uptime": "Uptime",
       "lastUpdated": "Last Updated"
+    },
+    "smtpBanner": {
+      "message": "Configure SMTP settings to receive notifications",
+      "configure": "Configure"
     }
   },
   "fileManager": {
@@ -556,7 +656,21 @@
         "pasteHere": "Paste here"
       }
     },
-    "noFiles": "No files found"
+    "noFiles": "No files found",
+    "deleteDialog": {
+      "title": "Delete Confirmation",
+      "descriptionFile": "Are you sure you want to delete the file '{name}'? This action cannot be undone.",
+      "descriptionDirectory": "Are you sure you want to delete the directory '{name}' and all its contents? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "noPermissionCreate": "You don't have permission to create files",
+    "noPermissionUpdate": "You don't have permission to update files",
+    "copiedToClipboard": "Copied to clipboard",
+    "copySuccess": "File copied successfully",
+    "errors": {
+      "fileExists": "File already exists"
+    }
   },
   "selfHost": {
     "deployment": {
@@ -855,8 +969,9 @@
           "invalidFormat": "Port must be a number."
         },
         "domain": {
-          "minLength": "Domain name must be at least 3 characters.",
-          "invalidFormat": "Domain name must be a valid domain name."
+          "minLength": "Domain name must be at least 3 characters long.",
+          "invalidFormat": "Please enter a valid domain name (e.g., example.com).",
+          "notAllowed": "This domain is not allowed. You can add it in the Settings > Domains section to make it available."
         },
         "repository": {
           "minLength": "Repository name must be at least 3 characters.",
@@ -943,7 +1058,8 @@
     "general": "General",
     "notifications": "Notifications",
     "team": "Team",
-    "domains": "Domains"
+    "domains": "Domains",
+    "update": "Update"
   },
   "layout": {
     "breadcrumbs": {
@@ -967,6 +1083,22 @@
       "help": "Help",
       "reportIssue": "Report an issue",
       "logout": "Log out"
+    }
+  },
+  "toasts": {
+    "errors": {
+      "realtimeMonitor": "Error connecting to realtime monitor service",
+      "setFileToCopy": "Error setting file to copy",
+      "moveFile": "Error moving file",
+      "copyFile": "Error copying file",
+      "renameFile": "Error renaming file",
+      "startRenaming": "Error starting renaming",
+      "navigateToFile": "Error navigating to file",
+      "createNewFolder": "Error creating new folder",
+      "uploadFile": "Failed to upload file",
+      "deleteFile": "Error deleting file",
+      "setEmail": "Error setting email",
+      "setPassword": "Error setting password"
     }
   }
 }

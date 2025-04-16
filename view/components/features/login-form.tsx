@@ -13,6 +13,11 @@ export interface LoginFormProps {
   handlePasswordChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleLogin: () => void;
   isLoading: boolean;
+  twoFactorCode?: string;
+  handleTwoFactorCodeChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  showTwoFactor?: boolean;
+  handleTwoFactorLogin?: () => void;
+  isTwoFactorLoading?: boolean;
 }
 
 export function LoginForm({ ...props }: LoginFormProps) {
@@ -25,43 +30,70 @@ export function LoginForm({ ...props }: LoginFormProps) {
           <div className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">{t('auth.login.title')}</h1>
-                <p className="text-muted-foreground text-balance">{t('auth.login.description')}</p>
+                <h1 className="text-2xl font-bold">
+                  {props.showTwoFactor ? t('auth.login.2fa.title') : t('auth.login.title')}
+                </h1>
+                <p className="text-muted-foreground text-balance">
+                  {props.showTwoFactor ? t('auth.login.2fa.description') : t('auth.login.description')}
+                </p>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">{t('auth.email')}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t('auth.login.emailPlaceholder')}
-                  required
-                  value={props.email}
-                  onChange={props.handleEmailChange}
-                />
-              </div>
-              <div className="grid gap-3">
-                {/* <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
-                    Forgot your password?
-                  </a>
-                </div> */}
-                <Label htmlFor="password">{t('auth.password')}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={props.password}
-                  onChange={props.handlePasswordChange}
-                />
-              </div>
+              {!props.showTwoFactor && (
+                <>
+                  <div className="grid gap-3">
+                    <Label htmlFor="email">{t('auth.email')}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={t('auth.login.emailPlaceholder')}
+                      required
+                      value={props.email}
+                      onChange={props.handleEmailChange}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    {/* <div className="flex items-center">
+                      <Label htmlFor="password">Password</Label>
+                      <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
+                        Forgot your password?
+                      </a>
+                    </div> */}
+                    <Label htmlFor="password">{t('auth.password')}</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      value={props.password}
+                      onChange={props.handlePasswordChange}
+                    />
+                  </div>
+                </>
+              )}
+              {props.showTwoFactor && (
+                <div className="grid gap-3">
+                  <Label htmlFor="twoFactorCode">{t('auth.login.2fa.enterCode')}</Label>
+                  <Input
+                    id="twoFactorCode"
+                    type="text"
+                    placeholder={t('auth.login.2fa.codePlaceholder')}
+                    required
+                    value={props.twoFactorCode}
+                    onChange={props.handleTwoFactorCodeChange}
+                  />
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full"
-                onClick={props.handleLogin}
-                disabled={props.isLoading}
+                onClick={props.showTwoFactor ? props.handleTwoFactorLogin : props.handleLogin}
+                disabled={props.showTwoFactor ? props.isTwoFactorLoading : props.isLoading}
               >
-                {props.isLoading ? t('auth.login.loading') : t('auth.login.submit')}
+                {props.showTwoFactor
+                  ? props.isTwoFactorLoading
+                    ? t('auth.login.2fa.verifying')
+                    : t('auth.login.2fa.verifyButton')
+                  : props.isLoading
+                  ? t('auth.login.loading')
+                  : t('auth.login.submit')}
               </Button>
               {/* <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
@@ -82,11 +114,17 @@ export function LoginForm({ ...props }: LoginFormProps) {
       </Card>
       <div className="text-muted-foreground text-center text-xs text-balance">
         {t('auth.login.terms')}{' '}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <a
+          href="https://docs.nixopus.com/license"
+          className="underline underline-offset-4 hover:text-primary"
+        >
           {t('auth.login.termsOfService')}
         </a>{' '}
         {t('auth.login.and')}{' '}
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <a
+          href="https://docs.nixopus.com/privacy-policy"
+          className="underline underline-offset-4 hover:text-primary"
+        >
           {t('auth.login.privacyPolicy')}
         </a>
         .

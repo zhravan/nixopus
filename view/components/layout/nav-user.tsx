@@ -45,7 +45,8 @@ export function NavUser({ user }: { user: User }) {
       'LAST_ACTIVE_NAV_KEY',
       'SIDEBAR_STORAGE_KEY',
       'terminalOpen',
-      'persist:root'
+      'persist:root',
+      'active_organization'
     ];
     keys.forEach((key) => localStorage.removeItem(key));
   };

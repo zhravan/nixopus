@@ -37,13 +37,17 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{t('dashboard.disk.used').replace('{value}', disk.used.toFixed(2))}</span>
-            <span>
-              {t('dashboard.disk.percentage').replace('{value}', disk.percentage.toFixed(2))}
+            <span className="truncate max-w-[80px] sm:max-w-[100px]">
+              {t('dashboard.disk.used').replace('{value}', disk.used.toFixed(2))}
             </span>
-            <span>{t('dashboard.disk.total').replace('{value}', disk.total.toFixed(2))}</span>
+            <span className="truncate max-w-[60px] sm:max-w-[80px]">
+              {t('dashboard.disk.percentage').replace('{value}', disk.percentage.toFixed(1))}
+            </span>
+            <span className="truncate max-w-[80px] sm:max-w-[100px]">
+              {t('dashboard.disk.total').replace('{value}', disk.total.toFixed(2))}
+            </span>
           </div>
-          <div className="text-xs font-mono text-muted-foreground mt-1 sm:mt-2">
+          <div className="text-xs font-mono text-muted-foreground mt-1 sm:mt-2 overflow-x-auto">
             <table className="min-w-full">
               <thead>
                 <tr>
@@ -62,12 +66,18 @@ const DiskUsageCard: React.FC<DiskUsageCardProps> = ({ systemStats }) => {
               <tbody className="text-xxs sm:text-xs">
                 {disk.allMounts.map((mount, index) => (
                   <tr key={index}>
-                    <td className="text-left pr-1 sm:pr-2 truncate max-w-[60px] sm:max-w-none">
+                    <td className="text-left pr-1 sm:pr-2 truncate max-w-[60px] sm:max-w-[100px]">
                       {mount.mountPoint}
                     </td>
-                    <td className="text-right pr-1 sm:pr-2">{mount.size}</td>
-                    <td className="text-right pr-1 sm:pr-2">{mount.used}</td>
-                    <td className="text-right">{mount.capacity}</td>
+                    <td className="text-right pr-1 sm:pr-2 truncate max-w-[60px] sm:max-w-[80px]">
+                      {mount.size}
+                    </td>
+                    <td className="text-right pr-1 sm:pr-2 truncate max-w-[60px] sm:max-w-[80px]">
+                      {mount.used}
+                    </td>
+                    <td className="text-right truncate max-w-[40px] sm:max-w-[60px]">
+                      {mount.capacity}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -98,11 +108,11 @@ const DiskUsageCardSkeleton = () => {
             <div className="h-2 rounded-full bg-gray-400" />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
+            <Skeleton className="h-3 w-20" />
             <Skeleton className="h-3 w-10" />
-            <Skeleton className="h-3 w-10" />
-            <Skeleton className="h-3 w-10" />
+            <Skeleton className="h-3 w-20" />
           </div>
-          <div className="text-xs font-mono text-muted-foreground mt-1 sm:mt-2">
+          <div className="text-xs font-mono text-muted-foreground mt-1 sm:mt-2 overflow-x-auto">
             <table className="min-w-full">
               <thead>
                 <tr>

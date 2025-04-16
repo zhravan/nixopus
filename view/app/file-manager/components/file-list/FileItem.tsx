@@ -1,19 +1,14 @@
 import React from 'react';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger
-} from '@/components/ui/context-menu';
-import { Code, Copy, Info, MoveIcon, Pencil, TrashIcon } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
 import { FileData, FileType } from '@/redux/types/files';
 import FileInfo from './FileInfo';
 import { getFileIcons } from '@/app/self-host/utils/getFileIcons';
 import { formatFileSize } from '@/app/self-host/utils/formatFileSize';
-import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
 import { useFileOperations } from '../../hooks/file-operations/useOperations';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
+import { FileContextMenu } from '../context-menu/FileContextMenu';
 import { useTranslation } from '@/hooks/use-translation';
+import { TrashIcon } from 'lucide-react';
 
 interface FileItemProps {
   file: FileData;
@@ -28,6 +23,19 @@ interface FileItemProps {
   index: number;
   canUpdate: boolean;
   canDelete: boolean;
+  isEditing: boolean;
+  editedFileName: string;
+  setEditedFileName: React.Dispatch<React.SetStateAction<string>>;
+  isDialogOpen: boolean;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSizeLoading: boolean;
+  fileSize: number | null;
+  handleRename: (file: FileData) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, file: FileData) => void;
+  handleTextDoubleClick: () => void;
+  handleDelete: (path: string) => void;
+  handleCopy: (fromPath: string, toPath: string) => void;
+  startRenaming: (file: FileData) => void;
 }
 
 export function FileItem({
@@ -42,26 +50,24 @@ export function FileItem({
   setFileToMove,
   index,
   canUpdate,
-  canDelete
+  canDelete,
+  isEditing,
+  editedFileName,
+  setEditedFileName,
+  isDialogOpen,
+  setIsDialogOpen,
+  isSizeLoading,
+  fileSize,
+  handleRename,
+  handleKeyDown,
+  handleTextDoubleClick,
+  handleDelete,
+  handleCopy,
+  startRenaming
 }: FileItemProps) {
   const { t } = useTranslation();
-  const {
-    isEditing,
-    setIsEditing,
-    editedFileName,
-    setEditedFileName,
-    isDialogOpen,
-    setIsDialogOpen,
-    isSizeLoading,
-    fileSize,
-    handleRename,
-    onDeleteFolder,
-    startRenaming,
-    handleKeyDown,
-    handleTextDoubleClick
-  } = useFileOperations(file, refetch);
 
-  const { handleCopyFile, handleFileMove } = useFileManagerActionsHook();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
   const renderFileName = () =>
     isEditing ? (
@@ -69,8 +75,8 @@ export function FileItem({
         type="text"
         value={editedFileName}
         onChange={(e) => setEditedFileName(e.target.value)}
-        onBlur={handleRename}
-        onKeyDown={handleKeyDown}
+        onBlur={() => handleRename(file)}
+        onKeyDown={(e) => handleKeyDown(e, file)}
         autoFocus
         className={`w-full px-2 py-1 ${activePath === file.path ? 'bg-secondary text-white' : 'bg-transparent'} rounded-md`}
         onClick={(e) => e.stopPropagation()}
@@ -79,10 +85,10 @@ export function FileItem({
       <span
         className={`px-2 py-1 ${layout === 'grid' ? 'text-center' : 'text-left'} 
                 ${activePath === file.path ? 'bg-secondary text-white' : ''} break-words rounded-md leading-normal`}
-        title={editedFileName}
+        title={file.name}
         onDoubleClick={handleTextDoubleClick}
       >
-        {editedFileName}
+        {file.name}
       </span>
     );
 
@@ -127,38 +133,40 @@ export function FileItem({
   );
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <div onClick={() => onFolderClickActive(file.path)} className="cursor-pointer">
-          {layout === 'grid' ? gridLayout : listLayout}
-        </div>
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onSelect={() => setIsDialogOpen(true)}>
-          <Info className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.info')}
-        </ContextMenuItem>
-        {canUpdate && (
-          <>
-            <ContextMenuItem onSelect={startRenaming}>
-              <Pencil className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.rename')}
-            </ContextMenuItem>
-            <ContextMenuItem onSelect={() => handleCopyFile(file, setFileToCopy)}>
-              <Copy className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.copy')}
-            </ContextMenuItem>
-            <ContextMenuItem onSelect={() => setFileToMove(file)}>
-              <MoveIcon className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.move')}
-            </ContextMenuItem>
-          </>
-        )}
-        {canDelete && (
-          <ContextMenuItem onSelect={onDeleteFolder}>
-            <TrashIcon className="mr-2 h-4 w-4" /> {t('fileManager.item.actions.delete')}
-          </ContextMenuItem>
-        )}
-      </ContextMenuContent>
+    <FileContextMenu
+      isItem
+      canUpdate={canUpdate}
+      canDelete={canDelete}
+      onInfo={() => setIsDialogOpen(true)}
+      onRename={() => startRenaming(file)}
+      onCopy={() => {
+        setFileToCopy(file);
+        handleCopy(file.path, file.path);
+      }}
+      onMoveItem={() => setFileToMove(file)}
+      onDelete={() => setIsDeleteDialogOpen(true)}
+    >
+      <div onClick={() => onFolderClickActive(file.path)} className="cursor-pointer">
+        {layout === 'grid' ? gridLayout : listLayout}
+      </div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <FileInfo file={file} isLoading={isSizeLoading} fileSize={fileSize || null} />
       </Dialog>
-    </ContextMenu>
+      <DeleteDialog
+        title={t('fileManager.deleteDialog.title')}
+        description={
+          type === 'folder'
+            ? t('fileManager.deleteDialog.descriptionDirectory', { name: file.name })
+            : t('fileManager.deleteDialog.descriptionFile', { name: file.name })
+        }
+        onConfirm={() => handleDelete(file.path)}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        variant="destructive"
+        confirmText={t('fileManager.deleteDialog.confirm')}
+        cancelText={t('fileManager.deleteDialog.cancel')}
+        icon={TrashIcon}
+      />
+    </FileContextMenu>
   );
 }

@@ -35,6 +35,7 @@ type SFTPClient interface {
 	Stat(path string) (os.FileInfo, error)
 	Rename(fromPath string, toPath string) error
 	Create(path string) (*sftp.File, error)
+	Open(path string) (*sftp.File, error)
 }
 
 type SFTPFileInfo interface {
@@ -172,7 +173,7 @@ func (f *FileManagerService) CreateDirectory(path string) error {
 	return nil
 }
 
-func (f *FileManagerService) DeleteFile(path string) error {
+func (f *FileManagerService) DeleteDirectory(path string) error {
 	err := f.withSFTPClient(func(client SFTPClient) error {
 		if err := client.Remove(path); err != nil {
 			return fmt.Errorf("failed to delete file %s: %w", path, err)
@@ -218,6 +219,109 @@ func (f *FileManagerService) UploadFile(file io.Reader, path string, filename st
 		defer out.Close()
 		if _, err := io.Copy(out, file); err != nil {
 			return fmt.Errorf("failed to write file content: %w", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *FileManagerService) CopyDirectory(fromPath string, toPath string) error {
+	f.logger.Log(logger.Info, "copying directory", fmt.Sprintf("from %s to %s", fromPath, toPath))
+
+	err := f.withSFTPClient(func(client SFTPClient) error {
+		sourceInfo, err := client.Stat(fromPath)
+		if err != nil {
+			return fmt.Errorf("source path %s does not exist: %w", fromPath, err)
+		}
+
+		if !sourceInfo.IsDir() {
+			return f.copyFile(client, fromPath, toPath)
+		}
+
+		if err := client.MkdirAll(toPath); err != nil {
+			return fmt.Errorf("failed to create target directory %s: %w", toPath, err)
+		}
+
+		files, err := client.ReadDir(fromPath)
+		if err != nil {
+			return fmt.Errorf("failed to read source directory %s: %w", fromPath, err)
+		}
+
+		for _, file := range files {
+			sourcePath := filepath.Join(fromPath, file.Name())
+			targetPath := filepath.Join(toPath, file.Name())
+
+			if file.IsDir() {
+				if err := f.CopyDirectory(sourcePath, targetPath); err != nil {
+					return fmt.Errorf("failed to copy directory %s: %w", sourcePath, err)
+				}
+			} else {
+				if err := f.copyFile(client, sourcePath, targetPath); err != nil {
+					return fmt.Errorf("failed to copy file %s: %w", sourcePath, err)
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("copy operation failed: %w", err)
+	}
+
+	return nil
+}
+
+func (f *FileManagerService) copyFile(client SFTPClient, sourcePath, targetPath string) error {
+	sourceFile, err := client.Open(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to open source file %s: %w", sourcePath, err)
+	}
+	defer sourceFile.Close()
+
+	targetFile, err := client.Create(targetPath)
+	if err != nil {
+		return fmt.Errorf("failed to create target file %s: %w", targetPath, err)
+	}
+	defer targetFile.Close()
+
+	if _, err := io.Copy(targetFile, sourceFile); err != nil {
+		return fmt.Errorf("failed to copy file content from %s to %s: %w", sourcePath, targetPath, err)
+	}
+
+	return nil
+}
+
+func (f *FileManagerService) DeleteFile(path string) error {
+	f.logger.Log(logger.Info, "deleting file/directory", path)
+
+	err := f.withSFTPClient(func(client SFTPClient) error {
+		info, err := client.Stat(path)
+		if err != nil {
+			return fmt.Errorf("failed to stat %s: %w", path, err)
+		}
+
+		if info.IsDir() {
+			files, err := client.ReadDir(path)
+			if err != nil {
+				return fmt.Errorf("failed to read directory %s: %w", path, err)
+			}
+
+			for _, file := range files {
+				filePath := filepath.Join(path, file.Name())
+				if err := f.DeleteFile(filePath); err != nil {
+					return err
+				}
+			}
+		}
+
+		if err := client.Remove(path); err != nil {
+			return fmt.Errorf("failed to delete %s: %w", path, err)
 		}
 
 		return nil

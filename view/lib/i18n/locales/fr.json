@@ -25,7 +25,16 @@
       "errors": {
         "loginFailed": "Échec de la connexion",
         "invalidCredentials": "Email ou mot de passe invalide",
-        "requiredFields": "L'email et le mot de passe sont requis"
+        "requiredFields": "L'email et le mot de passe sont requis",
+        "2faFailed": "Code 2FA invalide"
+      },
+      "2fa": {
+        "title": "Authentification à deux facteurs",
+        "description": "Veuillez entrer le code de vérification depuis votre application d'authentification",
+        "enterCode": "Code de vérification",
+        "codePlaceholder": "Entrez le code à 6 chiffres",
+        "verifyButton": "Vérifier",
+        "verifying": "Vérification en cours..."
       }
     },
     "register": "S'inscrire",
@@ -83,6 +92,18 @@
         "title": "Préférences de Langue",
         "description": "Choisissez votre langue préférée pour l'application",
         "select": "Sélectionner la langue"
+      },
+      "font": "Police",
+      "fontOptions": {
+        "geist": "Geist",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "montserrat": "Montserrat",
+        "spaceGrotesk": "Space Grotesk",
+        "outfit": "Outfit",
+        "jakarta": "Plus Jakarta Sans",
+        "system": "Système"
       }
     },
     "account": {
@@ -137,6 +158,23 @@
             "description": "Vérifiez votre boîte de réception pour trouver le lien de réinitialisation"
           }
         }
+      },
+      "2fa": {
+        "title": "Authentification à deux facteurs",
+        "description": "Ajoutez une couche de sécurité supplémentaire à votre compte",
+        "setupButton": "Configurer la 2FA",
+        "verifyButton": "Vérifier",
+        "enterCode": "Entrez le code de vérification",
+        "codePlaceholder": "Entrez le code à 6 chiffres",
+        "setupSuccess": "Configuration 2FA réussie",
+        "setupError": "Échec de la configuration 2FA",
+        "verifySuccess": "Vérification 2FA réussie",
+        "verifyError": "Code de vérification invalide",
+        "enabledTitle": "2FA est activée",
+        "enabledDescription": "Votre compte est protégé par l'authentification à deux facteurs",
+        "disableButton": "Désactiver 2FA",
+        "disableSuccess": "2FA a été désactivée",
+        "disableError": "Échec de la désactivation de 2FA"
       }
     },
     "domains": {
@@ -212,7 +250,7 @@
         "title": "Notifications",
         "description": "Gérez vos préférences et canaux de notification",
         "accessDenied": {
-          "title": "Accès Refusé",
+          "title": "Accès refusé",
           "description": "Vous n'avez pas la permission de voir les paramètres de notification"
         },
         "tabs": {
@@ -222,54 +260,94 @@
         "permissions": {
           "update": "Vous n'avez pas la permission de mettre à jour les paramètres de notification",
           "create": "Vous n'avez pas la permission de créer les paramètres de notification"
+        },
+        "messages": {
+          "emailConfigSaved": "Configuration de messagerie enregistrée avec succès",
+          "emailConfigFailed": "Échec de l'enregistrement de la configuration de messagerie",
+          "webhookConfigSaved": "Configuration du webhook enregistrée avec succès",
+          "webhookConfigUpdated": "Configuration du webhook mise à jour avec succès",
+          "webhookConfigDeleted": "Configuration du webhook supprimée avec succès",
+          "webhookConfigFailed": "Échec de l'enregistrement de la configuration du webhook",
+          "preferencesUpdated": "Préférences de notification mises à jour avec succès",
+          "preferencesFailed": "Échec de la mise à jour des préférences de notification"
         }
       },
       "channels": {
         "email": {
           "title": "E-mail",
-          "description": "Configurer les paramètres SMTP pour envoyer des notifications par e-mail",
+          "description": "Configurez les paramètres SMTP pour envoyer des notifications par e-mail",
           "fields": {
-            "smtpServer": {
+            "smtp_host": {
               "label": "Serveur SMTP",
               "placeholder": "smtp.exemple.com"
             },
-            "port": {
+            "smtp_port": {
               "label": "Port",
               "placeholder": "587"
             },
-            "username": {
+            "smtp_username": {
               "label": "Nom d'utilisateur",
-              "placeholder": "votre-email@exemple.com"
+              "placeholder": "utilisateur@exemple.com"
             },
-            "password": {
+            "smtp_password": {
               "label": "Mot de passe",
-              "placeholder": "Entrez votre mot de passe SMTP"
+              "placeholder": "••••••••"
             },
-            "fromEmail": {
+            "smtp_from_email": {
               "label": "E-mail d'expédition",
               "placeholder": "notifications@exemple.com"
             },
-            "fromName": {
+            "smtp_from_name": {
               "label": "Nom d'expédition",
-              "placeholder": "Nom de votre Organisation"
+              "placeholder": "Système de Notifications"
             }
           },
           "buttons": {
-            "save": "Enregistrer"
+            "save": "Enregistrer la configuration"
+          }
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Configurez les notifications Slack",
+          "fields": {
+            "webhook_secret": {
+              "label": "Secret du webhook",
+              "placeholder": "Entrez votre secret de webhook Slack"
+            },
+            "channel_id": {
+              "label": "ID du canal",
+              "placeholder": "Entrez l'ID de votre canal Slack"
+            }
+          },
+          "buttons": {
+            "save": "Enregistrer la configuration"
+          }
+        },
+        "discord": {
+          "title": "Discord",
+          "description": "Configurez le webhook Discord pour envoyer des notifications à votre canal Discord",
+          "fields": {
+            "webhook_url": {
+              "label": "URL du webhook",
+              "placeholder": "https://discord.com/api/webhooks/..."
+            }
+          },
+          "buttons": {
+            "save": "Enregistrer la configuration"
           }
         }
       },
       "preferences": {
         "activity": {
-          "title": "Notifications d'Activité",
+          "title": "Notifications d'activité",
           "description": "Notifications concernant l'activité dans votre équipe"
         },
         "security": {
-          "title": "Notifications de Sécurité",
+          "title": "Notifications de sécurité",
           "description": "Alertes importantes concernant les applications déployées et les erreurs"
         },
         "updates": {
-          "title": "Mises à Jour et Marketing",
+          "title": "Mises à jour et marketing",
           "description": "Restez informé de nos produits et services"
         }
       }
@@ -423,6 +501,18 @@
           "creating": "Création en cours..."
         }
       }
+    },
+    "2fa": {
+      "title": "Authentification à Deux Facteurs",
+      "description": "Ajoutez une couche supplémentaire de sécurité à votre compte",
+      "setupButton": "Configurer 2FA",
+      "setupSuccess": "Configuration 2FA initiée avec succès",
+      "setupError": "Échec de la configuration 2FA",
+      "enterCode": "Entrez le code de vérification",
+      "codePlaceholder": "Entrez le code à 6 chiffres",
+      "verifyButton": "Vérifier",
+      "verifySuccess": "Vérification 2FA réussie",
+      "verifyError": "Code de vérification invalide"
     }
   },
   "languages": {
@@ -432,8 +522,8 @@
     "kn": "Kannada"
   },
   "dashboard": {
-    "title": "Tableau de Bord",
-    "description": "Surveillez votre serveur",
+    "title": "Tableau de bord",
+    "description": "Surveillez vos applications et ressources système",
     "containers": {
       "title": "Conteneurs",
       "table": {
@@ -441,7 +531,7 @@
           "id": "ID",
           "name": "Nom",
           "image": "Image",
-          "status": "État",
+          "status": "Statut",
           "ports": "Ports",
           "created": "Créé"
         },
@@ -450,13 +540,13 @@
       }
     },
     "disk": {
-      "title": "Utilisation du Disque",
+      "title": "Utilisation du disque",
       "used": "{value} Go utilisé",
       "total": "{value} Go total",
       "percentage": "{value}%",
       "table": {
         "headers": {
-          "mount": "Point de Montage",
+          "mount": "Point de montage",
           "size": "Taille",
           "used": "Utilisé",
           "percentage": "%"
@@ -464,7 +554,7 @@
       }
     },
     "load": {
-      "title": "Charge Moyenne",
+      "title": "Charge moyenne",
       "labels": {
         "oneMin": "1 minute",
         "fiveMin": "5 minutes",
@@ -472,7 +562,7 @@
       }
     },
     "memory": {
-      "title": "Utilisation de la Mémoire",
+      "title": "Utilisation de la mémoire",
       "used": "{value} Mo utilisé",
       "total": "{value} Mo total",
       "percentage": "{value}%"
@@ -484,11 +574,15 @@
       "reconnectFailed": "Échec de la reconnexion. Veuillez réessayer plus tard."
     },
     "system": {
-      "title": "Informations Système",
+      "title": "Informations système",
       "osType": "Type d'OS",
       "cpu": "CPU",
-      "uptime": "Temps de Fonctionnement",
-      "lastUpdated": "Dernière Mise à Jour"
+      "uptime": "Temps de fonctionnement",
+      "lastUpdated": "Dernière mise à jour"
+    },
+    "smtpBanner": {
+      "message": "Configurez les paramètres SMTP pour recevoir des notifications",
+      "configure": "Configurer"
     }
   },
   "fileManager": {
@@ -550,7 +644,14 @@
         "pasteHere": "Coller ici"
       }
     },
-    "noFiles": "Aucun fichier trouvé"
+    "noFiles": "Aucun fichier trouvé",
+    "noPermissionCreate": "Vous n'avez pas la permission de créer des fichiers",
+    "noPermissionUpdate": "Vous n'avez pas la permission de mettre à jour des fichiers",
+    "copiedToClipboard": "Copié dans le presse-papiers",
+    "copySuccess": "Fichier copié avec succès",
+    "errors": {
+      "fileExists": "Le fichier existe déjà"
+    }
   },
   "selfHost": {
     "deployment": {
@@ -799,7 +900,10 @@
         "domain": {
           "label": "Domaine",
           "description": "Domaine sur lequel votre application sera disponible",
-          "placeholder": "Domaine"
+          "placeholder": "Domaine",
+          "minLength": "Le nom de domaine doit contenir au moins 3 caractères.",
+          "invalidFormat": "Veuillez entrer un nom de domaine valide (exemple: exemple.com).",
+          "notAllowed": "Ce domaine n'est pas autorisé. Vous pouvez l'ajouter dans la section Paramètres > Domaines pour le rendre disponible."
         },
         "buildPack": {
           "label": "Pack de Construction",
@@ -850,7 +954,8 @@
         },
         "domain": {
           "minLength": "Le nom de domaine doit contenir au moins 3 caractères.",
-          "invalidFormat": "Le nom de domaine doit être un nom de domaine valide."
+          "invalidFormat": "Le nom de domaine doit être un nom de domaine valide.",
+          "notAllowed": "Ce domaine n'est pas autorisé. Vous pouvez l'ajouter dans la section Paramètres > Domaines pour le rendre disponible."
         },
         "repository": {
           "minLength": "Le nom du dépôt doit contenir au moins 3 caractères.",
@@ -927,7 +1032,8 @@
     "general": "Général",
     "notifications": "Notifications",
     "team": "Équipe",
-    "domains": "Domaines"
+    "domains": "Domaines",
+    "update": "Mettre à jour"
   },
   "layout": {
     "breadcrumbs": {
@@ -951,6 +1057,22 @@
       "help": "Aide",
       "reportIssue": "Signaler un problème",
       "logout": "Se déconnecter"
+    }
+  },
+  "toasts": {
+    "errors": {
+      "realtimeMonitor": "Erreur de connexion au service de surveillance en temps réel",
+      "setFileToCopy": "Erreur lors de la définition du fichier à copier",
+      "moveFile": "Erreur lors du déplacement du fichier",
+      "copyFile": "Erreur lors de la copie du fichier",
+      "renameFile": "Erreur lors du renommage du fichier",
+      "startRenaming": "Erreur lors du démarrage du renommage",
+      "navigateToFile": "Erreur lors de la navigation vers le fichier",
+      "createNewFolder": "Erreur lors de la création du nouveau dossier",
+      "uploadFile": "Erreur lors du téléchargement du fichier",
+      "deleteFile": "Erreur lors de la suppression du fichier",
+      "setEmail": "Erreur lors de la définition de l'email",
+      "setPassword": "Erreur lors de la définition du mot de passe"
     }
   }
 }

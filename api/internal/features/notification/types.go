@@ -9,8 +9,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/discord"
+	"github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/email"
+	"github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/preferences"
+	slackhelper "github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/slack"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
-	"github.com/slack-go/slack"
+	slackgo "github.com/slack-go/slack"
 	"github.com/uptrace/bun"
 )
 
@@ -30,20 +34,12 @@ type Email struct {
 }
 
 type Slack struct {
-	SlackClient *slack.Client
+	SlackClient *slackgo.Client
 	ChannelID   string
 }
 
 type Discord struct {
 	WebhookUrl string `json:"webhook_url"`
-}
-
-func NewNotificationChannels() *NotificationChannels {
-	return &NotificationChannels{
-		Email:   &Email{},
-		Slack:   &Slack{},
-		Discord: &Discord{},
-	}
 }
 
 type NotificationBaseData struct {
@@ -65,11 +61,15 @@ type NotificationOrganizationData struct {
 
 type NotificationManager struct {
 	sync.RWMutex
-	Channels    *NotificationChannels
-	PayloadChan chan NotificationPayload
-	ctx         context.Context
-	cancel      context.CancelFunc
-	db          *bun.DB
+	Channels       *NotificationChannels
+	PayloadChan    chan NotificationPayload
+	ctx            context.Context
+	cancel         context.CancelFunc
+	db             *bun.DB
+	prefManager    *preferences.PreferenceManager
+	emailManager   *email.EmailManager
+	slackManager   *slackhelper.SlackManager
+	discordManager *discord.DiscordManager
 }
 
 type NotificationPasswordResetData struct {
@@ -238,15 +238,29 @@ type PreferenceItem struct {
 	Enabled      bool      `json:"enabled"`
 }
 
-type EmailData struct {
-	Subject     string      `json:"subject"`
-	Template    string      `json:"template"`
-	Data        interface{} `json:"data"`
-	ContentType string      `json:"content_type"`
-	Category    string      `json:"category"`
-	Type        string      `json:"type"`
-}
-
 type ResetEmailData struct {
 	ResetURL string `json:"reset_url"`
+}
+
+type CreateWebhookConfigRequest struct {
+	Type          string  `json:"type" validate:"required,oneof=slack discord"`
+	WebhookURL    string  `json:"webhook_url"`
+	WebhookSecret *string `json:"webhook_secret,omitempty"`
+	ChannelID     string  `json:"channel_id,omitempty"`
+}
+
+type UpdateWebhookConfigRequest struct {
+	Type          string  `json:"type" validate:"required,oneof=slack discord"`
+	WebhookURL    *string `json:"webhook_url,omitempty"`
+	WebhookSecret *string `json:"webhook_secret,omitempty"`
+	ChannelID     *string `json:"channel_id,omitempty"`
+	IsActive      *bool   `json:"is_active,omitempty"`
+}
+
+type DeleteWebhookConfigRequest struct {
+	Type string `json:"type" validate:"required,oneof=slack discord"`
+}
+
+type GetWebhookConfigRequest struct {
+	Type string `json:"type" validate:"required,oneof=slack discord"`
 }

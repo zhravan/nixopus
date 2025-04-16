@@ -13,16 +13,21 @@ import {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
-  refreshToken: string | null;
+  token: string | undefined;
+  refreshToken: string | undefined;
   isAuthenticated: boolean;
   isInitialized: boolean;
+  isLoading: boolean;
+  twoFactor: {
+    isRequired: boolean;
+    tempToken: string | undefined;
+  };
 }
 
 interface AuthPayload {
   user: User | null;
-  token: string | null;
-  refreshToken: string | null;
+  token: string | undefined;
+  refreshToken: string | undefined;
 }
 
 export const initializeAuth = createAsyncThunk<AuthPayload | null>(
@@ -99,10 +104,15 @@ export const initializeAuth = createAsyncThunk<AuthPayload | null>(
 
 const initialState: AuthState = {
   user: null,
-  token: null,
-  refreshToken: null,
+  token: undefined,
+  refreshToken: undefined,
   isAuthenticated: false,
-  isInitialized: false
+  isInitialized: false,
+  isLoading: false,
+  twoFactor: {
+    isRequired: false,
+    tempToken: undefined
+  }
 };
 
 export const authSlice = createSlice({
@@ -116,13 +126,27 @@ export const authSlice = createSlice({
         token: string;
         refreshToken?: string;
         expiresIn?: number;
+        tempToken?: string;
       }>
     ) => {
-      const { user, token, refreshToken, expiresIn } = action.payload;
+      const { user, token, refreshToken, expiresIn, tempToken } = action.payload;
 
-      if (token) {
+      if (tempToken) {
+        state.twoFactor.tempToken = tempToken;
+        state.twoFactor.isRequired = true;
+        state.token = tempToken;
+        state.isAuthenticated = false;
+
+        setAuthTokens({
+          access_token: tempToken,
+          refresh_token: undefined,
+          expires_in: expiresIn
+        });
+      } else if (token) {
         state.token = token;
         state.isAuthenticated = true;
+        state.twoFactor.isRequired = false;
+        state.twoFactor.tempToken = undefined;
 
         setAuthTokens({
           access_token: token,
@@ -139,71 +163,139 @@ export const authSlice = createSlice({
     },
     logout: (state) => {
       state.user = null;
-      state.token = null;
-      state.refreshToken = null;
+      state.token = undefined;
+      state.refreshToken = undefined;
       state.isAuthenticated = false;
+      state.twoFactor.isRequired = false;
+      state.twoFactor.tempToken = undefined;
       clearAuthTokens();
+    },
+    clearTwoFactor: (state) => {
+      state.twoFactor.isRequired = false;
+      state.twoFactor.tempToken = undefined;
+    },
+    setTwoFactorEnabled: (state, action: PayloadAction<boolean>) => {
+      if (state.user) {
+        state.user.two_factor_enabled = action.payload;
+      }
     }
   },
   extraReducers: (builder) => {
     builder
+      .addCase(initializeAuth.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(initializeAuth.fulfilled, (state, action) => {
         if (action.payload) {
           state.user = action.payload.user;
           state.token = action.payload.token;
           state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
+          state.twoFactor.isRequired = false;
+          state.twoFactor.tempToken = undefined;
         }
         state.isInitialized = true;
+        state.isLoading = false;
       })
       .addCase(initializeAuth.rejected, (state) => {
         state.isInitialized = true;
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.loginUser.matchPending, (state) => {
+        state.isLoading = true;
       })
       .addMatcher(authApi.endpoints.loginUser.matchFulfilled, (state, { payload }) => {
         console.log('Login successful, payload:', payload);
-        if (payload?.access_token) {
+        if (payload?.temp_token) {
+          console.log('2FA required, setting temp token');
+          state.twoFactor.isRequired = true;
+          state.twoFactor.tempToken = payload.temp_token;
+          state.token = payload.temp_token;
+          state.isAuthenticated = false;
+
+          setAuthTokens({
+            access_token: payload.temp_token,
+            refresh_token: undefined,
+            expires_in: payload.expires_in
+          });
+        } else if (payload?.access_token) {
           console.log('Setting auth state with access token');
           state.user = payload.user;
           state.token = payload.access_token;
-          state.refreshToken = payload.refresh_token || null;
+          state.refreshToken = payload.refresh_token || undefined;
           state.isAuthenticated = true;
           state.isInitialized = true;
+          state.twoFactor.isRequired = false;
+          state.twoFactor.tempToken = undefined;
 
           setAuthTokens({
             access_token: payload.access_token,
-            refresh_token: payload.refresh_token,
+            refresh_token: payload.refresh_token || undefined,
             expires_in: payload.expires_in
           });
-          console.log('Auth state updated:', {
-            hasUser: !!state.user,
-            hasToken: !!state.token,
-            hasRefreshToken: !!state.refreshToken,
-            isAuthenticated: state.isAuthenticated,
-            isInitialized: state.isInitialized
-          });
         } else {
-          console.error('Login payload missing access token:', payload);
+          console.error('Login payload missing required tokens:', payload);
         }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.loginUser.matchRejected, (state) => {
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.twoFactorLogin.matchPending, (state) => {
+        state.isLoading = true;
+      })
+      .addMatcher(authApi.endpoints.twoFactorLogin.matchFulfilled, (state, { payload }) => {
+        if (payload?.access_token) {
+          state.user = payload.user;
+          state.token = payload.access_token;
+          state.refreshToken = payload.refresh_token || undefined;
+          state.isAuthenticated = true;
+          state.isInitialized = true;
+          state.twoFactor.isRequired = false;
+          state.twoFactor.tempToken = undefined;
+
+          setAuthTokens({
+            access_token: payload.access_token,
+            refresh_token: payload.refresh_token || undefined,
+            expires_in: payload.expires_in
+          });
+        }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.twoFactorLogin.matchRejected, (state) => {
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.refreshToken.matchPending, (state) => {
+        state.isLoading = true;
       })
       .addMatcher(authApi.endpoints.refreshToken.matchFulfilled, (state, { payload }) => {
         if (payload?.access_token) {
           state.token = payload.access_token;
-
-          if (payload.refresh_token) {
-            state.refreshToken = payload.refresh_token;
-          }
+          state.refreshToken = payload.refresh_token || undefined;
+          state.isAuthenticated = true;
 
           setAuthTokens({
             access_token: payload.access_token,
-            refresh_token: payload.refresh_token,
+            refresh_token: payload.refresh_token || undefined,
             expires_in: payload.expires_in
           });
         }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.refreshToken.matchRejected, (state) => {
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.getUserDetails.matchPending, (state) => {
+        state.isLoading = true;
       })
       .addMatcher(authApi.endpoints.getUserDetails.matchFulfilled, (state, { payload }) => {
         if (payload) {
           state.user = payload;
         }
+        state.isLoading = false;
+      })
+      .addMatcher(authApi.endpoints.getUserDetails.matchRejected, (state) => {
+        state.isLoading = false;
       })
       .addMatcher(userApi.endpoints.updateUserName.matchFulfilled, (state, { payload }) => {
         if (payload && state.user) {
@@ -213,5 +305,5 @@ export const authSlice = createSlice({
   }
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, clearTwoFactor, setTwoFactorEnabled } = authSlice.actions;
 export default authSlice.reducer;

@@ -30,7 +30,6 @@ interface NavMainProps {
 }
 
 export function NavMain({ items, onItemClick }: NavMainProps) {
-  const pathname = usePathname();
   const router = useRouter();
   const { isItemCollapsed, toggleItem } = useCollapsibleState();
 
@@ -41,7 +40,6 @@ export function NavMain({ items, onItemClick }: NavMainProps) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -53,7 +51,11 @@ export function NavMain({ items, onItemClick }: NavMainProps) {
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title} onClick={() => handleClick(item.url)}>
+                <SidebarMenuButton
+                  className="cursor-pointer"
+                  tooltip={item.title}
+                  onClick={() => handleClick(item.url)}
+                >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                   {(item.items?.length || 0) > 0 && (

@@ -104,10 +104,16 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 				return "", err
 			}
 		} else {
-			s.logger.Log(logger.Info, "Pulling repository", c.UserID)
-			err = s.gitClient.Pull(authenticatedURL, clonePath)
+			if err := s.handleGitPull(authenticatedURL, clonePath, c.UserID); err != nil {
+				return "", err
+			}
+		}
+
+		if c.Branch != "" {
+			s.logger.Log(logger.Info, fmt.Sprintf("Switching to branch %s", c.Branch), c.UserID)
+			err = s.gitClient.SwitchBranch(clonePath, c.Branch)
 			if err != nil {
-				s.logger.Log(logger.Error, fmt.Sprintf("Failed to pull repository: %s", err.Error()), "")
+				s.logger.Log(logger.Error, fmt.Sprintf("Failed to switch to branch %s: %s", c.Branch, err.Error()), "")
 				return "", err
 			}
 		}
@@ -115,33 +121,4 @@ func (s *GithubConnectorService) CloneRepository(c CloneRepositoryConfig, commit
 
 	s.logger.Log(logger.Info, fmt.Sprintf("Context loaded successfully %s", repo_url), c.UserID)
 	return clonePath, nil
-}
-
-// GetRepositoryDetailsFromId retrieves the name and clone URL of a repository
-// given its ID.
-//
-// Parameters:
-//
-//	repoID - the ID of the repository to retrieve.
-//	UserID - the ID of the user whose repositories to search.
-//
-// Returns:
-//
-//	string - the name of the repository if found, otherwise an empty string.
-//	string - the clone URL of the repository if found, otherwise an empty string.
-//	error - an error if the repository is not found or if the method fails.
-func (s *GithubConnectorService) GetRepositoryDetailsFromId(repoID uint64, UserID string) (string, string, error) {
-	repositories, err := s.GetGithubRepositories(UserID)
-
-	if err != nil {
-		return "", "", err
-	}
-
-	for _, repository := range repositories {
-		if repository.ID == repoID {
-			return repository.Name, repository.CloneURL, nil
-		}
-	}
-
-	return "", "", fmt.Errorf("repository not found")
 }

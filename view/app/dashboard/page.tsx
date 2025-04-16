@@ -8,10 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package } from 'lucide-react';
 import DiskUsageCard from './components/system/disk-usage';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAppSelector } from '@/redux/hooks';
+import { useGetSMTPConfigurationsQuery } from '@/redux/services/settings/notificationApi';
+import { SMTPBanner } from './components/smtp-banner';
 
 function DashboardPage() {
   const { t } = useTranslation();
   const { containersData, systemStats } = useMonitor();
+  const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
+  const { data: smtpConfig } = useGetSMTPConfigurationsQuery(activeOrganization?.id, {
+    skip: !activeOrganization
+  });
 
   return (
     <div className="container mx-auto py-6 space-y-8 max-w-6xl">
@@ -24,6 +31,8 @@ function DashboardPage() {
             </p>
           </div>
         </div>
+
+        {!smtpConfig && <SMTPBanner />}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

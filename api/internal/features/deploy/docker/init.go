@@ -41,6 +41,11 @@ type DockerRepository interface {
 	ComposeUp(composeFilePath string, envVars map[string]string) error
 	ComposeDown(composeFilePath string) error
 	ComposeBuild(composeFilePath string, envVars map[string]string) error
+	RemoveImage(imageName string, opts image.RemoveOptions) error
+}
+
+type DockerClient struct {
+	Client *client.Client
 }
 
 // NewDockerService creates a new instance of DockerService using the default docker client.
@@ -63,9 +68,25 @@ func NewDockerServiceWithClient(cli *client.Client, ctx context.Context, logger 
 // NewDockerClient creates a new docker client with the environment variables and
 // the correct API version negotiation.
 func NewDockerClient() *client.Client {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := client.NewClientWithOpts(
+		client.WithHost("unix:///var/run/docker.sock"),
+		client.WithAPIVersionNegotiation(),
+	)
 	if err != nil {
-		panic(err)
+		cli, err = client.NewClientWithOpts(
+			client.FromEnv,
+			client.WithAPIVersionNegotiation(),
+			client.WithTLSClientConfigFromEnv(),
+		)
+		if err != nil {
+			cli, err = client.NewClientWithOpts(
+				client.FromEnv,
+				client.WithAPIVersionNegotiation(),
+			)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 
 	return cli
@@ -275,4 +296,13 @@ func (s *DockerService) ComposeBuild(composeFilePath string, envVars map[string]
 		return fmt.Errorf("failed to build docker compose services: %v, output: %s", err, output)
 	}
 	return nil
+}
+
+func (s *DockerService) RemoveImage(imageName string, opts image.RemoveOptions) error {
+	ctx := context.Background()
+	_, err := s.Cli.ImageRemove(ctx, imageName, image.RemoveOptions{
+		Force:         opts.Force,
+		PruneChildren: true,
+	})
+	return err
 }

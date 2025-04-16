@@ -59,6 +59,21 @@ type VerificationToken struct {
 	CreatedAt time.Time `bun:"created_at,type:timestamp,notnull,default:now()"`
 }
 
+type TwoFactorSetupResponse struct {
+	Secret string `json:"secret"`
+	QRCode string `json:"qr_code"`
+}
+
+type TwoFactorVerifyRequest struct {
+	Code string `json:"code"`
+}
+
+type TwoFactorLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Code     string `json:"code"`
+}
+
 var (
 	ErrInvalidUser                                = errors.New("invalid user")
 	ErrEmptyPassword                              = errors.New("password cannot be empty")
@@ -102,4 +117,8 @@ var (
 	ErrFailedToAddUserToOrganization              = errors.New("failed to add user to organization")
 	ErrFailedToGetOrganization                    = errors.New("failed to get organization")
 	ErrInvalidAccess                              = errors.New("invalid access")
+	ErrFailedToSetup2FA                           = errors.New("failed to setup two-factor authentication")
+	ErrFailedToEnable2FA                          = errors.New("failed to enable two-factor authentication")
+	ErrFailedToDisable2FA                         = errors.New("failed to disable two-factor authentication")
+	ErrInvalid2FACode                             = errors.New("invalid two-factor authentication code")
 )

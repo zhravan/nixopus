@@ -1,6 +1,6 @@
 'use client';
 import { getToken } from '@/lib/auth';
-import { WEBSOCKET_URL } from '@/redux/conf';
+import { getWebsocketUrl } from '@/redux/conf';
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 
 type WebSocketContextValue = {
@@ -26,7 +26,7 @@ interface WebSocketProviderProps {
 
 export const WebSocketProvider = ({
   children,
-  url = WEBSOCKET_URL + '?token=' + getToken(),
+  url,
   reconnectInterval = 3000,
   maxReconnectAttempts = 5
 }: WebSocketProviderProps) => {
@@ -37,7 +37,7 @@ export const WebSocketProvider = ({
   const reconnectAttemptsRef = useRef(0);
   const isConnectingRef = useRef(false);
 
-  const connectWebSocket = () => {
+  const connectWebSocket = async () => {
     if (isConnectingRef.current) {
       console.log('Connection already in progress, skipping');
       return;
@@ -71,7 +71,8 @@ export const WebSocketProvider = ({
     console.log('Initiating WebSocket connection...');
 
     try {
-      const socket = new WebSocket(url);
+      const wsUrl = url || (await getWebsocketUrl()) + '?token=' + getToken();
+      const socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
         console.log('WebSocket connection established');
@@ -134,7 +135,7 @@ export const WebSocketProvider = ({
     }
 
     connectWebSocket();
-  }, [url]);
+  }, []);
 
   useEffect(() => {
     if (!wsRef.current) {

@@ -6,7 +6,11 @@ export enum AUTHURLS {
   RESET_PASSWORD = 'v1/auth/reset-password',
   SEND_VERIFICATION = 'v1/auth/send-verification-email',
   VERIFY_EMAIL = 'v1/auth/verify-email',
-  LOGOUT = 'v1/auth/logout'
+  LOGOUT = 'v1/auth/logout',
+  SETUP_TWO_FACTOR = 'v1/auth/setup-2fa',
+  VERIFY_TWO_FACTOR = 'v1/auth/verify-2fa',
+  DISABLE_TWO_FACTOR = 'v1/auth/disable-2fa',
+  TWO_FACTOR_LOGIN = 'v1/auth/2fa-login'
 }
 
 export enum USERURLS {
@@ -29,7 +33,12 @@ export enum USER_NOTIFICATION_SETTINGS {
   DELETE_SMTP = 'v1/notification/smtp',
 
   GET_PREFERENCES = 'v1/notification/preferences',
-  UPDATE_PREFERENCES = 'v1/notification/preferences'
+  UPDATE_PREFERENCES = 'v1/notification/preferences',
+
+  GET_WEBHOOK = 'v1/notification/webhook',
+  CREATE_WEBHOOK = 'v1/notification/webhook',
+  UPDATE_WEBHOOK = 'v1/notification/webhook',
+  DELETE_WEBHOOK = 'v1/notification/webhook'
 }
 
 export enum DOMAIN_SETTINGS {
@@ -57,7 +66,10 @@ export enum DEPLOY {
   DEPLOYMENT = 'v1/deploy/application/deployments',
   DELETE_APPLICATION = 'v1/deploy/application',
   ROLLBACK_APPLICATION = 'v1/deploy/application/rollback',
-  RESTART_APPLICATION = 'v1/deploy/application/restart'
+  RESTART_APPLICATION = 'v1/deploy/application/restart',
+  GET_APPLICATION_LOGS = 'v1/deploy/application/logs/{application_id}',
+  GET_DEPLOYMENT_LOGS = 'v1/deploy/application/deployments/{deployment_id}/logs',
+  GET_APPLICATION_DEPLOYMENTS = 'v1/deploy/application/deployments'
 }
 
 export enum SOCKET_EVENTS {
@@ -71,12 +83,10 @@ export enum SOCKET_ACTIONS {
 export enum FILEMANAGERURLS {
   LIST_FILES_AT_PATH = 'v1/file-manager',
   CREATE_DIRECTORY = 'v1/file-manager/create-directory',
-  DELETE_FILE = 'v1/file-manager',
-  CREATE_FILE = 'v1/files',
-  DELETE_DIRECTORY = 'v1/files/directories',
+  DELETE_DIRECTORY = 'v1/file-manager/delete-directory',
   MOVE_FOLDER_FILES_RECURSIVELY_OR_RENAME = 'v1/file-manager/move-directory',
-  COPY_FOLDER_FILES_RECURSIVELY = 'v1/files/copy',
-  CALCULATE_DIRECTORY_SIZE = 'v1/files/directories/size',
+  COPY_FOLDER_FILES_RECURSIVELY = 'v1/file-manager/copy-directory',
+  CALCULATE_DIRECTORY_SIZE = 'v1/file-manager/directories/size',
   UPLOAD_FILE = 'v1/file-manager/upload'
 }
 

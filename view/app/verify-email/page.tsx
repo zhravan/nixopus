@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useVerifyEmailMutation } from '@/redux/services/users/authApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { toast } from 'sonner';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -15,16 +16,20 @@ export default function VerifyEmailPage() {
   const [verifyEmail] = useVerifyEmailMutation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState(t('auth.verifyEmail.loading'));
+  const isVerifying = useRef(false);
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
       setMessage(t('auth.verifyEmail.error.invalidLink'));
       return;
     }
 
+    if (isVerifying.current) return;
+
     const verify = async () => {
+      isVerifying.current = true;
       try {
         await verifyEmail({ token }).unwrap();
         setStatus('success');
@@ -32,11 +37,24 @@ export default function VerifyEmailPage() {
       } catch (error) {
         setStatus('error');
         setMessage(t('auth.verifyEmail.error.message'));
+      } finally {
+        isVerifying.current = false;
       }
     };
 
     verify();
-  }, [searchParams, verifyEmail, t]);
+
+    return () => {
+      isVerifying.current = false;
+    };
+  }, [token]);
+
+  useEffect(() => {
+    if (status === 'success') {
+      router.push('/dashboard');
+      toast.success(t('auth.verifyEmail.success.message'));
+    }
+  }, [status]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -48,11 +66,6 @@ export default function VerifyEmailPage() {
         <CardContent className="flex flex-col items-center gap-4">
           {status === 'loading' && <Loader2 className="h-8 w-8 animate-spin" />}
           <p className="text-center">{message}</p>
-          {status === 'success' && (
-            <Button onClick={() => router.push('/login')}>
-              {t('auth.verifyEmail.buttons.goToLogin')}
-            </Button>
-          )}
           {status === 'error' && (
             <Button variant="outline" onClick={() => router.push('/login')}>
               {t('auth.verifyEmail.buttons.backToLogin')}

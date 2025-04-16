@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -65,5 +66,54 @@ func TestUpdateDomain(t *testing.T) {
 		_, err = service.UpdateDomain("new.domain.com", user.ID.String(), nonExistentID)
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, domainTypes.ErrDomainNotFound)
+	})
+
+	t.Run("should not update domain that does not belong to server", func(t *testing.T) {
+		setup := testutils.NewTestSetup()
+		storage := &domainStorage.DomainStorage{DB: setup.DB, Ctx: setup.Ctx}
+		service := domainService.NewDomainsService(setup.Store, setup.Ctx, setup.Logger, storage)
+
+		user, org, err := setup.CreateTestUserAndOrg()
+		assert.NoError(t, err)
+
+		createReq := domainTypes.CreateDomainRequest{
+			Name:           "test." + os.Getenv("SSH_HOST"),
+			OrganizationID: org.ID,
+		}
+
+		resp, err := service.CreateDomain(createReq, user.ID.String())
+		assert.NoError(t, err)
+
+		_, err = service.UpdateDomain("example.com", user.ID.String(), resp.ID)
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, domainTypes.ErrDomainDoesNotBelongToServer)
+	})
+
+	t.Run("should update domain that belongs to server", func(t *testing.T) {
+		setup := testutils.NewTestSetup()
+		storage := &domainStorage.DomainStorage{DB: setup.DB, Ctx: setup.Ctx}
+		service := domainService.NewDomainsService(setup.Store, setup.Ctx, setup.Logger, storage)
+
+		user, org, err := setup.CreateTestUserAndOrg()
+		assert.NoError(t, err)
+
+		serverHost := os.Getenv("SSH_HOST")
+		if serverHost == "" {
+			serverHost, err = os.Hostname()
+			assert.NoError(t, err)
+		}
+
+		createReq := domainTypes.CreateDomainRequest{
+			Name:           "test1." + serverHost,
+			OrganizationID: org.ID,
+		}
+
+		resp, err := service.CreateDomain(createReq, user.ID.String())
+		assert.NoError(t, err)
+
+		newName := "test2." + serverHost
+		updated, err := service.UpdateDomain(newName, user.ID.String(), resp.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, newName, updated.Name)
 	})
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileData } from '@/redux/types/files';
-import FileContextMenu from './FileContextMenu';
+import FileContextMenu from './DropDownMenu';
 
 interface ActionsProps {
   refetch: () => void;

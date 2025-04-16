@@ -67,8 +67,13 @@ export type ApplicationLogs = {
   updated_at: string;
   log: string;
   application_deployment_id: string;
-  application_deployment?: ApplicationDeployment;
-  application?: Application;
+};
+
+export type ApplicationLogsResponse = {
+  logs: ApplicationLogs[];
+  total_count: number;
+  current_page: number;
+  total_pages: number;
 };
 
 export type Status = 'failed' | 'cloning' | 'building' | 'deploying' | 'deployed';

@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/domain/types"
+	"github.com/raghavyuva/nixopus-api/internal/features/domain/validation"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
@@ -48,6 +49,12 @@ func (s *DomainsService) UpdateDomain(newName, userID, domainID string) (*shared
 	if existing == nil {
 		s.logger.Log(logger.Error, "domain not found", domainID)
 		return nil, types.ErrDomainNotFound
+	}
+
+	validator := validation.NewValidator(s.storage)
+	if err := validator.ValidateDomainBelongsToServer(newName); err != nil {
+		s.logger.Log(logger.Error, "domain does not belong to server", fmt.Sprintf("domain_name=%s", newName))
+		return nil, err
 	}
 
 	err = txStorage.UpdateDomain(domainID, newName)

@@ -12,7 +12,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types.AuthResponse, error) {
+func (c *AuthService) Register(registrationRequest types.RegisterRequest, userTypeype string) (types.AuthResponse, error) {
 	c.logger.Log(logger.Info, "registering user", registrationRequest.Email)
 	userType := registrationRequest.Type
 	if userType == "" {
@@ -40,7 +40,7 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 		hashedPassword,
 		registrationRequest.Username,
 		"",
-		"admin",
+		userType,
 		false,
 	)
 
@@ -64,7 +64,7 @@ func (c *AuthService) Register(registrationRequest types.RegisterRequest) (types
 		return types.AuthResponse{}, types.ErrFailedToCreateToken
 	}
 
-	accessToken, err := utils.CreateToken(user.Email, time.Minute*15)
+	accessToken, err := utils.CreateToken(user.Email, time.Minute*15, user.TwoFactorEnabled, true)
 	if err != nil {
 		c.logger.Log(logger.Error, types.ErrFailedToCreateAccessToken.Error(), err.Error())
 		return types.AuthResponse{}, types.ErrFailedToCreateToken

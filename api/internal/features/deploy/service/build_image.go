@@ -31,19 +31,26 @@ func (s *DeployService) buildImageFromDockerfile(b DeployerConfig) (string, erro
 		buildContextPath = filepath.Join(b.contextPath, b.application.BasePath)
 	}
 
+	if _, err := os.Stat(buildContextPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("build context path does not exist: %s", buildContextPath)
+	}
+
 	archive, err := s.createBuildContextArchive(buildContextPath)
 	if err != nil {
 		return "", err
 	}
 
-	// Handle Dockerfile path relative to build context
 	dockerfile_path := "Dockerfile"
 	if b.application.DockerfilePath != "" {
-		// Dockerfile path should be relative to the build context
 		dockerfile_path = b.application.DockerfilePath
 		if strings.HasPrefix(dockerfile_path, "/") {
 			dockerfile_path = dockerfile_path[1:]
 		}
+	}
+
+	dockerfileFullPath := filepath.Join(buildContextPath, dockerfile_path)
+	if _, err := os.Stat(dockerfileFullPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("Dockerfile not found at path: %s", dockerfileFullPath)
 	}
 
 	s.logger.Log(logger.Info, "using dockerfile path: "+dockerfile_path, "")

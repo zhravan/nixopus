@@ -23,8 +23,17 @@
       "privacyPolicy": "Política de Privacidad",
       "errors": {
         "loginFailed": "Error al iniciar sesión",
-        "invalidCredentials": "Correo electrónico o contraseña inválidos",
-        "requiredFields": "El correo electrónico y la contraseña son requeridos"
+        "invalidCredentials": "Email o contraseña inválidos",
+        "requiredFields": "El email y la contraseña son requeridos",
+        "2faFailed": "Código 2FA inválido"
+      },
+      "2fa": {
+        "title": "Autenticación de dos factores",
+        "description": "Por favor ingrese el código de verificación desde su aplicación de autenticación",
+        "enterCode": "Código de verificación",
+        "codePlaceholder": "Ingrese el código de 6 dígitos",
+        "verifyButton": "Verificar",
+        "verifying": "Verificando..."
       }
     },
     "register": "Registrarse",
@@ -82,6 +91,18 @@
         "title": "Preferencias de Idioma",
         "description": "Elige tu idioma preferido para la aplicación",
         "select": "Seleccionar idioma"
+      },
+      "font": "Fuente",
+      "fontOptions": {
+        "geist": "Geist",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "montserrat": "Montserrat",
+        "spaceGrotesk": "Space Grotesk",
+        "outfit": "Outfit",
+        "jakarta": "Plus Jakarta Sans",
+        "system": "Sistema"
       }
     },
     "account": {
@@ -136,6 +157,23 @@
             "description": "Revisa tu bandeja de entrada para encontrar el enlace de restablecimiento"
           }
         }
+      },
+      "2fa": {
+        "title": "Autenticación de dos factores",
+        "description": "Agregue una capa adicional de seguridad a su cuenta",
+        "setupButton": "Configurar 2FA",
+        "verifyButton": "Verificar",
+        "enterCode": "Ingrese el código de verificación",
+        "codePlaceholder": "Ingrese el código de 6 dígitos",
+        "setupSuccess": "Configuración 2FA exitosa",
+        "setupError": "Error al configurar 2FA",
+        "verifySuccess": "Verificación 2FA exitosa",
+        "verifyError": "Código de verificación inválido",
+        "enabledTitle": "2FA está habilitada",
+        "enabledDescription": "Su cuenta está protegida con autenticación de dos factores",
+        "disableButton": "Desactivar 2FA",
+        "disableSuccess": "2FA ha sido desactivada",
+        "disableError": "Error al desactivar 2FA"
       }
     },
     "domains": {
@@ -209,74 +247,108 @@
     "notifications": {
       "page": {
         "title": "Notificaciones",
-        "description": "Administra tus preferencias y canales de notificación",
+        "description": "Administre sus preferencias y canales de notificación",
         "accessDenied": {
-          "title": "Acceso Denegado",
-          "description": "No tienes permiso para ver la configuración de notificaciones"
+          "title": "Acceso denegado",
+          "description": "No tiene permiso para ver la configuración de notificaciones"
         },
         "tabs": {
           "channels": "Canales",
           "preferences": "Preferencias"
         },
         "permissions": {
-          "update": "No tienes permiso para actualizar la configuración de notificaciones",
-          "create": "No tienes permiso para crear la configuración de notificaciones"
+          "update": "No tiene permiso para actualizar la configuración de notificaciones",
+          "create": "No tiene permiso para crear la configuración de notificaciones"
+        },
+        "messages": {
+          "emailConfigSaved": "Configuración de correo electrónico guardada correctamente",
+          "emailConfigFailed": "Error al guardar la configuración de correo electrónico",
+          "webhookConfigSaved": "Configuración de webhook guardada correctamente",
+          "webhookConfigUpdated": "Configuración de webhook actualizada correctamente",
+          "webhookConfigDeleted": "Configuración de webhook eliminada correctamente",
+          "webhookConfigFailed": "Error al guardar la configuración de webhook",
+          "preferencesUpdated": "Preferencias de notificación actualizadas correctamente",
+          "preferencesFailed": "Error al actualizar las preferencias de notificación"
         }
       },
       "channels": {
         "email": {
-          "title": "Correo Electrónico",
-          "description": "Configurar ajustes SMTP para enviar notificaciones por correo electrónico",
+          "title": "Correo electrónico",
+          "description": "Configure los ajustes SMTP para enviar notificaciones por correo electrónico",
           "fields": {
-            "smtpServer": {
+            "smtp_host": {
               "label": "Servidor SMTP",
               "placeholder": "smtp.ejemplo.com"
             },
-            "port": {
+            "smtp_port": {
               "label": "Puerto",
               "placeholder": "587"
             },
-            "username": {
-              "label": "Nombre de Usuario",
-              "placeholder": "tu-correo@ejemplo.com"
+            "smtp_username": {
+              "label": "Nombre de usuario",
+              "placeholder": "usuario@ejemplo.com"
             },
-            "password": {
+            "smtp_password": {
               "label": "Contraseña",
-              "placeholder": "Ingresa tu contraseña SMTP"
+              "placeholder": "••••••••"
             },
-            "fromEmail": {
-              "label": "Correo de Origen",
+            "smtp_from_email": {
+              "label": "Correo electrónico de envío",
               "placeholder": "notificaciones@ejemplo.com"
             },
-            "fromName": {
-              "label": "Nombre de Origen",
-              "placeholder": "Nombre de tu Organización"
+            "smtp_from_name": {
+              "label": "Nombre de envío",
+              "placeholder": "Sistema de Notificaciones"
             }
           },
           "buttons": {
-            "save": "Guardar"
+            "save": "Guardar configuración"
+          }
+        },
+        "slack": {
+          "title": "Slack",
+          "description": "Configure las notificaciones de Slack",
+          "fields": {
+            "webhook_secret": {
+              "label": "Secreto del webhook",
+              "placeholder": "Ingrese su secreto de webhook de Slack"
+            },
+            "channel_id": {
+              "label": "ID del canal",
+              "placeholder": "Ingrese el ID de su canal de Slack"
+            }
+          },
+          "buttons": {
+            "save": "Guardar configuración"
+          }
+        },
+        "discord": {
+          "title": "Discord",
+          "description": "Configure el webhook de Discord para enviar notificaciones a su canal de Discord",
+          "fields": {
+            "webhook_url": {
+              "label": "URL del webhook",
+              "placeholder": "https://discord.com/api/webhooks/..."
+            }
+          },
+          "buttons": {
+            "save": "Guardar configuración"
           }
         }
       },
       "preferences": {
         "activity": {
-          "title": "Notificaciones de Actividad",
-          "description": "Notificaciones sobre la actividad en tu equipo"
+          "title": "Notificaciones de actividad",
+          "description": "Notificaciones sobre la actividad en su equipo"
         },
         "security": {
-          "title": "Notificaciones de Seguridad",
-          "description": "Alertas importantes sobre aplicaciones desplegadas y errores"
+          "title": "Notificaciones de seguridad",
+          "description": "Alertas importantes sobre aplicaciones implementadas y errores"
         },
         "updates": {
-          "title": "Actualizaciones y Marketing",
-          "description": "Mantente informado sobre nuestros productos y servicios"
+          "title": "Actualizaciones y marketing",
+          "description": "Manténgase informado sobre nuestros productos y servicios"
         }
-      },
-      "messages": {
-        "emailConfigSaved": "Configuración de correo electrónico guardada exitosamente",
-        "emailConfigFailed": "Error al guardar la configuración de correo electrónico",
-        "preferencesUpdated": "Preferencias actualizadas exitosamente",
-        "preferencesFailed": "Error al actualizar las preferencias"
       }
     },
     "teams": {
@@ -428,6 +500,18 @@
           "creating": "Creando..."
         }
       }
+    },
+    "2fa": {
+      "title": "Autenticación de Dos Factores",
+      "description": "Agrega una capa adicional de seguridad a tu cuenta",
+      "setupButton": "Configurar 2FA",
+      "setupSuccess": "Configuración de 2FA iniciada exitosamente",
+      "setupError": "Error al configurar 2FA",
+      "enterCode": "Ingresa el código de verificación",
+      "codePlaceholder": "Ingresa el código de 6 dígitos",
+      "verifyButton": "Verificar",
+      "verifySuccess": "Verificación de 2FA exitosa",
+      "verifyError": "Código de verificación inválido"
     }
   },
   "languages": {
@@ -437,8 +521,8 @@
     "kn": "Kannada"
   },
   "dashboard": {
-    "title": "Panel de Control",
-    "description": "Monitorea tu servidor",
+    "title": "Panel de control",
+    "description": "Monitorea tus aplicaciones y recursos del sistema",
     "containers": {
       "title": "Contenedores",
       "table": {
@@ -455,13 +539,13 @@
       }
     },
     "disk": {
-      "title": "Uso del Disco",
+      "title": "Uso del disco",
       "used": "{value} GB usado",
       "total": "{value} GB total",
       "percentage": "{value}%",
       "table": {
         "headers": {
-          "mount": "Montaje",
+          "mount": "Punto de montaje",
           "size": "Tamaño",
           "used": "Usado",
           "percentage": "%"
@@ -469,7 +553,7 @@
       }
     },
     "load": {
-      "title": "Promedio de Carga",
+      "title": "Carga promedio",
       "labels": {
         "oneMin": "1 minuto",
         "fiveMin": "5 minutos",
@@ -477,23 +561,27 @@
       }
     },
     "memory": {
-      "title": "Uso de Memoria",
+      "title": "Uso de memoria",
       "used": "{value} MB usado",
       "total": "{value} MB total",
       "percentage": "{value}%"
     },
     "errors": {
       "parseMessage": "Error al analizar el mensaje",
-      "unknownError": "Error desconocido ocurrido",
+      "unknownError": "Ocurrió un error desconocido",
       "connectionLost": "Conexión perdida. Intentando reconectar...",
-      "reconnectFailed": "Error al reconectar. Por favor intente más tarde."
+      "reconnectFailed": "Error al reconectar. Por favor, inténtalo más tarde."
     },
     "system": {
-      "title": "Información del Sistema",
+      "title": "Información del sistema",
       "osType": "Tipo de SO",
       "cpu": "CPU",
-      "uptime": "Tiempo de Actividad",
-      "lastUpdated": "Última Actualización"
+      "uptime": "Tiempo de actividad",
+      "lastUpdated": "Última actualización"
+    },
+    "smtpBanner": {
+      "message": "Configura los ajustes SMTP para recibir notificaciones",
+      "configure": "Configurar"
     }
   },
   "fileManager": {
@@ -552,6 +640,13 @@
         "move": "Mover",
         "delete": "Mover a Papelera"
       }
+    },
+    "noPermissionCreate": "No tienes permiso para crear archivos",
+    "noPermissionUpdate": "No tienes permiso para actualizar archivos",
+    "copiedToClipboard": "Copiado al portapapeles",
+    "copySuccess": "Archivo copiado exitosamente",
+    "errors": {
+      "fileExists": "El archivo ya existe"
     }
   },
   "selfHost": {
@@ -852,7 +947,8 @@
         },
         "domain": {
           "minLength": "El nombre del dominio debe tener al menos 3 caracteres.",
-          "invalidFormat": "El nombre del dominio debe ser un nombre de dominio válido."
+          "invalidFormat": "Por favor ingrese un nombre de dominio válido (ejemplo: ejemplo.com).",
+          "notAllowed": "Este dominio no está permitido. Puede agregarlo en la sección Configuración > Dominios para hacerlo disponible."
         },
         "repository": {
           "minLength": "El nombre del repositorio debe tener al menos 3 caracteres.",
@@ -953,7 +1049,8 @@
         "general": "General",
         "notifications": "Notificaciones",
         "team": "Equipo",
-        "domains": "Dominios"
+        "domains": "Dominios",
+        "update": "Actualizar"
       },
       "terminal": {
         "togglePosition": "Cambiar Posición del Terminal (Ctrl+T)"
@@ -966,6 +1063,22 @@
       "help": "Ayuda",
       "reportIssue": "Reportar un problema",
       "logout": "Cerrar sesión"
+    }
+  },
+  "toasts": {
+    "errors": {
+      "realtimeMonitor": "Error al conectar con el servicio de monitorización en tiempo real",
+      "setFileToCopy": "Error al establecer el archivo para copiar",
+      "moveFile": "Error al mover el archivo",
+      "copyFile": "Error al copiar el archivo",
+      "renameFile": "Error al renombrar el archivo",
+      "startRenaming": "Error al iniciar el renombrado",
+      "navigateToFile": "Error al navegar al archivo",
+      "createNewFolder": "Error al crear nueva carpeta",
+      "uploadFile": "Error al subir el archivo",
+      "deleteFile": "Error al eliminar el archivo",
+      "setEmail": "Error al establecer el correo electrónico",
+      "setPassword": "Error al establecer la contraseña"
     }
   }
 }

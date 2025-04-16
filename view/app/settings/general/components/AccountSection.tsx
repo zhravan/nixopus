@@ -14,6 +14,14 @@ import { ModeToggle } from '@/components/ui/theme-toggler';
 import { useSendVerificationEmailMutation } from '@/redux/services/users/authApi';
 import { useTranslation } from '@/hooks/use-translation';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { useFontSelection } from '@/hooks/use-font-selection';
 
 interface AccountSectionProps {
   username: string;
@@ -43,6 +51,7 @@ function AccountSection({
     useSendVerificationEmailMutation();
   const [verificationSent, setVerificationSent] = useState(false);
   const [verificationError, setVerificationError] = useState('');
+  const { selectedFont, handleFontChange } = useFontSelection();
 
   const handleSendVerification = async () => {
     try {
@@ -148,10 +157,46 @@ function AccountSection({
           <CardTitle>{t('settings.account.preferences.title')}</CardTitle>
           <CardDescription>{t('settings.account.preferences.description')}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm flex justify-between items-center">
-            <span>{t('settings.account.preferences.appearance')}</span> <ModeToggle />
-          </p>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="text-muted-foreground text-sm">
+              {t('settings.account.preferences.appearance')}
+            </p>
+            <ModeToggle />
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="text-muted-foreground text-sm">{t('settings.preferences.font')}</p>
+            <Select value={selectedFont} onValueChange={handleFontChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={t('settings.preferences.font')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="geist">{t('settings.preferences.fontOptions.geist')}</SelectItem>
+                <SelectItem value="inter">{t('settings.preferences.fontOptions.inter')}</SelectItem>
+                <SelectItem value="roboto">
+                  {t('settings.preferences.fontOptions.roboto')}
+                </SelectItem>
+                <SelectItem value="poppins">
+                  {t('settings.preferences.fontOptions.poppins')}
+                </SelectItem>
+                <SelectItem value="montserrat">
+                  {t('settings.preferences.fontOptions.montserrat')}
+                </SelectItem>
+                <SelectItem value="space-grotesk">
+                  {t('settings.preferences.fontOptions.spaceGrotesk')}
+                </SelectItem>
+                <SelectItem value="outfit">
+                  {t('settings.preferences.fontOptions.outfit')}
+                </SelectItem>
+                <SelectItem value="jakarta">
+                  {t('settings.preferences.fontOptions.jakarta')}
+                </SelectItem>
+                <SelectItem value="system">
+                  {t('settings.preferences.fontOptions.system')}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 

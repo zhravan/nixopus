@@ -1,28 +1,92 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Upload, Trash } from 'lucide-react';
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import use_file_upload from '../../hooks/file-operations/useUpload';
+import { useFileOperations } from '../../hooks/file-operations/useOperations';
 import { useTranslation } from '@/hooks/use-translation';
 
 interface FileUploadProps {
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  currentPath: string;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ setIsDialogOpen }) => {
+interface UploadingFile {
+  id: string;
+  file: File;
+  progress: number;
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({ setIsDialogOpen, currentPath }) => {
   const { t } = useTranslation();
-  const {
-    files,
-    isDragging,
-    fileInputRef,
-    handleDragEnter,
-    handleDragLeave,
-    handleDragOver,
-    handleDrop,
-    handleFileInput,
-    deleteFile
-  } = use_file_upload();
+  const [isUploading, setIsUploading] = useState(false);
+  const { handleFileUpload } = useFileOperations(() => {
+    setFiles([]);
+    setIsDialogOpen(false);
+  });
+  
+  const [isDragging, setIsDragging] = useState(false);
+  const [files, setFiles] = useState<UploadingFile[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const processFiles = async (newFiles: File[]) => {
+    if (isUploading) return;
+    setIsUploading(true);
+    
+    const uploadingFiles = newFiles.map(file => ({
+      id: Math.random().toString(36).substring(7),
+      file,
+      progress: 0
+    }));
+
+    setFiles(prev => [...prev, ...uploadingFiles]);
+
+    try {
+      for (const fileObj of uploadingFiles) {
+        await handleFileUpload(fileObj.file, currentPath);
+        setFiles(prev => prev.map(f => 
+          f.id === fileObj.id ? { ...f, progress: 100 } : f
+        ));
+      }
+    } catch (error) {
+      console.error('Error processing files:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    await processFiles(droppedFiles);
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    await processFiles(selectedFiles);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const deleteFile = (id: string) => {
+    setFiles(prev => prev.filter(f => f.id !== id));
+  };
 
   return (
     <DialogContent>

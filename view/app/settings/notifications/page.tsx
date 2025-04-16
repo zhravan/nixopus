@@ -9,6 +9,7 @@ import { useAppSelector } from '@/redux/hooks';
 import { hasPermission } from '@/lib/permission';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/use-translation';
+import { SMTPFormData } from '@/redux/types/notification';
 
 export type NotificationChannelConfig = {
   [key: string]: string;
@@ -18,8 +19,18 @@ const Page: React.FC = () => {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
-  const { smtpConfigs, isLoading, handleOnSave, preferences, handleUpdatePreference } =
-    useNotificationSettings();
+  const {
+    smtpConfigs,
+    slackConfig,
+    discordConfig,
+    isLoading,
+    handleOnSave,
+    handleCreateWebhookConfig,
+    handleUpdateWebhookConfig,
+    handleDeleteWebhookConfig,
+    preferences,
+    handleUpdatePreference
+  } = useNotificationSettings();
 
   const canRead = hasPermission(user, 'notification', 'read', activeOrg?.id);
   const canUpdate = hasPermission(user, 'notification', 'update', activeOrg?.id);
@@ -40,7 +51,7 @@ const Page: React.FC = () => {
     );
   }
 
-  const handleSave = (data: Record<string, string>) => {
+  const handleSave = (data: SMTPFormData) => {
     if (smtpConfigs) {
       if (canUpdate) {
         handleOnSave(data);
@@ -56,11 +67,67 @@ const Page: React.FC = () => {
     }
   };
 
+  const handleSaveSlack = (data: Record<string, string>) => {
+    if (slackConfig) {
+      if (canUpdate) {
+        handleUpdateWebhookConfig({
+          type: 'slack',
+          webhook_url: data.webhook_url,
+          webhook_secret: data.webhook_secret,
+          channel_id: data.channel_id
+        });
+      } else {
+        toast.error(t('settings.notifications.page.permissions.update'));
+      }
+    } else {
+      if (canCreate) {
+        handleCreateWebhookConfig({
+          type: 'slack',
+          webhook_url: data.webhook_url,
+          webhook_secret: data.webhook_secret,
+          channel_id: data.channel_id
+        });
+      } else {
+        toast.error(t('settings.notifications.page.permissions.create'));
+      }
+    }
+  };
+
+  const handleSaveDiscord = (data: Record<string, string>) => {
+    if (discordConfig) {
+      if (canUpdate) {
+        handleUpdateWebhookConfig({
+          type: 'discord',
+          webhook_url: data.webhook_url,
+          webhook_secret: data.webhook_secret,
+          channel_id: data.channel_id
+        });
+      } else {
+        toast.error(t('settings.notifications.page.permissions.update'));
+      }
+    } else {
+      if (canCreate) {
+        handleCreateWebhookConfig({
+          type: 'discord',
+          webhook_url: data.webhook_url,
+          webhook_secret: data.webhook_secret,
+          channel_id: data.channel_id
+        });
+      } else {
+        toast.error(t('settings.notifications.page.permissions.create'));
+      }
+    }
+  };
+
   const handleUpdate = (id: string, enabled: boolean) => {
     handleUpdatePreference(id, enabled);
   };
 
-  const showChannelsTab = canCreate || (smtpConfigs && canUpdate);
+  const showChannelsTab =
+    canCreate ||
+    (smtpConfigs && canUpdate) ||
+    (slackConfig && canUpdate) ||
+    (discordConfig && canUpdate);
 
   if (!showChannelsTab) {
     return (
@@ -97,8 +164,12 @@ const Page: React.FC = () => {
         <TabsContent value="channels">
           <NotificationChannelsTab
             smtpConfigs={smtpConfigs}
+            slackConfig={slackConfig}
+            discordConfig={discordConfig}
             isLoading={isLoading}
             handleOnSave={handleSave}
+            handleOnSaveSlack={handleSaveSlack}
+            handleOnSaveDiscord={handleSaveDiscord}
           />
         </TabsContent>
         <TabsContent value="preferences">

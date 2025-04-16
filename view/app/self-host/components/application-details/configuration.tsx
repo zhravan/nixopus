@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import FormInputField from '@/components/ui/form-input-field';
@@ -62,15 +62,31 @@ export const DeployConfigureForm = ({
     base_path
   });
 
-  const renderReadOnlyField = (label: string, value: string | undefined, description: string) => (
-    <div className="space-y-2">
-      <label className="text-sm font-medium">{label}</label>
-      <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
-        {value || '-'}
+  const renderReadOnlyField = (label: string, value: string | undefined, description: string) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const displayValue = value || '-';
+    const shouldShowMore = displayValue.length > 50;
+
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{label}</label>
+        <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground overflow-hidden">
+          <div className={`${!isExpanded ? 'truncate' : ''}`}>
+            {displayValue}
+          </div>
+          {shouldShowMore && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-xs text-primary hover:underline mt-1"
+            >
+              {isExpanded ? 'Show less' : 'Show more'}
+            </button>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </div>
-  );
+    );
+  };
 
   if (!canUpdate) {
     return (

@@ -1,16 +1,15 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FileData, FileType } from '@/redux/types/files';
+import { FileData } from '@/redux/types/files';
 import { useSearchable } from '@/hooks/use-searchable';
-import {
-  useCreateDirectoryMutation,
-  useGetFilesInPathQuery,
-  useUploadFileMutation
-} from '@/redux/services/file-manager/fileManagersApi';
-import { useFileManagerActionsHook } from '../../hooks/file-operations/useActions';
+import { useGetFilesInPathQuery } from '@/redux/services/file-manager/fileManagersApi';
+import { useFileOperations } from '../file-operations/useOperations';
+import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/use-translation';
 
 function use_file_manager() {
+  const { t } = useTranslation();
   const [currentPath, setCurrentPath] = useState('/');
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   const [showHidden, setShowHidden] = useState(false);
@@ -18,17 +17,42 @@ function use_file_manager() {
   const [selectedFile, setSelectedFile] = useState<FileData | undefined>();
   const [fileToCopy, setFileToCopy] = useState<FileData | undefined>();
   const [fileToMove, setFileToMove] = useState<FileData | undefined>();
-  const [createDirectory] = useCreateDirectoryMutation();
-  const [uploadFile] = useUploadFileMutation();
+  const [showCopyFeedback, setShowCopyFeedback] = useState(false);
+  const [copyFeedbackMessage, setCopyFeedbackMessage] = useState('');
   const router = useRouter();
   const path = useSearchParams().get('path');
-  const { data: files, isLoading, refetch } = useGetFilesInPathQuery({ path: currentPath });
+  
+  const { data: files, isLoading, refetch } = useGetFilesInPathQuery(
+    { path: currentPath },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true
+    }
+  );
+
   const {
-    handleFilePaste,
-    handleFileMove,
-    isCopyFileOrDirectoryLoading,
-    isMoveOrRenameDirectoryLoading
-  } = useFileManagerActionsHook();
+    handleFileUpload,
+    handleCreateDirectory,
+    handleMove: moveFile,
+    handleCopy: copyFile,
+    handleDelete,
+    calculateSize,
+    isSizeLoading: isCopyFileOrDirectoryLoading,
+    fileSize,
+    handleKeyDown,
+    handleTextDoubleClick,
+    handleRename,
+    startRenaming,
+    isEditing,
+    editedFileName,
+    setEditedFileName,
+    isDialogOpen,
+    setIsDialogOpen
+  } = useFileOperations(() => {
+    refetch();
+  });
+
   const { filteredAndSortedData, searchTerm, handleSearchChange, handleSortChange } = useSearchable(
     files || [],
     ['name', 'created_at', 'updated_at', 'size', 'file_type'],
@@ -47,36 +71,52 @@ function use_file_manager() {
     refetch();
   }, [currentPath, refetch]);
 
+  const handleCopy = async (fromPath: string, toPath: string) => {
+    try {
+      await copyFile(fromPath, toPath);
+      await refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.copyFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
+  const handleMove = async (fromPath: string, toPath: string) => {
+    try {
+      await moveFile(fromPath, toPath);
+      refetch();
+    } catch (error) {
+      toast.error(t('toasts.errors.moveFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
   const fileClicked = (filePath: string | number | boolean) => {
-    router.push(`/file-manager?path=${encodeURIComponent(filePath)}`);
+    try {
+      router.push(`/file-manager?path=${encodeURIComponent(filePath)}`);
+    } catch (error) {
+      toast.error(t('toasts.errors.navigateToFile'), {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   };
 
   const createNewFolder = async () => {
-    if (!currentPath) return;
-
-    const newFolders = files?.filter(
-      (item) => item.file_type === FileType.Directory && /^New Folder \d+$/.test(item.name)
-    );
-
-    let highestNumber = 0;
-    newFolders?.forEach((folder) => {
-      const match = folder.name.match(/^New Folder (\d+)$/);
-      if (match) {
-        const number = parseInt(match[1], 10);
-        if (number > highestNumber) {
-          highestNumber = number;
-        }
-      }
+    const existingFolders = files?.filter((file: FileData) => file.name.startsWith('New Folder'));
+    const numbers = existingFolders?.map((folder: FileData) => {
+      const match = folder.name.match(/New Folder (\d+)/);
+      return match ? parseInt(match[1]) : 0;
     });
+    const highestNumber = numbers?.length ? Math.max(...numbers) : 0;
 
     const newFolderName = `New Folder ${highestNumber + 1}`;
-
-    await createDirectory({ path: currentPath, name: newFolderName });
+    await handleCreateDirectory(currentPath, newFolderName);
     setSelectedPath(`${currentPath}/${newFolderName}`);
-    refetch();
   };
 
-  const handleKeyboardShortcuts = (e: KeyboardEvent) => {
+  const handleKeyboardShortcuts = async (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
       return;
     }
@@ -87,6 +127,12 @@ function use_file_manager() {
       e.preventDefault();
       if (selectedFile) {
         setFileToCopy(selectedFile);
+        setCopyFeedbackMessage(t('fileManager.copiedToClipboard', { name: selectedFile.name }));
+        setShowCopyFeedback(true);
+        setTimeout(() => {
+          setShowCopyFeedback(false);
+          setCopyFeedbackMessage('');
+        }, 2000);
       }
     }
 
@@ -100,19 +146,42 @@ function use_file_manager() {
     if (isModifierKey && e.key === 'v') {
       e.preventDefault();
       if (fileToCopy) {
-        handleFilePaste(fileToCopy.path, currentPath + '/' + fileToCopy.name);
-        refetch();
-        setFileToCopy(undefined);
-      } else if (fileToMove) {
-        handleFileMove(fileToMove.path, currentPath + '/' + fileToMove.name);
-        refetch();
-        setFileToMove(undefined);
-      }
-    }
+        const fileName = fileToCopy.name;
+        const basePath = currentPath;
+        let newPath = `${basePath}/${fileName}`;
+        let counter = 1;
 
-    if (e.key === 'Delete' && selectedFile) {
-      e.preventDefault();
-      // TODO : Implement delete functionality
+        while (files?.some(f => f.path === newPath)) {
+          const extension = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')) : '';
+          const baseName = extension ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
+          newPath = `${basePath}/${baseName} (${counter})${extension}`;
+          counter++;
+        }
+
+        try {
+          await handleCopy(fileToCopy.path, newPath);
+          setCopyFeedbackMessage(t('fileManager.copySuccess', { name: fileName }));
+          setShowCopyFeedback(true);
+          setTimeout(() => {
+            setShowCopyFeedback(false);
+            setCopyFeedbackMessage('');
+          }, 2000);
+          setFileToCopy(undefined);
+        } catch (error) {
+          toast.error(t('toasts.errors.copyFile'), {
+            description: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      } else if (fileToMove) {
+        try {
+          await handleMove(fileToMove.path, currentPath + '/' + fileToMove.name);
+          setFileToMove(undefined);
+        } catch (error) {
+          toast.error(t('toasts.errors.moveFile'), {
+            description: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      }
     }
 
     if (isModifierKey && e.key === 'h') {
@@ -129,6 +198,13 @@ function use_file_manager() {
       e.preventDefault();
       createNewFolder();
     }
+
+    if (e.key === 'F2' && selectedPath) {
+      const file = files?.find((f: FileData) => f.path === selectedPath);
+      if (file) {
+        handleMove(file.path, `${file.path}/renamed`);
+      }
+    }
   };
 
   useEffect(() => {
@@ -141,8 +217,8 @@ function use_file_manager() {
     currentPath,
     layout,
     showHidden,
-    handleFilePaste,
-    handleFileMove,
+    copyFile,
+    handleMove,
     refetch,
     setFileToCopy,
     setFileToMove,
@@ -156,17 +232,6 @@ function use_file_manager() {
     setSelectedFile(files?.find((file) => file.path === path));
   };
 
-  const handleFileUpload = async (file: File) => {
-    if (!currentPath) return;
-
-    try {
-      await uploadFile({ file, path: currentPath });
-      refetch();
-    } catch (error) {
-      console.error('Failed to upload file:', error);
-    }
-  };
-
   return {
     currentPath,
     layout,
@@ -175,10 +240,11 @@ function use_file_manager() {
     fileToCopy,
     fileToMove,
     isCopyFileOrDirectoryLoading,
-    isMoveOrRenameDirectoryLoading,
+    showCopyFeedback,
+    copyFeedbackMessage,
     handleFileSelect,
-    handleFilePaste,
-    handleFileMove,
+    handleCopy,
+    handleMove,
     handleSearchChange,
     handleSortChange,
     visibleFiles,
@@ -193,7 +259,17 @@ function use_file_manager() {
     setFileToMove,
     setSelectedPath,
     files,
-    handleFileUpload
+    handleFileUpload,
+    handleDelete,
+    handleKeyDown,
+    handleTextDoubleClick,
+    handleRename,
+    startRenaming,
+    isEditing,
+    editedFileName,
+    setEditedFileName,
+    isDialogOpen,
+    setIsDialogOpen
   };
 }
 

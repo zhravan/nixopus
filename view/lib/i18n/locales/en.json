@@ -663,6 +663,13 @@
       "descriptionDirectory": "Are you sure you want to delete the directory '{name}' and all its contents? This action cannot be undone.",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "noPermissionCreate": "You don't have permission to create files",
+    "noPermissionUpdate": "You don't have permission to update files",
+    "copiedToClipboard": "Copied to clipboard",
+    "copySuccess": "File copied successfully",
+    "errors": {
+      "fileExists": "File already exists"
     }
   },
   "selfHost": {

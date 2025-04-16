@@ -127,12 +127,42 @@ func (m *NotificationManager) SendVerificationEmailNotification(payload Notifica
 
 // SendOrganizationNotification sends an organization related notification to the user
 func (m *NotificationManager) SendOrganizationNotification(payload NotificationPayload) {
-	fmt.Printf("Organization Notification - %+v", payload)
 	if payload.Type == NotificationPayloadTypeUpdateUserRole {
 		if data, ok := payload.Data.(NotificationOrganizationData); ok {
-			m.emailManager.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
-			m.slackManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
-			m.discordManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID))
+			shouldSend, err := m.prefManager.CheckUserNotificationPreferences(payload.UserID, string(ActivityCategory), "team-updates")
+			if err != nil {
+				log.Printf("Failed to check notification preferences: %s", err)
+			}
+			if shouldSend {
+				m.emailManager.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
+				webhookUrl, err := m.GetWebhookURL(payload.UserID, "slack")
+				if err != nil {
+					log.Printf("Failed to get slack client: %s", err)
+				} else {
+					m.slackManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID), webhookUrl)
+				}
+				webhookURL, err := m.GetWebhookURL(payload.UserID, "discord")
+				if err != nil {
+					log.Printf("Failed to get discord webhook URL: %s", err)
+				}
+				m.discordManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID), webhookURL)
+			}
 		}
 	}
+}
+
+func (m *NotificationManager) GetWebhookURL(userID string, webhookType string) (string, error) {
+	var config shared_types.WebhookConfig
+
+	err := m.db.NewSelect().
+		Model(&config).
+		Where("type = ?", webhookType).
+		Where("user_id = ?", userID).
+		Scan(m.ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	return config.WebhookURL, nil
 }

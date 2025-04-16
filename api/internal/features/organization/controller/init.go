@@ -84,13 +84,13 @@ func (c *OrganizationsController) Notify(payloadType notification.NotificationPa
 	c.notification.SendNotification(notification.NewNotificationPayload(
 		payloadType,
 		user.ID.String(),
-		notification.NotificationAuthenticationData{
-			Email: user.Email,
+		notification.NotificationOrganizationData{
 			NotificationBaseData: notification.NotificationBaseData{
 				IP:      r.RemoteAddr,
 				Browser: r.UserAgent(),
 			},
-			UserName: user.Username,
+			OrganizationID: r.Header.Get("X-Organization-ID"),
+			UserID:         user.ID.String(),
 		},
 		notification.NotificationCategoryOrganization,
 	))

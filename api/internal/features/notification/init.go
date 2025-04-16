@@ -125,28 +125,69 @@ func (m *NotificationManager) SendVerificationEmailNotification(payload Notifica
 	}
 }
 
-// SendOrganizationNotification sends an organization related notification to the user
+func (m *NotificationManager) sendWebhookNotification(userID string, message string) {
+	webhookUrl, err := m.GetWebhookURL(userID, "slack")
+	if err != nil {
+		log.Printf("Failed to get slack webhook URL: %s", err)
+	} else {
+		m.slackManager.SendNotification(message, webhookUrl)
+	}
+
+	webhookURL, err := m.GetWebhookURL(userID, "discord")
+	if err != nil {
+		log.Printf("Failed to get discord webhook URL: %s", err)
+	} else {
+		m.discordManager.SendNotification(message, webhookURL)
+	}
+}
+
 func (m *NotificationManager) SendOrganizationNotification(payload NotificationPayload) {
-	if payload.Type == NotificationPayloadTypeUpdateUserRole {
-		if data, ok := payload.Data.(NotificationOrganizationData); ok {
-			shouldSend, err := m.prefManager.CheckUserNotificationPreferences(payload.UserID, string(ActivityCategory), "team-updates")
+	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(payload.UserID, string(ActivityCategory), "team-updates")
+	if err != nil {
+		log.Printf("Failed to check notification preferences: %s", err)
+		return
+	}
+
+	if !shouldSend {
+		return
+	}
+
+	switch payload.Type {
+	case NotificationPayloadTypeUpdateUserRole:
+		if data, ok := payload.Data.(email.UpdateUserRoleData); ok {
+			err := m.emailManager.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationName, data.UserName, data.NewRole)
 			if err != nil {
-				log.Printf("Failed to check notification preferences: %s", err)
+				log.Printf("Failed to send update user role email: %s", err)
 			}
-			if shouldSend {
-				m.emailManager.SendUpdateUserRoleEmail(payload.UserID, data.OrganizationID, data.UserID)
-				webhookUrl, err := m.GetWebhookURL(payload.UserID, "slack")
-				if err != nil {
-					log.Printf("Failed to get slack client: %s", err)
-				} else {
-					m.slackManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID), webhookUrl)
-				}
-				webhookURL, err := m.GetWebhookURL(payload.UserID, "discord")
-				if err != nil {
-					log.Printf("Failed to get discord webhook URL: %s", err)
-				}
-				m.discordManager.SendNotification(fmt.Sprintf("User role updated in organization %s", data.OrganizationID), webhookURL)
+			m.sendWebhookNotification(payload.UserID, fmt.Sprintf("User role updated in organization %s", data.OrganizationName))
+		}
+	case NotificationPayloadTypeAddUserToOrganization:
+		if data, ok := payload.Data.(AddUserToOrganizationData); ok {
+			err := m.emailManager.SendAddUserToOrganizationEmail(payload.UserID, email.AddUserToOrganizationData{
+				OrganizationName: data.OrganizationName,
+				UserName:         data.UserName,
+				UserEmail:        data.UserEmail,
+				IP:               data.IP,
+				Browser:          data.Browser,
+			})
+			if err != nil {
+				log.Printf("Failed to send add user to organization email: %s", err)
 			}
+			m.sendWebhookNotification(payload.UserID, fmt.Sprintf("New user %s (%s) added to organization %s", data.UserName, data.UserEmail, data.OrganizationName))
+		}
+	case NotificationPayloadTypeRemoveUserFromOrganization:
+		if data, ok := payload.Data.(RemoveUserFromOrganizationData); ok {
+			err := m.emailManager.SendRemoveUserFromOrganizationEmail(payload.UserID, email.RemoveUserFromOrganizationData{
+				OrganizationName: data.OrganizationName,
+				UserName:         data.UserName,
+				UserEmail:        data.UserEmail,
+				IP:               data.IP,
+				Browser:          data.Browser,
+			})
+			if err != nil {
+				log.Printf("Failed to send remove user from organization email: %s", err)
+			}
+			m.sendWebhookNotification(payload.UserID, fmt.Sprintf("User %s (%s) removed from organization %s", data.UserName, data.UserEmail, data.OrganizationName))
 		}
 	}
 }

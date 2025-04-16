@@ -41,6 +41,17 @@ jobs:
           cp .env.sample api/.env
           cp .env.sample view/.env
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -68,6 +79,13 @@ jobs:
           labels: ${{ steps.meta-api.outputs.labels }}
           build-args: |
             API_PORT=${{ env.API_PORT }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Extract metadata for View
         id: meta-view
@@ -89,3 +107,10 @@ jobs:
           labels: ${{ steps.meta-view.outputs.labels }}
           build-args: |
             NEXT_PUBLIC_PORT=${{ env.NEXT_PUBLIC_PORT }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache

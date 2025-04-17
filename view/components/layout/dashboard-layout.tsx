@@ -25,6 +25,8 @@ import { useTour } from '@/hooks/useTour';
 import { Button } from '@/components/ui/button';
 import { HelpCircle } from 'lucide-react';
 import { UpdateIcon } from '@radix-ui/react-icons';
+import { useAppSelector } from '@/redux/hooks';
+import { useCheckForUpdatesQuery, usePerformUpdateMutation } from '@/redux/services/users/userApi';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -34,6 +36,8 @@ enum TERMINAL_POSITION {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { t } = useTranslation();
+  const user = useAppSelector((state) => state.auth.user);
+  const isAdmin = user?.type === 'admin';
   const {
     addTeamModalOpen,
     setAddTeamModalOpen,
@@ -51,10 +55,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [TerminalPosition, setTerminalPosition] = React.useState(TERMINAL_POSITION.BOTTOM);
   const [fitAddonRef, setFitAddonRef] = React.useState<any | null>(null);
   const { startTour } = useTour();
+  const { data: updateCheck, refetch: checkForUpdates } = useCheckForUpdatesQuery();
+  const [performUpdate] = usePerformUpdateMutation();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 't' && e.ctrlKey) {
+      if (e.key === 't' && e.ctrlKey && isAdmin) {
         e.preventDefault();
         setTerminalPosition((prevPosition) =>
           prevPosition === TERMINAL_POSITION.BOTTOM
@@ -65,10 +71,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isAdmin]);
 
-  const handleUpdate = () => {
-    console.log('update');
+  const handleUpdate = async () => {
+    try {
+      await checkForUpdates();
+      await performUpdate();
+    } catch (error) {
+      console.error('Update failed:', error);
+    }
   };
 
   return (
@@ -160,12 +171,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                   <div className="h-full overflow-y-auto no-scrollbar">{children}</div>
                 </ResizablePanel>
-                {isTerminalOpen && <ResizableHandle draggable withHandle />}
+                {isTerminalOpen && isAdmin && <ResizableHandle draggable withHandle />}
                 <ResizablePanel
                   defaultSize={20}
                   minSize={15}
                   maxSize={50}
-                  hidden={!isTerminalOpen}
+                  hidden={!isTerminalOpen || !isAdmin}
                   onResize={() => {
                     if (fitAddonRef?.current) {
                       requestAnimationFrame(() => {

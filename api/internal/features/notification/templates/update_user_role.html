@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>User Role Updated</title>
+    <title>User Role Updated in {{.OrganizationName}}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,11 +35,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>User Role Updated</h1>
+        <h1>User Role Updated in {{.OrganizationName}}</h1>
     </div>
     <div class="content">
         <p>Hello,</p>
-        <p>The role for user with ID {{.UserID}} in organization {{.OrganizationID}} has been updated.</p>
+        <p>The role for user with ID {{.UserName}} in organization {{.OrganizationName}} has been updated to {{.NewRole}}.</p>
         <p>If you did not make this change, please contact your administrator immediately.</p>
     </div>
     <div class="footer">

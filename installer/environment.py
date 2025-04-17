@@ -252,7 +252,9 @@ class EnvironmentSetup:
             "API_URL": f"https://api.{self.domain}/api",
             "WEBSOCKET_URL": f"wss://api.{self.domain}/ws",
             "WEBHOOK_URL": f"https://api.{self.domain}/webhook",
+            "NEXT_PUBLIC_PORT": str(next_public_port),
             "MOUNT_PATH": "/etc/nixopus/configs",
+            "PORT": str(api_port),
             "SSH_HOST": local_ip,
             "SSH_PORT": "22",
             "SSH_USER": "root",
@@ -273,7 +275,6 @@ class EnvironmentSetup:
 
         api_env_vars = base_env_vars.copy()
         api_env_vars["PORT"] = str(api_port)
-        api_env_vars["NEXT_PUBLIC_PORT"] = str(next_public_port)
 
         api_env_file = self.project_root / "api" / ".env"
         with open(api_env_file, 'w') as f:
@@ -282,10 +283,9 @@ class EnvironmentSetup:
         
         view_env_vars = base_env_vars.copy()
         view_env_vars["PORT"] = str(next_public_port)
-        view_env_vars["NEXT_PUBLIC_PORT"] = str(next_public_port)
 
         view_env_file = self.project_root / "view" / ".env"
-        print(f"Writing to {view_env_file} with {next_public_port} for NEXT_PUBLIC_PORT and PORT")
+        print(f"Writing to {view_env_file} with {next_public_port} for PORT")
         with open(view_env_file, 'w') as f:
             for key, value in view_env_vars.items():
                 f.write(f"{key}={value}\n")

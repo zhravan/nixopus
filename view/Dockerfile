@@ -37,4 +37,4 @@ USER nixopus
 
 EXPOSE ${NEXT_PUBLIC_PORT}
 
-CMD ["PORT=${NEXT_PUBLIC_PORT}", "node", "server.js"]
+CMD ["sh", "-c", "node server.js"]

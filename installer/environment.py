@@ -277,14 +277,20 @@ class EnvironmentSetup:
         api_env_file = self.project_root / "api" / ".env"
         with open(api_env_file, 'w') as f:
             for key, value in env_vars.items():
-                f.write(f"{key}={value}\n")
+                if key == "PORT":
+                    f.write(f"PORT={api_port}\n")
+                else:
+                    f.write(f"{key}={value}\n")
         
         # copy to view/.env
         view_env_file = self.project_root / "view" / ".env"
+        print(f"Writing to {view_env_file} with {next_public_port} for NEXT_PUBLIC_PORT, port {api_port} for PORT")
         with open(view_env_file, 'w') as f:
             for key, value in env_vars.items():
                 if key == "PORT":
                     f.write(f"PORT={next_public_port}\n")
+                elif key == "NEXT_PUBLIC_PORT":
+                    f.write(f"NEXT_PUBLIC_PORT={next_public_port}\n")
                 else:
                     f.write(f"{key}={value}\n")
 

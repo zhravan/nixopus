@@ -1,5 +1,5 @@
 import { useSidebar } from 'vitepress-openapi'
-import spec from '../src/openapi.json' assert { type: 'json' }
+import spec from '../src/openapi.json' with { type: 'json' }
 import { defineConfigWithTheme } from 'vitepress'
 
 const sidebar = useSidebar({
@@ -9,7 +9,6 @@ const sidebar = useSidebar({
 export default defineConfigWithTheme({
   title: "Nixopus Docs",
   description: "documentation",
-  lastUpdated: true,
 
   themeConfig: {
     search: {

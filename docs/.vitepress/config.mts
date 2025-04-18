@@ -9,6 +9,7 @@ const sidebar = useSidebar({
 export default defineConfigWithTheme({
   title: "Nixopus Docs",
   description: "documentation",
+  head: [['link', { rel: 'icon', href: '/favicon.png' }]],
 
   themeConfig: {
     search: {

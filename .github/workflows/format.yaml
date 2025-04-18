@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       
       - uses: actions/setup-go@v5
         with:
@@ -29,12 +31,22 @@ jobs:
       - name: Run gofmt
         working-directory: api
         run: gofmt -l -w .
+      
+      - name: Commit API changes
+        if: github.event_name == 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'style(api): format Go code'
+          branch: ${{ github.head_ref }}
+          file_pattern: 'api/**/*.go'
 
   format-view:
     name: Format View
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       
       - uses: actions/setup-node@v4
         with:
@@ -52,3 +64,11 @@ jobs:
       - name: Run Prettier
         working-directory: view
         run: yarn format
+      
+      - name: Commit View changes
+        if: github.event_name == 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'style(view): format frontend code'
+          branch: ${{ github.head_ref }}
+          file_pattern: 'view/**/*.{js,jsx,ts,tsx,css,md,json}'

@@ -4,7 +4,12 @@
   <img src="./assets/nixopus_logo_transparent.png" alt="Nixopus Logo" width="300"/>
 </p>
 
+<div align="center">
+
 [![Security Scan](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml)
+[![Container CI/CD](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml)
+
+</div>
 
 ## Your All-in-One VPS Management Solution
 

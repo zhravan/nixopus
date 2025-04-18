@@ -42,7 +42,7 @@ export default defineConfigWithTheme({
       }
     },
     editLink: {
-      pattern: 'https://github.com/nixopus/nixopus/edit/main/docs/:path',
+      pattern: 'https://github.com/raghavyuva/nixopus/edit/master/docs/:path',
       text: "Edit this page on Github"
     },
     nav: [

@@ -205,13 +205,16 @@ class Installer:
         print("\nSetting up admin...")
         username = email.split('@')[0]
         
-        raw_command = f'curl -X POST https://api.{domain}/api/v1/auth/register -H "Content-Type: application/json" -d \'{{"email":"{email}","password":"{password}","type":"admin","username":"{username}","organization":""}}\''
-        print("Raw command:", raw_command)
-        
         curl_command = [
-            "curl", "-X", "POST", f"https://api.{domain}/api/v1/auth/register",
+            "curl", "-X", "POST", "https://api.{domain}/api/v1/auth/register",
             "-H", "Content-Type: application/json",
-            "-d", f'{{"email":"{email}","password":"{password}","type":"admin","username":"{username}","organization":""}}'
+            "-d", json.dumps({
+                "email": email,
+                "password": password,
+                "type": "admin",
+                "username": username,
+                "organization": ""
+            })
         ]
         
         result = subprocess.run(curl_command, capture_output=True, text=True, check=False)
@@ -222,8 +225,11 @@ class Installer:
             
         try:
             response = json.loads(result.stdout)
-            if response.get("status") == "success":
+            if response.get("status") == 200:
                 print("✓ Admin setup completed successfully")
+                return
+            if response.get("title") == "Bad Request" and "admin already registered" in str(response):
+                print("✓ Admin already registered")
                 return
             error_msg = response.get("message", "Unknown error")
             print(f"✗ API Error: {error_msg}")
@@ -236,11 +242,11 @@ def main():
     installer = Installer()
     
     print("\033[36m  _   _ _ _                           \033[0m")
-    print("\033[36m | \ | (_)                          \033[0m")
-    print("\033[36m |  \| |___  _____  _ __  _   _ ___ \033[0m")
-    print("\033[36m | . \` | \ \/ / _ \| '_ \| | | / __|\033[0m")
-    print("\033[36m | |\  | |>  < (_) | |_) | |_| \__ \033[0m")
-    print("\033[36m |_| \_|_/_/\_\___/| .__/ \__,_|___/\033[0m")
+    print("\033[36m | \\ | (_)                          \033[0m")
+    print("\033[36m |  \\| |___  _____  _ __  _   _ ___ \033[0m")
+    print("\033[36m | . ` | \\ \\/ / _ \\| '_ \\| | | / __|\033[0m")
+    print("\033[36m | |\\  | |>  < (_) | |_) | |_| \\__ \033[0m")
+    print("\033[36m |_| \\_|_/_/\\_\\___/| .__/ \\__,_|___/\033[0m")
     print("\033[36m                   | |              \033[0m")
     print("\033[36m                   |_|              \033[0m")
     print("\n")

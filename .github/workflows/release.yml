@@ -88,9 +88,15 @@ jobs:
           script: |
             const isPrerelease = ${{ contains(github.ref_name, '-alpha.') || contains(github.ref_name, '-beta.') || contains(github.ref_name, '-rc.') }};
             const releaseType = isPrerelease ? 'pre-release' : 'release';
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🎉 ${releaseType} ${{ github.ref_name }} has been created!\n\nContainer images will be built and pushed to ${process.env.REGISTRY}/${process.env.API_IMAGE} and ${process.env.REGISTRY}/${process.env.VIEW_IMAGE}`
-            }) 
+            const message = `🎉 ${releaseType} ${{ github.ref_name }} has been created!\n\nContainer images will be built and pushed to ${process.env.REGISTRY}/${process.env.API_IMAGE} and ${process.env.REGISTRY}/${process.env.VIEW_IMAGE}`;
+            
+            if (context.issue && context.issue.number) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: message
+              });
+            } else {
+              console.log(message);
+            } 

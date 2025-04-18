@@ -180,12 +180,15 @@ class Installer:
         print("\nSetting up Proxy...")
         try:
             with open('helpers/caddy.json', 'r') as f:
-                config = json.dumps(json.load(f))
+                config = json.load(f)
+            
+            os.environ['APP_DOMAIN'] = f'app.{self.domain}'
+            os.environ['API_DOMAIN'] = f'api.{self.domain}'
             
             result = subprocess.run(
                 ['curl', '-X', 'POST', 'http://localhost:2019/load',
                  '-H', 'Content-Type: application/json',
-                 '-d', config],
+                 '-d', json.dumps(config)],
                 capture_output=True,
                 text=True
             )

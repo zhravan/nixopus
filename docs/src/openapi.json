@@ -828,8 +828,7 @@
                 },
                 "summary": "get recent audit logs",
                 "tags": [
-                    "api/v1",
-                    "audit"
+                    "api/v1/audit"
                 ]
             }
         },
@@ -1894,8 +1893,7 @@
                 },
                 "summary": "delete application",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             },
@@ -1963,8 +1961,7 @@
                 },
                 "summary": "get application by id",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             },
@@ -2043,8 +2040,7 @@
                 },
                 "summary": "handle deploy",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             },
@@ -2123,8 +2119,7 @@
                 },
                 "summary": "update application",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2205,8 +2200,7 @@
                 },
                 "summary": "get application deployments",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2284,8 +2278,7 @@
                 },
                 "summary": "get deployment by id",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2363,8 +2356,7 @@
                 },
                 "summary": "get deployment logs",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2442,8 +2434,7 @@
                 },
                 "summary": "get logs",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2524,8 +2515,7 @@
                 },
                 "summary": "re deploy application",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2606,8 +2596,7 @@
                 },
                 "summary": "handle restart",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2688,8 +2677,7 @@
                 },
                 "summary": "handle rollback",
                 "tags": [
-                    "api/v1",
-                    "deploy",
+                    "api/v1/deploy",
                     "application"
                 ]
             }
@@ -2770,8 +2758,7 @@
                 },
                 "summary": "get applications",
                 "tags": [
-                    "api/v1",
-                    "deploy"
+                    "api/v1/deploy"
                 ]
             }
         },
@@ -2851,8 +2838,7 @@
                 },
                 "summary": "delete domain",
                 "tags": [
-                    "api/v1",
-                    "domains"
+                    "api/v1/domain"
                 ]
             },
             "post": {
@@ -2930,8 +2916,7 @@
                 },
                 "summary": "create domain",
                 "tags": [
-                    "api/v1",
-                    "domains"
+                    "api/v1/domain"
                 ]
             },
             "put": {
@@ -3009,8 +2994,7 @@
                 },
                 "summary": "update domain",
                 "tags": [
-                    "api/v1",
-                    "domains"
+                    "api/v1/domain"
                 ]
             }
         },
@@ -3079,8 +3063,7 @@
                 },
                 "summary": "generate random sub domain",
                 "tags": [
-                    "api/v1",
-                    "domains"
+                    "api/v1/domain"
                 ]
             }
         },
@@ -3149,8 +3132,7 @@
                 },
                 "summary": "get domains",
                 "tags": [
-                    "api/v1",
-                    "domains"
+                    "api/v1/domains"
                 ]
             }
         },
@@ -3230,8 +3212,7 @@
                 },
                 "summary": "list files",
                 "tags": [
-                    "api/v1",
-                    "file-manager"
+                    "api/v1/file-manager"
                 ]
             }
         },
@@ -3311,8 +3292,7 @@
                 },
                 "summary": "copy directory",
                 "tags": [
-                    "api/v1",
-                    "file-manager"
+                    "api/v1/file-manager"
                 ]
             }
         },
@@ -3392,8 +3372,7 @@
                 },
                 "summary": "create directory",
                 "tags": [
-                    "api/v1",
-                    "file-manager"
+                    "api/v1/file-manager"
                 ]
             }
         },
@@ -3473,8 +3452,7 @@
                 },
                 "summary": "delete directory",
                 "tags": [
-                    "api/v1",
-                    "file-manager"
+                    "api/v1/file-manager"
                 ]
             }
         },
@@ -3554,8 +3532,7 @@
                 },
                 "summary": "move directory",
                 "tags": [
-                    "api/v1",
-                    "file-manager"
+                    "api/v1/file-manager"
                 ]
             }
         },
@@ -3624,8 +3601,7 @@
                 },
                 "summary": "upload file",
                 "tags": [
-                    "api/v1",
-                    "file-manager"
+                    "api/v1/file-manager"
                 ]
             }
         },
@@ -3705,8 +3681,7 @@
                 },
                 "summary": "create github connector",
                 "tags": [
-                    "api/v1",
-                    "github-connector"
+                    "api/v1/github-connector"
                 ]
             },
             "put": {
@@ -3784,8 +3759,7 @@
                 },
                 "summary": "update github connector request",
                 "tags": [
-                    "api/v1",
-                    "github-connector"
+                    "api/v1/github-connector"
                 ]
             }
         },
@@ -3854,8 +3828,7 @@
                 },
                 "summary": "get github connectors",
                 "tags": [
-                    "api/v1",
-                    "github-connector"
+                    "api/v1/github-connector"
                 ]
             }
         },
@@ -3924,8 +3897,7 @@
                 },
                 "summary": "get github repositories",
                 "tags": [
-                    "api/v1",
-                    "github-connector"
+                    "api/v1/github-connector"
                 ]
             }
         },
@@ -4133,8 +4105,7 @@
                 },
                 "summary": "get preferences",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "preferences"
                 ]
             },
@@ -4213,8 +4184,7 @@
                 },
                 "summary": "update preference",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "preferences"
                 ]
             }
@@ -4295,8 +4265,7 @@
                 },
                 "summary": "delete smtp",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "smtp"
                 ]
             },
@@ -4364,8 +4333,7 @@
                 },
                 "summary": "get smtp",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "smtp"
                 ]
             },
@@ -4444,8 +4412,7 @@
                 },
                 "summary": "add smtp",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "smtp"
                 ]
             },
@@ -4524,8 +4491,7 @@
                 },
                 "summary": "update smtp",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "smtp"
                 ]
             }
@@ -4606,8 +4572,7 @@
                 },
                 "summary": "delete webhook config",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "webhook"
                 ]
             },
@@ -4686,8 +4651,7 @@
                 },
                 "summary": "create webhook config",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "webhook"
                 ]
             },
@@ -4766,8 +4730,7 @@
                 },
                 "summary": "update webhook config",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "webhook"
                 ]
             }
@@ -4845,8 +4808,7 @@
                 },
                 "summary": "get webhook config",
                 "tags": [
-                    "api/v1",
-                    "notification",
+                    "api/v1/notification",
                     "webhook"
                 ]
             }
@@ -4927,8 +4889,7 @@
                 },
                 "summary": "delete organization",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             },
             "post": {
@@ -5006,8 +4967,7 @@
                 },
                 "summary": "create organization",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             },
             "put": {
@@ -5085,8 +5045,7 @@
                 },
                 "summary": "update organization",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5166,8 +5125,7 @@
                 },
                 "summary": "add user to organization",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5247,8 +5205,7 @@
                 },
                 "summary": "remove user from organization",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5317,8 +5274,7 @@
                 },
                 "summary": "get resources",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5387,8 +5343,7 @@
                 },
                 "summary": "get roles",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5468,8 +5423,7 @@
                 },
                 "summary": "update user role",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5549,8 +5503,7 @@
                 },
                 "summary": "get organization users",
                 "tags": [
-                    "api/v1",
-                    "organizations"
+                    "api/v1/organizations"
                 ]
             }
         },
@@ -5630,8 +5583,7 @@
                 },
                 "summary": "perform update",
                 "tags": [
-                    "api/v1",
-                    "update"
+                    "api/v1/update"
                 ]
             }
         },
@@ -5700,8 +5652,7 @@
                 },
                 "summary": "check for updates",
                 "tags": [
-                    "api/v1",
-                    "update"
+                    "api/v1/update"
                 ]
             }
         },
@@ -5770,8 +5721,7 @@
                 },
                 "summary": "get user details",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -5851,8 +5801,7 @@
                 },
                 "summary": "update user name",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -5921,8 +5870,7 @@
                 },
                 "summary": "get user organizations",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -5991,8 +5939,7 @@
                 },
                 "summary": "get settings",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -6072,8 +6019,7 @@
                 },
                 "summary": "update auto update",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -6153,8 +6099,7 @@
                 },
                 "summary": "update font",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -6234,8 +6179,7 @@
                 },
                 "summary": "update language",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
@@ -6315,15 +6259,14 @@
                 },
                 "summary": "update theme",
                 "tags": [
-                    "api/v1",
-                    "user"
+                    "api/v1/user"
                 ]
             }
         },
-        "/webhook/": {
+        "/api/v1/webhook": {
             "post": {
                 "description": "#### Controller: \n\n`github.com/raghavyuva/nixopus-api/internal/features/deploy/controller.(*DeployController).HandleGithubWebhook`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n\n---\n\n",
-                "operationId": "POST_/webhook/",
+                "operationId": "POST_/api/v1/webhook",
                 "parameters": [
                     {
                         "in": "header",
@@ -6383,7 +6326,10 @@
                         "description": ""
                     }
                 },
-                "summary": "handle github webhook"
+                "summary": "handle github webhook",
+                "tags": [
+                    "api/v1/webhook"
+                ]
             }
         },
         "/ws": {
@@ -6456,62 +6402,63 @@
     "servers": [
         {
             "description": "local server",
-            "url": "http://localhost:8080"
-        },
-        {
-            "description": "staging server",
-            "url": "https://staging.nixopus.com"
-        },
-        {
-            "description": "production server",
-            "url": "https://api.nixopus.com"
+            "url": "http://localhost:8080/api/v1",
+            "variables": {
+                "ws": {
+                    "default": "ws://localhost:8080/api/v1/ws",
+                    "description": "WebSocket server URL"
+                }
+            }
         }
     ],
     "tags": [
         {
-            "name": "api/v1"
+            "name": "api/v1/audit"
         },
         {
             "name": "api/v1/auth"
         },
         {
+            "name": "api/v1/deploy"
+        },
+        {
+            "name": "api/v1/domain"
+        },
+        {
+            "name": "api/v1/domains"
+        },
+        {
+            "name": "api/v1/file-manager"
+        },
+        {
+            "name": "api/v1/github-connector"
+        },
+        {
             "name": "api/v1/health"
         },
         {
+            "name": "api/v1/notification"
+        },
+        {
+            "name": "api/v1/organizations"
+        },
+        {
+            "name": "api/v1/update"
+        },
+        {
+            "name": "api/v1/user"
+        },
+        {
+            "name": "api/v1/webhook"
+        },
+        {
             "name": "application"
-        },
-        {
-            "name": "audit"
-        },
-        {
-            "name": "deploy"
-        },
-        {
-            "name": "domains"
-        },
-        {
-            "name": "file-manager"
-        },
-        {
-            "name": "github-connector"
-        },
-        {
-            "name": "notification"
-        },
-        {
-            "name": "organizations"
         },
         {
             "name": "preferences"
         },
         {
             "name": "smtp"
-        },
-        {
-            "name": "update"
-        },
-        {
-            "name": "user"
         },
         {
             "name": "versions"

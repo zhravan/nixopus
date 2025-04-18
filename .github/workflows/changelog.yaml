@@ -14,10 +14,12 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: release/${{ github.ref_name }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,8 +30,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          RELEASE_BRANCH="release/${GITHUB_REF#refs/tags/}"
-          git checkout -b $RELEASE_BRANCH
       
       - name: Generate Changelog
         run: |
@@ -48,6 +48,6 @@ jobs:
 
           git add CHANGELOG.md
           git commit -m "chore: update changelog"
-          git push origin $RELEASE_BRANCH
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

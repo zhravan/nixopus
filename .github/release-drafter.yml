@@ -9,23 +9,22 @@ categories:
     labels:
       - 'bug'
       - 'fix'
-  - title: '🔧 Maintenance'
+  - title: '🧹 Chores'
     labels:
-      - 'maintenance'
       - 'chore'
-      - 'dependencies'
+      - 'maintenance'
   - title: '📚 Documentation'
     labels:
       - 'documentation'
       - 'docs'
-  - title: '🧹 Code Style'
-    labels:
-      - 'style'
-      - 'format'
   - title: '🧪 Tests'
     labels:
       - 'test'
       - 'testing'
+  - title: '🔧 Refactoring'
+    labels:
+      - 'refactor'
+      - 'refactoring'
   - title: '🔒 Security'
     labels:
       - 'security'
@@ -63,16 +62,12 @@ version-resolver:
   major:
     labels:
       - 'major'
-      - 'breaking-change'
   minor:
     labels:
       - 'minor'
-      - 'feature'
   patch:
     labels:
       - 'patch'
-      - 'fix'
-      - 'bug'
-  default: 'patch'
+  default: patch
 
 filter-by-commitish: true 

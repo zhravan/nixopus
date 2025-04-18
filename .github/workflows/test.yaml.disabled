@@ -1,4 +1,4 @@
-name: Lint Nixopus API
+name: Test Nixopus API
 
 on:
   pull_request:
@@ -6,12 +6,12 @@ on:
       - 'api/**'
   push:
     branches:
-      - '*'
+      - 'master'
     paths:
       - 'api/**'
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +23,6 @@ jobs:
           cache: true
           cache-dependency-path: api/go.sum
       
-      - uses: golangci/golangci-lint-action@v4
-        with:
-          version: latest
-          working-directory: api
-          args: --timeout=5m
+      - name: Test API folder
+        run: |
+          cd api && make test 

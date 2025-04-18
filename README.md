@@ -4,6 +4,13 @@
   <img src="./assets/nixopus_logo_transparent.png" alt="Nixopus Logo" width="300"/>
 </p>
 
+<div align="center">
+
+[![Security Scan](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml)
+[![Package Manager](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml)
+
+</div>
+
 ## Your All-in-One VPS Management Solution
 
 Nixopus is a powerful platform designed to simplify VPS management. Whether you're a DevOps engineer, system administrator, or developer, Nixopus streamlines your workflow with comprehensive tools for deployment, monitoring, and maintenance.

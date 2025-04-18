@@ -12,6 +12,8 @@ import shutil
 import json
 import secrets
 import time
+import string
+import random
 
 class Installer:
     def __init__(self):
@@ -34,7 +36,16 @@ class Installer:
         return domain
     
     def generate_strong_password(self):
-        return secrets.token_urlsafe(16)
+        while True:
+            password = ''.join(random.choices(
+                string.ascii_letters + string.digits + string.punctuation,
+                k=16
+            ))
+            if (any(c.isupper() for c in password) and
+                any(c.islower() for c in password) and
+                any(c.isdigit() for c in password) and
+                any(c in string.punctuation for c in password)):
+                return password
 
     def ask_admin_credentials(self):
         email = input("Please enter the email for the admin: ")

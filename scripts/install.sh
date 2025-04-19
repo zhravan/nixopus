@@ -27,6 +27,11 @@ echo "Downloading Nixopus..."
 git clone https://github.com/raghavyuva/nixopus.git
 cd nixopus/installer
 
+echo "Caddy configuration Setup..."
+mkdir -p /etc/nixopus/caddy
+chmod 755 /etc/nixopus/caddy
+cp ../helpers/Caddyfile /etc/nixopus/caddy/Caddyfile
+
 echo "Setting up Python virtual environment..."
 python3 -m venv venv
 source venv/bin/activate

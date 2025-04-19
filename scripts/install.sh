@@ -36,6 +36,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 echo "Starting installation..."
+cat docker-compose.yml
 python3 install.py "$@"
 
 deactivate

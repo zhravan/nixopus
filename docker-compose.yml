@@ -81,9 +81,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ${CADDY_DATA_VOLUME:-/etc/nixopus/caddy}/data:/data
-      - ${CADDY_CONFIG_VOLUME:-/etc/nixopus/caddy}/config:/config
-      - /etc/nixopus/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /etc/nixopus/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ${CADDY_DATA_VOLUME:-/etc/nixopus/caddy}:/data
+      - ${CADDY_CONFIG_VOLUME:-/etc/nixopus/caddy}:/config
     command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
     networks:
       - nixopus-network

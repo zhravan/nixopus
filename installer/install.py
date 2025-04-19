@@ -285,19 +285,11 @@ class Installer:
     def setup_caddy(self, domains):
         print("\nSetting up Proxy...")
         try:
-            caddy_file_path = os.path.join(self.project_root, 'helpers', 'caddy.json')
-            if not os.path.exists(caddy_file_path):
-                raise FileNotFoundError(f"Caddy configuration file not found at: {caddy_file_path}")
-                
-            with open(caddy_file_path, 'r') as f:
+            with open('../helpers/caddy.json', 'r') as f:
                 config_str = f.read()
                 config_str = config_str.replace('{env.APP_DOMAIN}', domains['app_domain'])
                 config_str = config_str.replace('{env.API_DOMAIN}', domains['api_domain'])
                 config = json.loads(config_str)
-            
-            print(f"Loading Caddy configuration for domains:")
-            print(f"  - App Domain: {domains['app_domain']}")
-            print(f"  - API Domain: {domains['api_domain']}")
             
             response = requests.post(
                 'http://localhost:2019/load',
@@ -307,19 +299,13 @@ class Installer:
             
             if response.status_code == 200:
                 print("Caddy configuration loaded successfully")
-                print(f"Response: {response.text}")
             else:
-                print("Error: Failed to load Caddy configuration:")
-                print(f"Status Code: {response.status_code}")
-                print(f"Response: {response.text}")
-        except FileNotFoundError as e:
-            print(f"Error: {str(e)}")
+                print("Failed to load Caddy configuration:")
+                print(response.text)
         except requests.exceptions.RequestException as e:
-            print(f"Error: Error connecting to Caddy: {str(e)}")
-        except json.JSONDecodeError as e:
-            print(f"Error: Invalid JSON in Caddy configuration: {str(e)}")
+            print(f"Error connecting to Caddy: {str(e)}")
         except Exception as e:
-            print(f"Error: Error setting up Caddy: {str(e)}")
+            print(f"Error setting up Caddy: {str(e)}")
     
     def setup_admin(self, email, password, api_domain):
         print("\nSetting up admin...")

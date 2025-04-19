@@ -40,9 +40,7 @@ python3 install.py "$@"
 
 echo "Caddy configuration Setup..."
 rm -rf /etc/nixopus/caddy
-mkdir -p /etc/nixopus/caddy/data/caddy
-mkdir -p /etc/nixopus/caddy/data/caddy/acme
-mkdir -p /etc/nixopus/caddy/data/caddy/locks
+mkdir -p /etc/nixopus/caddy/data
 mkdir -p /etc/nixopus/caddy/config
 echo '{
 	admin 0.0.0.0:2019
@@ -51,12 +49,8 @@ echo '{
 		level INFO
 	}
 }' > /etc/nixopus/caddy/Caddyfile
-
 chmod 755 /etc/nixopus/caddy
 chmod 755 /etc/nixopus/caddy/data
-chmod 755 /etc/nixopus/caddy/data/caddy
-chmod 755 /etc/nixopus/caddy/data/caddy/acme
-chmod 755 /etc/nixopus/caddy/data/caddy/locks
 chmod 755 /etc/nixopus/caddy/config
 chmod 644 /etc/nixopus/caddy/Caddyfile
 

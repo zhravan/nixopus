@@ -35,9 +35,6 @@ echo "Installing dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "Starting installation..."
-python3 install.py "$@"
-
 echo "Caddy configuration Setup..."
 rm -rf /etc/nixopus/caddy
 mkdir -p /etc/nixopus/caddy
@@ -48,7 +45,9 @@ echo '{
 		level INFO
 	}
 }' > /etc/nixopus/caddy/Caddyfile
-chmod 644 /etc/nixopus/caddy/Caddyfile
+
+echo "Starting installation..."
+python3 install.py "$@"
 
 deactivate
 cd $TEMP_DIR/..

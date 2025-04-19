@@ -20,7 +20,7 @@ cd nixopus/installer
 echo "Starting installation..."
 python3 install.py
 
-cd /
+cd $TEMP_DIR/..
 rm -rf $TEMP_DIR
 
 echo "Installation completed!"

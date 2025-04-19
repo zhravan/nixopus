@@ -39,17 +39,19 @@ echo "Starting installation..."
 python3 install.py "$@"
 
 echo "Caddy configuration Setup..."
-mkdir -p /etc/nixopus/caddy
-cat > /etc/nixopus/caddy/Caddyfile << 'EOF'
-{
+rm -rf /etc/nixopus/caddy
+mkdir -p /etc/nixopus/caddy/data
+mkdir -p /etc/nixopus/caddy/config
+echo '{
 	admin 0.0.0.0:2019
 	log {
 		format json
 		level INFO
 	}
-}
-EOF
+}' > /etc/nixopus/caddy/Caddyfile
 chmod 755 /etc/nixopus/caddy
+chmod 755 /etc/nixopus/caddy/data
+chmod 755 /etc/nixopus/caddy/config
 chmod 644 /etc/nixopus/caddy/Caddyfile
 
 deactivate

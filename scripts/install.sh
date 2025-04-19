@@ -25,14 +25,7 @@ cd $TEMP_DIR
 
 echo "Downloading Nixopus..."
 git clone https://github.com/raghavyuva/nixopus.git
-cd nixopus
-
-mkdir -p api/helpers
-mkdir -p /etc/nixopus/caddy
-mkdir -p /etc/nixopus/configs
-mkdir -p /etc/nixopus/db
-
-cd installer
+cd nixopus/installer
 
 echo "Setting up Python virtual environment..."
 python3 -m venv venv

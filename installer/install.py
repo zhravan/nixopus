@@ -24,10 +24,12 @@ class Installer:
             print("Please run the script with sudo privileges")
             sys.exit(1)
 
-    def setup_environment(self, domains):
-        environment = EnvironmentSetup(domains)
-        environment.setup_environment()
-        return environment.env_vars
+    def setup_environment(self, domain):
+        print("\nSetting up environment...")
+        env_setup = EnvironmentSetup(domain)
+        env_vars = env_setup.setup_environment()
+        print("Environment setup completed!")
+        return env_vars
 
 def main():
     installer = Installer()

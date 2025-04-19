@@ -37,31 +37,35 @@ class Installer:
             validation = Validation()
             base_domain = None
             
-            if args.api_domain and args.app_domain:
-                validation.validate_domain(args.api_domain)
-                validation.validate_domain(args.app_domain)
-                base_domain = args.api_domain.split('.', 1)[1] if '.' in args.api_domain else args.api_domain
-                return {
-                    "api_domain": args.api_domain,
-                    "app_domain": args.app_domain,
-                    "base_domain": base_domain
-                }
-            elif args.api_domain:
-                validation.validate_domain(args.api_domain)
-                base_domain = args.api_domain.split('.', 1)[1] if '.' in args.api_domain else args.api_domain
-                return {
-                    "api_domain": args.api_domain,
-                    "app_domain": f"nixopus.{base_domain}",
-                    "base_domain": base_domain
-                }
-            elif args.app_domain:
-                validation.validate_domain(args.app_domain)
-                base_domain = args.app_domain.split('.', 1)[1] if '.' in args.app_domain else args.app_domain
-                return {
-                    "api_domain": f"nixopusapi.{base_domain}",
-                    "app_domain": args.app_domain,
-                    "base_domain": base_domain
-                }
+            try:
+                if args.api_domain and args.app_domain:
+                    validation.validate_domain(args.api_domain)
+                    validation.validate_domain(args.app_domain)
+                    base_domain = args.api_domain.split('.', 1)[1] if '.' in args.api_domain else args.api_domain
+                    return {
+                        "api_domain": args.api_domain,
+                        "app_domain": args.app_domain,
+                        "base_domain": base_domain
+                    }
+                elif args.api_domain:
+                    validation.validate_domain(args.api_domain)
+                    base_domain = args.api_domain.split('.', 1)[1] if '.' in args.api_domain else args.api_domain
+                    return {
+                        "api_domain": args.api_domain,
+                        "app_domain": f"nixopus.{base_domain}",
+                        "base_domain": base_domain
+                    }
+                elif args.app_domain:
+                    validation.validate_domain(args.app_domain)
+                    base_domain = args.app_domain.split('.', 1)[1] if '.' in args.app_domain else args.app_domain
+                    return {
+                        "api_domain": f"nixopusapi.{base_domain}",
+                        "app_domain": args.app_domain,
+                        "base_domain": base_domain
+                    }
+            except SystemExit:
+                print("Invalid domain provided. Please try again with valid domains.")
+                return None
         return None
     
     def get_admin_credentials_from_args(self, args):
@@ -81,9 +85,14 @@ class Installer:
                 return args.email, password
             elif args.password:
                 validation.validate_password(args.password)
-                email = input("Please enter the email for the admin: ")
-                validation.validate_email(email)
-                return email, args.password
+                while True:
+                    email = input("Please enter the email for the admin: ")
+                    try:
+                        validation.validate_email(email)
+                        return email, args.password
+                    except SystemExit:
+                        print("Please enter a valid email address")
+                        continue
         return None, None
     
     # this script will only work with root privileges
@@ -104,9 +113,16 @@ class Installer:
                 return password
 
     def ask_admin_credentials(self):
-        email = input("Please enter the email for the admin: ")
         validation = Validation()
-        validation.validate_email(email)
+        while True:
+            email = input("Please enter the email for the admin: ")
+            try:
+                validation.validate_email(email)
+                break
+            except SystemExit:
+                print("Please enter a valid email address")
+                continue
+                
         password = input("Please enter the password for the admin(generates a strong password if left blank): ")
         if not password:
             password = self.generate_strong_password()
@@ -115,17 +131,27 @@ class Installer:
     
     def check_docker_version(self):
         try:
-            subprocess.run(["docker", "--version"], check=True, capture_output=True)
+            result = subprocess.run(["docker", "--version"], check=True, capture_output=True, text=True)
+            version_string = result.stdout.strip()
+            if not self._version_check(version_string, self.required_docker_version):
+                print(f"Error: Docker version {self.required_docker_version} or higher is required")
+                print(f"Current version: {version_string}")
+                sys.exit(1)
         except subprocess.CalledProcessError as e:
-            print(f"Error: Docker version {self.required_docker_version} or higher is required")
+            print(f"Error: Docker is not installed or not working properly")
             print(e.stderr.decode())
             sys.exit(1)
             
     def check_docker_compose_version(self):
         try:
-            subprocess.run(["docker-compose", "--version"], check=True, capture_output=True)
+            result = subprocess.run(["docker-compose", "--version"], check=True, capture_output=True, text=True)
+            version_string = result.stdout.strip()
+            if not self._version_check(version_string, self.required_compose_version):
+                print(f"Error: Docker Compose version {self.required_compose_version} or higher is required")
+                print(f"Current version: {version_string}")
+                sys.exit(1)
         except subprocess.CalledProcessError as e:
-            print(f"Error: Docker Compose version {self.required_compose_version} or higher is required")
+            print(f"Error: Docker Compose is not installed or not working properly")
             print(e.stderr.decode())
             sys.exit(1)
             
@@ -165,12 +191,20 @@ class Installer:
     def start_services(self):
         print("\nStarting services...")
         try:
+            # Check if docker daemon is running
+            try:
+                subprocess.run(["docker", "info"], check=True, capture_output=True)
+            except subprocess.CalledProcessError:
+                print("Error: Docker daemon is not running. Please start the Docker service and try again.")
+                sys.exit(1)
+
             os.environ["DOCKER_HOST"] = "tcp://localhost:2376"
             os.environ["DOCKER_TLS_VERIFY"] = "1"
             os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
             
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             
+            print("Pulling required images...")
             pull_result = subprocess.run(
                 compose_cmd + ["pull"],
                 capture_output=True,
@@ -181,8 +215,13 @@ class Installer:
             if pull_result.returncode != 0:
                 print("Error pulling images:")
                 print(pull_result.stderr)
+                print("\nTroubleshooting tips:")
+                print("1. Check your internet connection")
+                print("2. Verify Docker is running: sudo systemctl status docker")
+                print("3. Try pulling images manually: docker pull <image-name>")
                 sys.exit(1)
             
+            print("Starting services...")
             result = subprocess.run(
                 compose_cmd + ["up", "-d"],
                 capture_output=True,
@@ -193,9 +232,17 @@ class Installer:
             if result.returncode != 0:
                 print("Error starting services:")
                 print(result.stderr)
+                print("\nTroubleshooting tips:")
+                print("1. Check if ports are already in use")
+                print("2. Verify Docker has enough resources")
+                print("3. Check Docker logs: docker-compose logs")
                 sys.exit(1)
         except Exception as e:
             print(f"Error starting services: {str(e)}")
+            print("\nTroubleshooting tips:")
+            print("1. Check if Docker is installed and running")
+            print("2. Verify you have sufficient permissions")
+            print("3. Check system resources (memory, disk space)")
             sys.exit(1)
 
     def verify_installation(self):
@@ -315,15 +362,22 @@ def main():
     
     installer.ask_for_sudo()
     
-    
     domains = installer.get_domains_from_args(args)
     if not domains:
-        domain = input("Please enter the base domain (e.g. nixopus.com): ")
-        domains = {
-            "api_domain": f"nixopusapi.{domain}",
-            "app_domain": f"nixopus.{domain}",
-            "base_domain": domain
-        }
+        validation = Validation()
+        while True:
+            domain = input("Please enter the base domain (e.g. nixopus.com): ")
+            try:
+                validation.validate_domain(domain)
+                domains = {
+                    "api_domain": f"nixopusapi.{domain}",
+                    "app_domain": f"nixopus.{domain}",
+                    "base_domain": domain
+                }
+                break
+            except SystemExit:
+                print("Please enter a valid domain name")
+                continue
     
     email, password = installer.get_admin_credentials_from_args(args)
     if not email or not password:

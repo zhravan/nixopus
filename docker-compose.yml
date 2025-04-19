@@ -83,7 +83,7 @@ services:
     volumes:
       - ${CADDY_DATA_VOLUME:-/etc/nixopus/caddy}/data:/data
       - ${CADDY_CONFIG_VOLUME:-/etc/nixopus/caddy}/config:/config
-      - /etc/nixopus/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - /etc/nixopus/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
     command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
     networks:
       - nixopus-network

@@ -27,12 +27,18 @@ echo "Downloading Nixopus..."
 git clone https://github.com/raghavyuva/nixopus.git
 cd nixopus/installer
 
+echo "Setting up Python virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
+
 echo "Installing dependencies..."
-pip3 install -r requirements.txt
+pip install --upgrade pip
+pip install -r requirements.txt
 
 echo "Starting installation..."
-python3 install.py
+python3 install.py "$@"
 
+deactivate
 cd $TEMP_DIR/..
 rm -rf $TEMP_DIR
 

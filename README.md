@@ -20,16 +20,16 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
 For complete documentation, visit our [Documentation Portal](https://docs.nixopus.com).
 
 ## Demo
-<div style="position: relative; width: 100%; max-width: 600px; margin: 20px auto;">
-  <a href="https://youtu.be/QTrCqsesibU" target="_blank" style="display: block;">
-    <img src="https://img.youtube.com/vi/QTrCqsesibU/0.jpg" style="width: 100%; display: block;">
+
+<p align="center">
+  <a href="https://youtu.be/QTrCqsesibU" title="Nixopus Demo - Click to Watch!">
+    <img src="https://img.youtube.com/vi/QTrCqsesibU/0.jpg" 
+         alt="Nixopus Demo" 
+         width="600" 
+         height="440" 
+         style="max-width: 100%;">
   </a>
-  <a href="https://youtu.be/QTrCqsesibU" target="_blank" 
-     style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_play_button_icon_%282013%E2%80%932017%29.svg" 
-         style="width: 80px; height: auto;">
-  </a>
-</div>
+</p>
 
 ## 🤝 Contributing
 

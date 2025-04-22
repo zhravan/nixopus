@@ -1,4 +1,4 @@
-License
+License [https://docs.n8n.io/sustainable-use-license/][Fair Code - Sustainable use license]
 Portions of this software are licensed as follows:
 
 Content of branches other than the main branch (i.e. "master") are not licensed.

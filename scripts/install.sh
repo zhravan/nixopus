@@ -27,8 +27,16 @@ echo "Downloading Nixopus..."
 git clone https://github.com/raghavyuva/nixopus.git > /dev/null 2>&1
 cd nixopus > /dev/null 2>&1
 
-if [ "$1" == "staging" ]; then
-    echo "Checking out to feat/develop branch for staging..."
+ENV="production"
+for arg in "$@"; do
+    if [[ $arg == "--env"* ]]; then
+        ENV=$(echo $arg | cut -d'=' -f2)
+        break
+    fi
+done
+
+if [ "$ENV" == "staging" ]; then
+    echo "Checking out to feat/staging_env_setup branch for staging..."
     git checkout feat/staging_env_setup > /dev/null 2>&1
     NIXOPUS_DIR="/etc/nixopus-staging"
 else

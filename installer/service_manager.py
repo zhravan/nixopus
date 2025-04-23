@@ -108,8 +108,24 @@ class ServiceManager:
         except Exception as e:
             print(f"Error starting services: {str(e)}")
             sys.exit(1)
+            
+    def production_containers(self):
+        return {
+            "nixopus-api-container": "API service",
+            "nixopus-db-container": "Database service",
+            "nixopus-view-container": "View service",
+            "nixopus-caddy-container": "Caddy service"
+        }
+    
+    def staging_containers(self):
+        return {
+            "nixopus-staging-api": "API service",
+            "nixopus-staging-db": "Database service",
+            "nixopus-staging-view": "View service",
+            "nixopus-staging-caddy": "Caddy service"
+        }
 
-    def verify_installation(self):
+    def verify_installation(self,env):
         print("\nVerifying installation...")
         try:
             result = subprocess.run(["docker", "ps", "--format", "{{.Names}} {{.Status}}"], capture_output=True, text=True)
@@ -119,12 +135,7 @@ class ServiceManager:
                 sys.exit(1)
                 
             running_containers = result.stdout.splitlines()
-            required_containers = {
-                "nixopus-api-container": "API service",
-                "nixopus-db-container": "Database service",
-                "nixopus-view-container": "View service",
-                "nixopus-caddy-container": "Caddy service"
-            }
+            required_containers = self.production_containers() if env == "production" else self.staging_containers()
             
             missing_containers = []
             for container, service_name in required_containers.items():
@@ -146,7 +157,7 @@ class ServiceManager:
             print(f"Error verifying installation: {str(e)}")
             sys.exit(1)
     
-    def setup_caddy(self, domains):
+    def setup_caddy(self, domains, env):
         print("\nSetting up Proxy...")
         try:
             with open('../helpers/caddy.json', 'r') as f:
@@ -154,9 +165,9 @@ class ServiceManager:
                 config_str = config_str.replace('{env.APP_DOMAIN}', domains['app_domain'])
                 config_str = config_str.replace('{env.API_DOMAIN}', domains['api_domain'])
                 config = json.loads(config_str)
-            
+            request_url = 'http://localhost:2019/load' if env == "production" else 'http://localhost:2020/load'
             response = requests.post(
-                'http://localhost:2019/load',
+                request_url,
                 json=config,
                 headers={'Content-Type': 'application/json'}
             )

@@ -80,9 +80,9 @@ class ServiceManager:
             
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             if env == "staging":
-                compose_cmd += ["-f", "docker-compose-staging.yml"]
+                compose_cmd += ["-f", "../docker-compose-staging.yml"]
             else:
-                compose_cmd += ["-f", "docker-compose.yml"]
+                compose_cmd += ["-f", "../docker-compose.yml"]
             print("Pulling required images...")
             pull_result = subprocess.run(
                 compose_cmd + ["pull"],

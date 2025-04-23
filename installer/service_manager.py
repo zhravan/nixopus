@@ -80,7 +80,7 @@ class ServiceManager:
             os.environ["DOCKER_CONTEXT"] = "nixopus" if env == "production" else "nixopus-staging"
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             if env == "staging":
-                compose_cmd += ["-f", "../docker-compose-staging.yml", "--context", "nixopus-staging", "--build"]
+                compose_cmd += ["-f", "../docker-compose-staging.yml", "--build"]
                 print("Building staging images...")
                 build_result = subprocess.run(
                     compose_cmd + ["build"],

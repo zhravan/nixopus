@@ -61,7 +61,7 @@ def main():
     
     installer.service_manager.check_system_requirements()
     env_vars = installer.setup_environment(domains,env)
-    installer.service_manager.start_services()
+    installer.service_manager.start_services(env)
     installer.service_manager.verify_installation(env) 
     installer.service_manager.setup_caddy(domains,env)
     time.sleep(10)

@@ -65,7 +65,7 @@ class ServiceManager:
             return False
         return tuple(map(int, version.group().split('.'))) >= tuple(map(int, required_version.split('.')))
 
-    def start_services(self):
+    def start_services(self, env):
         print("\nStarting services...")
         try:
             try:
@@ -79,7 +79,10 @@ class ServiceManager:
             os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
             
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
-            
+            if env == "staging":
+                compose_cmd += ["-f", "docker-compose-staging.yml"]
+            else:
+                compose_cmd += ["-f", "docker-compose.yml"]
             print("Pulling required images...")
             pull_result = subprocess.run(
                 compose_cmd + ["pull"],

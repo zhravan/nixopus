@@ -198,11 +198,10 @@ class EnvironmentSetup:
             
             result = subprocess.run([
                 "docker", "context", "create", self.context_name,
-                "--docker", f"host=tcp://{local_ip}:{docker_port}," +
-                           f"ca={self.docker_certs_dir / 'ca.pem'}," +
-                           f"cert={self.docker_certs_dir / 'cert.pem'}," +
-                           f"key={self.docker_certs_dir / 'key.pem'}," +
-                           "tls=true"
+                "--docker", f"host=tcp://{local_ip}:{docker_port}",
+                "--docker", f"ca={self.docker_certs_dir / 'ca.pem'}",
+                "--docker", f"cert={self.docker_certs_dir / 'cert.pem'}",
+                "--docker", f"key={self.docker_certs_dir / 'key.pem'}"
             ], capture_output=True, text=True)
             
             if result.returncode != 0:

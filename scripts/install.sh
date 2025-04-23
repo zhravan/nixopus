@@ -29,7 +29,7 @@ cd nixopus > /dev/null 2>&1
 
 if [ "$1" == "staging" ]; then
     echo "Checking out to feat/develop branch for staging..."
-    git checkout feat/develop > /dev/null 2>&1
+    git checkout feat/staging_env_setup > /dev/null 2>&1
     NIXOPUS_DIR="/etc/nixopus-staging"
 else
     NIXOPUS_DIR="/etc/nixopus"

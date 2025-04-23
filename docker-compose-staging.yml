@@ -23,7 +23,7 @@ services:
       - ${MOUNT_PATH:-/etc/nixopus/configs}:/etc/nixopus/configs
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - nixopus-staging-network
+      - nixopus-network
     depends_on:
       nixopus-staging-db:
         condition: service_healthy
@@ -64,23 +64,8 @@ services:
     volumes:
       - ./logs:/app/logs
     networks:
-      - nixopus-staging-network
-
-  nixopus-staging-caddy:
-    image: caddy:latest
-    container_name: nixopus-staging-caddy
-    ports:
-      - "2020:2019"
-      - "8081:80"
-      - "8445:443"
-    volumes:
-      - /etc/nixopus-staging/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ${CADDY_DATA_VOLUME:-/etc/nixopus-staging/caddy/data}:/data
-      - ${CADDY_CONFIG_VOLUME:-/etc/nixopus-staging/caddy/config}:/config
-    command: [ "caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile" ]
-    networks:
-      - nixopus-staging-network
+      - nixopus-network
 
 networks:
-  nixopus-staging-network:
+  nixopus-network:
     driver: bridge

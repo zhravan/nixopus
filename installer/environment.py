@@ -321,7 +321,7 @@ class EnvironmentSetup:
             "DOCKER_TLS_VERIFY": "1",
             "DOCKER_CERT_PATH": str(self.docker_certs_dir),
             "DOCKER_CONTEXT": self.context_name,
-            "CADDY_ENDPOINT": "http://nixopus-caddy:2019" if self.env == "production" else "http://nixopus-staging-caddy:2020",
+            "CADDY_ENDPOINT": "http://nixopus-caddy:2019",
             "CADDY_DATA_VOLUME": str(self.config_dir / "caddy" / "data"),
             "CADDY_CONFIG_VOLUME": str(self.config_dir / "caddy" / "config"),
             "DB_VOLUME": str(self.config_dir / "db"),

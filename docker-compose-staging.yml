@@ -74,7 +74,7 @@ services:
       - "8081:80"
       - "8445:443"
     volumes:
-      - /etc/nixopus-staging/caddy/config:/etc/caddy
+      - /etc/nixopus-staging/caddy/Caddyfile:/etc/caddy/Caddyfile
       - ${CADDY_DATA_VOLUME:-/etc/nixopus-staging/caddy/data}:/data
       - ${CADDY_CONFIG_VOLUME:-/etc/nixopus-staging/caddy/config}:/config
     command: [ "caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile" ]

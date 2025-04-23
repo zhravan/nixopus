@@ -13,7 +13,7 @@ services:
       - "${PORT:-8444}:${PORT:-8444}"
     restart: unless-stopped
     env_file:
-      - .env.staging
+      - .env
     environment:
       - HOST_NAME=nixopus-staging-db
     volumes:
@@ -60,7 +60,7 @@ services:
       - "${NEXT_PUBLIC_PORT:-7444}:${NEXT_PUBLIC_PORT:-7444}"
     restart: unless-stopped
     env_file:
-      - .env.staging
+      - .env
     volumes:
       - ./logs:/app/logs
     networks:

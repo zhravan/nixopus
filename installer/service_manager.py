@@ -80,18 +80,18 @@ class ServiceManager:
             os.environ["DOCKER_CONTEXT"] = "nixopus" if env == "production" else "nixopus-staging"
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             if env == "staging":
-                compose_cmd += ["-f", "../docker-compose-staging.yml", "--build"]
-                print("Building staging images...")
-                build_result = subprocess.run(
-                    compose_cmd + ["build"],
+                compose_cmd += ["-f", "../docker-compose-staging.yml"]
+                print("Building and starting staging services...")
+                result = subprocess.run(
+                    compose_cmd + ["up", "--build", "-d"],
                     capture_output=True,
                     text=True,
                     cwd=self.project_root
                 )
-                if build_result.returncode != 0:
-                    print("Error building images:")
-                    print(build_result.stderr)
-                    raise Exception("Failed to build images")
+                if result.returncode != 0:
+                    print("Error building and starting services:")
+                    print(result.stderr)
+                    raise Exception("Failed to build and start services")
             else:
                 compose_cmd += ["-f", "../docker-compose.yml"]
                 print("Pulling production images...")
@@ -105,19 +105,18 @@ class ServiceManager:
                     print("Error pulling images:")
                     print(pull_result.stderr)
                     raise Exception("Failed to pull images")
-            
-            print("Starting services...")
-            result = subprocess.run(
-                compose_cmd + ["up", "-d"],
-                capture_output=True,
-                text=True,
-                cwd=self.project_root
-            )
-            
-            if result.returncode != 0:
-                print("Error starting services:")
-                print(result.stderr)
-                sys.exit(1)
+                
+                print("Starting services...")
+                result = subprocess.run(
+                    compose_cmd + ["up", "-d"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root
+                )
+                if result.returncode != 0:
+                    print("Error starting services:")
+                    print(result.stderr)
+                    raise Exception("Failed to start services")
         except Exception as e:
             print(f"Error starting services: {str(e)}")
             sys.exit(1)

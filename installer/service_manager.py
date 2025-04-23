@@ -77,24 +77,34 @@ class ServiceManager:
             os.environ["DOCKER_HOST"] = "tcp://localhost:2376"
             os.environ["DOCKER_TLS_VERIFY"] = "1"
             os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
-            
+            os.environ["DOCKER_CONTEXT"] = "nixopus" if env == "production" else "nixopus-staging"
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             if env == "staging":
-                compose_cmd += ["-f", "../docker-compose-staging.yml"]
+                compose_cmd += ["-f", "../docker-compose-staging.yml", "--context", "nixopus-staging", "--build"]
+                print("Building staging images...")
+                build_result = subprocess.run(
+                    compose_cmd + ["build"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root
+                )
+                if build_result.returncode != 0:
+                    print("Error building images:")
+                    print(build_result.stderr)
+                    raise Exception("Failed to build images")
             else:
                 compose_cmd += ["-f", "../docker-compose.yml"]
-            print("Pulling required images...")
-            pull_result = subprocess.run(
-                compose_cmd + ["pull"],
-                capture_output=True,
-                text=True,
-                cwd=self.project_root
-            )
-            
-            if pull_result.returncode != 0:
-                print("Error pulling images:")
-                print(pull_result.stderr)
-                sys.exit(1)
+                print("Pulling production images...")
+                pull_result = subprocess.run(
+                    compose_cmd + ["pull"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root
+                )
+                if pull_result.returncode != 0:
+                    print("Error pulling images:")
+                    print(pull_result.stderr)
+                    raise Exception("Failed to pull images")
             
             print("Starting services...")
             result = subprocess.run(

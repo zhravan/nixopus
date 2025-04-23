@@ -8,14 +8,16 @@ import json
 import time
 
 class EnvironmentSetup:
-    def __init__(self, domains):
+    def __init__(self, domains, env="staging"):
         self.domains = domains
         self.project_root = Path(__file__).parent.parent
         self.env_file = self.project_root / ".env"
         self.env_sample = self.project_root / ".env.sample"
-        self.config_dir = Path("/etc/nixopus")
+        # we will use different config directories for staging and production
+        self.config_dir = Path("/etc/nixopus-staging") if env == "staging" else Path("/etc/nixopus")
         self.docker_certs_dir = self.config_dir / "docker-certs"
         self.ssh_dir = self.config_dir / "ssh"
+        self.env = env
 
     def generate_random_string(self, length=12):
         alphabet = string.ascii_letters + string.digits
@@ -230,9 +232,10 @@ class EnvironmentSetup:
         username = f"nixopus_{self.generate_random_string(8)}"
         password = self.generate_random_string(16)
         
-        api_port = 8443
-        next_public_port = 7443 
-        db_port = 5432 
+        # we will use different ports for staging and production
+        api_port = 8443 if self.env == "production" else 8444
+        next_public_port = 7443 if self.env == "production" else 7444
+        db_port = 5432 if self.env == "production" else 5433
 
         private_key_path, public_key_path = self.generate_ssh_key()
         self.setup_authorized_keys()
@@ -262,7 +265,7 @@ class EnvironmentSetup:
             "DOCKER_HOST": f"tcp://{local_ip}:2376",
             "DOCKER_TLS_VERIFY": "1",
             "DOCKER_CERT_PATH": str(self.docker_certs_dir),
-            "CADDY_ENDPOINT": "http://nixopus-caddy:2019",
+            "CADDY_ENDPOINT": "http://nixopus-caddy:2019" if self.env == "production" else "http://nixopus-staging-caddy:2020",
             "CADDY_DATA_VOLUME": str(self.config_dir / "caddy" / "data"),
             "CADDY_CONFIG_VOLUME": str(self.config_dir / "caddy" / "config"),
             "DB_VOLUME": str(self.config_dir / "db"),

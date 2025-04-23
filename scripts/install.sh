@@ -25,7 +25,17 @@ cd $TEMP_DIR > /dev/null 2>&1
 
 echo "Downloading Nixopus..."
 git clone https://github.com/raghavyuva/nixopus.git > /dev/null 2>&1
-cd nixopus/installer > /dev/null 2>&1
+cd nixopus > /dev/null 2>&1
+
+if [ "$1" == "staging" ]; then
+    echo "Checking out to feat/develop branch for staging..."
+    git checkout feat/develop > /dev/null 2>&1
+    NIXOPUS_DIR="/etc/nixopus-staging"
+else
+    NIXOPUS_DIR="/etc/nixopus"
+fi
+
+cd installer > /dev/null 2>&1
 
 echo "Setting up Nixopus Installation Environment..."
 python3 -m venv venv > /dev/null 2>&1
@@ -35,15 +45,15 @@ echo "Installing dependencies..."
 pip install --upgrade pip > /dev/null 2>&1
 pip install -r requirements.txt > /dev/null 2>&1
 
-rm -rf /etc/nixopus/caddy > /dev/null 2>&1
-mkdir -p /etc/nixopus/caddy > /dev/null 2>&1
+rm -rf $NIXOPUS_DIR/caddy > /dev/null 2>&1
+mkdir -p $NIXOPUS_DIR/caddy > /dev/null 2>&1
 echo '{
 	admin 0.0.0.0:2019
 	log {
 		format json
 		level INFO
 	}
-}' > /etc/nixopus/caddy/Caddyfile
+}' > $NIXOPUS_DIR/caddy/Caddyfile
 
 echo "Starting Nixopus Installation..."
 python3 install.py "$@"

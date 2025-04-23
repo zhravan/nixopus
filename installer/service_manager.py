@@ -176,6 +176,10 @@ class ServiceManager:
                 config_str = f.read()
                 config_str = config_str.replace('{env.APP_DOMAIN}', domains['app_domain'])
                 config_str = config_str.replace('{env.API_DOMAIN}', domains['api_domain'])
+                app_reverse_proxy_url = "nixopus-view:7443" if env == "production" else "nixopus-staging-view:7444"
+                api_reverse_proxy_url = "nixopus-api:8443" if env == "production" else "nixopus-staging-api:8444"
+                config_str = config_str.replace('{env.APP_REVERSE_PROXY_URL}', app_reverse_proxy_url)
+                config_str = config_str.replace('{env.API_REVERSE_PROXY_URL}', api_reverse_proxy_url)
                 config = json.loads(config_str)
             request_url = 'http://localhost:2019/load' if env == "production" else 'http://localhost:2020/load'
             response = requests.post(

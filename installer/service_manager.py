@@ -134,7 +134,6 @@ class ServiceManager:
             "nixopus-staging-api": "API service",
             "nixopus-staging-db": "Database service",
             "nixopus-staging-view": "View service",
-            "nixopus-staging-caddy": "Caddy service"
         }
 
     def verify_installation(self,env):

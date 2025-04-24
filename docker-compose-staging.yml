@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  nixopus-staging-api:
+    image: nixopus-staging-api:latest
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      args:
+        - PORT=${PORT:-8444}
+    container_name: nixopus-staging-api
+    ports:
+      - "${PORT:-8444}:${PORT:-8444}"
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - HOST_NAME=nixopus-staging-db
+    volumes:
+      - ./logs:/app/logs
+      - ${DOCKER_CERT_PATH}:/etc/nixopus-staging/docker-certs
+      - ${SSH_PRIVATE_KEY}:/etc/nixopus-staging/ssh/id_rsa
+      - ${MOUNT_PATH:-/etc/nixopus-staging/configs}:/etc/nixopus-staging/configs
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - nixopus-network
+    depends_on:
+      nixopus-staging-db:
+        condition: service_healthy
+
+  nixopus-staging-db:
+    image: postgres:14-alpine
+    container_name: nixopus-staging-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${USERNAME}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    command: postgres -p 5433
+    ports:
+      - "5433:5433"
+    volumes:
+      - ${DB_VOLUME:-/etc/nixopus-staging/db}:/var/lib/postgresql/data
+    networks:
+      - nixopus-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${USERNAME} -d ${DB_NAME} -p 5433" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nixopus-staging-view:
+    image: nixopus-staging-view:latest
+    build:
+      context: ./view
+      dockerfile: Dockerfile
+    container_name: nixopus-staging-view
+    ports:
+      - "${NEXT_PUBLIC_PORT:-7444}:${NEXT_PUBLIC_PORT:-7444}"
+    restart: unless-stopped
+    env_file:
+      - view/.env
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - nixopus-network
+
+networks:
+  nixopus-network:
+    driver: bridge

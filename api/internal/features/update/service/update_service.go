@@ -131,27 +131,46 @@ func (s *UpdateService) PerformUpdate() error {
 		return fmt.Errorf("failed to create temp directory: %w", err)
 	}
 
-	if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git clone https://github.com/raghavyuva/nixopus.git .", tempDir)); err != nil {
-		return fmt.Errorf("failed to clone repository: %w", err)
+	cloneCmd := fmt.Sprintf("cd %s && GIT_TERMINAL_PROMPT=0 git clone --verbose https://github.com/raghavyuva/nixopus.git . 2>&1", tempDir)
+	cloneOutput, err := ssh.RunCommand(cloneCmd)
+	if err != nil {
+		s.logger.Log(logger.Error, "Git clone failed", fmt.Sprintf("output: %s, error: %v", cloneOutput, err))
+		return fmt.Errorf("failed to clone repository: %w (output: %s)", err, cloneOutput)
 	}
 
 	if s.env == Staging {
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update", tempDir)); err != nil {
-			return fmt.Errorf("failed to checkout staging branch: %w", err)
+		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update 2>&1", tempDir))
+		if err != nil {
+			s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
+			return fmt.Errorf("failed to checkout staging branch: %w (output: %s)", err, checkoutOutput)
 		}
 	} else {
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout master", tempDir)); err != nil {
-			return fmt.Errorf("failed to checkout master branch: %w", err)
+		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout master 2>&1", tempDir))
+		if err != nil {
+			s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
+			return fmt.Errorf("failed to checkout master branch: %w (output: %s)", err, checkoutOutput)
 		}
 	}
 
+	composeCheckOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && test -f %s && echo 'exists' || echo 'missing'", tempDir, composeFile))
+	if err != nil {
+		return fmt.Errorf("failed to check compose file: %w", err)
+	}
+	if strings.TrimSpace(composeCheckOutput) == "missing" {
+		return fmt.Errorf("compose file %s not found in repository", composeFile)
+	}
+
 	if s.env == Staging {
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart --build", tempDir, composeFile)); err != nil {
-			return fmt.Errorf("failed to restart staging containers: %w", err)
+		restartOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart --build 2>&1", tempDir, composeFile))
+		if err != nil {
+			s.logger.Log(logger.Error, "Container restart failed", fmt.Sprintf("output: %s, error: %v", restartOutput, err))
+			return fmt.Errorf("failed to restart staging containers: %w (output: %s)", err, restartOutput)
 		}
 	} else {
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart", tempDir, composeFile)); err != nil {
-			return fmt.Errorf("failed to restart production containers: %w", err)
+		restartOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart 2>&1", tempDir, composeFile))
+		if err != nil {
+			s.logger.Log(logger.Error, "Container restart failed", fmt.Sprintf("output: %s, error: %v", restartOutput, err))
+			return fmt.Errorf("failed to restart production containers: %w (output: %s)", err, restartOutput)
 		}
 	}
 

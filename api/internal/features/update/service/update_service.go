@@ -86,7 +86,7 @@ func (s *UpdateService) getCurrentVersion() (string, error) {
 func (s *UpdateService) fetchLatestVersion() (string, error) {
 	branch := "heads/master"
 	if s.env == Staging {
-		branch = "heads/feat/auto_update" // TODO: Change to develop after testing
+		branch = "feat/auto_update" // TODO: Change to develop after testing
 	}
 
 	url := fmt.Sprintf("https://raw.githubusercontent.com/raghavyuva/nixopus/%s/version.txt", branch)

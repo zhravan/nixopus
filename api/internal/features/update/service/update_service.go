@@ -118,6 +118,10 @@ func (s *UpdateService) PerformUpdate() error {
 	defer client.Close()
 
 	tempDir := "/tmp/nixopus-update"
+	composeFile := "docker-compose.yml"
+	if s.env == Staging {
+		composeFile = "docker-compose-staging.yml"
+	}
 
 	defer func() {
 		ssh.RunCommand(fmt.Sprintf("rm -rf %s", tempDir))
@@ -131,23 +135,23 @@ func (s *UpdateService) PerformUpdate() error {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 
-	if s.env == Staging {	
-		// Checkout the auto-update branch for staging (to be changed to develop after testing)
+	if s.env == Staging {
 		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update", tempDir)); err != nil {
-			return fmt.Errorf("failed to checkout develop branch: %w", err)
-		}
-
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f docker-compose-staging.yml up --build -d", tempDir)); err != nil {
-			return fmt.Errorf("failed to start staging containers: %w", err)
+			return fmt.Errorf("failed to checkout staging branch: %w", err)
 		}
 	} else {
-		// Checkout the master branch for production
 		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout master", tempDir)); err != nil {
 			return fmt.Errorf("failed to checkout master branch: %w", err)
 		}
+	}
 
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f docker-compose.yml up --build -d", tempDir)); err != nil {
-			return fmt.Errorf("failed to start production containers: %w", err)
+	if s.env == Staging {
+		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart --build", tempDir, composeFile)); err != nil {
+			return fmt.Errorf("failed to restart staging containers: %w", err)
+		}
+	} else {
+		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart", tempDir, composeFile)); err != nil {
+			return fmt.Errorf("failed to restart production containers: %w", err)
 		}
 	}
 

@@ -89,7 +89,7 @@ func (s *UpdateService) fetchLatestVersion() (string, error) {
 		branch = "feat/auto_update" // TODO: Change to develop after testing
 	}
 
-	url := fmt.Sprintf("https://raw.githubusercontent.com/raghavyuva/nixopus/%s/version.txt", branch)
+	url := fmt.Sprintf("https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/%s/version.txt", branch)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", err

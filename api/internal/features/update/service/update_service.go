@@ -84,7 +84,7 @@ func (s *UpdateService) getCurrentVersion() (string, error) {
 
 // fetchLatestVersion fetches the latest version from the appropriate branch from our repo
 func (s *UpdateService) fetchLatestVersion() (string, error) {
-	branch := "heads/master"
+	branch := "master"
 	if s.env == Staging {
 		branch = "feat/auto_update" // TODO: Change to develop after testing
 	}

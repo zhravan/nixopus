@@ -36,8 +36,8 @@ for arg in "$@"; do
 done
 
 if [ "$ENV" == "staging" ]; then
-    echo "Checking out to feat/auto-update branch for staging environment..."
-    git checkout feat/auto-update > /dev/null 2>&1
+    echo "Checking out to feat/auto_update branch for staging environment..."
+    git checkout feat/auto_update > /dev/null 2>&1
     NIXOPUS_DIR="/etc/nixopus-staging"
 else
     NIXOPUS_DIR="/etc/nixopus"

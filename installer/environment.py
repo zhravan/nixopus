@@ -311,7 +311,7 @@ class EnvironmentSetup:
             "WEBSOCKET_URL": f"wss://{self.domains['api_domain']}/ws",
             "WEBHOOK_URL": f"https://{self.domains['api_domain']}/api/v1/webhook",
             "NEXT_PUBLIC_PORT": str(next_public_port),
-            "MOUNT_PATH": "/etc/nixopus/configs",
+            "MOUNT_PATH": "/etc/nixopus/configs" if self.env == "production" else "/etc/nixopus-staging/configs",
             "PORT": str(api_port),
             "SSH_HOST": local_ip,
             "SSH_PORT": "22",

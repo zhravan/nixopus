@@ -133,7 +133,7 @@ func (s *UpdateService) PerformUpdate() error {
 
 	if s.env == Staging {	
 		// Checkout the auto-update branch for staging (to be changed to develop after testing)
-		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto-update", tempDir)); err != nil {
+		if _, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update", tempDir)); err != nil {
 			return fmt.Errorf("failed to checkout develop branch: %w", err)
 		}
 

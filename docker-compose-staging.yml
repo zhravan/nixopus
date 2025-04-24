@@ -18,9 +18,9 @@ services:
       - HOST_NAME=nixopus-staging-db
     volumes:
       - ./logs:/app/logs
-      - ${DOCKER_CERT_PATH}:/etc/nixopus/docker-certs
-      - ${SSH_PRIVATE_KEY}:/etc/nixopus/ssh/id_rsa
-      - ${MOUNT_PATH:-/etc/nixopus/configs}:/etc/nixopus/configs
+      - ${DOCKER_CERT_PATH}:/etc/nixopus-staging/docker-certs
+      - ${SSH_PRIVATE_KEY}:/etc/nixopus-staging/ssh/id_rsa
+      - ${MOUNT_PATH:-/etc/nixopus-staging/configs}:/etc/nixopus-staging/configs
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - nixopus-network
@@ -41,7 +41,7 @@ services:
     ports:
       - "5433:5433"
     volumes:
-      - ${DB_VOLUME:-/etc/nixopus/db}:/var/lib/postgresql/data
+      - ${DB_VOLUME:-/etc/nixopus-staging/db}:/var/lib/postgresql/data
     networks:
       - nixopus-network
     healthcheck:

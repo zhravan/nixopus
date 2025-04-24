@@ -316,15 +316,15 @@ class EnvironmentSetup:
             "SSH_HOST": local_ip,
             "SSH_PORT": "22",
             "SSH_USER": "root",
-            "SSH_PRIVATE_KEY": str(Path("/etc/nixopus/ssh/id_rsa")),
+            "SSH_PRIVATE_KEY": str(private_key_path),
             "DOCKER_HOST": f"tcp://{local_ip}:2376" if self.env == "production" else f"tcp://{local_ip}:2377",
             "DOCKER_TLS_VERIFY": "1",
-            "DOCKER_CERT_PATH": str(Path("/etc/nixopus/docker-certs")),
+            "DOCKER_CERT_PATH": str(self.docker_certs_dir),
             "DOCKER_CONTEXT": self.context_name,
             "CADDY_ENDPOINT": "http://nixopus-caddy:2019",
-            "CADDY_DATA_VOLUME": str(Path("/etc/nixopus/caddy/data")),
-            "CADDY_CONFIG_VOLUME": str(Path("/etc/nixopus/caddy/config")),
-            "DB_VOLUME": str(Path("/etc/nixopus/db")),
+            "CADDY_DATA_VOLUME": str(self.config_dir / "caddy" / "data"),
+            "CADDY_CONFIG_VOLUME": str(self.config_dir / "caddy" / "config"),
+            "DB_VOLUME": str(self.config_dir / "db"),
             "ALLOWED_ORIGIN": f"https://{self.domains['app_domain']}"
         }
 

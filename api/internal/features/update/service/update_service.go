@@ -65,7 +65,7 @@ func (s *UpdateService) getPathConfig() PathConfig {
 	}
 	return PathConfig{
 		SourceDir:   baseDir + "/source",
-		BackupDir:   fmt.Sprintf("%s-backup-%s", baseDir, time.Now().Format("20060102-150405")),
+		BackupDir:   fmt.Sprintf("%s/source_backups/backup-%s", baseDir, time.Now().Format("20060102-150405")),
 		ComposeFile: composeFile,
 	}
 }
@@ -164,10 +164,6 @@ func (s *UpdateService) PerformUpdate() error {
 		return err
 	}
 
-	if err := s.stopContainers(ssh, paths); err != nil {
-		s.logger.Log(logger.Warning, "Container stop warning", err.Error())
-	}
-
 	if err := s.startContainers(ssh, paths); err != nil {
 		return err
 	}
@@ -258,12 +254,6 @@ func (s *UpdateService) cloneRepository(ssh *ssh.SSH, paths PathConfig) error {
 	return nil
 }
 
-func (s *UpdateService) stopContainers(ssh *ssh.SSH, paths PathConfig) error {
-	stopCmd := fmt.Sprintf("cd %s && docker compose -f %s down 2>&1", paths.SourceDir, paths.ComposeFile)
-	_, err := ssh.RunCommand(stopCmd)
-	return err
-}
-
 func (s *UpdateService) pullLatestImages(ssh *ssh.SSH, paths PathConfig) error {
 	pullCmd := fmt.Sprintf("cd %s && docker compose -f %s pull 2>&1", paths.SourceDir, paths.ComposeFile)
 	_, err := ssh.RunCommand(pullCmd)
@@ -306,8 +296,6 @@ func (s *UpdateService) handleRollback(ssh *ssh.SSH, paths PathConfig) {
 
 	if strings.TrimSpace(backupExists) == "exists" {
 		s.logger.Log(logger.Warning, "Update failed, rolling back to previous version", "")
-
-		s.stopContainers(ssh, paths)
 
 		restoreCmd := fmt.Sprintf("rm -rf %s && mv %s %s", paths.SourceDir, paths.BackupDir, paths.SourceDir)
 		if _, err := ssh.RunCommand(restoreCmd); err != nil {

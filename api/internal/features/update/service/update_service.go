@@ -260,24 +260,19 @@ func (s *UpdateService) cloneRepository(ssh *ssh.SSH, paths PathConfig) error {
 	return nil
 }
 
-func (s *UpdateService) pullLatestImages(ssh *ssh.SSH, paths PathConfig) error {
-	pullCmd := fmt.Sprintf("cd %s && docker compose -f %s pull 2>&1", paths.SourceDir, paths.ComposeFile)
-	_, err := ssh.RunCommand(pullCmd)
-	return err
-}
-
 func (s *UpdateService) startContainers(ssh *ssh.SSH, paths PathConfig) error {
 	var startCmd string
 	if s.env == Staging {
-		startCmd = fmt.Sprintf("cd %s && docker compose -f %s up -d --build 2>&1", paths.SourceDir, paths.ComposeFile)
+		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=unix:///var/run/docker.sock DOCKER_CONTEXT=nixopus-staging docker compose -f %s up -d --build 2>&1", paths.SourceDir, paths.ComposeFile)
 	} else {
-		if err := s.pullLatestImages(ssh, paths); err != nil {
-			s.logger.Log(logger.Warning, "Docker pull warning", err.Error())
-		}
-		startCmd = fmt.Sprintf("cd %s && docker compose -f %s up -d 2>&1", paths.SourceDir, paths.ComposeFile)
+		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=unix:///var/run/docker.sock DOCKER_CONTEXT=nixopus docker compose -f %s up -d 2>&1", paths.SourceDir, paths.ComposeFile)
 	}
 
-	ssh.RunCommand(startCmd)
+	startOutput, err := ssh.RunCommand(startCmd)
+	if err != nil {
+		s.logger.Log(logger.Error, "Container start failed", fmt.Sprintf("output: %s, error: %v", startOutput, err))
+		return fmt.Errorf("failed to start containers: %w (output: %s)", err, startOutput)
+	}
 	return nil
 }
 

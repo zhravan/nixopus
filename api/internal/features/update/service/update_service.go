@@ -33,20 +33,40 @@ type UpdateService struct {
 	env     Environment
 }
 
+type PathConfig struct {
+	SourceDir   string
+	BackupDir   string
+	ComposeFile string
+}
+
 func NewUpdateService(storage *storage.App, logger *logger.Logger, ctx context.Context) *UpdateService {
-	var env Environment
-	dockerEnv := os.Getenv("DOCKER_CONTEXT")
-	if dockerEnv == "nixopus-staging" {
-		env = Staging
-	} else {
-		env = Production
-	}
 	return &UpdateService{
 		storage: storage,
 		logger:  logger,
 		ctx:     ctx,
 		docker:  docker.NewDockerService(),
-		env:     env,
+		env:     getEnvironment(),
+	}
+}
+
+func getEnvironment() Environment {
+	if os.Getenv("DOCKER_CONTEXT") == "nixopus-staging" {
+		return Staging
+	}
+	return Production
+}
+
+func (s *UpdateService) getPathConfig() PathConfig {
+	baseDir := "/etc/nixopus"
+	composeFile := "docker-compose.yml"
+	if s.env == Staging {
+		baseDir = "/etc/nixopus-staging"
+		composeFile = "docker-compose-staging.yml"
+	}
+	return PathConfig{
+		SourceDir:   baseDir + "/source",
+		BackupDir:   fmt.Sprintf("%s-backup-%s", baseDir, time.Now().Format("20060102-150405")),
+		ComposeFile: composeFile,
 	}
 }
 
@@ -85,11 +105,7 @@ func (s *UpdateService) getCurrentVersion() (string, error) {
 
 // fetchLatestVersion fetches the latest version from the appropriate branch from our repo
 func (s *UpdateService) fetchLatestVersion() (string, error) {
-	branch := "master"
-	if s.env == Staging {
-		branch = "feat/auto_update" // TODO: Change to develop after testing
-	}
-
+	branch := s.getBranch()
 	url := fmt.Sprintf("https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/%s/version.txt", branch)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -109,6 +125,13 @@ func (s *UpdateService) fetchLatestVersion() (string, error) {
 	return strings.TrimSpace(string(versionBytes)), nil
 }
 
+func (s *UpdateService) getBranch() string {
+	if s.env == Staging {
+		return "feat/auto_update"
+	}
+	return "master"
+}
+
 // PerformUpdate performs an update for the current environment
 func (s *UpdateService) PerformUpdate() error {
 	ssh := ssh.NewSSH()
@@ -118,66 +141,196 @@ func (s *UpdateService) PerformUpdate() error {
 	}
 	defer client.Close()
 
-	tempDir := "/tmp/nixopus-update"
-	composeFile := "docker-compose.yml"
-	if s.env == Staging {
-		composeFile = "docker-compose-staging.yml"
+	paths := s.getPathConfig()
+	updateSuccess := false
+
+	defer func() {
+		if !updateSuccess {
+			s.handleRollback(ssh, paths)
+		} else {
+			s.cleanupBackup(ssh, paths)
+		}
+	}()
+
+	if err := s.sourceCodeDirectoryCheck(ssh, paths.SourceDir); err != nil {
+		return err
 	}
 
-	// defer func() {
-	// 	ssh.RunCommand(fmt.Sprintf("rm -rf %s", tempDir))
-	// }()
-
-	if _, err := ssh.RunCommand(fmt.Sprintf("rm -rf %s && mkdir -p %s", tempDir, tempDir)); err != nil {
-		return fmt.Errorf("failed to create temp directory: %w", err)
+	if err := s.createBackup(ssh, paths); err != nil {
+		return err
 	}
 
-	cloneCmd := fmt.Sprintf("cd %s && GIT_TERMINAL_PROMPT=0 git clone --verbose https://github.com/raghavyuva/nixopus.git . 2>&1", tempDir)
+	if err := s.updateRepository(ssh, paths); err != nil {
+		return err
+	}
+
+	if err := s.stopContainers(ssh, paths); err != nil {
+		s.logger.Log(logger.Warning, "Container stop warning", err.Error())
+	}
+
+	if err := s.startContainers(ssh, paths); err != nil {
+		return err
+	}
+
+	if err := s.verifyServices(ssh, paths); err != nil {
+		return err
+	}
+
+	updateSuccess = true
+	s.logger.Log(logger.Info, "Update completed successfully", "")
+	return nil
+}
+
+func (s *UpdateService) sourceCodeDirectoryCheck(ssh *ssh.SSH, sourceDir string) error {
+	dirCheckCmd := fmt.Sprintf("test -d %s && echo 'exists' || echo 'missing'", sourceDir)
+	dirCheckOutput, err := ssh.RunCommand(dirCheckCmd)
+	if err != nil {
+		return fmt.Errorf("failed to check source directory: %w", err)
+	}
+
+	if strings.TrimSpace(dirCheckOutput) == "missing" {
+		if _, err := ssh.RunCommand(fmt.Sprintf("mkdir -p %s", sourceDir)); err != nil {
+			return fmt.Errorf("failed to create source directory: %w", err)
+		}
+	}
+	return nil
+}
+
+func (s *UpdateService) createBackup(ssh *ssh.SSH, paths PathConfig) error {
+	checkContainersCmd := fmt.Sprintf("cd %s && docker compose -f %s ps -q 2>/dev/null | wc -l", paths.SourceDir, paths.ComposeFile)
+	containersOutput, err := ssh.RunCommand(checkContainersCmd)
+	if err == nil && strings.TrimSpace(containersOutput) != "0" {
+		s.logger.Log(logger.Info, "Creating backup of current deployment", paths.BackupDir)
+		backupCmd := fmt.Sprintf("cp -a %s %s", paths.SourceDir, paths.BackupDir)
+		if _, err := ssh.RunCommand(backupCmd); err != nil {
+			return fmt.Errorf("failed to create backup: %w", err)
+		}
+	}
+	return nil
+}
+
+func (s *UpdateService) updateRepository(ssh *ssh.SSH, paths PathConfig) error {
+	gitDirCheckCmd := fmt.Sprintf("test -d %s/.git && echo 'exists' || echo 'missing'", paths.SourceDir)
+	gitDirOutput, err := ssh.RunCommand(gitDirCheckCmd)
+	if err != nil {
+		return fmt.Errorf("failed to check git directory: %w", err)
+	}
+
+	if strings.TrimSpace(gitDirOutput) == "exists" {
+		return s.updateExistingRepository(ssh, paths)
+	}
+	return s.cloneRepository(ssh, paths)
+}
+
+func (s *UpdateService) updateExistingRepository(ssh *ssh.SSH, paths PathConfig) error {
+	s.logger.Log(logger.Info, "Updating existing repository", paths.SourceDir)
+	branch := s.getBranch()
+	fetchCmd := fmt.Sprintf("cd %s && git fetch --all && git reset --hard origin/%s && git checkout %s && git pull 2>&1",
+		paths.SourceDir, branch, branch)
+	fetchOutput, err := ssh.RunCommand(fetchCmd)
+	if err != nil {
+		s.logger.Log(logger.Error, "Git update failed", fmt.Sprintf("output: %s, error: %v", fetchOutput, err))
+		return fmt.Errorf("failed to update repository: %w (output: %s)", err, fetchOutput)
+	}
+	return nil
+}
+
+func (s *UpdateService) cloneRepository(ssh *ssh.SSH, paths PathConfig) error {
+	s.logger.Log(logger.Info, "Cloning repository", paths.SourceDir)
+	if _, err := ssh.RunCommand(fmt.Sprintf("rm -rf %s/* %s/.[!.]*", paths.SourceDir, paths.SourceDir)); err != nil {
+		return fmt.Errorf("failed to clean source directory: %w", err)
+	}
+
+	cloneCmd := fmt.Sprintf("cd %s && GIT_TERMINAL_PROMPT=0 git clone --verbose https://github.com/raghavyuva/nixopus.git . 2>&1", paths.SourceDir)
 	cloneOutput, err := ssh.RunCommand(cloneCmd)
 	if err != nil {
 		s.logger.Log(logger.Error, "Git clone failed", fmt.Sprintf("output: %s, error: %v", cloneOutput, err))
 		return fmt.Errorf("failed to clone repository: %w (output: %s)", err, cloneOutput)
 	}
 
-	if s.env == Staging {
-		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update 2>&1", tempDir+"/nixopus"))
-		if err != nil {
-			s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
-			return fmt.Errorf("failed to checkout staging branch: %w (output: %s)", err, checkoutOutput)
-		}
-	} else {
-		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout master 2>&1", tempDir+"/nixopus"))
-		if err != nil {
-			s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
-			return fmt.Errorf("failed to checkout master branch: %w (output: %s)", err, checkoutOutput)
-		}
-	}
-
-	tempDir = tempDir + "/nixopus"
-
-	composeCheckOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && test -f %s && echo 'exists' || echo 'missing'", tempDir, composeFile))
+	branch := s.getBranch()
+	checkoutCmd := fmt.Sprintf("cd %s && git checkout %s 2>&1", paths.SourceDir, branch)
+	checkoutOutput, err := ssh.RunCommand(checkoutCmd)
 	if err != nil {
-		return fmt.Errorf("failed to check compose file: %w", err)
+		s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
+		return fmt.Errorf("failed to checkout %s branch: %w (output: %s)", branch, err, checkoutOutput)
 	}
-	if strings.TrimSpace(composeCheckOutput) == "missing" {
-		return fmt.Errorf("compose file %s not found in repository", composeFile)
-	}
-
-	if s.env == Staging {
-		restartOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart --build 2>&1", tempDir, composeFile))
-		if err != nil {
-			s.logger.Log(logger.Error, "Container restart failed", fmt.Sprintf("output: %s, error: %v", restartOutput, err))
-			return fmt.Errorf("failed to restart staging containers: %w (output: %s)", err, restartOutput)
-		}
-	} else {
-		restartOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && docker compose -f %s restart 2>&1", tempDir, composeFile))
-		if err != nil {
-			s.logger.Log(logger.Error, "Container restart failed", fmt.Sprintf("output: %s, error: %v", restartOutput, err))
-			return fmt.Errorf("failed to restart production containers: %w (output: %s)", err, restartOutput)
-		}
-	}
-
 	return nil
+}
+
+func (s *UpdateService) stopContainers(ssh *ssh.SSH, paths PathConfig) error {
+	stopCmd := fmt.Sprintf("cd %s && docker compose -f %s down 2>&1", paths.SourceDir, paths.ComposeFile)
+	_, err := ssh.RunCommand(stopCmd)
+	return err
+}
+
+func (s *UpdateService) pullLatestImages(ssh *ssh.SSH, paths PathConfig) error {
+	pullCmd := fmt.Sprintf("cd %s && docker compose -f %s pull 2>&1", paths.SourceDir, paths.ComposeFile)
+	_, err := ssh.RunCommand(pullCmd)
+	return err
+}
+
+func (s *UpdateService) startContainers(ssh *ssh.SSH, paths PathConfig) error {
+	var startCmd string
+	if s.env == Staging {
+		startCmd = fmt.Sprintf("cd %s && docker compose -f %s up -d --build 2>&1", paths.SourceDir, paths.ComposeFile)
+	} else {
+		if err := s.pullLatestImages(ssh, paths); err != nil {
+			s.logger.Log(logger.Warning, "Docker pull warning", err.Error())
+		}
+		startCmd = fmt.Sprintf("cd %s && docker compose -f %s up -d 2>&1", paths.SourceDir, paths.ComposeFile)
+	}
+
+	startOutput, err := ssh.RunCommand(startCmd)
+	if err != nil {
+		s.logger.Log(logger.Error, "Container start failed", fmt.Sprintf("output: %s, error: %v", startOutput, err))
+		return fmt.Errorf("failed to start containers: %w (output: %s)", err, startOutput)
+	}
+	return nil
+}
+
+func (s *UpdateService) verifyServices(ssh *ssh.SSH, paths PathConfig) error {
+	time.Sleep(10 * time.Second)
+	checkCmd := fmt.Sprintf("cd %s && docker compose -f %s ps --format json 2>&1", paths.SourceDir, paths.ComposeFile)
+	checkOutput, err := ssh.RunCommand(checkCmd)
+	if err != nil {
+		s.logger.Log(logger.Error, "Service verification failed", checkOutput)
+		return fmt.Errorf("failed to verify services: %w", err)
+	}
+	return nil
+}
+
+func (s *UpdateService) handleRollback(ssh *ssh.SSH, paths PathConfig) {
+	backupExistsCmd := fmt.Sprintf("test -d %s && echo 'exists' || echo 'missing'", paths.BackupDir)
+	backupExists, _ := ssh.RunCommand(backupExistsCmd)
+
+	if strings.TrimSpace(backupExists) == "exists" {
+		s.logger.Log(logger.Warning, "Update failed, rolling back to previous version", "")
+
+		s.stopContainers(ssh, paths)
+
+		restoreCmd := fmt.Sprintf("rm -rf %s && mv %s %s", paths.SourceDir, paths.BackupDir, paths.SourceDir)
+		if _, err := ssh.RunCommand(restoreCmd); err != nil {
+			s.logger.Log(logger.Error, "Failed to restore from backup", err.Error())
+			return
+		}
+
+		if err := s.startContainers(ssh, paths); err != nil {
+			s.logger.Log(logger.Error, "Failed to restart previous version", err.Error())
+		} else {
+			s.logger.Log(logger.Info, "Successfully rolled back to previous version", "")
+		}
+	}
+}
+
+func (s *UpdateService) cleanupBackup(ssh *ssh.SSH, paths PathConfig) {
+	backupExistsCmd := fmt.Sprintf("test -d %s && echo 'exists' || echo 'missing'", paths.BackupDir)
+	backupExists, _ := ssh.RunCommand(backupExistsCmd)
+	if strings.TrimSpace(backupExists) == "exists" {
+		if _, err := ssh.RunCommand(fmt.Sprintf("rm -rf %s", paths.BackupDir)); err != nil {
+			s.logger.Log(logger.Warning, "Failed to remove backup directory", err.Error())
+		}
+	}
 }
 
 // GetUserAutoUpdatePreference gets the user's auto update preference from the database

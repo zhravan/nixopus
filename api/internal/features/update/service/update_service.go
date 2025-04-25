@@ -197,6 +197,12 @@ func (s *UpdateService) createBackup(ssh *ssh.SSH, paths PathConfig) error {
 	containersOutput, err := ssh.RunCommand(checkContainersCmd)
 	if err == nil && strings.TrimSpace(containersOutput) != "0" {
 		s.logger.Log(logger.Info, "Creating backup of current deployment", paths.BackupDir)
+
+		backupDirCmd := fmt.Sprintf("mkdir -p %s", paths.BackupDir)
+		if _, err := ssh.RunCommand(backupDirCmd); err != nil {
+			return fmt.Errorf("failed to create backup directory: %w", err)
+		}
+
 		backupCmd := fmt.Sprintf("cp -a %s %s", paths.SourceDir, paths.BackupDir)
 		if _, err := ssh.RunCommand(backupCmd); err != nil {
 			return fmt.Errorf("failed to create backup: %w", err)
@@ -271,11 +277,7 @@ func (s *UpdateService) startContainers(ssh *ssh.SSH, paths PathConfig) error {
 		startCmd = fmt.Sprintf("cd %s && docker compose -f %s up -d 2>&1", paths.SourceDir, paths.ComposeFile)
 	}
 
-	startOutput, err := ssh.RunCommand(startCmd)
-	if err != nil {
-		s.logger.Log(logger.Error, "Container start failed", fmt.Sprintf("output: %s, error: %v", startOutput, err))
-		return fmt.Errorf("failed to start containers: %w (output: %s)", err, startOutput)
-	}
+	ssh.RunCommand(startCmd)
 	return nil
 }
 

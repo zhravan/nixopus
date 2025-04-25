@@ -139,18 +139,20 @@ func (s *UpdateService) PerformUpdate() error {
 	}
 
 	if s.env == Staging {
-		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update 2>&1", tempDir))
+		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout feat/auto_update 2>&1", tempDir+"/nixopus"))
 		if err != nil {
 			s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
 			return fmt.Errorf("failed to checkout staging branch: %w (output: %s)", err, checkoutOutput)
 		}
 	} else {
-		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout master 2>&1", tempDir))
+		checkoutOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && git checkout master 2>&1", tempDir+"/nixopus"))
 		if err != nil {
 			s.logger.Log(logger.Error, "Git checkout failed", fmt.Sprintf("output: %s, error: %v", checkoutOutput, err))
 			return fmt.Errorf("failed to checkout master branch: %w (output: %s)", err, checkoutOutput)
 		}
 	}
+
+	tempDir = tempDir + "/nixopus"
 
 	composeCheckOutput, err := ssh.RunCommand(fmt.Sprintf("cd %s && test -f %s && echo 'exists' || echo 'missing'", tempDir, composeFile))
 	if err != nil {

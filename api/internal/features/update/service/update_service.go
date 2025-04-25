@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io"
 	"net/http"
@@ -123,9 +124,9 @@ func (s *UpdateService) PerformUpdate() error {
 		composeFile = "docker-compose-staging.yml"
 	}
 
-	defer func() {
-		ssh.RunCommand(fmt.Sprintf("rm -rf %s", tempDir))
-	}()
+	// defer func() {
+	// 	ssh.RunCommand(fmt.Sprintf("rm -rf %s", tempDir))
+	// }()
 
 	if _, err := ssh.RunCommand(fmt.Sprintf("rm -rf %s && mkdir -p %s", tempDir, tempDir)); err != nil {
 		return fmt.Errorf("failed to create temp directory: %w", err)
@@ -190,6 +191,9 @@ func (s *UpdateService) GetUserAutoUpdatePreference(userID uuid.UUID) (bool, err
 		Scan(s.ctx, &autoUpdate)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
 		return false, fmt.Errorf("failed to get user settings: %w", err)
 	}
 

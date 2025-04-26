@@ -173,6 +173,14 @@ func (s *UpdateService) PerformUpdate() error {
 	}
 
 	updateSuccess = true
+	latestVersion, err := s.fetchLatestVersion()
+	if err != nil {
+		return fmt.Errorf("failed to fetch latest version: %w", err)
+	}
+	err = os.Setenv("APP_VERSION", latestVersion)
+	if err != nil {
+		return fmt.Errorf("failed to set APP_VERSION: %w", err)
+	}
 	s.logger.Log(logger.Info, "Update completed successfully", "")
 	return nil
 }

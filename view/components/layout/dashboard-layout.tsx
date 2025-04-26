@@ -123,7 +123,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {t('navigation.update')}
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 className="ml-auto"
                 onClick={startTour}

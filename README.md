@@ -9,6 +9,9 @@
 [![Security Scan](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml)
 [![Package Manager](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml)
 [![Release](https://github.com/raghavyuva/nixopus/actions/workflows/release.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/release.yml)
+
+[Website](https://nixopus.com) | [Documentation](https://docs.nixopus.com) | [Join Community](https://discord.gg/skdcq39Wpv)
+
 </div>
 
 ## Your All-in-One VPS Management Solution

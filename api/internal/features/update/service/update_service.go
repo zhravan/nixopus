@@ -106,23 +106,33 @@ func (s *UpdateService) getCurrentVersion() (string, error) {
 // fetchLatestVersion fetches the latest version from the appropriate branch from our repo
 func (s *UpdateService) fetchLatestVersion() (string, error) {
 	branch := s.getBranch()
+	s.logger.Log(logger.Info, "Fetching latest version", fmt.Sprintf("Using branch: %s", branch))
+
 	url := fmt.Sprintf("https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/%s/version.txt", branch)
+	s.logger.Log(logger.Info, "Constructed version URL", url)
+
 	resp, err := http.Get(url)
 	if err != nil {
+		s.logger.Log(logger.Error, "Failed to fetch version", fmt.Sprintf("Error: %v", err))
 		return "", err
 	}
 	defer resp.Body.Close()
 
+	s.logger.Log(logger.Info, "Version fetch response", fmt.Sprintf("Status: %d", resp.StatusCode))
 	if resp.StatusCode != http.StatusOK {
+		s.logger.Log(logger.Error, "Failed to fetch version", fmt.Sprintf("Status code: %d", resp.StatusCode))
 		return "", fmt.Errorf("failed to fetch version: status %d", resp.StatusCode)
 	}
 
 	versionBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
+		s.logger.Log(logger.Error, "Failed to read version response", fmt.Sprintf("Error: %v", err))
 		return "", err
 	}
 
-	return strings.TrimSpace(string(versionBytes)), nil
+	version := strings.TrimSpace(string(versionBytes))
+	s.logger.Log(logger.Info, "Successfully fetched version", version)
+	return version, nil
 }
 
 func (s *UpdateService) getBranch() string {

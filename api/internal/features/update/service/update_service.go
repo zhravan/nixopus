@@ -242,8 +242,8 @@ func (s *UpdateService) cloneRepository(ssh *ssh.SSH, paths PathConfig) error {
 	if _, err := ssh.RunCommand(fmt.Sprintf("rm -rf %s/* %s/.[!.]*", paths.SourceDir, paths.SourceDir)); err != nil {
 		return fmt.Errorf("failed to clean source directory: %w", err)
 	}
-
-	cloneCmd := fmt.Sprintf("cd %s && GIT_TERMINAL_PROMPT=0 git clone --verbose https://github.com/raghavyuva/nixopus.git . 2>&1", paths.SourceDir)
+	repoURL := "https://github.com/raghavyuva/nixopus.git"
+	cloneCmd := fmt.Sprintf("cd %s && git clone %s . 2>&1", paths.SourceDir, repoURL)
 	cloneOutput, err := ssh.RunCommand(cloneCmd)
 	if err != nil {
 		s.logger.Log(logger.Error, "Git clone failed", fmt.Sprintf("output: %s, error: %v", cloneOutput, err))
@@ -262,10 +262,12 @@ func (s *UpdateService) cloneRepository(ssh *ssh.SSH, paths PathConfig) error {
 
 func (s *UpdateService) startContainers(ssh *ssh.SSH, paths PathConfig) error {
 	var startCmd string
+	DOCKER_HOST := os.Getenv("DOCKER_HOST")
+	DOCKER_CONTEXT := os.Getenv("DOCKER_CONTEXT")
 	if s.env == Staging {
-		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=unix:///var/run/docker.sock DOCKER_CONTEXT=nixopus-staging docker compose -f %s up -d --build 2>&1", paths.SourceDir, paths.ComposeFile)
+		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=%s DOCKER_CONTEXT=%s docker compose -f %s up -d --build 2>&1", paths.SourceDir, DOCKER_HOST, DOCKER_CONTEXT, paths.ComposeFile)
 	} else {
-		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=unix:///var/run/docker.sock DOCKER_CONTEXT=nixopus docker compose -f %s up -d 2>&1", paths.SourceDir, paths.ComposeFile)
+		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=%s DOCKER_CONTEXT=%s docker compose -f %s up -d 2>&1", paths.SourceDir, DOCKER_HOST, DOCKER_CONTEXT, paths.ComposeFile)
 	}
 
 	startOutput, err := ssh.RunCommand(startCmd)

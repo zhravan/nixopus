@@ -280,12 +280,10 @@ func (s *UpdateService) cloneRepository(ssh *ssh.SSH, paths PathConfig) error {
 
 func (s *UpdateService) startContainers(ssh *ssh.SSH, paths PathConfig) error {
 	var startCmd string
-	DOCKER_HOST := os.Getenv("DOCKER_HOST")
-	DOCKER_CONTEXT := os.Getenv("DOCKER_CONTEXT")
 	if s.env == Staging {
-		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=%s DOCKER_CONTEXT=%s docker compose -f %s up -d --build 2>&1", paths.SourceDir, DOCKER_HOST, DOCKER_CONTEXT, paths.ComposeFile)
+		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=unix:///var/run/docker.sock DOCKER_CONTEXT=nixopus-staging docker compose -f %s up -d --build 2>&1", paths.SourceDir, paths.ComposeFile)
 	} else {
-		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=%s DOCKER_CONTEXT=%s docker compose -f %s up -d 2>&1", paths.SourceDir, DOCKER_HOST, DOCKER_CONTEXT, paths.ComposeFile)
+		startCmd = fmt.Sprintf("cd %s && DOCKER_HOST=unix:///var/run/docker.sock DOCKER_CONTEXT=default docker compose -f %s up -d 2>&1", paths.SourceDir, paths.ComposeFile)
 	}
 
 	startOutput, err := ssh.RunCommand(startCmd)

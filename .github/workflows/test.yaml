@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - feat/develop
+      - test/unit_test
     paths:
       - 'api/**'
   push:
@@ -15,12 +16,6 @@ on:
     paths:
       - 'api/**'
 
-env:
-  TEST_DB_USERNAME: nixopus
-  TEST_DB_PASSWORD: nixopus
-  TEST_DB_NAME: nixopus_test
-  TEST_DB_PORT: 5433
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -28,11 +23,11 @@ jobs:
       test-db:
         image: postgres:14-alpine
         env:
-          POSTGRES_USER: ${{ env.TEST_DB_USERNAME }}
-          POSTGRES_PASSWORD: ${{ env.TEST_DB_PASSWORD }}
-          POSTGRES_DB: ${{ env.TEST_DB_NAME }}
+          POSTGRES_USER: nixopus
+          POSTGRES_PASSWORD: nixopus
+          POSTGRES_DB: nixopus_test
         ports:
-          - ${{ env.TEST_DB_PORT }}:5432
+          - 5433:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -54,10 +49,6 @@ jobs:
       
       - name: Build and run tests
         env:
-          DB_HOST: localhost
-          DB_PORT: ${{ env.TEST_DB_PORT }}
-          DB_USER: ${{ env.TEST_DB_USERNAME }}
-          DB_PASSWORD: ${{ env.TEST_DB_PASSWORD }}
-          DB_NAME: ${{ env.TEST_DB_NAME }}
+          $(cat api/env.test)
         run: |
           cd api && make test 

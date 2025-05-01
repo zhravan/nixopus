@@ -56,7 +56,7 @@ func (c *FeatureFlagController) UpdateFeatureFlag(f fuego.ContextWithBody[types.
 	}
 
 	// Invalidate the feature flag cache
-	c.cache.InvalidateFeatureFlag(c.ctx, req.FeatureName)
+	c.cache.InvalidateFeatureFlag(c.ctx, organizationID.String(), req.FeatureName)
 
 	return &types.Response{
 		Status:  "success",

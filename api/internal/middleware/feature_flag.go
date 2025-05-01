@@ -33,7 +33,8 @@ func FeatureFlagMiddleware(next http.Handler, app *appStorage.App, featureName s
 		featureFlagStorage := &feature_flags_storage.FeatureFlagStorage{DB: app.Store.DB, Ctx: app.Ctx}
 
 		if cache != nil {
-			if enabled, err := cache.GetFeatureFlag(app.Ctx, featureName); err == nil {
+			enabled, err := cache.GetFeatureFlag(app.Ctx, organizationID.String(), featureName)
+			if err == nil {
 				if enabled {
 					next.ServeHTTP(w, r)
 					return
@@ -55,7 +56,7 @@ func FeatureFlagMiddleware(next http.Handler, app *appStorage.App, featureName s
 		}
 
 		if cache != nil {
-			cache.SetFeatureFlag(app.Ctx, featureName, isEnabled)
+			cache.SetFeatureFlag(app.Ctx, organizationID.String(), featureName, isEnabled)
 		}
 
 		next.ServeHTTP(w, r)

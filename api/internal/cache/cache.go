@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -28,8 +29,9 @@ type CacheRepository interface {
 	SetUser(ctx context.Context, email string, user *types.User) error
 	GetOrgMembership(ctx context.Context, userID, orgID string) (bool, error)
 	SetOrgMembership(ctx context.Context, userID, orgID string, belongs bool) error
-	GetFeatureFlag(ctx context.Context, featureName string) (bool, error)
-	SetFeatureFlag(ctx context.Context, featureName string, enabled bool) error
+	GetFeatureFlag(ctx context.Context, orgID, featureName string) (bool, error)
+	SetFeatureFlag(ctx context.Context, orgID, featureName string, enabled bool) error
+	InvalidateFeatureFlag(ctx context.Context, orgID, featureName string) error
 }
 
 func NewCache(redisURL string) (*Cache, error) {
@@ -114,11 +116,11 @@ func (c *Cache) InvalidateOrgMembership(ctx context.Context, userID, orgID strin
 	return c.client.Del(key).Err()
 }
 
-func (c *Cache) GetFeatureFlag(ctx context.Context, featureName string) (bool, error) {
-	key := FeatureFlagCacheKeyPrefix + featureName
+func (c *Cache) GetFeatureFlag(ctx context.Context, orgID, featureName string) (bool, error) {
+	key := fmt.Sprintf("%s:%s:%s", FeatureFlagCacheKeyPrefix, orgID, featureName)
 	val, err := c.client.Get(key).Result()
 	if err == redis.Nil {
-		return false, nil
+		return false, redis.Nil
 	}
 	if err != nil {
 		return false, err
@@ -126,8 +128,8 @@ func (c *Cache) GetFeatureFlag(ctx context.Context, featureName string) (bool, e
 	return val == "true", nil
 }
 
-func (c *Cache) SetFeatureFlag(ctx context.Context, featureName string, enabled bool) error {
-	key := FeatureFlagCacheKeyPrefix + featureName
+func (c *Cache) SetFeatureFlag(ctx context.Context, orgID, featureName string, enabled bool) error {
+	key := fmt.Sprintf("%s:%s:%s", FeatureFlagCacheKeyPrefix, orgID, featureName)
 	val := "false"
 	if enabled {
 		val = "true"
@@ -135,7 +137,7 @@ func (c *Cache) SetFeatureFlag(ctx context.Context, featureName string, enabled 
 	return c.client.Set(key, val, FeatureFlagCacheTTL).Err()
 }
 
-func (c *Cache) InvalidateFeatureFlag(ctx context.Context, featureName string) error {
-	key := FeatureFlagCacheKeyPrefix + featureName
+func (c *Cache) InvalidateFeatureFlag(ctx context.Context, orgID, featureName string) error {
+	key := fmt.Sprintf("%s:%s:%s", FeatureFlagCacheKeyPrefix, orgID, featureName)
 	return c.client.Del(key).Err()
 }

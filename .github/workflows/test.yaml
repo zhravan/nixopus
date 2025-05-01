@@ -1,0 +1,58 @@
+name: Test Nixopus API
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+  push:
+    branches:
+      - 'master'
+    paths:
+      - 'api/**'
+
+env:
+  TEST_DB_USERNAME: nixopus
+  TEST_DB_PASSWORD: nixopus
+  TEST_DB_NAME: nixopus_test
+  TEST_DB_PORT: 5433
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      test-db:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: ${{ env.TEST_DB_USERNAME }}
+          POSTGRES_PASSWORD: ${{ env.TEST_DB_PASSWORD }}
+          POSTGRES_DB: ${{ env.TEST_DB_NAME }}
+        ports:
+          - ${{ env.TEST_DB_PORT }}:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          check-latest: true
+          cache: true
+          cache-dependency-path: api/go.sum
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and run tests
+        env:
+          DB_HOST: localhost
+          DB_PORT: ${{ env.TEST_DB_PORT }}
+          DB_USER: ${{ env.TEST_DB_USERNAME }}
+          DB_PASSWORD: ${{ env.TEST_DB_PASSWORD }}
+          DB_NAME: ${{ env.TEST_DB_NAME }}
+        run: |
+          cd api && make test 

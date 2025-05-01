@@ -26,11 +26,10 @@ jobs:
           POSTGRES_USER: nixopus
           POSTGRES_PASSWORD: nixopus
           POSTGRES_DB: nixopus_test
-          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5433:5432
         options: >-
-          --health-cmd pg_isready -U nixopus -d nixopus_test
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5

@@ -11,6 +11,7 @@ on:
     branches:
       - 'master'
       - 'feat/develop'
+      - 'test/unit_test'
     paths:
       - 'api/**'
 

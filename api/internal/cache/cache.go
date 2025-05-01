@@ -15,6 +15,8 @@ const (
 	OrgMembershipCacheKeyPrefix = "org_membership:"
 	UserCacheTTL                = 10 * time.Minute
 	OrgMembershipCacheTTL       = 30 * time.Minute
+	FeatureFlagCacheKeyPrefix   = "feature_flag:"
+	FeatureFlagCacheTTL         = 10 * time.Minute
 )
 
 type Cache struct {
@@ -26,6 +28,8 @@ type CacheRepository interface {
 	SetUser(ctx context.Context, email string, user *types.User) error
 	GetOrgMembership(ctx context.Context, userID, orgID string) (bool, error)
 	SetOrgMembership(ctx context.Context, userID, orgID string, belongs bool) error
+	GetFeatureFlag(ctx context.Context, featureName string) (bool, error)
+	SetFeatureFlag(ctx context.Context, featureName string, enabled bool) error
 }
 
 func NewCache(redisURL string) (*Cache, error) {
@@ -107,5 +111,31 @@ func (c *Cache) InvalidateUser(ctx context.Context, email string) error {
 
 func (c *Cache) InvalidateOrgMembership(ctx context.Context, userID, orgID string) error {
 	key := OrgMembershipCacheKeyPrefix + userID + ":" + orgID
+	return c.client.Del(key).Err()
+}
+
+func (c *Cache) GetFeatureFlag(ctx context.Context, featureName string) (bool, error) {
+	key := FeatureFlagCacheKeyPrefix + featureName
+	val, err := c.client.Get(key).Result()
+	if err == redis.Nil {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return val == "true", nil
+}
+
+func (c *Cache) SetFeatureFlag(ctx context.Context, featureName string, enabled bool) error {
+	key := FeatureFlagCacheKeyPrefix + featureName
+	val := "false"
+	if enabled {
+		val = "true"
+	}
+	return c.client.Set(key, val, FeatureFlagCacheTTL).Err()
+}
+
+func (c *Cache) InvalidateFeatureFlag(ctx context.Context, featureName string) error {
+	key := FeatureFlagCacheKeyPrefix + featureName
 	return c.client.Del(key).Err()
 }

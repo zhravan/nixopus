@@ -50,11 +50,10 @@ jobs:
           file_pattern: 'api/**/*.go'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
-          skip_dirty_check: true
+          skip_dirty_check: false
           skip_fetch: true
           skip_checkout: true
-          disable_globbing: true
-          status_options: '--untracked-files=no'
+          disable_globbing: false
 
   format-view:
     name: Format View
@@ -89,10 +88,10 @@ jobs:
         with:
           commit_message: 'style(view): format frontend code'
           branch: ${{ github.head_ref }}
+          file_pattern: 'view/**'
           commit_user_name: 'github-actions[bot]'
           commit_user_email: 'github-actions[bot]@users.noreply.github.com'
-          skip_dirty_check: true
+          skip_dirty_check: false
           skip_fetch: true
           skip_checkout: true
-          disable_globbing: true
-          status_options: '--untracked-files=no'
+          disable_globbing: false

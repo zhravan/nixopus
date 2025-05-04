@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	cache "github.com/raghavyuva/nixopus-api/internal/cache"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/user/service"
 	"github.com/raghavyuva/nixopus-api/internal/features/user/storage"
@@ -17,18 +18,21 @@ type UserController struct {
 	service   *service.UserService
 	ctx       context.Context
 	logger    logger.Logger
+	cache     *cache.Cache
 }
 
 func NewUserController(
 	store *shared_storage.Store,
 	ctx context.Context,
 	l logger.Logger,
+	cache *cache.Cache,
 ) *UserController {
 	return &UserController{
 		validator: validation.NewValidator(),
 		service:   service.NewUserService(store, ctx, l, &storage.UserStorage{DB: store.DB, Ctx: ctx}),
 		ctx:       ctx,
 		logger:    l,
+		cache:     cache,
 	}
 }
 

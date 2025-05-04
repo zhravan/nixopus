@@ -7,7 +7,80 @@
     "logout": "Logout",
     "accessDenied": "Access Denied",
     "noPermissionView": "You don't have permission to view this page",
-    "searchFiles": "Search files..."
+    "searchFiles": "Search files...",
+    "featureDisabled": "Feature Disabled",
+    "featureNotAvailable": "This feature is not available for your organization",
+    "goBack": "Go Back",
+    "refreshPage": "Refresh Page",
+    "loading": "Loading..."
+  },
+  "containers": {
+    "title": "Containers",
+    "list": "Container List",
+    "name": "Name",
+    "image": "Image",
+    "status": "Status",
+    "ports": "Ports",
+    "actions": "Actions",
+    "refresh": "Refresh",
+    "start": "Start",
+    "stop": "Stop",
+    "remove": "Remove",
+    "restart": "Restart",
+    "start_success": "Container started successfully",
+    "stop_success": "Container stopped successfully",
+    "prune_images": "Prune Images",
+    "prune_build_cache": "Prune Build Cache",
+    "prune_images_success": "Images pruned successfully",
+    "prune_build_cache_success": "Build cache pruned successfully",
+    "prune_images_error": "Failed to prune images",
+    "prune_build_cache_error": "Failed to prune build cache",
+    "remove_success": "Container removed successfully",
+    "start_error": "Failed to start container",
+    "stop_error": "Failed to stop container",
+    "remove_error": "Failed to remove container",
+    "fetch_error": "Failed to fetch containers",
+    "overview": "Overview",
+    "logs": "Logs",
+    "details": "Details",
+    "basic_info": "Basic Info",
+    "resources": "Resources",
+    "cpu_shares": "CPU Shares",
+    "memory": "Memory",
+    "command": "Command",
+    "created": "Created",
+    "ip_address": "IP Address",
+    "load_more_logs": "Load More Logs",
+    "no_logs": "No logs found",
+    "no_containers": "No containers found",
+    "more_ports": "+{count} more",
+    "deleteDialog": {
+      "title": "Delete Container",
+      "description": "Are you sure you want to delete this container?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "pruneImagesDialog": {
+      "title": "Prune Images",
+      "description": "Are you sure you want to prune all images?",
+      "confirm": "Prune",
+      "cancel": "Cancel"
+    },
+    "pruneBuildCacheDialog": {
+      "title": "Prune Build Cache",
+      "description": "Are you sure you want to prune all build cache?",
+      "confirm": "Prune",
+      "cancel": "Cancel"
+    },
+    "images": {
+      "title": "Images",
+      "id": "ID",
+      "tags": "Tags",
+      "created": "Created",
+      "size": "Size",
+      "containers": "Containers",
+      "none": "<none>"
+    }
   },
   "auth": {
     "login": {
@@ -85,7 +158,8 @@
     "description": "Manage your account",
     "tabs": {
       "account": "Account",
-      "security": "Security"
+      "security": "Security",
+      "featureFlags": "Features"
     },
     "preferences": {
       "language": {
@@ -109,6 +183,74 @@
         "title": "Auto Update",
         "description": "Automatically update nixopus when a new version is available",
         "select": "Select auto update"
+      }
+    },
+    "featureFlags": {
+      "title": "Features",
+      "description": "Enable or disable specific features for your organization",
+      "groups": {
+        "infrastructure": {
+          "title": "Infrastructure",
+          "description": "Enable or disable specific infrastructure features for your organization"
+        },
+        "development": {
+          "title": "Development",
+          "description": "Enable or disable specific development features for your organization"
+        },
+        "monitoring": {
+          "title": "Monitoring",
+          "description": "Enable or disable specific monitoring features for your organization"
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Enable or disable specific notifications features for your organization"
+        }
+      },
+      "features": {
+        "terminal": {
+          "title": "Terminal",
+          "description": "Access to the terminal feature"
+        },
+        "file_manager": {
+          "title": "File Manager",
+          "description": "Access to the file manager feature"
+        },
+        "self_hosted": {
+          "title": "Self Hosted",
+          "description": "Access to the self hosted feature"
+        },
+        "domain": {
+          "title": "Domain",
+          "description": "Access to the domain feature"
+        },
+        "container": {
+          "title": "Container",
+          "description": "Access to the container feature"
+        },
+        "monitoring": {
+          "title": "Monitoring",
+          "description": "Access to the monitoring feature"
+        },
+        "proxy_config": {
+          "title": "Proxy Configuration",
+          "description": "Access to the proxy configuration feature"
+        },
+        "github_connector": {
+          "title": "GitHub Connector",
+          "description": "Access to the GitHub connector feature"
+        },
+        "audit": {
+          "title": "Audit Logs",
+          "description": "Access to the audit logs feature"
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Access to the notifications feature"
+        }
+      },
+      "messages": {
+        "updated": "Feature flag updated successfully",
+        "updateFailed": "Failed to update feature flag"
       }
     },
     "account": {
@@ -556,7 +698,8 @@
         },
         "noContainers": "No containers found",
         "morePorts": "+{count} more"
-      }
+      },
+      "viewAll": "View All"
     },
     "disk": {
       "title": "Disk Usage",
@@ -1069,7 +1212,8 @@
     "notifications": "Notifications",
     "team": "Team",
     "domains": "Domains",
-    "update": "Update"
+    "update": "Update",
+    "containers": "Containers"
   },
   "layout": {
     "breadcrumbs": {

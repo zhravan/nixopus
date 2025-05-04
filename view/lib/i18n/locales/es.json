@@ -6,7 +6,80 @@
     "profile": "Perfil",
     "logout": "Cerrar sesión",
     "accessDenied": "Acceso Denegado",
-    "noPermissionView": "No tienes permiso para ver esta página"
+    "noPermissionView": "No tienes permiso para ver esta página",
+    "featureDisabled": "Característica Deshabilitada",
+    "featureNotAvailable": "Esta característica no está disponible para tu organización",
+    "goBack": "Volver",
+    "refreshPage": "Actualizar página",
+    "loading": "Cargando..."
+  },
+  "containers": {
+    "title": "Contenedores",
+    "list": "Lista de Contenedores",
+    "name": "Nombre",
+    "image": "Imagen",
+    "status": "Estado",
+    "ports": "Puertos",
+    "actions": "Acciones",
+    "refresh": "Actualizar",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "remove": "Eliminar",
+    "restart": "Reiniciar",
+    "start_success": "Contenedor iniciado correctamente",
+    "stop_success": "Contenedor parado correctamente",
+    "remove_success": "Contenedor eliminado correctamente",
+    "start_error": "Error al iniciar el contenedor",
+    "stop_error": "Error al parar el contenedor",
+    "remove_error": "Error al eliminar el contenedor",
+    "fetch_error": "Error al obtener los contenedores",
+    "prune_images": "Eliminar imágenes",
+    "prune_build_cache": "Eliminar caché de compilación",
+    "prune_images_success": "Imágenes eliminadas correctamente",
+    "prune_build_cache_success": "Caché de compilación eliminada correctamente",
+    "prune_images_error": "Error al eliminar las imágenes",
+    "prune_build_cache_error": "Error al eliminar la caché de compilación",
+    "overview": "Resumen",
+    "logs": "Logs",
+    "details": "Detalles",
+    "basic_info": "Información básica",
+    "resources": "Recursos",
+    "cpu_shares": "Partes de CPU",
+    "memory": "Memoria",
+    "command": "Comando",
+    "created": "Creado",
+    "ip_address": "IP",
+    "load_more_logs": "Cargar más logs",
+    "no_logs": "No se encontraron logs",
+    "no_containers": "No se encontraron contenedores",
+    "more_ports": "+{count} más",
+    "deleteDialog": {
+      "title": "Eliminar Contenedor",
+      "description": "¿Estás seguro de que quieres eliminar este contenedor?",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "pruneImagesDialog": {
+      "title": "Eliminar Imágenes",
+      "description": "¿Estás seguro de que quieres eliminar todas las imágenes?",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "pruneBuildCacheDialog": {
+      "title": "Eliminar Caché de Compilación",
+      "description": "¿Estás seguro de que quieres eliminar toda la caché de compilación?",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "images": {
+      "title": "Imágenes",
+      "id": "ID",
+      "tags": "Etiquetas",
+      "created": "Creado",
+      "size": "Tamaño",
+      "containers": "Contenedores",
+      "none": "<ninguno>"
+    }
   },
   "auth": {
     "login": {
@@ -84,7 +157,8 @@
     "description": "Administra tu cuenta",
     "tabs": {
       "account": "Cuenta",
-      "security": "Seguridad"
+      "security": "Seguridad",
+      "featureFlags": "Características"
     },
     "preferences": {
       "language": {
@@ -108,6 +182,74 @@
         "title": "Actualización Automática",
         "description": "Actualiza nixopus cuando una nueva versión esté disponible",
         "select": "Seleccionar actualización automática"
+      }
+    },
+    "featureFlags": {
+      "title": "Características",
+      "description": "Habilita o deshabilita características específicas para tu organización",
+      "groups": {
+        "infrastructure": {
+          "title": "Infraestructura",
+          "description": "Habilita o deshabilita características específicas de infraestructura para tu organización"
+        },
+        "development": {
+          "title": "Desarrollo",
+          "description": "Habilita o deshabilita características específicas de desarrollo para tu organización"
+        },
+        "monitoring": {
+          "title": "Monitoreo",
+          "description": "Habilita o deshabilita características específicas de monitoreo para tu organización"
+        },
+        "notifications": {
+          "title": "Notificaciones",
+          "description": "Habilita o deshabilita características específicas de notificaciones para tu organización"
+        }
+      },
+      "features": {
+        "terminal": {
+          "title": "Terminal",
+          "description": "Acceso a la característica de terminal"
+        },
+        "file_manager": {
+          "title": "Gestor de Archivos",
+          "description": "Acceso a la característica de gestor de archivos"
+        },
+        "self_hosted": {
+          "title": "Self Hosted",
+          "description": "Acceso a la característica de self hosted"
+        },
+        "container": {
+          "title": "Contenedor",
+          "description": "Acceso a la característica de contenedor"
+        },
+        "domain": {
+          "title": "Dominio",
+          "description": "Acceso a la característica de dominio"
+        },
+        "monitoring": {
+          "title": "Monitoreo",
+          "description": "Acceso a la característica de monitoreo"
+        },
+        "proxy_config": {
+          "title": "Configuración de Proxy",
+          "description": "Acceso a la característica de configuración de proxy"
+        },
+        "github_connector": {
+          "title": "Conector de GitHub",
+          "description": "Acceso a la característica de conector de GitHub"
+        },
+        "audit": {
+          "title": "Registros de Auditoría",
+          "description": "Acceso a la característica de registros de auditoría"
+        },
+        "notifications": {
+          "title": "Notificaciones",
+          "description": "Acceso a la característica de notificaciones"
+        }
+      },
+      "messages": {
+        "updated": "Característica actualizada exitosamente",
+        "updateFailed": "Error al actualizar la característica"
       }
     },
     "account": {
@@ -543,7 +685,8 @@
         },
         "noContainers": "No se encontraron contenedores",
         "morePorts": "+{count} más"
-      }
+      },
+      "viewAll": "Ver Todo"
     },
     "disk": {
       "title": "Uso del disco",
@@ -1046,6 +1189,7 @@
     "notifications": "Notificaciones",
     "team": "Equipo",
     "domains": "Dominios",
+    "containers": "Contenedores",
     "layout": {
       "breadcrumbs": {
         "home": "Inicio",
@@ -1057,7 +1201,8 @@
         "notifications": "Notificaciones",
         "team": "Equipo",
         "domains": "Dominios",
-        "update": "Actualizar"
+        "update": "Actualizar",
+        "containers": "Contenedores"
       },
       "terminal": {
         "togglePosition": "Cambiar Posición del Terminal (Ctrl+T)"

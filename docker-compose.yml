@@ -17,6 +17,7 @@ services:
       - ${SSH_PRIVATE_KEY}:/etc/nixopus/ssh/id_rsa
       - ${MOUNT_PATH:-/etc/nixopus/configs}:/etc/nixopus/configs
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/nixopus/source/api/.env:/app/.env
     networks:
       - nixopus-network
     depends_on:
@@ -87,6 +88,7 @@ services:
       - /etc/nixopus/source/view/.env
     volumes:
       - ./logs:/app/logs
+      - /etc/nixopus/source/view/.env:/app/.env
     networks:
       - nixopus-network
 

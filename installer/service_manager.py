@@ -74,9 +74,10 @@ class ServiceManager:
                 print("Error: Docker daemon is not running. Please start the Docker service and try again.")
                 sys.exit(1)
 
-            os.environ["DOCKER_HOST"] = "tcp://localhost:2376"
+            docker_port = "2376" if env == "production" else "2377"
+            os.environ["DOCKER_HOST"] = f"tcp://localhost:{docker_port}"
             os.environ["DOCKER_TLS_VERIFY"] = "1"
-            os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs"
+            os.environ["DOCKER_CERT_PATH"] = "/etc/nixopus/docker-certs" if env == "production" else "/etc/nixopus-staging/docker-certs"
             os.environ["DOCKER_CONTEXT"] = "nixopus" if env == "production" else "nixopus-staging"
             compose_cmd = ["docker", "compose"] if shutil.which("docker") else ["docker-compose"]
             if env == "staging":

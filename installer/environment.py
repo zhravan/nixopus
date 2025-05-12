@@ -274,8 +274,11 @@ class EnvironmentSetup:
                 
             print(f"Successfully created Docker context '{self.context_name}'")
             
+            subprocess.run(["docker", "context", "use", self.context_name],
+                         capture_output=True, text=True)
+            
             test_result = subprocess.run(
-                ["docker", "--context", self.context_name, "version", "--format", "{{.Server.Version}}"],
+                ["docker", "version", "--format", "{{.Server.Version}}"],
                 capture_output=True, text=True
             )
             
@@ -291,12 +294,14 @@ class EnvironmentSetup:
                 time.sleep(5)
                 
                 test_result = subprocess.run(
-                    ["docker", "--context", self.context_name, "version", "--format", "{{.Server.Version}}"],
+                    ["docker", "version", "--format", "{{.Server.Version}}"],
                     capture_output=True, text=True
                 )
                 
                 if test_result.returncode != 0:
                     print("Failed to establish secure connection to Docker daemon")
+                    print("Please check Docker daemon logs for more information")
+                    print("You may need to manually configure Docker daemon TLS settings")
                 
             return self.context_name
             

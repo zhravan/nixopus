@@ -184,7 +184,7 @@ class ServiceManager:
         try:
             current_config = None
             try:
-                response = requests.get('http://localhost:2019/config')
+                response = requests.get('http://localhost:2019/config/')
                 if response.status_code == 200:
                     current_config = response.json()
             except requests.exceptions.RequestException:

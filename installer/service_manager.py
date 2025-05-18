@@ -221,8 +221,8 @@ class ServiceManager:
                         raise Exception("Failed to update routes in Caddy configuration")
             else:
                 response = requests.post(
-                    'http://localhost:2019/config/apps/http/servers/nixopus',
-                    json=new_config['apps']['http']['servers']['nixopus'],
+                    'http://localhost:2019/load',
+                    json=new_config,
                     headers={'Content-Type': 'application/json'}
                 )
                 if response.status_code != 200:

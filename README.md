@@ -26,6 +26,10 @@ In today's software landscape, feature bloat often leads to cluttered and confus
 
 While many excellent software solutions exist, each with their own strengths, we choose not to directly compare Nixopus with other solutions. Instead, we believe that true value comes from user engagement and community feedback. Our philosophy is simple: we invite you to explore Nixopus, share your experiences, and help shape its future. We understand that no software is perfect - there's always room for improvement, and it's the user's perspective that truly matters in making something great.
 
+## Demo
+[![Alt text](https://img.youtube.com/vi/DrDGWNq4JM4/maxresdefault.jpg)](https://www.youtube.com/watch?v=DrDGWNq4JM4)
+
+
 ## Documentation
 
 For complete documentation, visit our [Documentation Portal](https://docs.nixopus.com).

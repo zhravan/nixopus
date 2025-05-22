@@ -68,7 +68,9 @@ func (m *Migrator) LoadMigrationsFromFS(path string) error {
 
 		// Get relative path from migrations root
 		relPath, err := filepath.Rel(path, filePath)
+
 		if err != nil {
+			fmt.Println("Error getting relative path:", relPath)
 			return fmt.Errorf("failed to get relative path: %w", err)
 		}
 
@@ -127,13 +129,13 @@ func (m *Migrator) LoadMigrationsFromFS(path string) error {
 			return fmt.Errorf("invalid migration ID format in %s: %w", baseName, err)
 		}
 
-		m.migrations = append(m.migrations, 
-		&Migration{
-			ID:   id,
-			Name: baseName,
-			Up:   upSQL,
-			Down: downSQL,
-		})
+		m.migrations = append(m.migrations,
+			&Migration{
+				ID:   id,
+				Name: baseName,
+				Up:   upSQL,
+				Down: downSQL,
+			})
 	}
 
 	// Sort migrations by ID

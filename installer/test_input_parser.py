@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from installer.input_parser import InputParser
 import argparse
+from installer.validation import Validation
 
 class TestInputParser(unittest.TestCase):
     def setUp(self):
@@ -42,7 +43,8 @@ class TestInputParser(unittest.TestCase):
         self.assertTrue(any(c.isupper() for c in password))
         self.assertTrue(any(c.islower() for c in password))
         self.assertTrue(any(c.isdigit() for c in password))
-        self.assertTrue(any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in password))
+        validation = Validation()
+        self.assertTrue(any(c in validation.SPECIAL_CHARS for c in password))
 
     def test_generate_strong_password_multiple_generations(self):
         passwords = set()

@@ -7,6 +7,7 @@ import sys
 class InputParser:
     def __init__(self):
         self.parser = self._setup_arg_parser()
+        self.validation = Validation()
     
     def _setup_arg_parser(self):
         parser = argparse.ArgumentParser(description='Nixopus Installation Wizard')
@@ -18,15 +19,14 @@ class InputParser:
         return parser
     
     def generate_strong_password(self):
-        special_chars = '!@#$%^&*()_+-=[]{}|;:,.<>?'
         while True:
             password = ''.join(secrets.choice(
-                string.ascii_letters + string.digits + special_chars
+                string.ascii_letters + string.digits + self.validation.SPECIAL_CHARS
             ) for _ in range(16))
             if (any(c.isupper() for c in password) and
                 any(c.islower() for c in password) and
                 any(c.isdigit() for c in password) and
-                any(c in special_chars for c in password)):
+                any(c in self.validation.SPECIAL_CHARS for c in password)):
                 return password
 
     def get_env_from_args(self, args):

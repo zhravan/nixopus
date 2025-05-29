@@ -1,15 +1,18 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # check if the script is running as root
 if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root (sudo)"
+    echo "Error: Please run as root (sudo)" >&2
     exit 1
 fi
 
 # check if the required commands are installed
 function check_command() {
-    if ! command -v "$1" &> /dev/null; then
-        echo "$1 is not installed. Please install $1 before running this script."
+    local cmd="$1"
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: '$cmd' is not installed. Please install '$cmd' before running this script." >&2
         exit 1
     fi
 }
@@ -17,7 +20,7 @@ function check_command() {
 # check if the required python version is installed
 function check_python_version() {
     if ! python3 --version | grep -q "Python 3.10"; then
-        echo "Python 3.10 is not installed. Please install Python 3.10 before running this script."
+        echo "Error: Python 3.10 is not installed. Please install Python 3.10 before running this script." >&2
         exit 1
     fi
 }
@@ -55,40 +58,40 @@ function setup_config_based_on_environment() {
 }
 
 function create_nixopus_directories() {
-    mkdir -p "$NIXOPUS_DIR"
-    mkdir -p "$SOURCE_DIR"
+    mkdir -p "${NIXOPUS_DIR:?}"
+    mkdir -p "${SOURCE_DIR:?}"
 }
 
 function clone_nixopus_repository() {
-    if [ -d "$SOURCE_DIR/.git" ]; then
-        cd "$SOURCE_DIR" || exit 1
+    if [ -d "${SOURCE_DIR:?}/.git" ]; then
+        cd "${SOURCE_DIR:?}" || exit 1
         git fetch --all
-        git reset --hard "origin/$BRANCH"
-        git checkout "$BRANCH"
+        git reset --hard "origin/${BRANCH:?}"
+        git checkout "${BRANCH:?}"
         git pull
     else
-        rm -rf "$SOURCE_DIR"/* "$SOURCE_DIR"/.[!.]*
-        git clone https://github.com/raghavyuva/nixopus.git "$SOURCE_DIR"
-        cd "$SOURCE_DIR" || exit 1
-        git checkout "$BRANCH"
+        rm -rf "${SOURCE_DIR:?}"/* "${SOURCE_DIR:?}"/.[!.]*
+        git clone https://github.com/raghavyuva/nixopus.git "${SOURCE_DIR:?}"
+        cd "${SOURCE_DIR:?}" || exit 1
+        git checkout "${BRANCH:?}"
     fi
 }
 
 function setup_caddy_configuration() {
-    echo "Setting up Caddy configuration..."
-    rm -rf "$NIXOPUS_DIR/caddy" > /dev/null 2>&1
-    mkdir -p "$NIXOPUS_DIR/caddy" > /dev/null 2>&1
+    echo "Setting up Caddy configuration..." >&2
+    rm -rf "${NIXOPUS_DIR:?}/caddy" > /dev/null 2>&1
+    mkdir -p "${NIXOPUS_DIR:?}/caddy" > /dev/null 2>&1
     echo '{
         admin 0.0.0.0:2019
         log {
             format json
             level INFO
         }
-    }' > "$NIXOPUS_DIR/caddy/Caddyfile"
+    }' > "${NIXOPUS_DIR:?}/caddy/Caddyfile"
 }
 
 function setup_nixopus_installation_environment() {
-    cd "$SOURCE_DIR/installer" || exit 1
+    cd "${SOURCE_DIR:?}/installer" || exit 1
     python3 -m venv venv > /dev/null 2>&1
     source venv/bin/activate > /dev/null 2>&1
     pip install --upgrade pip > /dev/null 2>&1
@@ -96,7 +99,7 @@ function setup_nixopus_installation_environment() {
 }
 
 function run_installer() {
-    PYTHONPATH="$SOURCE_DIR/installer" python3 install.py "$@"
+    PYTHONPATH="${SOURCE_DIR:?}/installer" python3 install.py "$@"
 }
 
 function deactivate_virtual_environment() {

@@ -253,7 +253,7 @@ flowchart TB
     classDef infra fill:#F0F0F0,stroke:#333,stroke-width:1px
 ```
 
-**Nixopus**__ is a full-stack platform with a UI built on React.js. The backend is written in Go and manages core functions, including authentication, deployments, and real-time updates via WebSockets.
+_**Nixopus**_ is an end-to-end platform with a UI built on React.js. The backend is written in Go, which is responsible for managing core functions, including authentication, deployments, and real-time updates via WebSockets.
 
 Data Storage and Management is supported via PostgreSQL database, which the backend accesses for queries and real-time notifications. The entire system operates within Docker containers, coordinated using Docker Compose, with Caddy serving as a reverse proxy to route requests securely.
 

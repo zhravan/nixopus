@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import time
+import json
+import subprocess
 from pathlib import Path
 from environment import EnvironmentSetup
 from input_parser import InputParser
@@ -8,13 +10,21 @@ from service_manager import ServiceManager
 
 class Installer:
     def __init__(self):
-        self.required_docker_version = "20.10.0"
-        self.required_compose_version = "2.0.0"
         self.project_root = Path(__file__).parent.parent
-        self.env_file = self.project_root / ".env"
-        self.env_sample = self.project_root / ".env.sample"
+        self.config = self._load_config()
+        self.env_file = self.project_root / self.config["files"]["env"]
+        self.env_sample = self.project_root / self.config["files"]["env_sample"]
         self.input_parser = InputParser()
         self.service_manager = None  # Will be initialized with environment later
+
+    def _load_config(self) -> dict:
+        config_path = self.project_root / "helpers" / "config.json"
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            return config["production"]
+        except Exception as e:
+            raise Exception(f"Failed to load configuration: {str(e)}")
 
 def main():
     installer = Installer()

@@ -209,7 +209,7 @@ class EnvironmentConfig:
                 errors=errors
             )
         except (ValueError, TypeError) as e:
-            raise Exception(env_config["errors"]["invalid_type"].format(env=env, error=str(e)))
+            raise Exception(env_config["errors"]["invalid_type"].format(env=env, error=str(e))) from e
 
 class EnvironmentSetup:
     def __init__(self, domains: Optional[Dict[str, str]], env: str = "staging"):

@@ -21,21 +21,31 @@ class SSHSetup:
         private_key_path = self.ssh_dir / f"id_{self.config.key_type}"
         public_key_path = self.ssh_dir / f"id_{self.config.key_type}.pub"
         
-        if not private_key_path.exists():
+        # (Re)generate when either part of the keypair is missing
+        if not private_key_path.exists() or not public_key_path.exists():
             try:
-                result = subprocess.run(
-                    ["ssh-keygen", "-t", self.config.key_type, "-b", str(self.config.key_bits), 
-                     "-f", str(private_key_path), "-N", ""],
-                    capture_output=True,
-                    text=True
+                subprocess.run(
+                    [
+                        "ssh-keygen",
+                        "-t", self.config.key_type,
+                        "-b", str(self.config.key_bits),
+                        "-f", str(private_key_path),
+                        "-N", ""
+                    ],
+                    check=True
                 )
-                if result.returncode != 0:
-                    raise Exception(self.config.errors["ssh_keygen_failed"])
-            except FileNotFoundError as e:
-                raise Exception(self.config.errors["ssh_keygen_not_found"].format(error=str(e)))
-            except Exception as e:
-                raise Exception(self.config.errors["ssh_key_error"].format(error=str(e)))
-        
+            except FileNotFoundError as err:
+                raise Exception(
+                    self.config.errors["ssh_keygen_not_found"].format(error=str(err))
+                ) from err
+            except subprocess.CalledProcessError as err:
+                raise Exception(
+                    self.config.errors["ssh_keygen_failed"]
+                ) from err
+            except Exception as err:
+                raise Exception(
+                    self.config.errors["ssh_key_error"].format(error=str(err))
+                ) from err
         return private_key_path, public_key_path
 
     def setup_authorized_keys(self, public_key_path: Path, permissions: dict) -> None:

@@ -1,4 +1,4 @@
-# Project Architecture
+# Architecture
 
 ## Overview
 
@@ -8,8 +8,8 @@ This document provides an overview of the architecture for the project, detailin
 %%{init: {
   'themeVariables': {
     'fontSize': '16px',
-    'primaryColor': '#ffffff',
-    'edgeLabelBackground':'#f8f9fa'
+    'primaryColor': '#87ceeb',
+    'edgeLabelBackground':'#0067ff'
   },
   'flowchart': {
     'zoom': true
@@ -105,7 +105,7 @@ flowchart TB
     classDef frontend fill:#4682B4,stroke:#333,stroke-width:1px,color:#fff;
     classDef backend fill:#32CD32,stroke:#333,stroke-width:1px,color:#fff;
     classDef datastore fill:#FFD700,stroke:#333,stroke-width:1px,color:#000;
-    classDef external fill:#A9A9A9,stroke:#333,stroke-width:1px,color:#fff;
+    classDef external fill:#b000000,stroke:#333,stroke-width:1px,color:#fff;
     classDef infra fill:#CD5C5C,stroke:#333,stroke-width:1px,color:#fff;
 
 ```

@@ -113,24 +113,24 @@ flowchart TB
 ## API Layer
 
 - **Language**: Go
-- **Location**: `api` directory
-- **Description**: The API layer is built using Go, providing backend services. It includes a `Dockerfile` for containerization and uses Go modules for dependency management.
+- **Location**: [api](https://github.com/raghavyuva/nixopus/tree/master/api) directory
+- **Description**: The API layer is built using Go, providing backend services. It includes a [Dockerfile](https://github.com/raghavyuva/nixopus/blob/master/api/Dockerfile) for containerization and uses Go modules for dependency management.
 
 ## Frontend Layer
 
-- **Framework**: Likely Next.js
-- **Location**: `view` directory
-- **Description**: The frontend is built using a JavaScript framework, with configuration files indicating the use of Next.js. It includes a `Dockerfile` for containerization and a `package.json` for managing dependencies.
+- **Framework**: Next.js
+- **Location**: [view](https://github.com/raghavyuva/nixopus/tree/master/view) directory
+- **Description**: The frontend is built using a JavaScript framework, with configuration files indicating the use of Next.js. It includes a [Dockerfile](https://github.com/raghavyuva/nixopus/blob/master/view/Dockerfile) for containerization and a [package.json](https://github.com/raghavyuva/nixopus/blob/master/view/package.json) for managing dependencies.
 
 ## Assets
 
-- **Location**: `assets` directory
+- **Location**: [assets](https://github.com/raghavyuva/nixopus/tree/master/assets) directory
 - **Description**: Contains image files used for branding and UI elements.
 
 ## Installation
 
 - **Language**: Python
-- **Location**: `installer` directory
+- **Location**: [installer](https://github.com/raghavyuva/nixopus/tree/master/installer) directory
 - **Description**: Python scripts are used for installation and setup, managing the installation process and dependencies.
 
 ## Deployment
@@ -141,12 +141,12 @@ flowchart TB
 ## Web Server
 
 - **Tool**: Caddy
-- **Location**: `helpers` directory
+- **Location**: [helpers](https://github.com/raghavyuva/nixopus/tree/master/helpers) directory
 - **Description**: Caddy is used as a web server, with configuration files provided for setup.
 
 ## Documentation
 
-- **Location**: `docs` directory
+- **Location**: [docs](https://github.com/raghavyuva/nixopus/tree/master/docs) directory
 - **Description**: Contains various documentation files and directories, including this architecture overview.
 
 _**Nixopus**_ is an end-to-end platform with a UI built on React.js. The backend is written in Go, which is responsible for managing core functions, including authentication, deployments, and real-time updates via WebSockets.

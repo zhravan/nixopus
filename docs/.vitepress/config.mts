@@ -10,7 +10,7 @@ export default defineConfigWithTheme({
   title: "Nixopus Docs",
   description: "documentation",
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
-
+  base: '/',
   themeConfig: {
     search: {
       provider: 'local',

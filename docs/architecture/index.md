@@ -135,8 +135,8 @@ flowchart TB
 
 ## Deployment
 
-- **Tools**: Docker, Docker Compose
-- **Description**: The project uses Docker for containerization and Docker Compose for orchestrating multi-container applications. Configuration files are provided for both development and staging environments.
+- **Tools**: `Docker`, `Docker Compose`
+- **Description**: The project uses `Docker` for containerization and `Docker Compose` for orchestrating multi-container applications. Configuration files are provided for both development and staging environments.
 
 ## Web Server
 
@@ -149,12 +149,15 @@ flowchart TB
 - **Location**: [docs](https://github.com/raghavyuva/nixopus/tree/master/docs) directory
 - **Description**: Contains various documentation files and directories, including this architecture overview.
 
-_**Nixopus**_ is an end-to-end platform with a UI built on React.js. The backend is written in Go, which is responsible for managing core functions, including authentication, deployments, and real-time updates via WebSockets.
+---
 
-Data Storage and Management is supported via PostgreSQL database, which the backend accesses for queries and real-time notifications. The entire system operates within Docker containers, coordinated using Docker Compose, with Caddy serving as a reverse proxy to route requests securely.
-
-Nixopus integrates with external services, currently GitHub for login and webhooks, and uses email, Slack, and Discord to send notifications.
-
-Installer scripts are purely used for self-hosting and production deployment purposes only, and development container setups are available to help developers quickly start working on the project. Automated CI/CD pipelines handle testing and deployment, while built-in documentation supports easy maintenance.
-
-This architecture setup allows for a modular and scalable application, leveraging containerization for easy deployment and management.
+> **TLDR Platform Overview**
+>
+> **Note:** The architecture overview provided is a high-level representation of the project's structure and components.
+>
+> Nixopus is a modular, containerized platform featuring a React.js UI and a Go backend for authentication, deployments, and real-time WebSocket
+> updates. It uses PostgreSQL (with LISTEN/NOTIFY) for data storage, Docker Compose for orchestration, and Caddy as a reverse proxy. Integrations
+> include GitHub (OAuth/webhooks) and notifications via email, Slack, and Discord. Python installer scripts and a devcontainer setup simplify
+> self-hosting and development, while GitHub Actions automate CI/CD and built-in docs ensure easy maintenance.
+>
+> This architecture setup allows for a modular and scalable application, leveraging containerization for easy deployment and management.

@@ -72,7 +72,7 @@ This section will help you set up Nixopus on your VPS quickly.
 To install Nixopus on your VPS, ensure you have sudo access and run the following command:
 
 ```
-sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/master/scripts/install.sh)"
+sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/main/scripts/install.sh)"
 ```
 
 #### Optional Parameters
@@ -87,7 +87,7 @@ You can customize your installation by providing the following optional paramete
 Example with optional parameters:
 
 ```
-sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/master/scripts/install.sh)" -- \
+sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/main/scripts/install.sh)" -- \
   --api-domain nixopusapi.example.tld \
   --app-domain nixopus.example.tld \
   --email admin@example.tld \
@@ -271,25 +271,25 @@ flowchart TB
     DOCS -.-> BR
 
     %% Click Events
-    click FE "https://github.com/raghavyuva/nixopus/tree/master/view/"
-    click AR "https://github.com/raghavyuva/nixopus/tree/master/view/app/api/"
-    click CH "https://github.com/raghavyuva/nixopus/tree/master/view/components/"
-    click CH "https://github.com/raghavyuva/nixopus/tree/master/view/hooks/"
-    click RS "https://github.com/raghavyuva/nixopus/tree/master/view/redux/"
-    click BR "https://github.com/raghavyuva/nixopus/blob/master/api/internal/routes.go"
-    click BR "https://github.com/raghavyuva/nixopus/tree/master/api/internal/middleware/"
-    click FM "https://github.com/raghavyuva/nixopus/tree/master/api/internal/features/"
-    click RT "https://github.com/raghavyuva/nixopus/tree/master/api/internal/realtime/"
-    click DB "https://github.com/raghavyuva/nixopus/tree/master/api/migrations/"
-    click DD "https://github.com/raghavyuva/nixopus/blob/master/docker-compose.yml"
-    click DD "https://github.com/raghavyuva/nixopus/blob/master/docker-compose-staging.yml"
-    click CP "https://github.com/raghavyuva/nixopus/tree/master/helpers/Caddyfile"
-    click CP "https://github.com/raghavyuva/nixopus/blob/master/helpers/caddy.json"
-    click IS "https://github.com/raghavyuva/nixopus/tree/master/installer/"
-    click IS "https://github.com/raghavyuva/nixopus/blob/master/scripts/install.sh"
-    click DEV "https://github.com/raghavyuva/nixopus/tree/master/.devcontainer/"
-    click DOCS "https://github.com/raghavyuva/nixopus/tree/master/docs/"
-    click CI "https://github.com/raghavyuva/nixopus/tree/master/.github/workflows/"
+    click FE "https://github.com/raghavyuva/nixopus/tree/main/view/"
+    click AR "https://github.com/raghavyuva/nixopus/tree/main/view/app/api/"
+    click CH "https://github.com/raghavyuva/nixopus/tree/main/view/components/"
+    click CH "https://github.com/raghavyuva/nixopus/tree/main/view/hooks/"
+    click RS "https://github.com/raghavyuva/nixopus/tree/main/view/redux/"
+    click BR "https://github.com/raghavyuva/nixopus/blob/main/api/internal/routes.go"
+    click BR "https://github.com/raghavyuva/nixopus/tree/main/api/internal/middleware/"
+    click FM "https://github.com/raghavyuva/nixopus/tree/main/api/internal/features/"
+    click RT "https://github.com/raghavyuva/nixopus/tree/main/api/internal/realtime/"
+    click DB "https://github.com/raghavyuva/nixopus/tree/main/api/migrations/"
+    click DD "https://github.com/raghavyuva/nixopus/blob/main/docker-compose.yml"
+    click DD "https://github.com/raghavyuva/nixopus/blob/main/docker-compose-staging.yml"
+    click CP "https://github.com/raghavyuva/nixopus/tree/main/helpers/Caddyfile"
+    click CP "https://github.com/raghavyuva/nixopus/blob/main/helpers/caddy.json"
+    click IS "https://github.com/raghavyuva/nixopus/tree/main/installer/"
+    click IS "https://github.com/raghavyuva/nixopus/blob/main/scripts/install.sh"
+    click DEV "https://github.com/raghavyuva/nixopus/tree/main/.devcontainer/"
+    click DOCS "https://github.com/raghavyuva/nixopus/tree/main/docs/"
+    click CI "https://github.com/raghavyuva/nixopus/tree/main/.github/workflows/"
 
     %% Styles
     classDef frontend fill:#D0E8FF,stroke:#333,stroke-width:1px

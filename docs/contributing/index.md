@@ -4,14 +4,16 @@ Thank you for your interest in contributing to Nixopus! This guide will help you
 
 ## Table of Contents
 
-1. [Code of Conduct](#code-of-conduct)
-2. [Development Setup](#development-setup)
-3. [Running the Application](#running-the-application)
-4. [Making Changes](#making-changes)
-5. [Submitting a Pull Request](#submitting-a-pull-request)
-6. [Proposing New Features](#proposing-new-features)
-7. [Extending Documentation](#extending-documentation)
-8. [Contributor License Agreement](#contributor-license-agreement)
+- [Contributing to Nixopus](#contributing-to-nixopus)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+    - [Developmentg Setup](#developmentg-setup)
+  - [Running the Application](#running-the-application)
+  - [Making Changes](#making-changes)
+  - [Submitting a Pull Request](#submitting-a-pull-request)
+  - [Proposing New Features](#proposing-new-features)
+  - [Extending Documentation](#extending-documentation)
+  - [Gratitude](#gratitude)
 
 ## Code of Conduct
 
@@ -22,6 +24,7 @@ Before contributing, please review and agree to our [Code of Conduct](/code-of-c
 If you prefer to set up your development environment manually:
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/raghavyuva/nixopus.git
 cd nixopus
@@ -30,6 +33,7 @@ cd nixopus
 2. Install Go (version 1.23.6 or newer), and PostgreSQL.
 
 3. Set up PostgreSQL databases:
+
 ```bash
 createdb postgres -U postgres
 
@@ -37,11 +41,13 @@ createdb nixopus_test -U postgres
 ```
 
 4. Copy and configure environment variables:
+
 ```bash
 cp .env.sample .env
 ```
 
 5. Install project dependencies:
+
 ```bash
 cd api
 go mod download
@@ -51,19 +57,23 @@ yarn install
 ```
 
 ## Running the Application
+
 1. Start the API service:
+
 ```bash
 cd api
 air
 ```
 
 2. Start the view service:
+
 ```bash
 cd view
 yarn dev
 ```
 
 The view service uses:
+
 - Next.js 15 with App Router
 - React 19
 - Redux Toolkit for state management
@@ -72,9 +82,11 @@ The view service uses:
 - TypeScript for type safety
 
 ## Making Changes
+
 Nixopus follows [trunk-based-development](https://www.atlassian.com/continuous-delivery/continuous-integration/trunk-based-development) conventions.
 
 1. Create a new branch:
+
 ```bash
 git checkout -b feature/your-feature-name
 ```
@@ -87,6 +99,7 @@ git checkout -b feature/your-feature-name
    - For frontend changes, follow the Next.js app directory structure
 
 3. Run tests:
+
 ```bash
 cd api
 make test
@@ -126,4 +139,5 @@ yarn lint
 Documentation is located in the `docs/` directory. Follow the existing structure and style when adding new content.
 
 ## Gratitude
+
 Thank you for contributing to Nixopus! Your efforts help make this project better for everyone.

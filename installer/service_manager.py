@@ -12,8 +12,6 @@ from docker_setup import DockerSetup
 class ServiceManager:
     def __init__(self, project_root, env="staging"):
         self.project_root = project_root
-        self.required_docker_version = "20.10.0"
-        self.required_compose_version = "2.0.0"
         self.docker_setup = DockerSetup(env)
 
     def check_system_requirements(self):
@@ -24,41 +22,9 @@ class ServiceManager:
             print(f"Error: Unsupported operating system: {system}")
             sys.exit(1)
 
-        # self.check_docker_version()
-        # self.check_docker_compose_version()
         self.check_curl_installed()
 
         print("System requirements check passed!")
-
-    def check_docker_version(self):
-        try:
-            result = subprocess.run(["docker", "--version"], check=True, capture_output=True, text=True)
-            version_string = result.stdout.strip()
-            if not self._version_check(version_string, self.required_docker_version):
-                print(f"Error: Docker version {self.required_docker_version} or higher is required")
-                print(f"Current version: {version_string}")
-                sys.exit(1)
-        except subprocess.CalledProcessError as e:
-            print(f"Error: Docker is not installed or not working properly")
-            print(e.stderr.decode())
-            sys.exit(1)
-            
-    def check_docker_compose_version(self):
-        try:
-            try:
-                result = subprocess.run(["docker", "compose", "--version"], check=True, capture_output=True, text=True)
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                result = subprocess.run(["docker-compose", "--version"], check=True, capture_output=True, text=True)
-            
-            version_string = result.stdout.strip()
-            if not self._version_check(version_string, self.required_compose_version):
-                print(f"Error: Docker Compose version {self.required_compose_version} or higher is required")
-                print(f"Current version: {version_string}")
-                sys.exit(1)
-        except subprocess.CalledProcessError as e:
-            print(f"Error: Docker Compose is not installed or not working properly")
-            print(e.stderr.decode())
-            sys.exit(1)
             
     def check_curl_installed(self):
         if not shutil.which("curl"):

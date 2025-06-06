@@ -5,6 +5,17 @@
 This document provides an overview of the architecture for the project, detailing the various components and their interactions.
 
 ```mermaid
+%%{init: {
+  'themeVariables': {
+    'fontSize': '16px',
+    'primaryColor': '#ffffff',
+    'edgeLabelBackground':'#f8f9fa'
+  },
+  'flowchart': {
+    'zoom': true
+  }
+}}%%
+
 flowchart TB
     %% Frontend Layer
     subgraph "Frontend (Next.js)" 
@@ -78,29 +89,25 @@ flowchart TB
     click FE "https://github.com/raghavyuva/nixopus/tree/master/view/"
     click AR "https://github.com/raghavyuva/nixopus/tree/master/view/app/api/"
     click CH "https://github.com/raghavyuva/nixopus/tree/master/view/components/"
-    click CH "https://github.com/raghavyuva/nixopus/tree/master/view/hooks/"
     click RS "https://github.com/raghavyuva/nixopus/tree/master/view/redux/"
-    click BR "https://github.com/raghavyuva/nixopus/blob/master/api/internal/routes.go"
     click BR "https://github.com/raghavyuva/nixopus/tree/master/api/internal/middleware/"
     click FM "https://github.com/raghavyuva/nixopus/tree/master/api/internal/features/"
     click RT "https://github.com/raghavyuva/nixopus/tree/master/api/internal/realtime/"
     click DB "https://github.com/raghavyuva/nixopus/tree/master/api/migrations/"
     click DD "https://github.com/raghavyuva/nixopus/blob/master/docker-compose.yml"
-    click DD "https://github.com/raghavyuva/nixopus/blob/master/docker-compose-staging.yml"
-    click CP "https://github.com/raghavyuva/nixopus/tree/master/helpers/Caddyfile"Add commentMore actions
-    click CP "https://github.com/raghavyuva/nixopus/blob/master/helpers/caddy.json"
+    click CP "https://github.com/raghavyuva/nixopus/tree/master/helpers/Caddyfile"
     click IS "https://github.com/raghavyuva/nixopus/tree/master/installer/"
-    click IS "https://github.com/raghavyuva/nixopus/blob/master/scripts/install.sh"
     click DEV "https://github.com/raghavyuva/nixopus/tree/master/.devcontainer/"
     click DOCS "https://github.com/raghavyuva/nixopus/tree/master/docs/"
     click CI "https://github.com/raghavyuva/nixopus/tree/master/.github/workflows/"
 
-    %% Styles
-    classDef frontend fill:#D0E8FF,stroke:#333,stroke-width:1px
-    classDef backend fill:#D0FFD0,stroke:#333,stroke-width:1px
-    classDef datastore fill:#FFE0A0,stroke:#333,stroke-width:1px
-    classDef external fill:#E0E0E0,stroke:#333,stroke-width:1px
-    classDef infra fill:#F0F0F0,stroke:#333,stroke-width:1px
+    %% Styles (higher-contrast palettes)
+    classDef frontend fill:#4682B4,stroke:#333,stroke-width:1px,color:#fff;
+    classDef backend fill:#32CD32,stroke:#333,stroke-width:1px,color:#fff;
+    classDef datastore fill:#FFD700,stroke:#333,stroke-width:1px,color:#000;
+    classDef external fill:#A9A9A9,stroke:#333,stroke-width:1px,color:#fff;
+    classDef infra fill:#CD5C5C,stroke:#333,stroke-width:1px,color:#fff;
+
 ```
 
 ## API Layer

@@ -9,6 +9,7 @@ from docker_setup import DockerSetup
 from ssh_setup import SSHSetup, SSHConfig
 from dataclasses import dataclass
 from typing import Dict, Optional
+from base_config import BaseConfig
 
 @dataclass
 class URLConfig:
@@ -114,25 +115,16 @@ class EnvironmentConfig:
             "caddy", "database", "version", "urls", "directories", "files", "errors"
         ]
 
-        if env not in VALID_ENVIRONMENTS:
-            raise ValueError(f"Invalid environment: {env}. Must be either 'production' or 'staging'")
-            
         config_path = Path(__file__).parent.parent / "helpers" / "config.json"
-        try:
-            with open(config_path, 'r') as f:
-                config = json.load(f)
-        except FileNotFoundError:
-            raise Exception(f"Configuration file not found at {config_path}")
-        except json.JSONDecodeError:
-            raise Exception(f"Invalid JSON in configuration file at {config_path}")
-            
-        env_config = config.get(env)
-        if not env_config:
-            raise Exception(f"Configuration for environment '{env}' not found in config file")
+        base_config = BaseConfig[EnvironmentConfig](
+            config_path=config_path,
+            env=env,
+            required_keys=REQUIRED_CONFIG_KEYS,
+            valid_environments=VALID_ENVIRONMENTS
+        )
 
-        missing_keys = [key for key in REQUIRED_CONFIG_KEYS if key not in env_config]
-        if missing_keys:
-            raise Exception(f"Missing required configuration keys for environment '{env}': {', '.join(missing_keys)}")
+        config = base_config.load_config()
+        env_config = config[env]
 
         try:
             urls = {

@@ -1,4 +1,4 @@
-# Installation / Self Host
+# Installation Guide
 
 Welcome to the Nixopus installation guide. This section will help you set up Nixopus on your VPS quickly.
 

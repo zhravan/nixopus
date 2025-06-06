@@ -1,7 +1,6 @@
 import { useSidebar } from 'vitepress-openapi'
 import spec from '../src/openapi.json' with { type: 'json' }
 import { defineConfigWithTheme } from 'vitepress'
-import mermaidPlugin from 'vitepress-plugin-mermaid'
 
 
 const sidebar = useSidebar({

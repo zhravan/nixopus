@@ -1,6 +1,8 @@
 import { useSidebar } from 'vitepress-openapi'
 import spec from '../src/openapi.json' with { type: 'json' }
 import { defineConfigWithTheme } from 'vitepress'
+import mermaidPlugin from 'vitepress-plugin-mermaid'
+
 
 const sidebar = useSidebar({
   spec,
@@ -11,6 +13,11 @@ export default defineConfigWithTheme({
   description: "documentation",
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   base: '/',
+  markdown: {
+    config(md) {
+      md.use(mermaidPlugin)
+    }
+  },
   themeConfig: {
     search: {
       provider: 'local',
@@ -60,6 +67,7 @@ export default defineConfigWithTheme({
         items: [
           { text: "Introduction", link: "/introduction/index.md" },
           { text: "Installation", link: "/install/index.md" },
+          { text: "Architecture", link: "/architecture/index.md" },
           { text: "Preferences", link: "/preferences/index.md" }
         ]
       },

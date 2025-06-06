@@ -149,15 +149,21 @@ flowchart TB
 - **Location**: [docs](https://github.com/raghavyuva/nixopus/tree/master/docs) directory
 - **Description**: Contains various documentation files and directories, including this architecture overview.
 
----
+## TLDR
 
-> **TLDR Platform Overview**
->
-> **Note:** The architecture overview provided is a high-level representation of the project's structure and components.
->
-> Nixopus is a modular, containerized platform featuring a React.js UI and a Go backend for authentication, deployments, and real-time WebSocket
-> updates. It uses PostgreSQL (with LISTEN/NOTIFY) for data storage, Docker Compose for orchestration, and Caddy as a reverse proxy. Integrations
-> include GitHub (OAuth/webhooks) and notifications via email, Slack, and Discord. Python installer scripts and a devcontainer setup simplify
-> self-hosting and development, while GitHub Actions automate CI/CD and built-in docs ensure easy maintenance.
->
-> This architecture setup allows for a modular and scalable application, leveraging containerization for easy deployment and management.
+> Note: The architecture overview provided is a high-level representation of the project's structure and components.
+
+- UI: React.js (Next.js)
+- Backend: Go (authentication, deployments, real-time via WebSockets)
+- Data Storage: PostgreSQL (uses LISTEN/NOTIFY for realtime)
+- Containerization: Docker Compose (each component in its own container)
+- Reverse Proxy: Caddy (routes HTTPS, manages TLS)
+- Integrations:
+  - GitHub (OAuth & webhooks)
+  - Notifications via Email, Slack, Discord
+  - Setup & Dev: .devcontainer/ for local development
+  - Production: Python installer scripts for production
+- TestingCI/CD: GitHub Actions (automated testing and deployments)
+- Documentation: Built-in docs under docs/ using vitepress
+
+This architecture setup allows for a modular and scalable application, leveraging containerization for easy deployment and management.

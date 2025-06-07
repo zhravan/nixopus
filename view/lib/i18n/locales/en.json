@@ -133,7 +133,14 @@
           "lowercase": "Password must contain at least one lowercase letter",
           "number": "Password must contain at least one number",
           "specialChar": "Password must contain at least one special character"
-        }
+        },
+        "adminAlreadyRegistered": "Admin already registered",
+        "adminAlreadyRegisteredDescription": "Please contact the administrator to get access.",
+        "loginButton": "Login",
+        "somethingWentWrong": "Something went wrong",
+        "loadingAdminRegistration": "Checking if admin is registered...",
+        "tryAgain": "Try again",
+        "registerFailed": "Failed to register"
       }
     },
     "email": "Email",

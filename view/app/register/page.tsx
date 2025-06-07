@@ -11,6 +11,7 @@ import useRegister from './hooks/use-register';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 import { LogIn } from 'lucide-react';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -91,9 +92,9 @@ export default function RegisterPage() {
                     </Button>
                     <div className="text-center text-sm">
                       {t('auth.register.alreadyHaveAccount')}{' '}
-                      <a href="/login" className="underline underline-offset-4">
+                      <Link href="/login" className="underline underline-offset-4">
                         {t('auth.login.title')}
-                      </a>
+                      </Link>
                     </div>
                   </form>
                 </div>
@@ -112,6 +113,8 @@ export default function RegisterPage() {
             <a
               href="https://docs.nixopus.com/license"
               className="underline underline-offset-4 hover:text-primary"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               {t('auth.register.termsOfService')}
             </a>{' '}
@@ -119,6 +122,8 @@ export default function RegisterPage() {
             <a
               href="https://docs.nixopus.com/privacy-policy"
               className="underline underline-offset-4 hover:text-primary"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               {t('auth.register.privacyPolicy')}
             </a>

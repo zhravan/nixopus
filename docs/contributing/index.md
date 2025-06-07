@@ -6,8 +6,9 @@ Thank you for your interest in contributing to Nixopus! This guide will help you
 
 - [Contributing to Nixopus](#contributing-to-nixopus)
   - [Table of Contents](#table-of-contents)
+  - [Specialized Contribution Guides](#specialized-contribution-guides)
   - [Code of Conduct](#code-of-conduct)
-    - [Developmentg Setup](#developmentg-setup)
+  - [Development Setup](#development-setup)
   - [Running the Application](#running-the-application)
   - [Making Changes](#making-changes)
   - [Submitting a Pull Request](#submitting-a-pull-request)
@@ -15,11 +16,21 @@ Thank you for your interest in contributing to Nixopus! This guide will help you
   - [Extending Documentation](#extending-documentation)
   - [Gratitude](#gratitude)
 
+## Specialized Contribution Guides
+
+We provide detailed guides for specific types of contributions:
+
+- [Backend Development Guide](backend.md) - For Go backend contributions
+- [Frontend Development Guide](frontend.md) - For Next.js/React frontend contributions
+- [Documentation Guide](documentation.md) - For improving or extending documentation
+- [Self-Hosting Guide](self-hosting.md) - For improving installation and self-hosting
+- [Docker Guide](docker.md) - For Docker builds and container optimization
+
 ## Code of Conduct
 
 Before contributing, please review and agree to our [Code of Conduct](/code-of-conduct/index.md). We're committed to maintaining a welcoming and inclusive community.
 
-### Developmentg Setup
+## Development Setup
 
 If you prefer to set up your development environment manually:
 

@@ -1,5 +1,6 @@
 export enum AUTHURLS {
   USER_LOGIN = 'v1/auth/login',
+  USER_REGISTER = 'v1/auth/register',
   USER_DETAILS = 'v1/user',
   REFRESH_TOKEN = 'v1/auth/refresh-token',
   REQUEST_PASSWORD_RESET = 'v1/auth/request-password-reset',

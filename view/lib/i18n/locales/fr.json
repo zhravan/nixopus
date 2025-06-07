@@ -124,6 +124,7 @@
       "and": "et",
       "privacyPolicy": "Politique de Confidentialité",
       "alreadyHaveAccount": "Vous avez déjà un compte ?",
+      "success": "Inscription réussie ! Veuillez vérifier votre e-mail pour vérifier votre compte.",
       "errors": {
         "invalidEmail": "E-mail invalide",
         "passwordMismatch": "Les mots de passe ne correspondent pas",

@@ -124,6 +124,7 @@
       "and": "and",
       "privacyPolicy": "Privacy Policy",
       "alreadyHaveAccount": "Already have an account?",
+      "success": "Registration successful! Please check your email to verify your account.",
       "errors": {
         "invalidEmail": "Invalid email",
         "passwordMismatch": "Passwords don't match",

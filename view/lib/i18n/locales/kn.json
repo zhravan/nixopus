@@ -124,6 +124,7 @@
       "and": "ಮತ್ತು",
       "privacyPolicy": "ಗೌಪ್ಯತಾ ನೀತಿ",
       "alreadyHaveAccount": "ನೀವು ಇದಕ್ಕೆ ಖಾತೆ ಹೊಂದಿದ್ದಾಗಿರಬೇಕು?",
+      "success": "ನೋಂದಿಸಲಾಗಿದೆ! ದಯವಿಟ್ಟು ನಿಮ್ಮ ಇಮೇಲ್ ಪರಿಶೀಲನೆ ಮಾಡಿ ಖಾತೆಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
       "errors": {
         "invalidEmail": "ಅಮಾನ್ಯ ಇಮೇಲ್",
         "passwordMismatch": "ಪಾಸ್ವರ್ಡ್ಗಳು ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ",
@@ -135,12 +136,12 @@
           "specialChar": "ಪಾಸ್ವರ್ಡ್ ಕನಿಷ್ಠ ಒಂದು ವಿಶೇಷ ಅಕ್ಷರವನ್ನು ಹೊಂದಿರಬೇಕು"
         },
         "adminAlreadyRegistered": "ಆದ್ಯತೆ ಮತ್ತೆ ನೋಂದಿಸಲಾಗಿದೆ",
-        "adminAlreadyRegisteredDescription": "ದಯವಿಟ್ಟು ಆದ್ಯತೆಗೆ ಕಂಟಿಸಿ ಆಗಿರಬೇಕು.",
+        "adminAlreadyRegisteredDescription": "ದಯವಿಟ್ಟು ಪ್ರವೇಶಕ್ಕಾಗಿ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
         "loginButton": "ಲಾಗಿನ್",
         "somethingWentWrong": "ಏನೋ ತಪ್ಪು ಸಂಭವಿಸಿದೆ",
         "loadingAdminRegistration": "ಆದ್ಯತೆ ನೋಂದಿಸಲಾಗಿದೆ ಎಂದು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...",
         "tryAgain": "ಮರುಪ್ರಯತ್ನಿಸಿ",
-        "registerFailed": "ನೋಂದಿಸಲಾಗಿದೆ"
+        "registerFailed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ"
       }
     },
     "email": "ಇಮೇಲ್",

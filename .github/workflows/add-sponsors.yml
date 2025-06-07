@@ -1,8 +1,14 @@
 name: Generate Sponsors README
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
+  pull_request: # On MR events
+    types: [opened, reopened, synchronize]
+    branches: [main, master, feature-develop]
+  push: # On merge/push
+    branches: [main, master, feature-develop]
   schedule:
-    - cron: 30 15 * * 0-6
+    - cron: "30 15 * * 0-6" # Daily at 15:30 UTC
+
 permissions:
   contents: write
 jobs:

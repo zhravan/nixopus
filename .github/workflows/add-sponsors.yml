@@ -1,0 +1,26 @@
+name: Add Sponsors to README
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 */6 * * *" # Every 6 hours
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Add GitHub Sponsors to README
+        uses: andymckay/add-github-sponsors-to-readme-action@v0.1.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          readme_path: "README.md"
+          sponsor_heading: "## Sponsors"

@@ -220,7 +220,7 @@ Documentation is located in the `docs/` directory. Follow the existing structure
 
 ## Contribution Guidelines
 
-Thank you for your interest in contributing to Nixopus! This guide will help you get started with the development setup and explain the contribution process.
+Thank you for your interest in contributing to Nixopus! This [guide](docs/contributing/README.md) will help you get started with the development setup and explain the contribution process.
 
 ## Community & Support
 

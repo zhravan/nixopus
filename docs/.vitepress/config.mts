@@ -5,7 +5,8 @@ import { defineConfig } from 'vitepress'
 import { withMermaid } from "vitepress-plugin-mermaid";
 
 const sidebar = useSidebar({
-  spec,
+  spec: spec as any,
+  linkPrefix: '/api'
 })
 
 export default withMermaid(
@@ -51,7 +52,8 @@ export default withMermaid(
       },
       nav: [
         { text: 'Home', link: '/' },
-        { text: 'Get Started', link: '/install/index.md' }
+        { text: 'Get Started', link: '/install/index.md' },
+        { text: 'Blog', link: '/blog/' }
       ],
       footer: {
         message: 'Released under the Functional Source License (FSL)',
@@ -74,6 +76,12 @@ export default withMermaid(
             { text: 'Terminal', link: '/terminal/index.md' },
             { text: "File Manager", link: "/file-manager/index.md" },
             { text: "Notifications", link: "/notifications/index.md" }
+          ]
+        },
+        {
+          text: 'Blog',
+          items: [
+            { text: 'Latest Posts', link: '/blog/' }
           ]
         },
         {

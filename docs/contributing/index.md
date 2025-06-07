@@ -20,6 +20,7 @@ Thank you for your interest in contributing to Nixopus! This guide will help you
 
 We provide detailed guides for specific types of contributions:
 
+- [Getting Started with contribution](README.md) - For general contribution guidelines
 - [Backend Development Guide](backend.md) - For Go backend contributions
 - [Frontend Development Guide](frontend.md) - For Next.js/React frontend contributions
 - [Documentation Guide](documentation.md) - For improving or extending documentation

@@ -21,6 +21,7 @@ This guide provides detailed instructions for contributing to the Nixopus backen
    createdb nixopus_test -U postgres
    
    # Copy environment template
+   # Note: Be sure to update the environment variables to suit your setup.
    cp api/.env.sample api/.env
    
    # Install dependencies
@@ -30,11 +31,15 @@ This guide provides detailed instructions for contributing to the Nixopus backen
 
 3. **Database Migrations**
 
+Currently **the migration works automatically when starting the server**. However, you can run migrations manually using the following command:
+
    ```bash
    # Run migrations
    cd api
    go run migrations/main.go
    ```
+
+*Note: [air](https://github.com/air-verse/air) as a dev-dependency so you can start the backend with the air command.*
 
 ## Project Structure
 
@@ -67,10 +72,10 @@ api/
 
    ```
    api/internal/features/your-feature/
-   ├── controller.go   # HTTP handlers
-   ├── service.go      # Business logic
-   ├── storage.go      # Data access
-   └── types.go        # Type definitions
+   ├── controller/init.go   # HTTP handlers
+   ├── service/service_name.go      # Business logic
+   ├── storage/dao_name.go      # Data access
+   └── types/type_name.go        # Type definitions
    ```
 
    Here's a sample implementation:
@@ -86,52 +91,70 @@ api/
        UpdatedAt string `json:"updated_at" db:"updated_at"`
    }
    
-   // controller.go
+   // init.go (Controller)
    package yourfeature
-   
-   import (
-       "net/http"
-       
-       "github.com/gin-gonic/gin"
-   )
-   
+
+   import "github.com/go-fuego/fuego"
+
    type Controller struct {
-       service *Service
+        service *Service
    }
-   
-   func NewController(service *Service) *Controller {
-       return &Controller{service: service}
+
+   func NewController(s *Service)*Controller {
+        return &Controller{service: s}
    }
-   
-   func (c *Controller) GetEntity(ctx *gin.Context) {
-       // Implementation
+
+   func (c *Controller) GetEntities(ctx fuego.Context) error {
+        entities, err := c.service.ListEntities()
+        if err != nil {
+            return ctx.JSON(500, map[string]string{"error": err.Error()})
+        }
+        return ctx.JSON(200, entities)
    }
-   
-   // service.go
+
+   func (c *Controller) CreateEntity(ctx fuego.Context) error {
+        var input YourEntity
+        if err := ctx.Bind(&input); err != nil {
+            return ctx.JSON(400, map[string]string{"error": "invalid input"})
+        }
+        created, err := c.service.CreateEntity(&input)
+        if err != nil {
+            return ctx.JSON(500, map[string]string{"error": err.Error()})
+        }
+        return ctx.JSON(201, created)
+   }
+
+   // service.go or service_name.go
    package yourfeature
-   
+
    type Service struct {
        storage *Storage
    }
-   
-   func NewService(storage *Storage) *Service {
+
+   func NewService(storage *Storage)*Service {
        return &Service{storage: storage}
    }
-   
-   // storage.go
+
+   // init.go or storage.go
    package yourfeature
-   
+
    import (
-       "database/sql"
+        "context"
+        "github.com/uptrace/bun"
    )
-   
+
    type Storage struct {
-       db *sql.DB
+       DB *bun.DB
+       Ctx context.Context
    }
-   
-   func NewStorage(db *sql.DB) *Storage {
-       return &Storage{db: db}
+
+   func NewFeatureStorage(db *bun.DB, ctx context.Context)*NewFeatureStorage {
+       return &FeatureStorage{
+            DB:  db,
+            Ctx: ctx
+        }
    }
+
    ```
 
 3. **Register Routes**
@@ -161,7 +184,7 @@ api/
    Create migration files in `api/migrations/your-feature/`:
 
    ```sql
-   -- 20250607000000_create_your_feature_table.up.sql
+   -- seq_number_create_your_feature_table.up.sql
    CREATE TABLE your_feature (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        name TEXT NOT NULL,
@@ -169,13 +192,13 @@ api/
        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
    );
    
-   -- 20250607000000_create_your_feature_table.down.sql
+   -- seq_number_create_your_feature_table.down.sql
    DROP TABLE IF EXISTS your_feature;
    ```
 
 5. **Write Tests**
 
-   Create tests in the same directory:
+   Organize your tests in the `tests/` using a separate folder named after each feature:
 
    ```go
    // controller_test.go
@@ -196,7 +219,7 @@ api/
 
 6. **Update API Documentation**
 
-   Update the OpenAPI specification in `api/doc/openapi.json` to include your new endpoints.
+   Note that the docs will be updated automatically; the OpenAPI specification in `api/doc/openapi.json` will be updated automatically.
 
 ## Testing
 
@@ -211,7 +234,7 @@ api/
 
    ```bash
    cd api
-   go test ./internal/features/your-feature/... -tags=integration
+   go test ./api/internal/tests/... -tags=integration
    ```
 
 3. **Run All Tests**

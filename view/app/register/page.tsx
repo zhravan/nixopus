@@ -14,24 +14,25 @@ import { LogIn } from 'lucide-react';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
-  const { form, onSubmit, isLoading, isAdminRegistered, isAdminRegisteredLoading, isAdminRegisteredError } = useRegister();
+  const {
+    form,
+    onSubmit,
+    isLoading,
+    isAdminRegistered,
+    isAdminRegisteredLoading,
+    isAdminRegisteredError
+  } = useRegister();
 
   if (isAdminRegisteredLoading) {
-    return (
-      <AdminRegisteredSkeleton />
-    );
+    return <AdminRegisteredSkeleton />;
   }
 
   if (isAdminRegisteredError) {
-    return (
-      <AdminRegisteredError />
-    );
+    return <AdminRegisteredError />;
   }
 
   if (isAdminRegistered) {
-    return (
-      <AdminRegistered />
-    );
+    return <AdminRegistered />;
   }
 
   return (
@@ -142,7 +143,9 @@ const AdminRegisteredError = () => {
               <div className="p-6 md:p-8">
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col items-center text-center">
-                    <h1 className="text-2xl font-bold">{t('auth.register.errors.somethingWentWrong')}</h1>
+                    <h1 className="text-2xl font-bold">
+                      {t('auth.register.errors.somethingWentWrong')}
+                    </h1>
                     <p className="text-muted-foreground text-balance mt-4">
                       {t('auth.register.errors.loadingAdminRegistration')}
                     </p>
@@ -150,7 +153,7 @@ const AdminRegisteredError = () => {
                   <div className="flex justify-center gap-4 mt-4 mb-4">
                     <Button variant="outline" onClick={() => window.location.reload()}>
                       {t('auth.register.errors.tryAgain')}
-                    </Button> 
+                    </Button>
                     <Button variant="outline" onClick={() => router.push('/login')}>
                       {t('auth.register.errors.loginButton')}
                     </Button>
@@ -217,7 +220,9 @@ const AdminRegistered = () => {
       <Card>
         <CardContent>
           <div className="flex flex-col items-center text-center">
-            <h1 className="text-2xl font-bold">{t('auth.register.errors.adminAlreadyRegistered')}</h1>
+            <h1 className="text-2xl font-bold">
+              {t('auth.register.errors.adminAlreadyRegistered')}
+            </h1>
             <p className="text-muted-foreground text-balance mt-4">
               {t('auth.register.errors.adminAlreadyRegisteredDescription')}
             </p>
@@ -231,5 +236,5 @@ const AdminRegistered = () => {
         </CardFooter>
       </Card>
     </div>
-  )
-}
+  );
+};

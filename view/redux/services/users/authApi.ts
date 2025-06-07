@@ -15,6 +15,19 @@ export const authApi = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: ['Authentication'],
   endpoints: (builder) => ({
+    registerUser: builder.mutation<AuthResponse, { email: string; password: string }>({
+      query(credentials) {
+        return {
+          url: AUTHURLS.USER_REGISTER,
+          method: 'POST',
+          body: credentials
+        };
+      },
+      transformResponse: (response: { data: AuthResponse }) => {
+        return { ...response.data };
+      },
+      invalidatesTags: [{ type: 'Authentication', id: 'LIST' }]
+    }),
     loginUser: builder.mutation<AuthResponse, LoginPayload>({
       query(credentials) {
         return {
@@ -123,6 +136,7 @@ export const authApi = createApi({
 });
 
 export const {
+  useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutMutation,
   useGetUserDetailsQuery,

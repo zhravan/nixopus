@@ -109,7 +109,32 @@
         "verifying": "Verificando..."
       }
     },
-    "register": "Registrarse",
+    "register": {
+      "title": "Registrarse",
+      "description": "Crea una nueva cuenta",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "submit": "Registrarse",
+      "emailPlaceholder": "m@ejemplo.com",
+      "loading": "Cargando...",
+      "terms": "Al hacer clic en continuar, aceptas nuestros",
+      "termsOfService": "Términos de Servicio",
+      "and": "y",
+      "privacyPolicy": "Política de Privacidad",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "errors": {
+        "invalidEmail": "Correo electrónico inválido",
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "passwordRequirements": {
+          "minLength": "La contraseña debe tener al menos 8 caracteres",
+          "uppercase": "La contraseña debe contener al menos una letra mayúscula",
+          "lowercase": "La contraseña debe contener al menos una letra minúscula",
+          "number": "La contraseña debe contener al menos un número",
+          "specialChar": "La contraseña debe contener al menos un carácter especial"
+        }
+      }
+    },
     "email": "Correo electrónico",
     "password": "Contraseña",
     "resetPassword": {

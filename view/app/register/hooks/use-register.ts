@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
-import { useRegisterUserMutation } from '@/redux/services/users/authApi';
+import { useIsAdminRegisteredQuery, useRegisterUserMutation } from '@/redux/services/users/authApi';
 import { toast } from 'sonner';
 
 const registerSchema = (t: (key: string) => string) =>
@@ -33,6 +33,7 @@ function useRegister() {
   const { t } = useTranslation();
   const router = useRouter();
   const [registerUser, { isLoading }] = useRegisterUserMutation();
+  const { data: isAdminRegistered, isLoading: isAdminRegisteredLoading, isError: isAdminRegisteredError } = useIsAdminRegisteredQuery();
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema(t)),
@@ -59,7 +60,10 @@ function useRegister() {
   return {
     form,
     onSubmit,
-    isLoading
+    isLoading,
+    isAdminRegistered,
+    isAdminRegisteredLoading,
+    isAdminRegisteredError
   };
 }
 

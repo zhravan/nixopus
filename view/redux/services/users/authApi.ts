@@ -131,6 +131,12 @@ export const authApi = createApi({
         return { ...response.data };
       },
       invalidatesTags: [{ type: 'Authentication', id: 'LIST' }]
+    }),
+    isAdminRegistered: builder.query<boolean, void>({
+      query: () => ({
+        url: AUTHURLS.IS_ADMIN_REGISTERED,
+        method: 'GET'
+      })
     })
   })
 });
@@ -147,5 +153,6 @@ export const {
   useSetupTwoFactorMutation,
   useVerifyTwoFactorMutation,
   useDisableTwoFactorMutation,
-  useTwoFactorLoginMutation
+  useTwoFactorLoginMutation,
+  useIsAdminRegisteredQuery
 } = authApi;

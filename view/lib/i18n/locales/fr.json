@@ -133,7 +133,14 @@
           "lowercase": "Le mot de passe doit contenir au moins une lettre minuscule",
           "number": "Le mot de passe doit contenir au moins un chiffre",
           "specialChar": "Le mot de passe doit contenir au moins un caractère spécial"
-        }
+        },
+        "adminAlreadyRegistered": "Administrateur déjà enregistré",
+        "adminAlreadyRegisteredDescription": "Veuillez contacter l'administrateur pour obtenir l'accès.",
+        "loginButton": "Se connecter",
+        "somethingWentWrong": "Une erreur est survenue",
+        "loadingAdminRegistration": "Vérification de l'enregistrement de l'administrateur...",
+        "tryAgain": "Réessayer",
+        "registerFailed": "Échec de l'inscription"
       }
     },
     "email": "E-mail",

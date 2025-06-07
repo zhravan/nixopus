@@ -71,6 +71,7 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
 - [Acknowledgments](#acknowledgments)
 - [About the Name](#about-the-name)
 - [Contributors](#contributors)
+- [Sponsors](#sponsors)
 
 ## Demo / Screenshots
 
@@ -274,3 +275,6 @@ Nixopus is derived from the combination of "octopus" and the Linux penguin (Tux)
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
+
+## Sponsors 
+

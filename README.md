@@ -19,7 +19,7 @@
 [![YouTube Video Views](https://img.shields.io/youtube/views/DrDGWNq4JM4?style=social&label=View%20Demo)](https://www.youtube.com/watch?v=DrDGWNq4JM4)
 ‎ ‎ ‎ [![Discord](https://img.shields.io/discord/1358854056642347180?label=Join%20Community&logo=discord&style=social)](https://discord.gg/skdcq39Wpv)
 
-[Website](https://nixopus.com) | [Documentation](https://docs.nixopus.com) | [Join Community](https://discord.gg/skdcq39Wpv)
+[Website](https://nixopus.com) | [Documentation](https://docs.nixopus.com)
 
 </div>
 

@@ -36,7 +36,7 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
     - [Optional Parameters](#optional-parameters)
     - [Accessing Nixopus](#accessing-nixopus)
 - [Usage](#usage)
-- [Architecture Overview](#architecture-overview)
+- [Architecture](#architecture)
 - [Development Guide](#development-guide)
   - [Development Setup](#development-setup)
   - [Running the Application](#running-the-application)
@@ -45,6 +45,7 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
   - [Proposing New Features](#proposing-new-features)
   - [Extending Documentation](#extending-documentation)
 - [Contribution Guidelines](#contribution-guidelines)
+- [Sponsorship](#sponsorship)
 - [Community \& Support](#community--support)
 - [License](#license)
 - [Code of Conduct](#code-of-conduct)
@@ -111,7 +112,7 @@ After successful installation, you can access the Nixopus dashboard by visiting 
 
 Once installed, Nixopus provides a dashboard for managing your VPS. You can deploy applications, monitor performance, and perform maintenance tasks directly from the interface.
 
-## Architecture Overview
+## Architecture
 
 Nixopus is built using a microservices architecture, leveraging Go for backend services and React for the frontend. It uses PostgreSQL for data storage and is designed to be scalable and efficient. To learn more about the architecture, refer to the [Architecture Overview](https://docs.nixopus.com/architecture) section in the documentation.
 
@@ -228,6 +229,13 @@ Documentation is located in the `docs/` directory. Follow the existing structure
 ## Contribution Guidelines
 
 Thank you for your interest in contributing to Nixopus! This [guide](docs/contributing/README.md) will help you get started with the development setup and explain the contribution process.
+
+## Sponsorship
+
+We've dedicated significant time to making Nixopus free and accessible. Your support helps us continue our development and vision for open source. Consider becoming a sponsor and join our community of supporters.
+
+- ![GitHub Sponsors](https://img.shields.io/github/sponsors/raghavyuva?label=Github%20Sponsor)
+- <a href="https://liberapay.com/raghavyuva/donate"><img src="https://img.shields.io/liberapay/goal/raghavyuva.svg?logo=liberapay"></a>
 
 ## Community & Support
 

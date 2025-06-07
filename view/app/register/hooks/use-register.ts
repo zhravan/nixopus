@@ -33,7 +33,11 @@ function useRegister() {
   const { t } = useTranslation();
   const router = useRouter();
   const [registerUser, { isLoading }] = useRegisterUserMutation();
-  const { data: isAdminRegistered, isLoading: isAdminRegisteredLoading, isError: isAdminRegisteredError } = useIsAdminRegisteredQuery();
+  const {
+    data: isAdminRegistered,
+    isLoading: isAdminRegisteredLoading,
+    isError: isAdminRegisteredError
+  } = useIsAdminRegisteredQuery();
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema(t)),

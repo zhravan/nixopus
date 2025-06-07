@@ -15,6 +15,9 @@
 [![Security Scan](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml)
 [![Package Manager](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml)
 [![Release](https://github.com/raghavyuva/nixopus/actions/workflows/release.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/release.yml)
+<br><br>
+[![YouTube Video Views](https://img.shields.io/youtube/views/DrDGWNq4JM4?style=social&label=View%20Demo)](https://www.youtube.com/watch?v=DrDGWNq4JM4)
+‎ ‎ ‎ [![Discord](https://img.shields.io/discord/1358854056642347180?label=Join%20Community&logo=discord&style=social)](https://discord.gg/skdcq39Wpv)
 
 [Website](https://nixopus.com) | [Documentation](https://docs.nixopus.com) | [Join Community](https://discord.gg/skdcq39Wpv)
 
@@ -26,11 +29,27 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
 
 > ⚠️ **Important Note**: Nixopus is currently in alpha/pre-release stage and is not yet ready for production use. While you're welcome to try it out, we recommend waiting for the beta or stable release before using it in production environments. The platform is still undergoing testing and development.
 
+## Features
+
+- **Simplified VPS management**
+  - *1 Click Application Deployment*: Deploy applications effortlessly with a single click, streamlining the setup process.
+  - *Integrated Web-Based Terminal*: Access your server's terminal directly from the browser, allowing you to manage your server with ease.
+  - *Intuitive File Manager*: Navigate and manage server files through a user-friendly interface.
+  - *Real Time Monitoring*: Monitor your server's CPU, RAM, containers, processes and resource usage in real-time.
+  - *Built in TLS Management*: Configura & manage TLS certificates for your domains directly within dashboard.
+  - *GitHub Integration for CI/CD*: Seamlessly integrate GitHub repositories for continuous integration and deployment.
+  - *Proxy Management via Caddy*: Configure and manage reverse proxies for your applications, streamlining the process of hosting multiple services.
+  - *Notification Integration*: Configure to send real-time alerts for critical server events directly to your preferred channels, including Slack, Discord, or Email.
+- **Comprehensive deployment tools**
+- **User-friendly interface**
+- **Customizable installation options**
+- **Self Host Deployment**
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
-- [Table of Contents](#table-of-contents)
 - [Features](#features)
+- [Table of Contents](#table-of-contents)
 - [Demo / Screenshots](#demo--screenshots)
 - [Installation \& Quick Start](#installation--quick-start)
     - [Optional Parameters](#optional-parameters)
@@ -53,24 +72,15 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
 - [About the Name](#about-the-name)
 - [Contributors](#contributors)
 
-## Features
-
-- **Simplified VPS management**
-  - *1 Click Application Deployment*: Deploy applications effortlessly with a single click, streamlining the setup process.
-  - *Integrated Web-Based Terminal*: Access your server's terminal directly from the browser, allowing you to manage your server with ease.
-  - *Intuitive File Manager*: Navigate and manage server files through a user-friendly interface.
-  - *Real Time Monitoring*: Monitor your server's CPU, RAM, containers, processes and resource usage in real-time.
-  - *Built in TLS Management*: Configura & manage TLS certificates for your domains directly within dashboard.
-  - *GitHub Integration for CI/CD*: Seamlessly integrate GitHub repositories for continuous integration and deployment.
-  - *Proxy Management via Caddy*: Configure and manage reverse proxies for your applications, streamlining the process of hosting multiple services.
-  - *Notification Integration*: Configure to send real-time alerts for critical server events directly to your preferred channels, including Slack, Discord, or Email.
-- **Comprehensive deployment tools**
-- **User-friendly interface**
-- **Customizable installation options**
-
 ## Demo / Screenshots
 
-[![Alt text](https://img.youtube.com/vi/DrDGWNq4JM4/maxresdefault.jpg)](https://www.youtube.com/watch?v=DrDGWNq4JM4)
+| Self Host Stats | Team Display | File Manager |
+| :-: | :-: | :-: |
+| <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/28nkmy49nm7oi5tq1t8c.webp"><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/28nkmy49nm7oi5tq1t8c.webp" alt="Self Host Stats" /></a> | <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gd5wei3oorzo6nwz96ro.webp"><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gd5wei3oorzo6nwz96ro.webp" alt="Team Display" /></a> | <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ikku6lr6cuqvv4ap5532.webp"><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ikku6lr6cuqvv4ap5532.webp" alt="File Manager" /></a> |
+
+| Self Host Logs | Dashboard Overview |  Notification Preferences |
+| :-: | :-: | :-: |
+| <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/quinawz7qvb6b5czi7u9.webp"><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/quinawz7qvb6b5czi7u9.webp" alt="Self Host Logs" /></a> | <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/iu7s99nj347eb24b2sdz.webp"><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/iu7s99nj347eb24b2sdz.webp" alt="Dashboard Overview" /></a> |  <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jtcayilnk5oeyy3qmcrp.webp"><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jtcayilnk5oeyy3qmcrp.webp" alt="Notification Preferences" /></a> |
 
 ## Installation & Quick Start
 

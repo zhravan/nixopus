@@ -1,3 +1,8 @@
+---
+title: "Docker Contributions"
+sidebar_label: "Docker"
+---
+
 # Contributing to Nixopus Docker Builds
 
 This guide provides detailed instructions for contributing to Nixopus Docker builds and container optimization.
@@ -5,6 +10,7 @@ This guide provides detailed instructions for contributing to Nixopus Docker bui
 ## Overview
 
 Docker is central to Nixopus deployment strategy. Contributions to Docker builds can include:
+
 - Optimizing Docker images for size and security
 - Improving build performance
 - Enhancing multi-stage builds
@@ -32,9 +38,9 @@ Nixopus uses Docker for containerization with the following key components:
 When optimizing Docker images:
 
 1. **Use Multi-Stage Builds**
-   
+
    Example improvement for the API Dockerfile:
-   
+
    ```dockerfile
    # Build stage
    FROM golang:1.21-alpine AS builder
@@ -63,14 +69,14 @@ When optimizing Docker images:
    ```
 
 2. **Minimize Layer Size**
-   
+
    Best practices:
    - Combine RUN commands with `&&`
    - Clean up in the same layer
    - Use `.dockerignore` to exclude unnecessary files
-   
+
    Example:
-   
+
    ```dockerfile
    RUN apk --no-cache add \
        curl \
@@ -79,9 +85,9 @@ When optimizing Docker images:
        openssl \
        && rm -rf /var/cache/apk/*
    ```
-   
+
    Example `.dockerignore`:
-   
+
    ```
    .git
    .github
@@ -97,19 +103,21 @@ When optimizing Docker images:
    ```
 
 3. **Use Specific Versions**
-   
+
    Bad:
+
    ```dockerfile
    FROM node:latest
    ```
-   
+
    Good:
+
    ```dockerfile
    FROM node:20.6.1-alpine3.18
    ```
 
 4. **Leverage BuildKit Features**
-   
+
    ```dockerfile
    # syntax=docker/dockerfile:1.4
    
@@ -124,7 +132,7 @@ When optimizing Docker images:
 ### 2. Security Improvements
 
 1. **Use Non-Root Users**
-   
+
    ```dockerfile
    # Create a non-root user
    RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -137,9 +145,9 @@ When optimizing Docker images:
    ```
 
 2. **Scan Images for Vulnerabilities**
-   
+
    Implement scanning in your local workflow and document it:
-   
+
    ```bash
    # Using Docker Scout
    docker scout cves nixopus-api:latest
@@ -149,14 +157,14 @@ When optimizing Docker images:
    ```
 
 3. **Minimal Base Images**
-   
+
    Replace general images with minimal alternatives:
-   
+
    - Use `alpine` instead of full `debian`
    - Use `distroless` images for production
-   
+
    Example:
-   
+
    ```dockerfile
    # Final production stage
    FROM gcr.io/distroless/static-debian11
@@ -169,7 +177,7 @@ When optimizing Docker images:
 ### 3. Docker Compose Improvements
 
 1. **Environment Management**
-   
+
    ```yaml
    services:
      api:
@@ -179,7 +187,7 @@ When optimizing Docker images:
    ```
 
 2. **Healthcheck Enhancements**
-   
+
    ```yaml
    services:
      api:
@@ -192,7 +200,7 @@ When optimizing Docker images:
    ```
 
 3. **Resource Constraints**
-   
+
    ```yaml
    services:
      api:
@@ -207,7 +215,7 @@ When optimizing Docker images:
    ```
 
 4. **Dependency Management**
-   
+
    ```yaml
    services:
      api:
@@ -221,9 +229,9 @@ When optimizing Docker images:
 ### 4. CI/CD Integration
 
 1. **Automated Builds**
-   
+
    Example GitHub Actions workflow for Docker builds:
-   
+
    ```yaml
    name: Docker Image CI
    
@@ -278,9 +286,9 @@ When optimizing Docker images:
    ```
 
 2. **Image Testing**
-   
+
    Add automated testing for Docker images:
-   
+
    ```yaml
    - name: Test image
      run: |
@@ -290,9 +298,9 @@ When optimizing Docker images:
 ### 5. Container Orchestration
 
 1. **Kubernetes Support**
-   
+
    Create Kubernetes manifests for Nixopus:
-   
+
    ```yaml
    # kubernetes/api-deployment.yaml
    apiVersion: apps/v1
@@ -342,9 +350,9 @@ When optimizing Docker images:
    ```
 
 2. **Docker Swarm Support**
-   
+
    Create Docker Swarm deployment examples:
-   
+
    ```yaml
    version: '3.8'
    
@@ -385,7 +393,7 @@ When optimizing Docker images:
 ### 1. BuildKit Features
 
 1. **Mount Secrets in Build**
-   
+
    ```dockerfile
    # syntax=docker/dockerfile:1.4
    
@@ -394,14 +402,15 @@ When optimizing Docker images:
    RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
        npm ci --production
    ```
-   
+
    Usage:
+
    ```bash
    docker build --secret id=npmrc,src=.npmrc -t nixopus-view .
    ```
 
 2. **Leverage Build Cache**
-   
+
    ```dockerfile
    # Cache node modules
    COPY package.json yarn.lock ./
@@ -414,7 +423,7 @@ When optimizing Docker images:
 Create specialized image variants:
 
 1. **Development Image**
-   
+
    ```dockerfile
    FROM nixopus-api:latest AS production
    
@@ -430,7 +439,7 @@ Create specialized image variants:
    ```
 
 2. **Testing Image**
-   
+
    ```dockerfile
    FROM nixopus-api-base:latest AS testing
    
@@ -449,7 +458,7 @@ Create specialized image variants:
 ## Monitoring and Observability
 
 1. **Add Prometheus Metrics**
-   
+
    ```dockerfile
    # Install Prometheus client
    RUN go get github.com/prometheus/client_golang/prometheus
@@ -463,7 +472,7 @@ Create specialized image variants:
    ```
 
 2. **Log Management**
-   
+
    ```dockerfile
    # Configure structured logging
    ENV LOG_FORMAT=json
@@ -477,7 +486,7 @@ Create specialized image variants:
 ## Testing Docker Changes
 
 1. **Local Testing Workflow**
-   
+
    ```bash
    # Build images
    docker-compose build
@@ -496,7 +505,7 @@ Create specialized image variants:
    ```
 
 2. **Performance Testing**
-   
+
    ```bash
    # Check image size
    docker images nixopus-api
@@ -509,7 +518,7 @@ Create specialized image variants:
    ```
 
 3. **Security Scanning**
-   
+
    ```bash
    # Scan for vulnerabilities
    docker scout cves nixopus-api:latest
@@ -521,7 +530,7 @@ Create specialized image variants:
 ## Submitting Docker Improvements
 
 1. **Document Changes**
-   
+
    Include before/after metrics:
    - Image size reduction
    - Build time improvements
@@ -529,13 +538,13 @@ Create specialized image variants:
    - Resource utilization changes
 
 2. **Update Documentation**
-   
+
    - Update README.md with new Docker features
    - Add examples of new Docker configurations
    - Document any breaking changes
 
 3. **Create Pull Request**
-   
+
    ```bash
    git add .
    git commit -m "feat(docker): optimize API container size and security"
@@ -543,7 +552,7 @@ Create specialized image variants:
    ```
 
 4. **PR Details**
-   
+
    Include in your PR:
    - Purpose of changes
    - Performance metrics
@@ -572,6 +581,7 @@ Create specialized image variants:
 ## Need Help?
 
 If you need assistance with Docker contributions:
+
 - Join the #docker channel on Discord
 - Review the Docker documentation
 - Check existing Docker issues for similar improvements

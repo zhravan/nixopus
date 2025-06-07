@@ -20,7 +20,12 @@ export const authApi = createApi({
         return {
           url: AUTHURLS.USER_REGISTER,
           method: 'POST',
-          body: credentials
+          body: {
+            ...credentials,
+            type: 'admin',
+            username: credentials.email.split('@')[0],
+            organization: ''
+          }
         };
       },
       transformResponse: (response: { data: AuthResponse }) => {

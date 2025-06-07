@@ -2,6 +2,7 @@ import argparse
 import secrets
 import string
 import sys
+import getpass
 
 from validation import Validation
 
@@ -68,7 +69,7 @@ class InputParser:
 
         if args.email:
             self.validation.validate_email(args.email)
-            password = input("Please enter the password for the admin(generates a strong password if left blank): ")
+            password = getpass.getpass("Please enter the password for the admin(generates a strong password if left blank): ")
             if not password:
                 password = self.generate_strong_password()
             self.validation.validate_password(password)

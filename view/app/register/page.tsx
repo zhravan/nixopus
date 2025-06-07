@@ -37,18 +37,18 @@ export default function RegisterPage() {
                         {...form.register('email')}
                       />
                       {form.formState.errors.email && (
-                        <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+                        <p className="text-sm text-destructive">
+                          {form.formState.errors.email.message}
+                        </p>
                       )}
                     </div>
                     <div className="grid gap-3">
                       <Label htmlFor="password">{t('auth.password')}</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        {...form.register('password')}
-                      />
+                      <Input id="password" type="password" {...form.register('password')} />
                       {form.formState.errors.password && (
-                        <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+                        <p className="text-sm text-destructive">
+                          {form.formState.errors.password.message}
+                        </p>
                       )}
                     </div>
                     <div className="grid gap-3">

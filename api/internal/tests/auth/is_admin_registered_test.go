@@ -11,9 +11,10 @@ import (
 
 func TestIsAdminRegistered(t *testing.T) {
 	testCases := []struct {
-		name           string
-		setup          func() *testutils.TestSetup
-		expectedStatus int
+		name                    string
+		setup                   func() *testutils.TestSetup
+		expectedStatus          int
+		expectedAdminRegistered bool
 	}{
 		{
 			name: "Successfully check if admin is registered",
@@ -22,14 +23,16 @@ func TestIsAdminRegistered(t *testing.T) {
 				setup.CreateTestUserAndOrg()
 				return setup
 			},
-			expectedStatus: http.StatusOK,
+			expectedStatus:          http.StatusOK,
+			expectedAdminRegistered: true,
 		},
 		{
 			name: "Admin is not registered",
 			setup: func() *testutils.TestSetup {
 				return testutils.NewTestSetup()
 			},
-			expectedStatus: http.StatusUnauthorized,
+			expectedStatus:          http.StatusOK,
+			expectedAdminRegistered: false,
 		},
 	}
 
@@ -40,6 +43,7 @@ func TestIsAdminRegistered(t *testing.T) {
 				Description(tc.name),
 				Get(tests.GetIsAdminRegisteredURL()),
 				Expect().Status().Equal(int64(tc.expectedStatus)),
+				Expect().Body().JSON().JQ(".data.admin_registered").Equal(tc.expectedAdminRegistered),
 			)
 		})
 	}

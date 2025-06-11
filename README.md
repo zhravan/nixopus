@@ -250,7 +250,7 @@ Thank you for your interest in contributing to Nixopus! This [guide](docs/contri
 We've dedicated significant time to making Nixopus free and accessible. Your support helps us continue our development and vision for open source. Consider becoming a sponsor and join our community of supporters.
 
 - ![GitHub Sponsors](https://img.shields.io/github/sponsors/raghavyuva?label=Github%20Sponsor)
-- <a href="https://liberapay.com/raghavyuva/donate"><img src="https://img.shields.io/liberapay/goal/raghavyuva.svg?logo=liberapay"></a>
+- <a href="https://liberapay.com/raghavyuva/donate"><img src="https://img.shields.io/liberapay/goal/raghavyuva.svg?logo=liberapay" alt="Donate to raghavyuva via Liberapay"></a>
 
 ## Community & Support
 

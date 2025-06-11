@@ -273,6 +273,7 @@ We would like to thank all contributors and supporters of Nixopus. Your efforts 
 Nixopus is derived from the combination of "octopus" and the Linux penguin (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.
 
 ## Contributors
+
 <a href="https://github.com/raghavyuva/nixopus/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=raghavyuva/nixopus" />
 </a>
@@ -281,4 +282,5 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ## Sponsors
 
-<!-- sponsors --><!-- sponsors -->
+<!-- sponsors -->
+<!-- sponsors -->

@@ -16,12 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Sponsors
         uses: JamesIves/github-sponsors-readme-action@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           file: "README.md"
           template: "* :heart: {link}"
           marker: "sponsors"

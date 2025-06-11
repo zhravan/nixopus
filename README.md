@@ -275,7 +275,7 @@ Nixopus is derived from the combination of "octopus" and the Linux penguin (Tux)
 ## Contributors
 
 <a href="https://github.com/raghavyuva/nixopus/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=raghavyuva/nixopus" />
+  <img src="https://contrib.rocks/image?repo=raghavyuva/nixopus" alt="Nixopus project contributors" />
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).

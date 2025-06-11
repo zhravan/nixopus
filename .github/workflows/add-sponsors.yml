@@ -36,3 +36,4 @@ jobs:
           else
             git commit -m "docs: update sponsors in README"
             git push
+          fi

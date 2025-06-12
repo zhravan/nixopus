@@ -39,7 +39,7 @@ Nixopus is a powerful platform designed to simplify VPS management. Whether you'
   - *1 Click Application Deployment*: Deploy applications effortlessly with a single click.
   - *Integrated Web-Based Terminal*: Access your server's terminal directly from the browser.
   - *Intuitive File Manager*: Navigate and manage server files through a user-friendly interface.
-  - *Real Time Monitoring*: Monitor your server's CPU, RAM, containers, processes and resource usage in real-time.
+  - *Real Time Monitoring*: Monitor your server's CPU, RAM, containers usage in real-time.
   - *Built in TLS Management*: Configure & manage TLS certificates for your domains.
   - *GitHub Integration for CI/CD*: Seamlessly integrate GitHub repositories.
   - *Proxy Management via Caddy*: Configure and manage reverse proxies.

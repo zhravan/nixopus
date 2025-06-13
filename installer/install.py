@@ -5,6 +5,7 @@ from pathlib import Path
 from environment import EnvironmentSetup
 from input_parser import InputParser
 from service_manager import ServiceManager
+import sys
 
 class Installer:
     def __init__(self):
@@ -18,7 +19,7 @@ class Installer:
 
 def main():
     installer = Installer()
-    args = installer.input_parser.parser.parse_args()
+    args = installer.input_parser.parse_args()
     
     print("\033[36m  _   _ _ _                           \033[0m")
     print("\033[36m | \\ | (_)                          \033[0m")
@@ -33,49 +34,66 @@ def main():
     print("This wizard will guide you through the installation process of Nixopus.")
     print("Please follow the prompts carefully to complete the setup.\n")
     
+    installer.input_parser.debug_print("Starting installation process...")
+    
     env = installer.input_parser.get_env_from_args(args)
     domains = installer.input_parser.get_domains_from_args(args)
     email, password = installer.input_parser.get_admin_credentials_from_args(args)
-    installer.service_manager = ServiceManager(installer.project_root, env)
+    
+    installer.input_parser.debug_print("Initializing service manager...")
+    installer.service_manager = ServiceManager(installer.project_root, env, args.debug)
+    
+    installer.input_parser.debug_print("Checking system requirements...")
     installer.service_manager.check_system_requirements()
-    env_setup = EnvironmentSetup(domains,env)
+    
+    installer.input_parser.debug_print("Setting up environment...")
+    env_setup = EnvironmentSetup(domains, env, args.debug)
     env_vars = env_setup.setup_environment()
     
-    print("Environment setup completed!")
+    installer.input_parser.debug_print("Environment setup completed!")
     
+    installer.input_parser.debug_print("Starting services...")
     installer.service_manager.start_services(env)
+    
+    installer.input_parser.debug_print("Verifying installation...")
     installer.service_manager.verify_installation(env)
-    # setup reverse proxy if domain is provided
+    
     if domains is not None:
-        installer.service_manager.setup_caddy(domains,env)
-        
-    # wait for services to start
+        installer.input_parser.debug_print("Setting up Caddy reverse proxy...")
+        installer.service_manager.setup_caddy(domains, env)
+    
+    installer.input_parser.debug_print("Waiting for services to start...")
     time.sleep(10)
     
     max_retries = 3
     retry_count = 0
     
-    # setup admin if email and password are provided through args
     if email is not None and password is not None:
+        installer.input_parser.debug_print("Setting up admin account...")
         while retry_count < max_retries:
             if installer.service_manager.check_api_up_status(env_vars["API_PORT"]):
+                installer.input_parser.debug_print("API is up, creating admin account...")
                 installer.service_manager.setup_admin(email, password, env_vars["API_PORT"])
                 break
             retry_count += 1
             if retry_count < max_retries:
+                installer.input_parser.debug_print(f"Retrying API status check (attempt {retry_count + 1}/{max_retries})...")
                 time.sleep(2)
-                print(f"Retrying API status check (attempt {retry_count + 1}/{max_retries})...")
     
     docker_setup = installer.service_manager.docker_setup
     if domains and isinstance(domains, dict) and domains.get("app_domain"):
         nixopus_accessible_at = domains["app_domain"]
+        installer.input_parser.debug_print(f"Using domain for access: {nixopus_accessible_at}")
     else:
         app_port = str(env_vars.get("APP_PORT", ""))
+        public_ip = docker_setup.get_public_ip()
         nixopus_accessible_at = (
-            docker_setup.get_public_ip()
+            public_ip
             if app_port in {"80", "443"}
-            else f"{docker_setup.get_public_ip()}:{app_port}"
+            else f"{public_ip}:{app_port}"
         )
+        installer.input_parser.debug_print(f"Using IP and port for access: {nixopus_accessible_at}")
+    
     print("\n\033[1mInstallation Complete!\033[0m")
     print(f"• Nixopus is accessible at: {nixopus_accessible_at}")
     print("\n\033[1mThank you for installing Nixopus!\033[0m")

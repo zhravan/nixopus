@@ -3,6 +3,7 @@ import secrets
 import string
 import sys
 import getpass
+import logging
 
 from validation import Validation
 
@@ -11,7 +12,7 @@ class InputParser:
     def __init__(self):
         self.parser = self._setup_arg_parser()
         self.validation = Validation()
-        self.debug = False
+        self.logger = logging.getLogger("nixopus")
     
     def _setup_arg_parser(self):
         parser = argparse.ArgumentParser(description='Nixopus Installation Wizard')
@@ -25,12 +26,9 @@ class InputParser:
     
     def parse_args(self):
         args = self.parser.parse_args()
-        self.debug = args.debug
+        if args.debug:
+            self.logger.setLevel(logging.DEBUG)
         return args
-    
-    def debug_print(self, message):
-        if self.debug:
-            print(f"[DEBUG] {message}")
     
     def generate_strong_password(self):
         while True:
@@ -41,7 +39,7 @@ class InputParser:
                 any(c.islower() for c in password) and
                 any(c.isdigit() for c in password) and
                 any(c in self.validation.SPECIAL_CHARS for c in password)):
-                self.debug_print(f"Generated password: {password}")
+                self.logger.debug(f"Generated password: {password}")
                 return password
 
     def get_env_from_args(self, args):
@@ -52,16 +50,16 @@ class InputParser:
             if args.env not in ['production', 'staging']:
                 print("Error: Environment must be either 'production' or 'staging'")
                 sys.exit(1)
-            self.debug_print(f"Using environment: {args.env}")
+            self.logger.debug(f"Using environment: {args.env}")
             return args.env
         else:
-            self.debug_print("No environment specified, defaulting to production")
+            self.logger.debug("No environment specified, defaulting to production")
             return "production"
     
     def get_domains_from_args(self, args):
         if args.api_domain and args.app_domain:
             try:
-                self.debug_print(f"Validating domains - API: {args.api_domain}, App: {args.app_domain}")
+                self.logger.debug(f"Validating domains - API: {args.api_domain}, App: {args.app_domain}")
                 self.validation.validate_domain(args.api_domain)
                 self.validation.validate_domain(args.app_domain)
                 return {
@@ -70,17 +68,17 @@ class InputParser:
                 }
             except SystemExit:
                 return None
-        self.debug_print("No domains provided")
+        self.logger.debug("No domains provided")
         return None
     
     def get_admin_credentials_from_args(self, args):
         # if email and password are provided, validate them and return them
         if args.email and args.password:
-            self.debug_print(f"Validating admin credentials for email: {args.email}")
+            self.logger.debug(f"Validating admin credentials for email: {args.email}")
             self.validation.validate_email(args.email)
             self.validation.validate_password(args.password)
             return args.email, args.password
 
         # return None if only one of email or password is provided or if both are not provided
-        self.debug_print("No admin credentials provided")
+        self.logger.debug("No admin credentials provided")
         return None, None

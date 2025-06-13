@@ -7,12 +7,13 @@ on:
     branches: [feat/develop,feat/fix_domain_deployment]
   workflow_dispatch:
 
+env:
+  ADMIN_EMAIL: admin@nixopus.local
+  ADMIN_PASSWORD: Nixopus@123!Secure
+
 jobs:
-  qemu:
+  setup-environment:
     runs-on: ubuntu-latest
-    env:
-      ADMIN_EMAIL: admin@nixopus.local
-      ADMIN_PASSWORD: Nixopus@123!Secure
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,9 +50,23 @@ jobs:
       - name: Make install script executable
         run: chmod +x scripts/install.sh
 
+  qemu:
+    needs: setup-environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Run install script
         run: |
           sudo ./scripts/install.sh --email="${{ env.ADMIN_EMAIL }}" --password="${{ env.ADMIN_PASSWORD }}"
+
+  qemu-domain:
+    needs: setup-environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Run install script with domain name
         run: |

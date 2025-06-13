@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+import logging
 from pathlib import Path
 from environment import EnvironmentSetup
 from input_parser import InputParser
@@ -16,6 +17,7 @@ class Installer:
         self.env_sample = self.project_root / ".env.sample"
         self.input_parser = InputParser()
         self.service_manager = None  # Will be initialized with environment later
+        self.logger = logging.getLogger("nixopus")
 
 def main():
     installer = Installer()
@@ -34,56 +36,56 @@ def main():
     print("This wizard will guide you through the installation process of Nixopus.")
     print("Please follow the prompts carefully to complete the setup.\n")
     
-    installer.input_parser.debug_print("Starting installation process...")
+    installer.logger.debug("Starting installation process...")
     
     env = installer.input_parser.get_env_from_args(args)
     domains = installer.input_parser.get_domains_from_args(args)
     email, password = installer.input_parser.get_admin_credentials_from_args(args)
     
-    installer.input_parser.debug_print("Initializing service manager...")
+    installer.logger.debug("Initializing service manager...")
     installer.service_manager = ServiceManager(installer.project_root, env, args.debug)
     
-    installer.input_parser.debug_print("Checking system requirements...")
+    installer.logger.debug("Checking system requirements...")
     installer.service_manager.check_system_requirements()
     
-    installer.input_parser.debug_print("Setting up environment...")
+    installer.logger.debug("Setting up environment...")
     env_setup = EnvironmentSetup(domains, env, args.debug)
     env_vars = env_setup.setup_environment()
     
-    installer.input_parser.debug_print("Environment setup completed!")
+    installer.logger.debug("Environment setup completed!")
     
-    installer.input_parser.debug_print("Starting services...")
+    installer.logger.debug("Starting services...")
     installer.service_manager.start_services(env)
     
-    installer.input_parser.debug_print("Verifying installation...")
+    installer.logger.debug("Verifying installation...")
     installer.service_manager.verify_installation(env)
     
     if domains is not None:
-        installer.input_parser.debug_print("Setting up Caddy reverse proxy...")
+        installer.logger.debug("Setting up Caddy reverse proxy...")
         installer.service_manager.setup_caddy(domains, env)
     
-    installer.input_parser.debug_print("Waiting for services to start...")
+    installer.logger.debug("Waiting for services to start...")
     time.sleep(10)
     
     max_retries = 3
     retry_count = 0
     
     if email is not None and password is not None:
-        installer.input_parser.debug_print("Setting up admin account...")
+        installer.logger.debug("Setting up admin account...")
         while retry_count < max_retries:
             if installer.service_manager.check_api_up_status(env_vars["API_PORT"]):
-                installer.input_parser.debug_print("API is up, creating admin account...")
+                installer.logger.debug("API is up, creating admin account...")
                 installer.service_manager.setup_admin(email, password, env_vars["API_PORT"])
                 break
             retry_count += 1
             if retry_count < max_retries:
-                installer.input_parser.debug_print(f"Retrying API status check (attempt {retry_count + 1}/{max_retries})...")
+                installer.logger.debug(f"Retrying API status check (attempt {retry_count + 1}/{max_retries})...")
                 time.sleep(2)
     
     docker_setup = installer.service_manager.docker_setup
     if domains and isinstance(domains, dict) and domains.get("app_domain"):
         nixopus_accessible_at = domains["app_domain"]
-        installer.input_parser.debug_print(f"Using domain for access: {nixopus_accessible_at}")
+        installer.logger.debug(f"Using domain for access: {nixopus_accessible_at}")
     else:
         app_port = str(env_vars.get("APP_PORT", ""))
         public_ip = docker_setup.get_public_ip()
@@ -92,7 +94,7 @@ def main():
             if app_port in {"80", "443"}
             else f"{public_ip}:{app_port}"
         )
-        installer.input_parser.debug_print(f"Using IP and port for access: {nixopus_accessible_at}")
+        installer.logger.debug(f"Using IP and port for access: {nixopus_accessible_at}")
     
     print("\n\033[1mInstallation Complete!\033[0m")
     print(f"• Nixopus is accessible at: {nixopus_accessible_at}")

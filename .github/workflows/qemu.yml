@@ -143,22 +143,22 @@ jobs:
           cmd="./scripts/install.sh"
           
           if [ -n "${{ matrix.email }}" ]; then
-            cmd="$cmd --email=\"${{ matrix.email }}\""
+            cmd="$cmd --email=${{ matrix.email }}"
           fi
           
           if [ -n "${{ matrix.password }}" ]; then
-            cmd="$cmd --password=\"${{ matrix.password }}\""
+            cmd="$cmd --password=${{ matrix.password }}"
           fi
           
           if [ -n "${{ matrix.api_domain }}" ]; then
-            cmd="$cmd --api-domain=\"${{ matrix.api_domain }}\""
+            cmd="$cmd --api-domain=${{ matrix.api_domain }}"
           fi
           
           if [ -n "${{ matrix.app_domain }}" ]; then
-            cmd="$cmd --app-domain=\"${{ matrix.app_domain }}\""
+            cmd="$cmd --app-domain=${{ matrix.app_domain }}"
           fi
           
-          cmd="$cmd --env=\"${{ matrix.env }}\""
+          cmd="$cmd --env=${{ matrix.env }}"
           
           echo "Running command: $cmd"
           sudo $cmd

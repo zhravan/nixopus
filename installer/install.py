@@ -35,25 +35,23 @@ def main():
     
     env = installer.input_parser.get_env_from_args(args)
     domains = installer.input_parser.get_domains_from_args(args)
-    
-    # enable this when domain is a required field, we can use ip address for now
-    # if not domains:
-    #     domains = installer.input_parser.ask_for_domain()
-    
     email, password = installer.input_parser.get_admin_credentials_from_args(args)
-    # if email is None and password is None:
-    #     email, password = installer.input_parser.ask_admin_credentials()
-    
     installer.service_manager = ServiceManager(installer.project_root, env)
     installer.service_manager.check_system_requirements()
-    env_setup = EnvironmentSetup(domains,env) # TODO: make this dynamic 
+    env_setup = EnvironmentSetup(domains,env)
     env_vars = env_setup.setup_environment()
+    
     print("Environment setup completed!")
+    
     installer.service_manager.start_services(env)
     installer.service_manager.verify_installation(env)
+    # setup reverse proxy if domain is provided
     if domains is not None:
         installer.service_manager.setup_caddy(domains,env)
+        
+    # wait for services to start
     time.sleep(10)
+    
     max_retries = 3
     retry_count = 0
     
@@ -80,11 +78,6 @@ def main():
         )
     print("\n\033[1mInstallation Complete!\033[0m")
     print(f"• Nixopus is accessible at: {nixopus_accessible_at}")
-    
-    # print("\n\033[1mAdmin Credentials:\033[0m")
-    # print(f"• Email: {email}")
-    # print(f"• Password: {password}")
-    # print("\n\033[1mImportant:\033[0m Please save these credentials securely. You will need them to log in.")
     print("\n\033[1mThank you for installing Nixopus!\033[0m")
     print("\n\033[1mPlease visit the documentation at https://docs.nixopus.com for more information.\033[0m")
     print("\n\033[1mIf you have any questions, please visit the community forum at https://discord.gg/skdcq39Wpv\033[0m")

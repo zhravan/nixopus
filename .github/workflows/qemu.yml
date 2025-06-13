@@ -2,9 +2,9 @@ name: QEMU Setup and Installation
 
 on:
   push:
-    branches: [feat/develop,feat/fix_domain_deployment]
+    branches: [feat/develop]
   pull_request:
-    branches: [feat/develop,feat/fix_domain_deployment]
+    branches: [feat/develop]
   workflow_dispatch:
 
 env:

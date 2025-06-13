@@ -19,6 +19,7 @@ class InputParser:
         parser.add_argument('--email', '-e', help='The email to create the admin account with')
         parser.add_argument('--password', '-p', help='The password to create the admin account with')
         parser.add_argument('--env', choices=['production', 'staging'], default='production', help='The environment to install in (production or staging)')
+        parser.add_argument("--debug", action='store_true', help='Enable debug mode')
         return parser
     
     def generate_strong_password(self):
@@ -67,41 +68,3 @@ class InputParser:
 
         # return None if only one of email or password is provided or if both are not provided
         return None, None
-    
-    # def ask_admin_credentials(self):
-    #     """
-    #     Ask for admin credentials
-    #     """
-    #     while True:
-    #         email = input("Please enter the email for the admin: ")
-    #         try:
-    #             self.validation.validate_email(email)
-    #             break
-    #         except SystemExit:
-    #             print("Please enter a valid email address")
-    #             continue
-                
-    #     password = input("Please enter the password for the admin(generates a strong password if left blank): ")
-    #     if not password:
-    #         password = self.generate_strong_password()
-    #     self.validation.validate_password(password)
-    #     return email, password
-    
-    # def ask_for_domain(self):
-    #     """
-    #     Ask for the domain
-    #     """
-    #     validation = Validation()
-    #     while True:
-    #         domain = input("Please enter the base domain (if domain is example.com, then api domain will be nixopusapi.example.com and app domain will be nixopus.example.com) : ")
-    #         if not domain:
-    #             continue
-    #         try:
-    #             validation.validate_domain(domain)
-    #             return {
-    #                 "api_domain": f"nixopusapi.{domain}",
-    #                 "app_domain": f"nixopus.{domain}",
-    #             }
-    #         except SystemExit:
-    #             print("Please enter a valid domain name")
-    #             continue

@@ -5,10 +5,11 @@
 set -euo pipefail
 
 function version_compare() {
-    local version1=$1
-    local version2=$2
+    local version1=$1 version2=$2
     local IFS=.
-    local i ver1=($version1) ver2=($version2)
+    # parse version strings into arrays
+    read -ra ver1 <<< "$version1"
+    read -ra ver2 <<< "$version2"
     
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
         ver1[i]=0
@@ -188,26 +189,27 @@ function load_api_env_variables(){
 function setup_postgres_with_docker(){
     load_api_env_variables
     docker run -d --name nixopus-db \
-        -e POSTGRES_USER="${POSTGRES_USER:-nixopus}" \
-        -e POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-nixopus}" \
-        -e POSTGRES_DB="${POSTGRES_DB:-nixopus}" \
-        -p "${POSTGRES_PORT:-5432}:5432" \
+        -e POSTGRES_USER="${USERNAME:-nixopus}" \
+        -e POSTGRES_PASSWORD="${PASSWORD:-nixopus}" \
+        -e POSTGRES_DB="${DB_NAME:-nixopus}" \
+        -p "${DB_PORT:-5432}:5432" \
         postgres
     echo "Postgres setup completed successfully"
 }
 
 # setup ssh will create a ssh key and add it to the authorized_keys file
 function setup_ssh(){
-    continue
+    # TODO: generate SSH key and add to authorized_keys
+    return 0
 }
 
 # setup environment variables
 function setup_environment_variables(){
     move_to_folder "api"
-    cp .env.example .env
+    cp .env.sample .env
     move_to_folder ".."
     move_to_folder "view"
-    cp .env.example .env
+    cp .env.sample .env
     move_to_folder ".."
     echo "Environment variables setup completed successfully"
 }

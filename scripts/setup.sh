@@ -121,6 +121,11 @@ function install_go() {
     local version="1.23.4"
     local arch
     arch=$(uname -m)
+    case "$arch" in
+        x86_64) arch="amd64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+    esac
     local os="linux"
     local temp_dir
     temp_dir=$(mktemp -d)

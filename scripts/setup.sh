@@ -4,30 +4,6 @@
 
 set -euo pipefail
 
-function version_compare() {
-    local version1=$1 version2=$2
-    local IFS=.
-    # parse version strings into arrays
-    read -ra ver1 <<< "$version1"
-    read -ra ver2 <<< "$version2"
-    
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
-        ver1[i]=0
-    done
-    for ((i=${#ver2[@]}; i<${#ver1[@]}; i++)); do
-        ver2[i]=0
-    done
-    
-    for ((i=0; i<${#ver1[@]}; i++)); do
-        if [[ ${ver1[i]} -gt ${ver2[i]} ]]; then
-            return 0
-        elif [[ ${ver1[i]} -lt ${ver2[i]} ]]; then
-            return 1
-        fi
-    done
-    return 0
-}
-
 function detect_package_manager() {
     if command -v apt-get &>/dev/null; then
         echo "apt"
@@ -153,19 +129,10 @@ function install_go() {
     fi
 }
 
-# check if the go version is installed else install it
+# check if the go version is installed else install it 1.23.4
 function check_go_version() {
     if ! command -v go &>/dev/null; then
         echo "Go is not installed. Installing..."
-        install_go
-    fi
-    
-    local required_version="1.23.4"
-    local current_version
-    current_version=$(go version | grep -oP 'go\K[0-9]+\.[0-9]+\.[0-9]+')
-    
-    if ! version_compare "$current_version" "$required_version"; then
-        echo "Current Go version ($current_version) is below required version ($required_version). Installing required version..."
         install_go
     fi
 }
@@ -173,7 +140,6 @@ function check_go_version() {
 # install air hot reload for golang
 function install_air_hot_reload(){
     go install github.com/air-verse/air@latest
-    echo "Air hot reload installed successfully"
 }
 
 # load the env variables from the api/.env.sample file

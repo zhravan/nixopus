@@ -90,7 +90,7 @@ function check_command() {
 }  
 
 function check_required_commands() {
-    local commands=("git" "docker" "docker-compose")
+    local commands=("git" "docker")
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done

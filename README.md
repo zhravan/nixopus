@@ -1,6 +1,12 @@
 <a href="https://nixopus.com"><img align="right" src="./assets/nixopus_logo_transparent.png" alt="Nixopus Logo" width="300" /></a>
 
-# Nixopus
+<div id="user-content-toc">
+  <ul style="list-style: none;">
+    <summary>
+      <h1 style="max-width: 300px;">Nixopus</h1>
+    </summary>
+  </ul>
+</div>
 
 **Streamline Your Entire Server Workflow — ServerOps with No Fuss**
 

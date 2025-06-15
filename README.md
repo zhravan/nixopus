@@ -1,16 +1,8 @@
-<p align="center">
-  <h1 align="center">Nixopus</h1>
-</p>
+<a href="https://nixopus.com"><img align="right" src="./assets/nixopus_logo_transparent.png" alt="Nixopus Logo" width="300" /></a>
 
-<p align="center">
-   <strong>Streamline Your Entire Server Workflow — ServerOps with No Fuss</strong>
-</p>
+# Nixopus
 
-<p align="center">
-  <img src="./assets/nixopus_logo_transparent.png" alt="Nixopus Logo" width="300"/>
-</p>
-
-<div align="center">
+**Streamline Your Entire Server Workflow — ServerOps with No Fuss**
 
 [![Security Scan](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/security.yml)
 [![Package Manager](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml/badge.svg)](https://github.com/raghavyuva/nixopus/actions/workflows/build_container.yml)
@@ -18,14 +10,9 @@
 <br><br>
 [![YouTube Video Views](https://img.shields.io/youtube/views/DrDGWNq4JM4?style=social&label=View%20Demo)](https://www.youtube.com/watch?v=DrDGWNq4JM4)
 ‎ ‎ ‎ [![Discord](https://img.shields.io/discord/1358854056642347180?label=Join%20Community&logo=discord&style=social)](https://discord.gg/skdcq39Wpv)
-
-<p align="center">
-    <img src="https://madewithlove.now.sh/in?heart=true&colorA=%23ff671f&colorB=%23046a38&text=India" alt="Made with love with Open Source" />
-</p>
-
+    <img src="https://madewithlove.now.sh/in?heart=true&colorA=%23ff671f&colorB=%23046a38&text=India" alt="Made with love with Open Source"/>
+    <br><br>
 [Website](https://nixopus.com) | [Documentation](https://docs.nixopus.com)
-
-</div>
 
 ## Project Overview
 

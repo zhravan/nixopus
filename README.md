@@ -13,7 +13,7 @@
     <img src="https://madewithlove.now.sh/in?heart=true&colorA=%23ff671f&colorB=%23046a38&text=India" alt="Made with love with Open Source"/>
     <br><br>
 [Website](https://nixopus.com) | [Documentation](https://docs.nixopus.com)
-
+<br><br>
 ## Project Overview
 
 Nixopus is a powerful platform designed to simplify VPS management. Whether you're a DevOps engineer, system administrator, or developer, Nixopus streamlines your workflow with comprehensive tools for deployment, monitoring, and maintenance.

@@ -47,4 +47,4 @@ jobs:
         run: chmod +x scripts/setup.sh
 
       - name: Run setup script
-        run: ./scripts/setup.sh
+        run: sudo ./scripts/setup.sh

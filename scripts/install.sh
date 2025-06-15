@@ -52,7 +52,7 @@ function setup_config_based_on_environment() {
     if [ "$env" == "staging" ]; then
         NIXOPUS_DIR="/etc/nixopus-staging"
         SOURCE_DIR="$NIXOPUS_DIR/source"
-        BRANCH="feat/develop"
+        BRANCH="fix/staging-qemu"
     else
         NIXOPUS_DIR="/etc/nixopus"
         SOURCE_DIR="$NIXOPUS_DIR/source"

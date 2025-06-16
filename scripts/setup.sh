@@ -148,7 +148,10 @@ function check_go_version() {
 
 # install air hot reload for golang
 function install_air_hot_reload(){
-    go install github.com/air-verse/air@latest
+    local user_home
+    user_home=$(eval echo ~${SUDO_USER:-$USER})
+    GOPATH="$user_home/go" go install github.com/air-verse/air@latest
+    export PATH="$PATH:$user_home/go/bin"
 }
 
 # load the env variables from the api/.env.sample file
@@ -204,7 +207,11 @@ function start_api(){
     move_to_folder "api"
     go mod tidy
     go mod download
-    air 
+    
+    local user_home
+    user_home=$(eval echo ~${SUDO_USER:-$USER})
+    
+    "$user_home/go/bin/air"
 }
 
 # start the view server

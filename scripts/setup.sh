@@ -84,6 +84,15 @@ function clone_nixopus() {
     fi
 }
 
+# checkout to the branch
+function checkout_branch() {
+    local branch="$1"
+    if ! git checkout "$branch"; then
+        echo "Error: Failed to checkout to $branch" >&2
+        exit 1
+    fi
+}
+
 # move to the folder
 function move_to_folder() {
     local folder="$1"
@@ -146,9 +155,14 @@ function install_air_hot_reload(){
 function load_api_env_variables(){
     move_to_folder "api"
     if [ -f .env.sample ]; then
-        set -a
-        source .env.sample
-        set +a
+        while IFS='=' read -r key value; do
+            # Skip empty lines and comments
+            [[ -z "$key" || "$key" =~ ^# ]] && continue
+            # Remove any quotes from the value
+            value=$(echo "$value" | tr -d '"'"'")
+            # Export the variable
+            export "$key=$value"
+        done < .env.sample
     else
         echo "Error: .env.sample file not found in api directory" >&2
         exit 1
@@ -193,10 +207,9 @@ function main() {
     check_required_commands
     check_go_version
     clone_nixopus
+    checkout_branch "feat/dev_environment"
     move_to_folder "nixopus"
     echo "Nixopus repository cloned successfully"
-    install_air_hot_reload
-    echo "Air hot reload installed successfully"
     setup_postgres_with_docker
     echo "Postgres setup completed successfully"
     setup_environment_variables

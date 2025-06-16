@@ -211,14 +211,14 @@ function start_api(){
     local user_home
     user_home=$(eval echo ~${SUDO_USER:-$USER})
     
-    "$user_home/go/bin/air" &
+    nohup "$user_home/go/bin/air" > api.log 2>&1 &
 }
 
 # start the view server
 function start_view(){
     move_to_folder "view"
     yarn install --frozen-lockfile
-    yarn run dev &
+    nohup yarn run dev > view.log 2>&1 &
 }
 
 # main function

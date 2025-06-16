@@ -241,6 +241,7 @@ function main() {
     echo "SSH setup completed successfully"
     start_api
     echo "API server started successfully"
+    move_to_folder ".."
     start_view
     echo "View server started successfully"
     echo "Nixopus development environment setup completed successfully"

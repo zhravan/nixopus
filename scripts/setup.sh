@@ -66,7 +66,7 @@ function check_command() {
 }  
 
 function check_required_commands() {
-    local commands=("git" "docker")
+    local commands=("git" "docker" "yarn")
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done
@@ -199,6 +199,21 @@ function setup_environment_variables(){
     echo "Environment variables setup completed successfully"
 }
 
+# start the api server
+function start_api(){
+    move_to_folder "api"
+    go mod tidy
+    go mod download
+    air 
+}
+
+# start the view server
+function start_view(){
+    move_to_folder "view"
+    yarn install --frozen-lockfile
+    yarn run dev
+}
+
 # main function
 function main() {
     echo "Starting Nixopus development environment setup..."
@@ -215,6 +230,10 @@ function main() {
     echo "Environment variables setup completed successfully"
     setup_ssh
     echo "SSH setup completed successfully"
+    start_api
+    echo "API server started successfully"
+    start_view
+    echo "View server started successfully"
     echo "Nixopus development environment setup completed successfully"
 }
 

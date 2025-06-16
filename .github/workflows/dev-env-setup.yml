@@ -3,8 +3,6 @@ name: Test Nixopus Development Environment Setup
 on:
   push:
     branches: [master, feat/develop,feat/dev_environment]
-  pull_request:
-    branches: [master, feat/develop,feat/dev_environment]
   workflow_dispatch:
 
 jobs:

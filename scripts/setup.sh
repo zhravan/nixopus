@@ -207,7 +207,6 @@ function main() {
     check_required_commands
     check_go_version
     clone_nixopus
-    checkout_branch "feat/dev_environment"
     move_to_folder "nixopus"
     echo "Nixopus repository cloned successfully"
     setup_postgres_with_docker

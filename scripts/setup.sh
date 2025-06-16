@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 # This script is used to setup the environment for the project
 
@@ -60,10 +60,26 @@ function check_root() {
 function check_command() {
     local cmd="$1"
     if ! command -v "$cmd" &>/dev/null; then
-        echo "Error: '$cmd' is not installed. Please install '$cmd' before running this script." >&2
-        exit 1
+        echo "Command '$cmd' not found. Attempting to install..."
+        case "$cmd" in
+            "git")
+                install_package "git"
+                ;;
+            "docker")
+                install_package "docker.io"
+                ;;
+            "yarn")
+                install_package "nodejs"
+                install_package "npm"
+                npm install -g yarn
+                ;;
+            *)
+                echo "Error: Automatic installation not supported for '$cmd'" >&2
+                exit 1
+                ;;
+        esac
     fi
-}  
+}
 
 function check_required_commands() {
     local commands=("git" "docker" "yarn")
@@ -121,6 +137,19 @@ function install_go() {
         rm -rf "$temp_dir"
         exit 1
     fi
+
+    echo "Verifying checksum..."
+    local checksum_url="https://go.dev/dl/go${version}.${os}-${arch}.tar.gz.sha256"
+    local expected_sum
+    expected_sum=$(curl -sL "$checksum_url" | awk '{print $1}')
+    local actual_sum
+    actual_sum=$(sha256sum "${temp_dir}/go.tar.gz" | awk '{print $1}')
+    
+    if [[ $expected_sum != $actual_sum ]]; then
+        echo "Error: Checksum mismatch for Go archive" >&2
+        rm -rf "$temp_dir"
+        exit 1
+    fi
     
     echo "Installing Go ${version}..."
     if ! rm -rf /usr/local/go && tar -C /usr/local -xzf "${temp_dir}/go.tar.gz"; then
@@ -132,7 +161,7 @@ function install_go() {
     rm -rf "$temp_dir"
     
     if ! grep -q "/usr/local/go/bin" /etc/profile.d/go.sh 2>/dev/null; then
-        echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile.d/go.sh
         chmod +x /etc/profile.d/go.sh
         source /etc/profile.d/go.sh
     fi
@@ -194,10 +223,21 @@ function setup_ssh(){
 # setup environment variables
 function setup_environment_variables(){
     move_to_folder "api"
-    cp .env.sample .env
+    if [ -f .env.sample ]; then
+        cp .env.sample .env || { echo "Error: Failed to copy api/.env.sample to .env" >&2; exit 1; }
+    else
+        echo "Error: api/.env.sample file not found" >&2
+        exit 1
+    fi
     move_to_folder ".."
+    
     move_to_folder "view"
-    cp .env.sample .env
+    if [ -f .env.sample ]; then
+        cp .env.sample .env || { echo "Error: Failed to copy view/.env.sample to .env" >&2; exit 1; }
+    else
+        echo "Error: view/.env.sample file not found" >&2
+        exit 1
+    fi
     move_to_folder ".."
     echo "Environment variables setup completed successfully"
 }
@@ -230,15 +270,15 @@ function main() {
     check_go_version
     clone_nixopus
     move_to_folder "nixopus"
-    echo "Nixopus repository cloned successfully"
-    setup_postgres_with_docker
-    echo "Postgres setup completed successfully"
-    setup_environment_variables
-    echo "Environment variables setup completed successfully"
+    checkout_branch "feat/dev_environment"
     install_air_hot_reload
-    echo "Air hot reload installed successfully"
+    echo "Nixopus repository cloned and configured successfully"
+    
+    setup_postgres_with_docker
+    setup_environment_variables
     setup_ssh
     echo "SSH setup completed successfully"
+    
     start_api
     echo "API server started successfully"
     move_to_folder ".."

@@ -228,6 +228,8 @@ function main() {
     echo "Postgres setup completed successfully"
     setup_environment_variables
     echo "Environment variables setup completed successfully"
+    install_air_hot_reload
+    echo "Air hot reload installed successfully"
     setup_ssh
     echo "SSH setup completed successfully"
     start_api

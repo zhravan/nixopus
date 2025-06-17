@@ -491,7 +491,6 @@ function main() {
     start_view
     echo "View server started successfully"
     echo "Nixopus development environment setup completed successfully"
-    
     echo "-------------------------------------------------------------"    
     echo ""
     echo "=== Application Access ==="

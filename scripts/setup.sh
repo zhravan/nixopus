@@ -492,7 +492,7 @@ function main() {
     echo "View server started successfully"
     echo "Nixopus development environment setup completed successfully"
     
-    echo "----------------------------------------------------------------------------"    
+    echo "-------------------------------------------------------------"    
     echo ""
     echo "=== Application Access ==="
     echo "Frontend: http://localhost:3000"

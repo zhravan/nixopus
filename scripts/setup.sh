@@ -4,41 +4,7 @@
 
 set -euo pipefail
 
-function detect_package_manager() {
-    if command -v apt-get &>/dev/null; then
-        echo "apt"
-    elif command -v dnf &>/dev/null; then
-        echo "dnf"
-    elif command -v yum &>/dev/null; then
-        echo "yum"
-    elif command -v pacman &>/dev/null; then
-        echo "pacman"
-    else
-        echo "Error: Unsupported package manager" >&2
-        exit 1
-    fi
-}
-
-function install_package() {
-    local pkg_manager
-    pkg_manager=$(detect_package_manager)
-    
-    case $pkg_manager in
-        "apt")
-            apt-get update
-            apt-get install -y "$1"
-            ;;
-        "dnf")
-            dnf install -y "$1"
-            ;;
-        "yum")
-            yum install -y "$1"
-            ;;
-        "pacman")
-            pacman -Sy --noconfirm "$1"
-            ;;
-    esac
-}
+BRANCH="feat/dev_environment"
 
 # check if the os is linux
 function check_os() {
@@ -60,29 +26,13 @@ function check_root() {
 function check_command() {
     local cmd="$1"
     if ! command -v "$cmd" &>/dev/null; then
-        echo "Command '$cmd' not found. Attempting to install..."
-        case "$cmd" in
-            "git")
-                install_package "git"
-                ;;
-            "docker")
-                install_package "docker.io"
-                ;;
-            "yarn")
-                install_package "nodejs"
-                install_package "npm"
-                npm install -g yarn
-                ;;
-            *)
-                echo "Error: Automatic installation not supported for '$cmd'" >&2
-                exit 1
-                ;;
-        esac
+        echo "Error: Command '$cmd' not found. Please install it manually" >&2
+        exit 1
     fi
 }
 
 function check_required_commands() {
-    local commands=("git" "docker" "yarn")
+    local commands=("git" "docker" "yarn")  
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done
@@ -92,13 +42,13 @@ function check_required_commands() {
 function clone_nixopus() {
     if [ -d "nixopus" ]; then
         echo "nixopus directory already exists. Removing..."
-        rm -rf nixopus
+        exit 1
     fi
-    if ! git clone https://github.com/raghavyuva/nixopus.git; then
+    if ! git clone --branch "$BRANCH" https://github.com/raghavyuva/nixopus.git; then
         echo "Error: Failed to clone nixopus repository" >&2
         exit 1
     fi
-}
+}   
 
 # checkout to the branch
 function checkout_branch() {
@@ -118,60 +68,11 @@ function move_to_folder() {
     fi
 }
 
-function install_go() {
-    local version="1.23.4"
-    local arch
-    arch=$(uname -m)
-    case "$arch" in
-        x86_64) arch="amd64" ;;
-        aarch64|arm64) arch="arm64" ;;
-        *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
-    esac
-    local os="linux"
-    local temp_dir
-    temp_dir=$(mktemp -d)
-    
-    echo "Downloading Go ${version}..."
-    if ! curl -L "https://go.dev/dl/go${version}.${os}-${arch}.tar.gz" -o "${temp_dir}/go.tar.gz"; then
-        echo "Error: Failed to download Go" >&2
-        rm -rf "$temp_dir"
-        exit 1
-    fi
-
-    echo "Verifying checksum..."
-    local checksum_url="https://go.dev/dl/go${version}.${os}-${arch}.tar.gz.sha256"
-    local expected_sum
-    expected_sum=$(curl -sL "$checksum_url" | awk '{print $1}')
-    local actual_sum
-    actual_sum=$(sha256sum "${temp_dir}/go.tar.gz" | awk '{print $1}')
-    
-    if [[ $expected_sum != $actual_sum ]]; then
-        echo "Error: Checksum mismatch for Go archive" >&2
-        rm -rf "$temp_dir"
-        exit 1
-    fi
-    
-    echo "Installing Go ${version}..."
-    if ! rm -rf /usr/local/go && tar -C /usr/local -xzf "${temp_dir}/go.tar.gz"; then
-        echo "Error: Failed to install Go" >&2
-        rm -rf "$temp_dir"
-        exit 1
-    fi
-    
-    rm -rf "$temp_dir"
-    
-    if ! grep -q "/usr/local/go/bin" /etc/profile.d/go.sh 2>/dev/null; then
-        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile.d/go.sh
-        chmod +x /etc/profile.d/go.sh
-        source /etc/profile.d/go.sh
-    fi
-}
-
 # check if the go version is installed else install it 1.23.4
 function check_go_version() {
     if ! command -v go &>/dev/null; then
-        echo "Go is not installed. Installing..."
-        install_go
+        echo "Go version 1.23.4 or higher is not installed. Please install it manually, and run the script again"
+        exit 1
     fi
 }
 
@@ -270,7 +171,7 @@ function main() {
     check_go_version
     clone_nixopus
     move_to_folder "nixopus"
-    checkout_branch "feat/dev_environment"
+    checkout_branch "$BRANCH"
     install_air_hot_reload
     echo "Nixopus repository cloned and configured successfully"
     

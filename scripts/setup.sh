@@ -38,6 +38,20 @@ function check_required_commands() {
     done
 }
 
+# check if the go version is installed 
+function check_go_version() {
+    local go_version=$(go version | awk '{print $3}' | sed 's/^go//')
+    local required_version="1.23.4"
+    
+    local ver_num=$(echo "$go_version" | sed 's/\.//g')
+    local req_num=$(echo "$required_version" | sed 's/\.//g')
+    
+    if [ "$ver_num" -lt "$req_num" ]; then
+        echo "Error: Go version $required_version or higher is required. Current version: $go_version" >&2
+        exit 1
+    fi
+}
+
 # clone the nixopus repository
 function clone_nixopus() {
     if [ -d "nixopus" ]; then
@@ -160,6 +174,7 @@ function main() {
     check_root
     check_os
     check_required_commands
+    check_go_version
     clone_nixopus
     move_to_folder "nixopus"
     checkout_branch "$BRANCH"

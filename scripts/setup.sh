@@ -1,11 +1,30 @@
 #!/usr/bin/env bash
 
-# This script is used to setup the environment for the project
+# Nixopus Development Environment Setup Script
+# 
+# This script sets up the development environment for the project
+# Supported platforms: Linux (Ubuntu, CentOS, Fedora, Arch) and macOS
+
+# Prerequisites:
+# - Linux: Run with sudo privileges
+# - macOS: Homebrew should be installed (https://brew.sh)
+#         Docker Desktop for Mac should be installed and running
+
+# Usage:
+# - Linux: sudo ./setup.sh
+# - macOS: ./setup.sh (no sudo required)
 
 set -euo pipefail
 
 function detect_package_manager() {
-    if command -v apt-get &>/dev/null; then
+    if [[ "$(uname)" == "Darwin" ]]; then
+        if command -v brew &>/dev/null; then
+            echo "brew"
+        else
+            echo "Error: Homebrew not found. Please install Homebrew first: https://brew.sh" >&2
+            exit 1
+        fi
+    elif command -v apt-get &>/dev/null; then
         echo "apt"
     elif command -v dnf &>/dev/null; then
         echo "dnf"
@@ -24,6 +43,9 @@ function install_package() {
     pkg_manager=$(detect_package_manager)
     
     case $pkg_manager in
+        "brew")
+            brew install "$1"
+            ;;
         "apt")
             apt-get update
             apt-get install -y "$1"
@@ -40,19 +62,46 @@ function install_package() {
     esac
 }
 
-# check if the os is linux
+# check if the os is linux or macOS
 function check_os() {
-    if [ "$(uname)" != "Linux" ]; then
-        echo "Error: This script is only supported on Linux." >&2
+    local os
+    os=$(uname)
+    if [[ "$os" != "Linux" && "$os" != "Darwin" ]]; then
+        echo "Error: This script is only supported on Linux and macOS." >&2
         exit 1
     fi
 }
 
-# check if the script is running as root
+# check for prerequisites on macOS
+function check_macos_prerequisites() {
+    if [[ "$(uname)" == "Darwin" ]]; then
+        echo "Checking macOS prerequisites..."
+        
+        # Check for Homebrew
+        if ! command -v brew &>/dev/null; then
+            echo "Error: Homebrew is required on macOS but not found." >&2
+            echo "Please install Homebrew first by running:" >&2
+            echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' >&2
+            exit 1
+        fi
+        
+        # Check for Docker if not found, exit in check_command function
+        if ! command -v docker &>/dev/null; then
+            echo "Warning: Docker not found. Please ensure Docker Desktop for Mac is installed and running."
+            echo "Download from: https://www.docker.com/products/docker-desktop"
+        fi
+        
+        echo "macOS prerequisites check completed."
+    fi
+}
+
+# check if the script is running as root (only required for Linux)
 function check_root() {
-    if [ "$EUID" -ne 0 ]; then
-        echo "Error: Please run as root (sudo)" >&2
+    if [[ "$(uname)" == "Linux" && "$EUID" -ne 0 ]]; then
+        echo "Error: Please run as root (sudo) on Linux systems" >&2
         exit 1
+    elif [[ "$(uname)" == "Darwin" && "$EUID" -eq 0 ]]; then
+        echo "Warning: consider running without sudo on macos as it is not equired." >&2
     fi
 }
 
@@ -66,12 +115,23 @@ function check_command() {
                 install_package "git"
                 ;;
             "docker")
-                install_package "docker.io"
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    echo "Install docker desktop for mac from: https://www.docker.com/products/docker-desktop"
+                    echo "After installation, make sure Docker Desktop is running."
+                    exit 1
+                else
+                    install_package "docker.io"
+                fi
                 ;;
             "yarn")
-                install_package "nodejs"
-                install_package "npm"
-                npm install -g yarn
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    install_package "node"
+                    install_package "yarn"
+                else
+                    install_package "nodejs"
+                    install_package "npm"
+                    npm install -g yarn
+                fi
                 ;;
             *)
                 echo "Error: Automatic installation not supported for '$cmd'" >&2
@@ -127,7 +187,14 @@ function install_go() {
         aarch64|arm64) arch="arm64" ;;
         *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
     esac
-    local os="linux"
+    
+    local os
+    case "$(uname)" in
+        "Linux") os="linux" ;;
+        "Darwin") os="darwin" ;;
+        *) echo "Unsupported OS: $(uname)" >&2; exit 1 ;;
+    esac
+    
     local temp_dir
     temp_dir=$(mktemp -d)
     
@@ -143,7 +210,11 @@ function install_go() {
     local expected_sum
     expected_sum=$(curl -sL "$checksum_url" | awk '{print $1}')
     local actual_sum
-    actual_sum=$(sha256sum "${temp_dir}/go.tar.gz" | awk '{print $1}')
+    if [[ "$(uname)" == "Darwin" ]]; then
+        actual_sum=$(shasum -a 256 "${temp_dir}/go.tar.gz" | awk '{print $1}')
+    else
+        actual_sum=$(sha256sum "${temp_dir}/go.tar.gz" | awk '{print $1}')
+    fi
     
     if [[ $expected_sum != $actual_sum ]]; then
         echo "Error: Checksum mismatch for Go archive" >&2
@@ -152,7 +223,18 @@ function install_go() {
     fi
     
     echo "Installing Go ${version}..."
-    if ! rm -rf /usr/local/go && tar -C /usr/local -xzf "${temp_dir}/go.tar.gz"; then
+    local go_install_path
+    if [[ "$(uname)" == "Darwin" ]]; then #incase of macos
+        go_install_path="/usr/local"
+        if [[ "$EUID" -ne 0 ]]; then
+            echo "Installing Go to user directory..."
+            go_install_path="$HOME"
+        fi
+    else
+        go_install_path="/usr/local"
+    fi
+    
+    if ! rm -rf "${go_install_path}/go" && tar -C "${go_install_path}" -xzf "${temp_dir}/go.tar.gz"; then
         echo "Error: Failed to install Go" >&2
         rm -rf "$temp_dir"
         exit 1
@@ -160,10 +242,26 @@ function install_go() {
     
     rm -rf "$temp_dir"
     
-    if ! grep -q "/usr/local/go/bin" /etc/profile.d/go.sh 2>/dev/null; then
-        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile.d/go.sh
-        chmod +x /etc/profile.d/go.sh
-        source /etc/profile.d/go.sh
+    # Set up PATH
+    if [[ "$(uname)" == "Darwin" ]]; then
+        local shell_profile
+        if [[ "$SHELL" == *"zsh"* ]]; then
+            shell_profile="$HOME/.zshrc"
+        else
+            shell_profile="$HOME/.bash_profile"
+        fi
+        
+        if ! grep -q "${go_install_path}/go/bin" "$shell_profile" 2>/dev/null; then
+            echo "export PATH=\$PATH:${go_install_path}/go/bin" >> "$shell_profile"
+            echo "Added Go to PATH in $shell_profile"
+        fi
+        export PATH="$PATH:${go_install_path}/go/bin"
+    else
+        if ! grep -q "/usr/local/go/bin" /etc/profile.d/go.sh 2>/dev/null; then
+            echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile.d/go.sh
+            chmod +x /etc/profile.d/go.sh
+            source /etc/profile.d/go.sh
+        fi
     fi
 }
 
@@ -178,7 +276,15 @@ function check_go_version() {
 # install air hot reload for golang
 function install_air_hot_reload(){
     local user_home
-    user_home=$(eval echo ~${SUDO_USER:-$USER})
+    if [[ "$(uname)" == "Darwin" ]]; then
+        user_home="$HOME"
+        if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
+            user_home=$(eval echo "~$SUDO_USER")
+        fi
+    else
+        user_home=$(eval echo ~${SUDO_USER:-$USER})
+    fi
+    
     GOPATH="$user_home/go" go install github.com/air-verse/air@latest
     export PATH="$PATH:$user_home/go/bin"
 }
@@ -205,13 +311,72 @@ function load_api_env_variables(){
 # setup postgres with docker
 function setup_postgres_with_docker(){
     load_api_env_variables
+    
+    # Check for and stop local PostgreSQL services on macOS
+    if [[ "$(uname)" == "Darwin" ]]; then
+        echo "Checking for local PostgreSQL services..."
+        if brew services list | grep -q "postgresql.*started"; then
+            echo "Found running local PostgreSQL service. Stopping it to avoid port conflicts..."
+            brew services stop postgresql@14 2>/dev/null || true
+            brew services stop postgresql 2>/dev/null || true
+            sleep 2
+        fi
+    fi
+    
+    # Check if container already exists
+    if docker ps -a --format 'table {{.Names}}' | grep -q "^nixopus-db$"; then
+        echo "Removing existing nixopus-db container..."
+        docker stop nixopus-db 2>/dev/null || true
+        docker rm nixopus-db 2>/dev/null || true
+    fi
+    
+    # Start PostgreSQL container with credentials matching .env.sample
     docker run -d --name nixopus-db \
-        -e POSTGRES_USER="${USERNAME:-nixopus}" \
-        -e POSTGRES_PASSWORD="${PASSWORD:-nixopus}" \
-        -e POSTGRES_DB="${DB_NAME:-nixopus}" \
+        -e POSTGRES_USER="${USERNAME:-postgres}" \
+        -e POSTGRES_PASSWORD="${PASSWORD:-12344}" \
+        -e POSTGRES_DB="${DB_NAME:-postgres}" \
+        -e POSTGRES_HOST_AUTH_METHOD=trust \
         -p "${DB_PORT:-5432}:5432" \
-        postgres
+        --health-cmd="pg_isready -U ${USERNAME:-postgres} -d ${DB_NAME:-postgres}" \
+        postgres:13
+    
+    echo "Waiting for PostgreSQL to be ready..."
+    sleep 5
+    
+    # Wait for PostgreSQL to be ready
+    local max_attempts=30
+    local attempt=1
+    while [ $attempt -le $max_attempts ]; do
+        if docker exec nixopus-db pg_isready -U "${USERNAME:-postgres}" -d "${DB_NAME:-postgres}" >/dev/null 2>&1; then
+            echo "PostgreSQL is ready!"
+            break
+        fi
+        echo "Waiting for PostgreSQL... (attempt $attempt/$max_attempts)"
+        sleep 2
+        attempt=$((attempt + 1))
+    done
+    
+    if [ $attempt -gt $max_attempts ]; then
+        echo "Error: PostgreSQL failed to start within expected time" >&2
+        exit 1
+    fi
+    
     echo "Postgres setup completed successfully"
+}
+
+# verify database connection
+function verify_database_connection(){
+    echo "Verifying database connection..."
+    load_api_env_variables
+    
+    # Test connection using docker exec
+    if docker exec nixopus-db psql -U "${USERNAME:-postgres}" -d "${DB_NAME:-postgres}" -c "SELECT 1;" >/dev/null 2>&1; then
+        echo "Database connection verified successfully"
+    else
+        echo "Error: Failed to connect to database" >&2
+        echo "Details: user=${USERNAME:-postgres}, db=${DB_NAME:-postgres}, host=${HOST_NAME:-localhost}, port=${DB_PORT:-5432}" >&2
+        exit 1
+    fi
 }
 
 # setup ssh will create a ssh key and add it to the authorized_keys file
@@ -249,23 +414,39 @@ function start_api(){
     go mod download
     
     local user_home
-    user_home=$(eval echo ~${SUDO_USER:-$USER})
+    if [[ "$(uname)" == "Darwin" ]]; then
+        user_home="$HOME"
+        if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
+            user_home=$(eval echo "~$SUDO_USER")
+        fi
+    else
+        user_home=$(eval echo ~${SUDO_USER:-$USER})
+    fi
     
+    echo "API server started with air hot reload"
+    echo "Logs can be found in api.log"
+    echo "You can stop the server using 'pkill -f air' command"
     nohup "$user_home/go/bin/air" > api.log 2>&1 &
+    
 }
 
 # start the view server
 function start_view(){
     move_to_folder "view"
     yarn install --frozen-lockfile
+    echo "View server started"
+    echo "Logs can be found in view.log"
+    echo "You can stop the server using 'pkill -f yarn' command"
     nohup yarn run dev > view.log 2>&1 &
+    
 }
 
 # main function
 function main() {
     echo "Starting Nixopus development environment setup..."
-    check_root
     check_os
+    check_macos_prerequisites
+    check_root
     check_required_commands
     check_go_version
     clone_nixopus
@@ -275,6 +456,7 @@ function main() {
     echo "Nixopus repository cloned and configured successfully"
     
     setup_postgres_with_docker
+    verify_database_connection
     setup_environment_variables
     setup_ssh
     echo "SSH setup completed successfully"
@@ -285,6 +467,32 @@ function main() {
     start_view
     echo "View server started successfully"
     echo "Nixopus development environment setup completed successfully"
+    
+    echo "----------------------------------------------------------------------------"    
+    echo ""
+    echo "=== Application Access ==="
+    echo "Frontend: http://localhost:3000"
+    echo "API: http://localhost:8080"
+    echo "Database: localhost:5432"
+    echo ""
+    echo "=== Troubleshooting ==="
+    echo "If you encounter database connection issues:"
+    echo "1. Check if Docker container is running: docker ps | grep nixopus-db"
+    echo "2. Check database logs: docker logs nixopus-db"
+    echo "3. Verify connection: docker exec nixopus-db psql -U postgres -d postgres -c 'SELECT 1;'"
+    echo "4. Restart the database: docker restart nixopus-db"
+    echo ""
+    echo "Log files:"
+    echo "- API logs: nixopus/api/api.log"
+    echo "- View logs: nixopus/view/view.log"
+    echo "----------------------------------------------------------------------------"
+    
+    echo ""
+echo "Need help or have questions?"
+echo ">>>> Join our Discord :: https://discord.com/invite/skdcq39Wpv"
+echo ">>>> Star us on GitHub: https://github.com/raghavyuva/nixopus/"
+
+
 }
 
 main

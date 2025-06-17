@@ -32,7 +32,7 @@ function check_command() {
 }
 
 function check_required_commands() {
-    local commands=("git" "docker" "yarn")  
+    local commands=("git" "docker" "yarn" "go")  
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done
@@ -41,7 +41,7 @@ function check_required_commands() {
 # clone the nixopus repository
 function clone_nixopus() {
     if [ -d "nixopus" ]; then
-        echo "nixopus directory already exists. Removing..."
+        echo "nixopus directory already exists, please remove it manually and run the script again"
         exit 1
     fi
     if ! git clone --branch "$BRANCH" https://github.com/raghavyuva/nixopus.git; then
@@ -68,19 +68,11 @@ function move_to_folder() {
     fi
 }
 
-# check if the go version is installed else install it 1.23.4
-function check_go_version() {
-    if ! command -v go &>/dev/null; then
-        echo "Go version 1.23.4 or higher is not installed. Please install it manually, and run the script again"
-        exit 1
-    fi
-}
-
 # install air hot reload for golang
 function install_air_hot_reload(){
     local user_home
     user_home=$(eval echo ~${SUDO_USER:-$USER})
-    GOPATH="$user_home/go" go install github.com/air-verse/air@latest
+    sudo -u "${SUDO_USER:-$USER}" env GOPATH="$user_home/go" go install github.com/air-verse/air@latest
     export PATH="$PATH:$user_home/go/bin"
 }
 
@@ -168,7 +160,6 @@ function main() {
     check_root
     check_os
     check_required_commands
-    check_go_version
     clone_nixopus
     move_to_folder "nixopus"
     checkout_branch "$BRANCH"

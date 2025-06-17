@@ -2,7 +2,8 @@ name: Test Nixopus Development Environment Setup
 
 on:
   push:
-    branches: [master, feat/develop, feat/dev_environment]
+    branches:
+      [master, feat/develop, feat/dev_environment, feat/dev_environment-macos]
   workflow_dispatch:
 
 jobs:

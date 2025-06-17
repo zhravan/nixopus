@@ -430,6 +430,30 @@ function start_api(){
     
 }
 
+open_discord_gh_link() {
+  local url="https://discord.com/invite/skdcq39Wpv"
+  local gh_url="https://github.com/raghavyuva/nixopus/"
+
+  case "$(uname)" in
+    Darwin)
+      open "$url"
+      open "$gh_url"
+      ;;
+    Linux)
+      if command -v xdg-open &>/dev/null; then
+        xdg-open "$url"
+        xdg-open "$gh_url"
+      else
+        echo "Warning: Could not auto-open browser." >&2
+      fi
+      ;;
+    *)
+      echo "Warning: Unsupported OS for browser launch." >&2
+      ;;
+  esac
+}
+
+
 # start the view server
 function start_view(){
     move_to_folder "view"
@@ -488,10 +512,11 @@ function main() {
     echo "----------------------------------------------------------------------------"
     
     echo ""
-echo "Need help or have questions?"
-echo ">>>> Join our Discord :: https://discord.com/invite/skdcq39Wpv"
-echo ">>>> Star us on GitHub: https://github.com/raghavyuva/nixopus/"
-
+    echo "Need help or have questions?"
+    echo ">>>> Join our Discord :: https://discord.com/invite/skdcq39Wpv"
+    echo ">>>> Star us on GitHub: https://github.com/raghavyuva/nixopus/"
+    echo ">>>> Raise issues on GitHub Issues: https://github.com/raghavyuva/nixopus/issues"
+    open_discord_gh_link
 
 }
 

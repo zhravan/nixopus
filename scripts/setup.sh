@@ -16,6 +16,9 @@
 
 set -euo pipefail
 
+
+BRANCH="feat/dev_environment"
+
 function detect_package_manager() {
     if [[ "$(uname)" == "Darwin" ]]; then
         if command -v brew &>/dev/null; then
@@ -151,23 +154,37 @@ function check_command() {
 }
 
 function check_required_commands() {
-    local commands=("git" "docker" "yarn" "lsof")
+    local commands=("git" "docker" "yarn" "lsof" "go")  
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done
 }
 
-# clone the nixopus repository
-function clone_nixopus() {
-    if [ -d "nixopus" ]; then
-        echo "nixopus directory already exists. Removing..."
-        rm -rf nixopus
-    fi
-    if ! git clone https://github.com/raghavyuva/nixopus.git; then
-        echo "Error: Failed to clone nixopus repository" >&2
+# check if the go version is installed 
+function check_go_version() {
+    local go_version=$(go version | awk '{print $3}' | sed 's/^go//')
+    local required_version="1.23.4"
+    
+    local ver_num=$(echo "$go_version" | sed 's/\.//g')
+    local req_num=$(echo "$required_version" | sed 's/\.//g')
+    
+    if [ "$ver_num" -lt "$req_num" ]; then
+        echo "Error: Go version $required_version or higher is required. Current version: $go_version" >&2
         exit 1
     fi
 }
+
+# clone the nixopus repository
+function clone_nixopus() {
+    if [ -d "nixopus" ]; then
+        echo "nixopus directory already exists, please remove it manually and run the script again"
+        exit 1
+    fi
+    if ! git clone --branch "$BRANCH" https://github.com/raghavyuva/nixopus.git; then
+        echo "Error: Failed to clone nixopus repository" >&2
+        exit 1
+    fi
+}   
 
 # checkout to the branch
 function checkout_branch() {
@@ -294,7 +311,7 @@ function install_air_hot_reload(){
         user_home=$(eval echo ~${SUDO_USER:-$USER})
     fi
     
-    GOPATH="$user_home/go" go install github.com/air-verse/air@latest
+    sudo -u "${SUDO_USER:-$USER}" env GOPATH="$user_home/go" go install github.com/air-verse/air@latest
     export PATH="$PATH:$user_home/go/bin"
 }
 
@@ -488,7 +505,7 @@ function main() {
     check_go_version
     clone_nixopus
     move_to_folder "nixopus"
-    checkout_branch "feat/dev_environment"
+    checkout_branch "$BRANCH"
     install_air_hot_reload
     echo "Nixopus repository cloned and configured successfully"
     

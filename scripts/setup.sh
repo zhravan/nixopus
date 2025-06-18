@@ -89,6 +89,7 @@ function check_macos_prerequisites() {
         if ! command -v docker &>/dev/null; then
             echo "Warning: Docker not found. Please ensure Docker Desktop for Mac is installed and running."
             echo "Download from: https://www.docker.com/products/docker-desktop"
+            exit 1
         fi
         
         echo "macOS prerequisites check completed."
@@ -133,6 +134,14 @@ function check_command() {
                     npm install -g yarn
                 fi
                 ;;
+            "lsof")
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    # lsof is built-in on macOS
+                    echo "lsof is available on macOS"
+                else
+                    install_package "lsof"
+                fi
+                ;;
             *)
                 echo "Error: Automatic installation not supported for '$cmd'" >&2
                 exit 1
@@ -142,7 +151,7 @@ function check_command() {
 }
 
 function check_required_commands() {
-    local commands=("git" "docker" "yarn")
+    local commands=("git" "docker" "yarn" "lsof")
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done
@@ -311,23 +320,11 @@ function load_api_env_variables(){
 # setup postgres with docker
 function setup_postgres_with_docker(){
     load_api_env_variables
-    
-    # Check for and stop local PostgreSQL services on macOS
-    if [[ "$(uname)" == "Darwin" ]]; then
-        echo "Checking for local PostgreSQL services..."
-        if brew services list | grep -q "postgresql.*started"; then
-            echo "Found running local PostgreSQL service. Stopping it to avoid port conflicts..."
-            brew services stop postgresql@14 2>/dev/null || true
-            brew services stop postgresql 2>/dev/null || true
-            sleep 2
-        fi
-    fi
-    
+
     # Check if container already exists
     if docker ps -a --format 'table {{.Names}}' | grep -q "^nixopus-db$"; then
-        echo "Removing existing nixopus-db container..."
-        docker stop nixopus-db 2>/dev/null || true
-        docker rm nixopus-db 2>/dev/null || true
+        echo "Already nixopus-db container exists"
+        return 0
     fi
     
     # Start PostgreSQL container with credentials matching .env.sample
@@ -462,7 +459,22 @@ function start_view(){
     echo "Logs can be found in view.log"
     echo "You can stop the server using 'pkill -f yarn' command"
     nohup yarn run dev > view.log 2>&1 &
-    
+
+}
+
+# check if required ports are available
+# This function checks if the essential ports needed by Nixopus services are free:
+# - 5432: PostgreSQL database (configurable via DB_PORT in api/.env.sample)
+# - 8080: API server (configurable via PORT in api/.env.sample)  
+# - 3000: Frontend development server (Next.js default for 'yarn dev')
+check_port_availability() {
+  for p in 5432 8080 3000; do
+    if pid=$(lsof -ti TCP:"$p"); then
+      echo "Port $p is in use (PID $pid)" >&2
+      exit 1
+    fi
+  done
+  echo "All ports (5432, 8080, 3000) are free."
 }
 
 # main function
@@ -472,6 +484,7 @@ function main() {
     check_macos_prerequisites
     check_root
     check_required_commands
+    check_port_availability
     check_go_version
     clone_nixopus
     move_to_folder "nixopus"

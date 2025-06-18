@@ -137,14 +137,6 @@ function check_command() {
                     npm install -g yarn
                 fi
                 ;;
-            "lsof")
-                if [[ "$(uname)" == "Darwin" ]]; then
-                    # lsof is built-in on macOS
-                    echo "lsof is available on macOS"
-                else
-                    install_package "lsof"
-                fi
-                ;;
             *)
                 echo "Error: Automatic installation not supported for '$cmd'" >&2
                 exit 1

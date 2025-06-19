@@ -13,7 +13,7 @@ export default withMermaid(
   defineConfig({
     title: "Nixopus Docs",
     description: "documentation",
-    head: [['link', { rel: 'icon', href: '/favicon.png' }]],
+    head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
     // base: '/',
     themeConfig: {
       search: {

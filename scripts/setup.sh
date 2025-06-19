@@ -78,7 +78,7 @@ function check_os() {
 # check for prerequisites on macOS
 function check_macos_prerequisites() {
     if [[ "$(uname)" == "Darwin" ]]; then
-        echo "Checking macOS prerequisites..."
+        echo "Checking macOS prerequisites"
         
         # Check for Homebrew
         if ! command -v brew &>/dev/null; then
@@ -113,7 +113,7 @@ function check_root() {
 function check_command() {
     local cmd="$1"
     if ! command -v "$cmd" &>/dev/null; then
-        echo "Command '$cmd' not found. Attempting to install..."
+        echo "Command '$cmd' not found. Attempting to install"
         case "$cmd" in
             "git")
                 install_package "git"
@@ -216,14 +216,14 @@ function install_go() {
     local temp_dir
     temp_dir=$(mktemp -d)
     
-    echo "Downloading Go ${version}..."
+    echo "Downloading Go ${version}"
     if ! curl -L "https://go.dev/dl/go${version}.${os}-${arch}.tar.gz" -o "${temp_dir}/go.tar.gz"; then
         echo "Error: Failed to download Go" >&2
         rm -rf "$temp_dir"
         exit 1
     fi
 
-    echo "Verifying checksum..."
+    echo "Verifying checksum"
     local checksum_url="https://go.dev/dl/go${version}.${os}-${arch}.tar.gz.sha256"
     local expected_sum
     expected_sum=$(curl -sL "$checksum_url" | awk '{print $1}')
@@ -240,12 +240,12 @@ function install_go() {
         exit 1
     fi
     
-    echo "Installing Go ${version}..."
+    echo "Installing Go ${version}"
     local go_install_path
     if [[ "$(uname)" == "Darwin" ]]; then #incase of macos
         go_install_path="/usr/local"
         if [[ "$EUID" -ne 0 ]]; then
-            echo "Installing Go to user directory..."
+            echo "Installing Go to user directory"
             go_install_path="$HOME"
         fi
     else
@@ -286,7 +286,7 @@ function install_go() {
 # check if the go version is installed else install it 1.23.4
 function check_go_version() {
     if ! command -v go &>/dev/null; then
-        echo "Go is not installed. Installing..."
+        echo "Go is not installed. Installing"
         install_go
     fi
 }
@@ -346,7 +346,7 @@ function setup_postgres_with_docker(){
         --health-cmd="pg_isready -U ${USERNAME:-postgres} -d ${DB_NAME:-postgres}" \
         postgres:14-alpine
     
-    echo "Waiting for PostgreSQL to be ready..."
+    echo "Waiting for PostgreSQL to be ready"
     sleep 5
     
     # Wait for PostgreSQL to be ready
@@ -357,7 +357,7 @@ function setup_postgres_with_docker(){
             echo "PostgreSQL is ready!"
             break
         fi
-        echo "Waiting for PostgreSQL... (attempt $attempt/$max_attempts)"
+        echo "Waiting for PostgreSQL (attempt $attempt/$max_attempts)"
         sleep 2
         attempt=$((attempt + 1))
     done
@@ -372,7 +372,7 @@ function setup_postgres_with_docker(){
 
 # verify database connection
 function verify_database_connection(){
-    echo "Verifying database connection..."
+    echo "Verifying database connection"
     load_api_env_variables
     
     # Test connection using docker exec
@@ -387,8 +387,45 @@ function verify_database_connection(){
 
 # setup ssh will create a ssh key and add it to the authorized_keys file
 function setup_ssh(){
-    # TODO: generate SSH key and add to authorized_keys
-    return 0
+    local ssh_dir="$HOME/.ssh"
+    local private_key="$ssh_dir/id_ed25519_nixopus"
+    local public_key="$ssh_dir/id_ed25519_nixopus.pub"
+    
+    if [[ -f "$private_key" && -f "$public_key" ]]; then
+        echo "SSH key for Nixopus already exists, skipping ssh setup"
+        return 0
+    fi
+    
+    echo "setting up SSH config"
+    
+    # Check if ssh-keygen is available and install if needed
+    if ! command -v ssh-keygen &>/dev/null; then
+        echo "Installing openssh"
+        if [[ "$(uname)" == "Darwin" ]]; then
+            install_package "openssh"
+        else
+            case $(detect_package_manager) in
+                "apt") install_package "openssh-client" ;;
+                "dnf"|"yum") install_package "openssh-clients" ;;
+                "pacman") install_package "openssh" ;;
+            esac
+        fi
+    fi
+    
+    local authorized_keys="$ssh_dir/authorized_keys"
+
+    mkdir -p "$ssh_dir" && chmod 700 "$ssh_dir"
+    
+    echo "Generating Nixopus SSH key"
+    ssh-keygen -t ed25519 -f "$private_key" -N "" -C "nixopus-$(whoami)@$(hostname)-$(date +%Y%m%d)"
+    chmod 600 "$private_key" && chmod 644 "$public_key"
+    
+    if [[ ! -f "$authorized_keys" || ! $(grep -Fq "$(cat "$public_key")" "$authorized_keys" 2>/dev/null) ]]; then
+        cat "$public_key" >> "$authorized_keys" && chmod 600 "$authorized_keys"
+        echo "Nixopus public key added to authorized_keys"
+    fi
+    
+    echo "Nixopus SSH setup is done"
 }
 
 # setup environment variables
@@ -488,7 +525,7 @@ check_port_availability() {
 
 # main function
 function main() {
-    echo "Starting Nixopus development environment setup..."
+    echo "Starting Nixopus development environment setup"
     check_os
     check_macos_prerequisites
     check_root

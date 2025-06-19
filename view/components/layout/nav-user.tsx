@@ -86,20 +86,31 @@ export function NavUser({ user }: { user: User }) {
   const handleSponsor = () => {
     window.open('https://github.com/sponsors/raghavyuva', '_blank');
   };
-  
+
   const getClientInfo = () => {
     const userAgent = navigator.userAgent;
-    const browser = userAgent.includes('Chrome') ? 'Chrome' :
-                   userAgent.includes('Firefox') ? 'Firefox' :
-                   userAgent.includes('Safari') ? 'Safari' :
-                   userAgent.includes('Edge') ? 'Edge' : 'Unknown';
-    
-    const os = userAgent.includes('Windows') ? 'Windows' :
-               userAgent.includes('Mac') ? 'macOS' :
-               userAgent.includes('Linux') ? 'Linux' :
-               userAgent.includes('Android') ? 'Android' :
-               userAgent.includes('iOS') ? 'iOS' : 'Unknown';
-    
+    const browser = userAgent.includes('Chrome')
+      ? 'Chrome'
+      : userAgent.includes('Firefox')
+        ? 'Firefox'
+        : userAgent.includes('Safari')
+          ? 'Safari'
+          : userAgent.includes('Edge')
+            ? 'Edge'
+            : 'Unknown';
+
+    const os = userAgent.includes('Windows')
+      ? 'Windows'
+      : userAgent.includes('Mac')
+        ? 'macOS'
+        : userAgent.includes('Linux')
+          ? 'Linux'
+          : userAgent.includes('Android')
+            ? 'Android'
+            : userAgent.includes('iOS')
+              ? 'iOS'
+              : 'Unknown';
+
     return {
       browser,
       os,
@@ -112,7 +123,7 @@ export function NavUser({ user }: { user: User }) {
 
   const handleReportIssue = () => {
     const clientInfo = getClientInfo();
-    
+
     const issueBody = `**Describe the bug**
 A clear and concise description of what the bug is.
 

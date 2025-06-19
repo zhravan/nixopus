@@ -344,7 +344,7 @@ function setup_postgres_with_docker(){
         -e POSTGRES_HOST_AUTH_METHOD=trust \
         -p "${DB_PORT:-5432}:5432" \
         --health-cmd="pg_isready -U ${USERNAME:-postgres} -d ${DB_NAME:-postgres}" \
-        postgres:13
+        postgres:14-alpine
     
     echo "Waiting for PostgreSQL to be ready..."
     sleep 5

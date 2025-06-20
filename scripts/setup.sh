@@ -428,6 +428,34 @@ function setup_ssh(){
         fi
     fi
     
+    # Check SSH daemon availability on macOS
+    if [[ "$OS" == "Darwin" ]]; then
+        echo "Checking SSH daemon (Remote Login) status on macOS..."
+        
+        # Check if SSH daemon is running
+        if ! sudo launchctl list | grep -q "com.openssh.sshd"; then
+            echo ""
+            echo "WARNING: SSH Remote Login is not enabled on this macOS system!"
+            echo ""
+            echo "To enable SSH Remote Login, please follow these steps:"
+            echo "1. Open System Settings (or System Preferences on older macOS versions)"
+            echo "2. Go to General → Sharing (or just Sharing on older versions)"
+            echo "3. Turn on 'Remote Login'"
+            echo "4. You can choose to allow access for:"
+            echo "   - All users, or"
+            echo "   - Only specific users (recommended for security)"
+            echo ""
+            echo "alternatively, you can enable it via command line by running:"
+            echo "   sudo systemsetup -setremotelogin on"
+            echo ""
+            echo "after enabling Remote Login, please run this setup script again."
+            echo ""
+            read -p "press Enter to continue with SSH key generation (you'll still need to enable Remote Login)..."
+        else
+            echo "SSH Remote Login is already enabled on macOS"
+        fi
+    fi
+    
     local authorized_keys="$ssh_dir/authorized_keys"
 
     mkdir -p "$ssh_dir" && chmod 700 "$ssh_dir"

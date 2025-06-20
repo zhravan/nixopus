@@ -201,22 +201,33 @@ function move_to_folder() {
     fi
 }
 
-function install_go() {
-    local version="1.23.4"
+# get architecture name in format expected by most download URLs
+function get_arch_name() {
     local arch
     arch=$(uname -m)
     case "$arch" in
-        x86_64) arch="amd64" ;;
-        aarch64|arm64) arch="arm64" ;;
+        x86_64) echo "amd64" ;;
+        aarch64|arm64) echo "arm64" ;;
         *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
     esac
-    
-    local os
+}
+
+# get OS name in lowercase format (for downloads, packages, etc.)
+function get_os_name() {
     case "$OS" in
-        "Linux") os="linux" ;;
-        "Darwin") os="darwin" ;;
+        "Linux") echo "linux" ;;
+        "Darwin") echo "darwin" ;;
         *) echo "Unsupported OS: $OS" >&2; exit 1 ;;
     esac
+}
+
+function install_go() {
+    local version="1.23.4"
+    local arch
+    arch=$(get_arch_name)
+    
+    local os
+    os=$(get_os_name)
     
     local temp_dir
     temp_dir=$(mktemp -d)

@@ -18,9 +18,10 @@ set -euo pipefail
 
 
 BRANCH="feat/dev_environment"
+OS="$(uname)"
 
 function detect_package_manager() {
-    if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
         if command -v brew &>/dev/null; then
             echo "brew"
         else
@@ -67,9 +68,7 @@ function install_package() {
 
 # check if the os is linux or macOS
 function check_os() {
-    local os
-    os=$(uname)
-    if [[ "$os" != "Linux" && "$os" != "Darwin" ]]; then
+    if [[ "$OS" != "Linux" && "$OS" != "Darwin" ]]; then
         echo "Error: This script is only supported on Linux and macOS." >&2
         exit 1
     fi
@@ -77,7 +76,7 @@ function check_os() {
 
 # check for prerequisites on macOS
 function check_macos_prerequisites() {
-    if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
         echo "Checking macOS prerequisites"
         
         # Check for Homebrew
@@ -101,10 +100,10 @@ function check_macos_prerequisites() {
 
 # check if the script is running as root (only required for Linux)
 function check_root() {
-    if [[ "$(uname)" == "Linux" && "$EUID" -ne 0 ]]; then
+    if [[ "$OS" == "Linux" && "$EUID" -ne 0 ]]; then
         echo "Error: Please run as root (sudo) on Linux systems" >&2
         exit 1
-    elif [[ "$(uname)" == "Darwin" && "$EUID" -eq 0 ]]; then
+    elif [[ "$OS" == "Darwin" && "$EUID" -eq 0 ]]; then
         echo "Warning: consider running without sudo on macos as it is not equired." >&2
     fi
 }
@@ -119,7 +118,7 @@ function check_command() {
                 install_package "git"
                 ;;
             "docker")
-                if [[ "$(uname)" == "Darwin" ]]; then
+                if [[ "$OS" == "Darwin" ]]; then
                     echo "Install docker desktop for mac from: https://www.docker.com/products/docker-desktop"
                     echo "After installation, make sure Docker Desktop is running."
                     exit 1
@@ -128,7 +127,7 @@ function check_command() {
                 fi
                 ;;
             "yarn")
-                if [[ "$(uname)" == "Darwin" ]]; then
+                if [[ "$OS" == "Darwin" ]]; then
                     install_package "node"
                     install_package "yarn"
                 else
@@ -207,10 +206,10 @@ function install_go() {
     esac
     
     local os
-    case "$(uname)" in
+    case "$OS" in
         "Linux") os="linux" ;;
         "Darwin") os="darwin" ;;
-        *) echo "Unsupported OS: $(uname)" >&2; exit 1 ;;
+        *) echo "Unsupported OS: $OS" >&2; exit 1 ;;
     esac
     
     local temp_dir
@@ -228,7 +227,7 @@ function install_go() {
     local expected_sum
     expected_sum=$(curl -sL "$checksum_url" | awk '{print $1}')
     local actual_sum
-    if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
         actual_sum=$(shasum -a 256 "${temp_dir}/go.tar.gz" | awk '{print $1}')
     else
         actual_sum=$(sha256sum "${temp_dir}/go.tar.gz" | awk '{print $1}')
@@ -242,7 +241,7 @@ function install_go() {
     
     echo "Installing Go ${version}"
     local go_install_path
-    if [[ "$(uname)" == "Darwin" ]]; then #incase of macos
+    if [[ "$OS" == "Darwin" ]]; then #incase of macos
         go_install_path="/usr/local"
         if [[ "$EUID" -ne 0 ]]; then
             echo "Installing Go to user directory"
@@ -261,7 +260,7 @@ function install_go() {
     rm -rf "$temp_dir"
     
     # Set up PATH
-    if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
         local shell_profile
         if [[ "$SHELL" == *"zsh"* ]]; then
             shell_profile="$HOME/.zshrc"
@@ -294,7 +293,7 @@ function check_go_version() {
 # install air hot reload for golang
 function install_air_hot_reload(){
     local user_home
-    if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
         user_home="$HOME"
         if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
             user_home=$(eval echo "~$SUDO_USER")
@@ -401,7 +400,7 @@ function setup_ssh(){
     # Check if ssh-keygen is available and install if needed
     if ! command -v ssh-keygen &>/dev/null; then
         echo "Installing openssh"
-        if [[ "$(uname)" == "Darwin" ]]; then
+        if [[ "$OS" == "Darwin" ]]; then
             install_package "openssh"
         else
             case $(detect_package_manager) in
@@ -457,7 +456,7 @@ function start_api(){
     go mod download
     
     local user_home
-    if [[ "$(uname)" == "Darwin" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
         user_home="$HOME"
         if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
             user_home=$(eval echo "~$SUDO_USER")
@@ -477,7 +476,7 @@ open_discord_gh_link() {
   local url="https://discord.com/invite/skdcq39Wpv"
   local gh_url="https://github.com/raghavyuva/nixopus/"
 
-  case "$(uname)" in
+  case "$OS" in
     Darwin)
       open "$url"
       open "$gh_url"

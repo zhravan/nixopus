@@ -11,14 +11,23 @@
 #         Docker Desktop for Mac should be installed and running
 
 # Usage:
-# - Linux: sudo ./setup.sh
-# - macOS: ./setup.sh (no sudo required)
+# - Linux: sudo ./setup.sh [OPTIONS]
+# - macOS: ./setup.sh [OPTIONS] (no sudo required)
+#
+# Port Configuration:
+# Use --help to see available port configuration options
+# Example: ./setup.sh --api-port 8081 --view-port 3001
 
 set -euo pipefail
 
 
 BRANCH="feat/dev_environment"
 OS="$(uname)"
+
+# Default port configurations
+DEFAULT_API_PORT=8080
+DEFAULT_VIEW_PORT=7443
+DEFAULT_DB_PORT=5432
 
 function detect_package_manager() {
     if [[ "$OS" == "Darwin" ]]; then
@@ -310,17 +319,26 @@ function check_go_version() {
 # install air hot reload for golang
 function install_air_hot_reload(){
     local user_home
-    if [[ "$OS" == "Darwin" ]]; then
-        user_home="$HOME"
-        if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
-            user_home=$(eval echo "~$SUDO_USER")
-        fi
-    else
-        user_home=$(eval echo ~${SUDO_USER:-$USER})
+    user_home=$(get_user_home)
+    local air_path="$user_home/go/bin/air"
+    
+    # Check if air is already installed
+    if command -v air &>/dev/null || [[ -f "$air_path" ]]; then
+        echo "Air hot reload is already installed, skipping installation"
+        export PATH="$PATH:$user_home/go/bin"
+        return 0
     fi
     
+    echo "Installing Air hot reload..."
     sudo -u "${SUDO_USER:-$USER}" env GOPATH="$user_home/go" go install github.com/air-verse/air@latest
     export PATH="$PATH:$user_home/go/bin"
+    
+    # Verify installation
+    if command -v air &>/dev/null || [[ -f "$air_path" ]]; then
+        echo "Air hot reload installed successfully"
+    else
+        echo "Warning: Air installation may have failed"
+    fi
 }
 
 # load the env variables from the api/.env.sample file
@@ -403,7 +421,9 @@ function verify_database_connection(){
 
 # setup ssh will create a ssh key and add it to the authorized_keys file
 function setup_ssh(){
-    local ssh_dir="$HOME/.ssh"
+    local user_home
+    user_home=$(get_user_home)
+    local ssh_dir="$user_home/.ssh"
     local private_key="$ssh_dir/id_ed25519_nixopus"
     local public_key="$ssh_dir/id_ed25519_nixopus.pub"
     
@@ -472,6 +492,82 @@ function setup_ssh(){
     echo "Nixopus SSH setup is done"
 }
 
+# Function to update SSH configuration in environment files
+function update_ssh_env_config(){
+    local user_home
+    user_home=$(get_user_home)
+    local ssh_dir="$user_home/.ssh"
+    local private_key="$ssh_dir/id_ed25519_nixopus"
+    local current_user=$(whoami)
+    
+    echo "Updating SSH configuration in environment files..."
+    
+    # Update API environment file
+    if [[ -f "api/.env" ]]; then
+        # Update SSH settings in API .env file
+        sed -i.bak "s|SSH_HOST=.*|SSH_HOST=localhost|g" api/.env
+        sed -i.bak "s|SSH_PORT=.*|SSH_PORT=22|g" api/.env
+        sed -i.bak "s|SSH_USER=.*|SSH_USER=$current_user|g" api/.env
+        
+        # For development environment, set up SSH private key (recommended)
+        # Users can optionally use SSH_PASSWORD for development if preferred
+        if grep -q "SSH_PRIVATE_KEY=" api/.env; then
+            sed -i.bak "s|SSH_PRIVATE_KEY=.*|SSH_PRIVATE_KEY=$private_key|g" api/.env
+        else
+            # Add SSH_PRIVATE_KEY if it doesn't exist
+            echo "SSH_PRIVATE_KEY=$private_key" >> api/.env
+        fi
+        
+        # Ensure SSH_PASSWORD exists as commented option for development
+        if ! grep -q "SSH_PASSWORD=" api/.env; then
+            echo "# SSH_PASSWORD=<YOUR_SSH_PASSWORD_HERE>" >> api/.env
+        fi
+        
+        # Remove backup file
+        rm -f api/.env.bak
+        
+        echo "SSH configuration updated in api/.env"
+        echo "  - SSH_HOST: localhost"
+        echo "  - SSH_PORT: 22"
+        echo "  - SSH_USER: $current_user"
+        echo "  - SSH_PRIVATE_KEY: $private_key (recommended for production)"
+        echo "  - SSH_PASSWORD: Available as commented option for development"
+        echo ""
+        echo "Note: For development, you can uncomment SSH_PASSWORD and comment out SSH_PRIVATE_KEY if preferred"
+    else
+        echo "Warning: api/.env file not found, SSH configuration not updated"
+    fi
+}
+
+# Update environment files with custom port configurations
+function update_port_configurations(){
+    echo "Updating port configurations..."
+    
+    # Update API environment file
+    if [[ -f "api/.env" ]]; then
+        sed -i.bak "s|PORT=.*|PORT=$API_PORT|g" api/.env
+        sed -i.bak "s|DB_PORT=.*|DB_PORT=$DB_PORT|g" api/.env
+        sed -i.bak "s|ALLOWED_ORIGIN=.*|ALLOWED_ORIGIN=http://localhost:$VIEW_PORT|g" api/.env
+        
+        rm -f api/.env.bak
+        echo "Updated API environment with custom ports"
+    fi
+    
+    # Update view environment file
+    if [[ -f "view/.env" ]]; then
+        sed -i.bak "s|PORT=.*|PORT=$VIEW_PORT|g" view/.env
+        sed -i.bak "s|NEXT_PUBLIC_PORT=.*|NEXT_PUBLIC_PORT=$VIEW_PORT|g" view/.env
+        
+        rm -f view/.env.bak
+        echo "Updated view environment with custom ports"
+    fi
+    
+    echo "Port configurations updated successfully"
+    echo "  - API Port: $API_PORT"
+    echo "  - Frontend Port: $VIEW_PORT"
+    echo "  - Database Port: $DB_PORT"
+}
+
 # setup environment variables
 function setup_environment_variables(){
     move_to_folder "api"
@@ -501,14 +597,7 @@ function start_api(){
     go mod download
     
     local user_home
-    if [[ "$OS" == "Darwin" ]]; then
-        user_home="$HOME"
-        if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
-            user_home=$(eval echo "~$SUDO_USER")
-        fi
-    else
-        user_home=$(eval echo ~${SUDO_USER:-$USER})
-    fi
+    user_home=$(get_user_home)
     
     echo "API server started with air hot reload"
     echo "Logs can be found in api.log"
@@ -552,30 +641,174 @@ function start_view(){
 
 }
 
-# check if required ports are available
-# This function checks if the essential ports needed by Nixopus services are free:
-# - 5432: PostgreSQL database (configurable via DB_PORT in api/.env.sample)
-# - 8080: API server (configurable via PORT in api/.env.sample)  
-# - 3000: Frontend development server (Next.js default for 'yarn dev')
-check_port_availability() {
-  for p in 5432 8080 3000; do
-    if pid=$(lsof -ti TCP:"$p"); then
-      echo "Port $p is in use (PID $pid)" >&2
-      exit 1
+# Check if a port is available
+function is_port_available() {
+    local port=$1
+    local host=${2:-localhost}
+    
+    # Try to connect to the port, if it fails the port is available
+    ! nc -z "$host" "$port" 2>/dev/null
+}
+
+# Validate that a port number is valid
+function validate_port() {
+    local port=$1
+    local port_name=$2
+    
+    if ! [[ "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        echo "Error: Invalid $port_name port '$port'. Port must be a number between 1 and 65535."
+        return 1
     fi
-  done
-  echo "All ports (5432, 8080, 3000) are free."
+    
+    if [ "$port" -lt 1024 ] && [ "$EUID" -ne 0 ]; then
+        echo "Warning: $port_name port $port is below 1024 and may require root privileges."
+    fi
+    
+    return 0
+}
+
+# Parse command line arguments for custom ports
+function parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --api-port)
+                API_PORT="$2"
+                shift 2
+                ;;
+            --view-port)
+                VIEW_PORT="$2"
+                shift 2
+                ;;
+            --db-port)
+                DB_PORT="$2"
+                shift 2
+                ;;
+            --help|-h)
+                show_usage
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1"
+                show_usage
+                exit 1
+                ;;
+        esac
+    done
+    
+    # Set defaults if not provided
+    API_PORT=${API_PORT:-$DEFAULT_API_PORT}
+    VIEW_PORT=${VIEW_PORT:-$DEFAULT_VIEW_PORT}
+    DB_PORT=${DB_PORT:-$DEFAULT_DB_PORT}
+    
+    # Validate all ports
+    validate_port "$API_PORT" "API" || exit 1
+    validate_port "$VIEW_PORT" "View" || exit 1
+    validate_port "$DB_PORT" "Database" || exit 1
+}
+
+# Show usage information
+function show_usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --api-port PORT      Set API server port (default: $DEFAULT_API_PORT)"
+    echo "  --view-port PORT     Set frontend server port (default: $DEFAULT_VIEW_PORT)"
+    echo "  --db-port PORT       Set database port (default: $DEFAULT_DB_PORT)"
+    echo "  --help, -h           Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                    # Use default ports"
+    echo "  $0 --api-port 8081 --view-port 3001  # Use custom API and view ports"
+    echo "  $0 --db-port 5433                    # Use custom database port"
+}
+
+# Check availability of all required ports
+function check_port_availability() {
+    echo "Checking port availability..."
+    
+    # Check API port
+    if ! is_port_available "$API_PORT"; then
+        echo "Error: API port $API_PORT is already in use."
+        echo "Please use a different port: ./setup.sh --api-port <PORT>"
+        exit 1
+    fi
+    
+    # Check Frontend port
+    if ! is_port_available "$VIEW_PORT"; then
+        echo "Error: Frontend port $VIEW_PORT is already in use."
+        echo "Please use a different port: ./setup.sh --view-port <PORT>"
+        exit 1
+    fi
+    
+    # Check Database port
+    if ! is_port_available "$DB_PORT"; then
+        echo "Error: Database port $DB_PORT is already in use."
+        echo "Please use a different port: ./setup.sh --db-port <PORT>"
+        exit 1
+    fi
+    
+    echo "All required ports are available."
+    return 0
+}
+
+# Function to perform comprehensive SSH health checks
+function ssh_health_check(){
+    local user_home
+    user_home=$(get_user_home)
+    local ssh_dir="$user_home/.ssh"
+    local private_key="$ssh_dir/id_ed25519_nixopus"
+    local current_user=$(whoami)
+    
+    echo "Running SSH health check..."
+    
+    # 1. Check SSH keys exist
+    if [[ ! -f "$private_key" || ! -f "$private_key.pub" ]]; then
+        echo "Error: SSH keys missing"
+        return 1
+    fi
+    
+    # 2. Quick SSH connection test
+    if timeout 10 ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$private_key" "$current_user@localhost" "exit" &>/dev/null; then
+        echo "SSH connection successful"
+        return 0
+    else
+        echo "SSH connection failed - please enable Remote Login in System Settings → Sharing (macOS) or start SSH service (Linux)"
+        return 1
+    fi
+}
+
+# Get the correct user home directory (handles sudo scenarios)
+function get_user_home(){
+    local user_home
+    if [[ "$OS" == "Darwin" ]]; then
+        user_home="$HOME"
+        if [[ "$EUID" -eq 0 && -n "${SUDO_USER:-}" ]]; then
+            user_home=$(eval echo "~$SUDO_USER")
+        fi
+    else
+        user_home=$(eval echo ~${SUDO_USER:-$USER})
+    fi
+    echo "$user_home"
 }
 
 # main function
 function main() {
+    # Parse command line arguments first
+    parse_arguments "$@"
+    
     echo "Starting Nixopus development environment setup"
     check_os
     check_macos_prerequisites
     check_root
     check_docker
     check_required_commands
-    check_port_availability
+    
+    # Check if ports are available before proceeding
+    if ! check_port_availability; then
+        echo "Setup cannot continue due to port conflicts. Please resolve them and try again."
+        exit 1
+    fi
+    
     check_go_version
     clone_nixopus
     move_to_folder "nixopus"
@@ -587,6 +820,18 @@ function main() {
     verify_database_connection
     setup_environment_variables
     setup_ssh
+    update_ssh_env_config
+    update_port_configurations
+    
+    # Perform SSH health checks
+    echo "Running SSH health checks..."
+    if ! ssh_health_check; then
+        echo ""
+        echo "SSH setup failed health checks. Please resolve the issues above before continuing."
+        echo "You can re-run this setup script after fixing the SSH configuration."
+        exit 1
+    fi
+    
     echo "SSH setup completed successfully"
     
     start_api
@@ -598,9 +843,9 @@ function main() {
     echo "-------------------------------------------------------------"    
     echo ""
     echo "=== Application Access ==="
-    echo "Frontend: http://localhost:3000"
-    echo "API: http://localhost:8080"
-    echo "Database: localhost:5432"
+    echo "Frontend: http://localhost:$VIEW_PORT"
+    echo "API: http://localhost:$API_PORT"
+    echo "Database: localhost:$DB_PORT"
     echo ""
     echo "=== Troubleshooting ==="
     echo "If you encounter database connection issues:"
@@ -623,4 +868,4 @@ function main() {
 
 }
 
-main
+main "$@"

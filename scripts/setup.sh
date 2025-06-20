@@ -74,6 +74,28 @@ function check_os() {
     fi
 }
 
+# check for Docker availability globally
+function check_docker() {
+    if ! command -v docker &>/dev/null; then
+        if [[ "$OS" == "Darwin" ]]; then
+            echo "Error: Docker not found. Please ensure Docker Desktop for Mac is installed and running."
+            echo "Download from: https://www.docker.com/products/docker-desktop"
+        else
+            echo "Error: Docker not found. Please install Docker first."
+            echo "You can install it using your package manager or from: https://docs.docker.com/engine/install/"
+        fi
+        exit 1
+    fi
+    
+    # Check if Docker daemon is running
+    if ! docker info &>/dev/null; then
+        echo "Error: Docker daemon is not running. Please start Docker service."
+        exit 1
+    fi
+    
+    echo "Docker check completed."
+}
+
 # check for prerequisites on macOS
 function check_macos_prerequisites() {
     if [[ "$OS" == "Darwin" ]]; then
@@ -84,13 +106,6 @@ function check_macos_prerequisites() {
             echo "Error: Homebrew is required on macOS but not found." >&2
             echo "Please install Homebrew first by running:" >&2
             echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' >&2
-            exit 1
-        fi
-        
-        # Check for Docker if not found, exit in check_command function
-        if ! command -v docker &>/dev/null; then
-            echo "Warning: Docker not found. Please ensure Docker Desktop for Mac is installed and running."
-            echo "Download from: https://www.docker.com/products/docker-desktop"
             exit 1
         fi
         
@@ -117,15 +132,6 @@ function check_command() {
             "git")
                 install_package "git"
                 ;;
-            "docker")
-                if [[ "$OS" == "Darwin" ]]; then
-                    echo "Install docker desktop for mac from: https://www.docker.com/products/docker-desktop"
-                    echo "After installation, make sure Docker Desktop is running."
-                    exit 1
-                else
-                    install_package "docker.io"
-                fi
-                ;;
             "yarn")
                 if [[ "$OS" == "Darwin" ]]; then
                     install_package "node"
@@ -145,7 +151,7 @@ function check_command() {
 }
 
 function check_required_commands() {
-    local commands=("git" "docker" "yarn" "lsof" "go")  
+    local commands=("git" "yarn" "go")  
     for cmd in "${commands[@]}"; do
         check_command "$cmd"
     done
@@ -528,6 +534,7 @@ function main() {
     check_os
     check_macos_prerequisites
     check_root
+    check_docker
     check_required_commands
     check_port_availability
     check_go_version

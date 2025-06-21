@@ -634,10 +634,18 @@ open_discord_gh_link() {
 function start_view(){
     move_to_folder "view"
     yarn install --frozen-lockfile
-    echo "View server started"
+    
+    # Read PORT from .env file
+    local view_port=7443  # default fallback
+    if [[ -f ".env" ]]; then
+        view_port=$(grep "^PORT=" .env | cut -d'=' -f2 | tr -d ' ')
+        view_port=${view_port:-7443}  # fallback if empty
+    fi
+    
+    echo "View server started on port $view_port"
     echo "Logs can be found in view.log"
     echo "You can stop the server using 'pkill -f yarn' command"
-    nohup yarn run dev > view.log 2>&1 &
+    nohup yarn run dev -- -p "$view_port" > view.log 2>&1 &
 
 }
 

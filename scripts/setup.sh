@@ -329,7 +329,7 @@ function install_air_hot_reload(){
         return 0
     fi
     
-    echo "Installing Air hot reload "
+    echo "Installing Air hot reload"
     sudo -u "${SUDO_USER:-$USER}" env GOPATH="$user_home/go" go install github.com/air-verse/air@latest
     export PATH="$PATH:$user_home/go/bin"
     
@@ -895,7 +895,7 @@ function main() {
     start_view
     echo "View server started successfully"
     
-    echo "WAaiting for appluications to fully initialize"
+    echo "Waiting for applications to fully initialize"
     sleep 3
 
     RED='\e[31m'

@@ -43,7 +43,7 @@
           </div>
         </div>
         <div class="contribution-cell">
-          <span class="contribution-badge diamond">$1,000+/mo in cash</span>
+          <span class="contribution-badge diamond">$1,000+ in cash</span>
         </div>
         <div class="benefits-cell">
           Full-suite visibility, Custom integrations, Early-access
@@ -64,7 +64,7 @@
           </div>
         </div>
         <div class="contribution-cell">
-          <span class="contribution-badge platinum">$500+/mo in cash</span>
+          <span class="contribution-badge platinum">$500+ in cash</span>
         </div>
         <div class="benefits-cell">
           Logo on docs, Quarterly newsletter, Priority support
@@ -85,7 +85,7 @@
           </div>
         </div>
         <div class="contribution-cell">
-          <span class="contribution-badge gold">$100+/mo in cash</span>
+          <span class="contribution-badge gold">$100+ in cash</span>
         </div>
         <div class="benefits-cell">
           GitHub badge, Sponsor updates, Sponsor-only chat
@@ -106,7 +106,7 @@
           </div>
         </div>
         <div class="contribution-cell">
-          <span class="contribution-badge silver">$25+/mo in cash</span>
+          <span class="contribution-badge silver">$25+ in cash</span>
         </div>
         <div class="benefits-cell">
           Name listing, Sponsor badge, Updates
@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-// No script needed for this static component
+// placeholder only - no script needed for this static component
 </script>
 
 <style scoped>

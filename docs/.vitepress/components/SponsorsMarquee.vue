@@ -1,7 +1,7 @@
 <template>
   <div class="sponsors-marquee-section">
     <div class="container">
-      <h2 class="sponsors-title">Our Sponsors</h2>
+      <h2 class="sponsors-title">Our Amazing Sponsors</h2>
       <p class="sponsors-subtitle">
         Thanks to our amazing sponsors who make Nixopus possible
       </p>
@@ -28,8 +28,8 @@
                 <img :src="sponsor.avatar" :alt="sponsor.name" />
               </div>
               <div class="sponsor-name">{{ sponsor.name }}</div>
-              <div class="sponsor-tier" :class="sponsor.tier">
-                {{ getTierLabel(sponsor.tier) }}
+              <div class="sponsor-type">
+                {{ sponsor.type }}
               </div>
             </div>
           </div>
@@ -42,50 +42,25 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 
-const sponsors = ref({});
+const sponsors = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
 
 const displaySponsors = computed(() => {
-  const allSponsors = [];
-
-  // Add sponsors from different tiers with tier information
-  Object.entries(sponsors.value).forEach(([tier, tierSponsors]) => {
-    if (Array.isArray(tierSponsors)) {
-      tierSponsors.forEach((sponsor) => {
-        allSponsors.push({
-          ...sponsor,
-          tier: tier
-        });
-      });
-    }
-  });
-
-  // Sort by tier priority
-  const tierOrder = {
-    partnership: 1,
-    diamond: 2,
-    platinum: 3,
-    gold: 4,
-    silver: 5,
-    bronze: 6
-  };
-
-  return allSponsors.sort((a, b) => {
-    return (tierOrder[a.tier] || 999) - (tierOrder[b.tier] || 999);
-  });
+  // Sponsors are now a flat array, so we just return them directly
+  return sponsors.value || [];
 });
 
 const duplicatedSponsors = computed(() => {
-  const sponsors = displaySponsors.value;
-  if (sponsors.length === 0) return [];
+  const sponsorsList = displaySponsors.value;
+  if (sponsorsList.length === 0) return [];
 
   // Create multiple copies for infinite scroll effect
   const copies = 3;
   const duplicated = [];
 
   for (let i = 0; i < copies; i++) {
-    sponsors.forEach((sponsor, index) => {
+    sponsorsList.forEach((sponsor, index) => {
       duplicated.push({
         ...sponsor,
         id: `${i}-${index}` // Unique ID for each copy
@@ -106,15 +81,7 @@ const getInitials = (name) => {
 };
 
 const getTierLabel = (tier) => {
-  const labels = {
-    partnership: "Partner",
-    diamond: "Diamond",
-    platinum: "Platinum",
-    gold: "Gold",
-    silver: "Silver",
-    bronze: "Bronze"
-  };
-  return labels[tier] || tier;
+  return "Sponsor";
 };
 
 const openSponsorLink = (sponsor) => {
@@ -304,41 +271,13 @@ onMounted(async () => {
   text-align: center;
 }
 
-.sponsor-tier {
+.sponsor-type {
   font-size: 0.875rem;
   font-weight: 500;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   text-transform: capitalize;
-}
-
-.sponsor-tier.partnership {
-  background: #4f46e5;
-  color: white;
-}
-
-.sponsor-tier.diamond {
   background: #6366f1;
-  color: white;
-}
-
-.sponsor-tier.platinum {
-  background: #8b5cf6;
-  color: white;
-}
-
-.sponsor-tier.gold {
-  background: #f59e0b;
-  color: white;
-}
-
-.sponsor-tier.silver {
-  background: #6b7280;
-  color: white;
-}
-
-.sponsor-tier.bronze {
-  background: #cd7f32;
   color: white;
 }
 
@@ -406,7 +345,7 @@ onMounted(async () => {
     font-size: 0.9rem;
   }
 
-  .sponsor-tier {
+  .sponsor-type {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
   }

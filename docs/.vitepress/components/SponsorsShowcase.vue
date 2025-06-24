@@ -14,133 +14,98 @@
     </details>
   </div>
 
-  <div v-else-if="Object.keys(sponsors).length === 0" class="error-container">
+  <div v-else-if="sponsors.length === 0" class="error-container">
     <p>No sponsors data found</p>
     <details>
       <summary>Debug Info</summary>
       <pre>{{
-        JSON.stringify(
-          { sponsors: sponsors, keys: Object.keys(sponsors) },
-          null,
-          2
-        )
+        JSON.stringify({ sponsors: sponsors, length: sponsors.length }, null, 2)
       }}</pre>
     </details>
   </div>
 
   <div v-else class="sponsors-showcase">
-    <div
-      v-for="(tierSponsors, tierKey) in availableTiers"
-      :key="tierKey"
-      class="tier-section"
-    >
-      <div class="tier-header">
-        <h3 class="tier-title">
-          {{ tierConfig[tierKey]?.emoji }}
-          {{ tierConfig[tierKey]?.name }} Sponsors
-        </h3>
-        <div
-          class="tier-badge"
-          :style="{ background: tierConfig[tierKey]?.bgColor }"
-        >
-          {{ tierSponsors.length }} sponsor{{
-            tierSponsors.length !== 1 ? "s" : ""
-          }}
-        </div>
+    <div class="sponsors-header">
+      <h3 class="sponsors-title">Meet Our Amazing Sponsors</h3>
+      <div class="sponsors-count-badge">
+        {{ sponsors.length }} sponsor{{ sponsors.length !== 1 ? "s" : "" }}
       </div>
+    </div>
 
-      <div class="sponsors-grid">
-        <div
-          v-for="sponsor in tierSponsors"
-          :key="sponsor.name"
-          class="sponsor-card"
-        >
-          <div class="card-header">
-            <div class="sponsor-avatar">
-              <img :src="sponsor.avatar" :alt="sponsor.name" />
-            </div>
-            <div class="sponsor-basic-info">
-              <h4 class="sponsor-name">{{ sponsor.name }}</h4>
-              <div class="sponsor-type">
-                <svg
-                  v-if="sponsor.type === 'Individual'"
-                  width="12"
-                  height="12"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"
-                  />
-                </svg>
-                <svg
-                  v-else
-                  width="12"
-                  height="12"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z"
-                  />
-                  <path
-                    d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"
-                  />
-                </svg>
-                {{ sponsor.type }}
-              </div>
-            </div>
-            <div
-              class="contribution-badge"
-              :style="{ background: tierConfig[tierKey]?.bgColor }"
-            >
-              {{ sponsor.contribution }}
-            </div>
+    <div class="sponsors-grid">
+      <div v-for="sponsor in sponsors" :key="sponsor.name" class="sponsor-card">
+        <div class="card-header">
+          <div class="sponsor-avatar">
+            <img :src="sponsor.avatar" :alt="sponsor.name" />
           </div>
-
-          <div class="sponsor-description">
-            {{ sponsor.description }}
-          </div>
-
-          <div class="sponsor-actions">
-            <a
-              v-if="sponsor.github"
-              :href="sponsor.github"
-              target="_blank"
-              class="action-btn github-btn"
-            >
+          <div class="sponsor-basic-info">
+            <h4 class="sponsor-name">{{ sponsor.name }}</h4>
+            <div class="sponsor-type">
               <svg
-                width="16"
-                height="16"
+                v-if="sponsor.type === 'Individual'"
+                width="12"
+                height="12"
                 fill="currentColor"
                 viewBox="0 0 16 16"
               >
                 <path
-                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                  d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"
                 />
               </svg>
-              GitHub
-            </a>
-
-            <a
-              v-if="sponsor.website"
-              :href="sponsor.website"
-              target="_blank"
-              class="action-btn portfolio-btn"
-            >
               <svg
-                width="16"
-                height="16"
+                v-else
+                width="12"
+                height="12"
                 fill="currentColor"
                 viewBox="0 0 16 16"
               >
                 <path
-                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"
+                  d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z"
+                />
+                <path
+                  d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z"
                 />
               </svg>
-              Portfolio
-            </a>
+              {{ sponsor.type }}
+            </div>
           </div>
+          <div v-if="sponsor.contribution" class="contribution-badge">
+            {{ sponsor.contribution }}
+          </div>
+        </div>
+
+        <div class="sponsor-description">
+          {{ sponsor.description }}
+        </div>
+
+        <div class="sponsor-actions">
+          <a
+            v-if="sponsor.github"
+            :href="sponsor.github"
+            target="_blank"
+            class="action-btn github-btn"
+          >
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            GitHub
+          </a>
+
+          <a
+            v-if="sponsor.website"
+            :href="sponsor.website"
+            target="_blank"
+            class="action-btn portfolio-btn"
+          >
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"
+              />
+            </svg>
+            Portfolio
+          </a>
         </div>
       </div>
     </div>
@@ -148,55 +113,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 
-const sponsors = ref({});
+const sponsors = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
-
-// Only show tiers that have sponsors
-const availableTiers = computed(() => {
-  const filteredTiers = {};
-  Object.keys(sponsors.value).forEach((tierKey) => {
-    if (sponsors.value[tierKey] && sponsors.value[tierKey].length > 0) {
-      filteredTiers[tierKey] = sponsors.value[tierKey];
-    }
-  });
-  return filteredTiers;
-});
-
-const tierConfig = {
-  partnership: {
-    emoji: "🤝",
-    name: "Partnership",
-    color: "#10B981",
-    bgColor: "linear-gradient(135deg, #10B981, #059669)"
-  },
-  diamond: {
-    emoji: "💎",
-    name: "Diamond",
-    color: "#8B5CF6",
-    bgColor: "linear-gradient(135deg, #8B5CF6, #A855F7)"
-  },
-  platinum: {
-    emoji: "🥈",
-    name: "Platinum",
-    color: "#3B82F6",
-    bgColor: "linear-gradient(135deg, #3B82F6, #1D4ED8)"
-  },
-  gold: {
-    emoji: "🥇",
-    name: "Gold",
-    color: "#F59E0B",
-    bgColor: "linear-gradient(135deg, #F59E0B, #D97706)"
-  },
-  silver: {
-    emoji: "🥉",
-    name: "Silver",
-    color: "#6B7280",
-    bgColor: "linear-gradient(135deg, #6B7280, #4B5563)"
-  }
-};
 
 onMounted(async () => {
   console.log("SponsorsShowcase: Component mounted");
@@ -246,7 +167,7 @@ onMounted(async () => {
     console.log("SponsorsShowcase: Response text length:", text.length);
 
     const data = JSON.parse(text);
-    console.log("SponsorsShowcase: Parsed data:", Object.keys(data));
+    console.log("SponsorsShowcase: Parsed data:", data);
 
     sponsors.value = data;
     console.log("SponsorsShowcase: Sponsors data set successfully");
@@ -319,30 +240,27 @@ onMounted(async () => {
   margin: 2rem 0;
 }
 
-.tier-section {
-  margin-bottom: 3rem;
-}
-
-.tier-header {
+.sponsors-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.tier-title {
+.sponsors-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #ffffff;
 }
 
-.tier-badge {
-  padding: 0.25rem 0.75rem;
+.sponsors-count-badge {
+  padding: 0.5rem 1rem;
   border-radius: 20px;
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
   color: white;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -441,6 +359,7 @@ onMounted(async () => {
 .contribution-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
@@ -510,10 +429,10 @@ onMounted(async () => {
     gap: 1rem;
   }
 
-  .tier-header {
+  .sponsors-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .sponsor-card {
@@ -544,8 +463,8 @@ onMounted(async () => {
     margin: 1rem 0;
   }
 
-  .tier-section {
-    margin-bottom: 2rem;
+  .sponsors-header {
+    margin-bottom: 1.5rem;
   }
 
   .sponsor-actions {

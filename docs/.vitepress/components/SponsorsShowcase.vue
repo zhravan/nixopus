@@ -125,7 +125,7 @@ onMounted(async () => {
   try {
     console.log("SponsorsShowcase: Starting fetch...");
 
-    // Try different fetch approaches
+    // TODO: Issue due to url fetch in local vs Github pages build
     const urls = [
       "/sponsor/sponsors.json",
       "./sponsors.json",
@@ -271,7 +271,7 @@ onMounted(async () => {
   gap: 1.5rem;
 }
 
-/* Sponsor Cards - Enhanced Dark Theme */
+/* Sponsor Cards -for dark theme */
 .sponsor-card {
   background: #1a1a1a;
   border: 1px solid #333;

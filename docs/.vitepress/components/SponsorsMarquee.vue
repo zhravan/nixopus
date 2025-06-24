@@ -47,7 +47,6 @@ const isLoading = ref(true);
 const error = ref(null);
 
 const displaySponsors = computed(() => {
-  // Sponsors are now a flat array, so we just return them directly
   return sponsors.value || [];
 });
 

@@ -13,3 +13,14 @@ test-all:
 
 test-routes:
 	@go test -p 1 ./internal/tests/routes/... -v -count=1
+
+.PHONY: fixtures-dev fixtures-clean fixtures-truncate
+
+fixtures-dev:
+	go run cmd/fixtures/main.go -fixture=fixtures/development/complete.yml
+
+fixtures-clean:
+	go run cmd/fixtures/main.go -fixture=fixtures/development/complete.yml -recreate
+
+fixtures-truncate:
+	go run cmd/fixtures/main.go -fixture=fixtures/development/complete.yml -truncate

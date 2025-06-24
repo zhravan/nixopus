@@ -1,0 +1,1064 @@
+
+- model: User
+  rows:
+    - _id: admin
+      id: "{{ uuid }}"
+      username: "admin"
+      email: "admin@nixopus.com"
+      password: "{{ hashPassword \"Admin123!\" }}"
+      avatar: ""
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+      is_verified: true
+      type: "admin"
+      two_factor_enabled: false
+
+    - _id: developer1
+      id: "{{ uuid }}"
+      username: "john_doe"
+      email: "john.doe@example.com"
+      password: "{{ hashPassword \"Password123!\" }}"
+      avatar: ""
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+      is_verified: true
+      type: "app_user"
+      two_factor_enabled: false
+
+    - _id: developer2
+      id: "{{ uuid }}"
+      username: "jane_smith"
+      email: "jane.smith@example.com"
+      password: "{{ hashPassword \"Password123!\" }}"
+      avatar: ""
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+      is_verified: true
+      type: "app_user"
+      two_factor_enabled: false
+
+- model: Organization
+  rows:
+    - _id: nixopus_org
+      id: "{{ uuid }}"
+      name: "Nixopus Inc"
+      description: "Main organization for Nixopus platform"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_org
+      id: "{{ uuid }}"
+      name: "Demo Organization"
+      description: "Demo organization for testing purposes"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+- model: Role
+  rows:
+    - _id: admin
+      id: "{{ uuid }}"
+      name: "admin"
+      description: "Administrator with full access"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member
+      id: "{{ uuid }}"
+      name: "member"
+      description: "Regular organization member"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer
+      id: "{{ uuid }}"
+      name: "viewer"
+      description: "Read-only access to resources"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+- model: Permission
+  rows:
+    - _id: create_user
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create users"
+      resource: "user"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_user
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read user information"
+      resource: "user"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_user
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update user information"
+      resource: "user"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_user
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete users"
+      resource: "user"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_organization
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create organizations"
+      resource: "organization"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_organization
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read organization information"
+      resource: "organization"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_organization
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update organization information"
+      resource: "organization"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_organization
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete organizations"
+      resource: "organization"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_role
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create roles"
+      resource: "role"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_role
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read role information"
+      resource: "role"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_role
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update role information"
+      resource: "role"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_role
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete roles"
+      resource: "role"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_permission
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create permissions"
+      resource: "permission"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_permission
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read permission information"
+      resource: "permission"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_permission
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update permission information"
+      resource: "permission"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_permission
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete permissions"
+      resource: "permission"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_feature_flags
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read feature flags"
+      resource: "feature_flags"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_feature_flags
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update feature flags"
+      resource: "feature_flags"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_dashboard
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read dashboard information"
+      resource: "dashboard"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_deploy
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create deployments"
+      resource: "deploy"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_deploy
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read deployment information"
+      resource: "deploy"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_deploy
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update deployment information"
+      resource: "deploy"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_deploy
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete deployments"
+      resource: "deploy"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_container
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create containers"
+      resource: "container"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_container
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read container information"
+      resource: "container"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_container
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update container information"
+      resource: "container"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_container
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete containers"
+      resource: "container"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_file_manager
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create files and directories"
+      resource: "file-manager"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_file_manager
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read files and directories"
+      resource: "file-manager"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_file_manager
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update files and directories"
+      resource: "file-manager"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_file_manager
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete files and directories"
+      resource: "file-manager"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_settings
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read settings information"
+      resource: "settings"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_settings
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update settings information"
+      resource: "settings"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_notification
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create notifications"
+      resource: "notification"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_notification
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read notification information"
+      resource: "notification"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_notification
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update notification information"
+      resource: "notification"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_notification
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete notifications"
+      resource: "notification"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: create_domain
+      id: "{{ uuid }}"
+      name: "create"
+      description: "Create domains"
+      resource: "domain"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: read_domain
+      id: "{{ uuid }}"
+      name: "read"
+      description: "Read domain information"
+      resource: "domain"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: update_domain
+      id: "{{ uuid }}"
+      name: "update"
+      description: "Update domain information"
+      resource: "domain"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: delete_domain
+      id: "{{ uuid }}"
+      name: "delete"
+      description: "Delete domains"
+      resource: "domain"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+- model: RolePermissions
+  rows:
+    - _id: admin_create_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_role
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_role.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_role
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_role.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_role
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_role.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_role
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_role.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_permission
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_permission.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_permission
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_permission.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_permission
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_permission.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_permission
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_permission.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_feature_flags
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_feature_flags.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_feature_flags
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_feature_flags.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_user
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_user.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_organization
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_organization.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_role
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_role.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_permission
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_permission.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_dashboard
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_dashboard.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_settings
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_settings.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_settings
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_settings.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_create_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.create_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_read_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.read_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_update_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.update_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: admin_delete_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      permission_id: "{{ $.Permission.delete_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_dashboard
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_dashboard.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_settings
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_settings.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_settings
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_settings.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_read_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.read_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: member_update_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.member.ID }}"
+      permission_id: "{{ $.Permission.update_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_dashboard
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_dashboard.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_deploy
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_deploy.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_container
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_container.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_file_manager
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_file_manager.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_settings
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_settings.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_notification
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_notification.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: viewer_read_domain
+      id: "{{ uuid }}"
+      role_id: "{{ $.Role.viewer.ID }}"
+      permission_id: "{{ $.Permission.read_domain.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+- model: FeatureFlag
+  rows:
+    - _id: nixopus_domain
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "domain"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_terminal
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "terminal"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_notifications
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "notifications"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_file_manager
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "file_manager"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_self_hosted
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "self_hosted"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_audit
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "audit"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_github_connector
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "github_connector"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_monitoring
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "monitoring"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: nixopus_container
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      feature_name: "container"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_domain
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "domain"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_terminal
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "terminal"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_notifications
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "notifications"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_file_manager
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "file_manager"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_self_hosted
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "self_hosted"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_audit
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "audit"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_github_connector
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "github_connector"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_monitoring
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "monitoring"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: demo_container
+      id: "{{ uuid }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      feature_name: "container"
+      is_enabled: true
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+- model: OrganizationUsers
+  rows:
+    - _id: admin_nixopus
+      id: "{{ uuid }}"
+      user_id: "{{ $.User.admin.ID }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: developer1_nixopus
+      id: "{{ uuid }}"
+      user_id: "{{ $.User.developer1.ID }}"
+      organization_id: "{{ $.Organization.nixopus_org.ID }}"
+      role_id: "{{ $.Role.member.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"
+
+    - _id: developer2_demo
+      id: "{{ uuid }}"
+      user_id: "{{ $.User.developer2.ID }}"
+      organization_id: "{{ $.Organization.demo_org.ID }}"
+      role_id: "{{ $.Role.admin.ID }}"
+      created_at: "{{ now }}"
+      updated_at: "{{ now }}"

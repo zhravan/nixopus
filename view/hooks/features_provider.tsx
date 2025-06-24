@@ -20,8 +20,13 @@ const FeatureFlagsContext = createContext<FeatureFlagsContextType>({
 export const FeatureFlagsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isInitialized } = useAppSelector((state) => state.auth);
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
-  
-  const { data: features = [], isLoading, error, refetch } = useGetAllFeatureFlagsQuery(undefined, {
+
+  const {
+    data: features = [],
+    isLoading,
+    error,
+    refetch
+  } = useGetAllFeatureFlagsQuery(undefined, {
     skip: !isAuthenticated || !isInitialized
   });
 

@@ -128,7 +128,7 @@ function check_root() {
         echo "Error: Please run as root (sudo) on Linux systems" >&2
         exit 1
     elif [[ "$OS" == "Darwin" && "$EUID" -eq 0 ]]; then
-        echo "Warning: consider running without sudo on macos as it is not equired." >&2
+        echo "Warning: consider running without sudo on macos as it is not required." >&2
     fi
 }
 
@@ -267,7 +267,7 @@ function install_go() {
     
     echo "Installing Go ${version}"
     local go_install_path
-    if [[ "$OS" == "Darwin" ]]; then #incase of macos
+    if [[ "$OS" == "Darwin" ]]; then # incase of macOS
         go_install_path="/usr/local"
         if [[ "$EUID" -ne 0 ]]; then
             echo "Installing Go to user directory"

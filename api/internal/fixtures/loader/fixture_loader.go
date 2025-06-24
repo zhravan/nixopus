@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"text/template"
 	"time"
 
@@ -11,12 +12,17 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dbfixture"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/yaml.v3"
 
 	"github.com/raghavyuva/nixopus-api/internal/types"
 )
 
 type FixtureLoader struct {
 	db *bun.DB
+}
+
+type ImportStatement struct {
+	Import string `yaml:"import"`
 }
 
 func NewFixtureLoader(db *bun.DB) *FixtureLoader {
@@ -51,9 +57,72 @@ func (fl *FixtureLoader) LoadFixtures(ctx context.Context, fixturePath string, o
 
 	fixture := dbfixture.New(fl.db, append(options, dbfixture.WithTemplateFuncs(funcMap))...)
 
+	// Check if the file contains import statements
+	if fl.isImportFile(fixturePath) {
+		return fl.loadFixturesWithImports(ctx, fixturePath, fixture)
+	}
+
 	err := fixture.Load(ctx, os.DirFS("."), fixturePath)
 	if err != nil {
 		return fmt.Errorf("failed to load fixture %s: %w", fixturePath, err)
+	}
+
+	return nil
+}
+
+// isImportFile checks if the fixture file contains import statements
+func (fl *FixtureLoader) isImportFile(fixturePath string) bool {
+	content, err := os.ReadFile(fixturePath)
+	if err != nil {
+		return false
+	}
+
+	var imports []ImportStatement
+	err = yaml.Unmarshal(content, &imports)
+	if err != nil {
+		return false
+	}
+
+	// Check if all items are import statements
+	for _, item := range imports {
+		if item.Import == "" {
+			return false
+		}
+	}
+
+	return len(imports) > 0
+}
+
+// loadFixturesWithImports loads multiple fixture files based on import statements
+func (fl *FixtureLoader) loadFixturesWithImports(ctx context.Context, fixturePath string, fixture *dbfixture.Fixture) error {
+	content, err := os.ReadFile(fixturePath)
+	if err != nil {
+		return fmt.Errorf("failed to read fixture file %s: %w", fixturePath, err)
+	}
+
+	var imports []ImportStatement
+	err = yaml.Unmarshal(content, &imports)
+	if err != nil {
+		return fmt.Errorf("failed to parse import statements in %s: %w", fixturePath, err)
+	}
+
+	// Get the directory of the main fixture file
+	baseDir := filepath.Dir(fixturePath)
+
+	// Load each imported file
+	for _, importStmt := range imports {
+		if importStmt.Import == "" {
+			continue
+		}
+
+		// Construct the full path to the imported file
+		importPath := filepath.Join(baseDir, importStmt.Import)
+
+		// Load the imported fixture file
+		err = fixture.Load(ctx, os.DirFS("."), importPath)
+		if err != nil {
+			return fmt.Errorf("failed to load imported fixture %s: %w", importPath, err)
+		}
 	}
 
 	return nil

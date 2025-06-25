@@ -7,6 +7,7 @@ interface BasePermissionGuardProps {
     children: React.ReactNode;
     fallback?: React.ReactNode;
     loadingFallback?: React.ReactNode;
+    errorFallback?: React.ReactNode;
 }
 
 interface SinglePermissionGuardProps extends BasePermissionGuardProps {
@@ -27,11 +28,13 @@ export const PermissionGuard: React.FC<SinglePermissionGuardProps> = ({
     permission,
     fallback,
     loadingFallback,
+    errorFallback,
 }) => (
     <RBACGuard
         permission={permission}
         fallback={fallback || <AccessDenied />}
         loadingFallback={loadingFallback}
+        errorFallback={errorFallback}
     >
         {children}
     </RBACGuard>
@@ -42,12 +45,14 @@ export const AnyPermissionGuard: React.FC<MultiplePermissionGuardProps> = ({
     permissions,
     fallback,
     loadingFallback,
+    errorFallback,
 }) => (
     <RBACGuard
         permissions={permissions}
         requireAll={false}
         fallback={fallback || <AccessDenied />}
         loadingFallback={loadingFallback}
+        errorFallback={errorFallback}
     >
         {children}
     </RBACGuard>
@@ -58,12 +63,14 @@ export const AllPermissionsGuard: React.FC<MultiplePermissionGuardProps> = ({
     permissions,
     fallback,
     loadingFallback,
+    errorFallback,
 }) => (
     <RBACGuard
         permissions={permissions}
         requireAll={true}
         fallback={fallback || <AccessDenied />}
         loadingFallback={loadingFallback}
+        errorFallback={errorFallback}
     >
         {children}
     </RBACGuard>
@@ -75,12 +82,14 @@ export const ResourceGuard: React.FC<ResourceGuardProps> = ({
     action,
     fallback,
     loadingFallback,
+    errorFallback,
 }) => (
     <RBACGuard
         resource={resource}
         action={action}
         fallback={fallback || <AccessDenied />}
         loadingFallback={loadingFallback}
+        errorFallback={errorFallback}
     >
         {children}
     </RBACGuard>

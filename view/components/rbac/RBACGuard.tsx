@@ -10,6 +10,7 @@ interface RBACGuardProps {
   requireAll?: boolean;
   fallback?: React.ReactNode;
   loadingFallback?: React.ReactNode;
+  errorFallback?: React.ReactNode;
 }
 
 export const RBACGuard: React.FC<RBACGuardProps> = ({
@@ -21,6 +22,7 @@ export const RBACGuard: React.FC<RBACGuardProps> = ({
   requireAll = false,
   fallback = null,
   loadingFallback = null,
+  errorFallback = null,
 }) => {
   const { 
     canAccessResource, 
@@ -36,16 +38,21 @@ export const RBACGuard: React.FC<RBACGuardProps> = ({
 
   let shouldRender = false;
 
-  if (resource && action) {
-    shouldRender = canAccessResource(resource, action);
-  } else if (permission) {
-    shouldRender = hasPermission(permission);
-  } else if (permissions && permissions.length > 0) {
-    shouldRender = requireAll 
-      ? hasAllPermissions(permissions)
-      : hasAnyPermission(permissions);
-  } else {
-    shouldRender = true;
+  try {
+    if (resource && action) {
+      shouldRender = canAccessResource(resource, action);
+    } else if (permission) {
+      shouldRender = hasPermission(permission);
+    } else if (permissions && permissions.length > 0) {
+      shouldRender = requireAll 
+        ? hasAllPermissions(permissions)
+        : hasAnyPermission(permissions);
+    } else {
+      shouldRender = true;
+    }
+  } catch (error) {
+    console.error('Permission check failed:', error);
+    return <>{errorFallback}</>;
   }
 
   return shouldRender ? <>{children}</> : <>{fallback}</>;

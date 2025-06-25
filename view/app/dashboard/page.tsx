@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ResourceGuard } from '@/components/rbac/PermissionGuard';
 
-// for dashboard page, we need to check if the user should have the dashboard:read permission
+// for dashboard page, we need to check if the user has the dashboard:read permission
 function DashboardPage() {
   const { t } = useTranslation();
   const { containersData, systemStats } = useMonitor();

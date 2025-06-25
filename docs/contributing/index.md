@@ -72,7 +72,7 @@ yarn install
 6. Load development fixtures (optional but recommended):
 
 ```bash
-cd api
+cd ../api
 
 # Load fixtures without affecting existing data
 make fixtures-load
@@ -91,14 +91,13 @@ The fixtures system provides sample data including users, organizations, roles, 
 1. Start the API service:
 
 ```bash
-cd api
 air
 ```
 
 2. Start the view service:
 
 ```bash
-cd view
+cd ../view
 yarn dev
 ```
 

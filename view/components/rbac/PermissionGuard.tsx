@@ -3,17 +3,26 @@ import { RBACGuard } from './RBACGuard';
 import { AccessDenied } from './AccessDenied';
 import { Action, Permission, Resource } from '@/lib/rbac';
 
-interface PermissionGuardProps {
+interface BasePermissionGuardProps {
     children: React.ReactNode;
-    permission: Permission;
-    permissions?: Permission[];
-    resource?: Resource;
-    action?: Action;
     fallback?: React.ReactNode;
     loadingFallback?: React.ReactNode;
 }
 
-export const PermissionGuard: React.FC<PermissionGuardProps> = ({
+interface SinglePermissionGuardProps extends BasePermissionGuardProps {
+    permission: Permission;
+}
+
+interface MultiplePermissionGuardProps extends BasePermissionGuardProps {
+    permissions: Permission[];
+}
+
+interface ResourceGuardProps extends BasePermissionGuardProps {
+    resource: Resource;
+    action: Action;
+}
+
+export const PermissionGuard: React.FC<SinglePermissionGuardProps> = ({
     children,
     permission,
     fallback,
@@ -28,7 +37,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
     </RBACGuard>
 );
 
-export const AnyPermissionGuard: React.FC<PermissionGuardProps> = ({
+export const AnyPermissionGuard: React.FC<MultiplePermissionGuardProps> = ({
     children,
     permissions,
     fallback,
@@ -44,7 +53,7 @@ export const AnyPermissionGuard: React.FC<PermissionGuardProps> = ({
     </RBACGuard>
 );
 
-export const AllPermissionsGuard: React.FC<PermissionGuardProps> = ({
+export const AllPermissionsGuard: React.FC<MultiplePermissionGuardProps> = ({
     children,
     permissions,
     fallback,
@@ -60,7 +69,7 @@ export const AllPermissionsGuard: React.FC<PermissionGuardProps> = ({
     </RBACGuard>
 );
 
-export const ResourceGuard: React.FC<PermissionGuardProps> = ({
+export const ResourceGuard: React.FC<ResourceGuardProps> = ({
     children,
     resource,
     action,

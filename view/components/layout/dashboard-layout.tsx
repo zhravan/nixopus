@@ -28,6 +28,7 @@ import { UpdateIcon } from '@radix-ui/react-icons';
 import { useAppSelector } from '@/redux/hooks';
 import { useCheckForUpdatesQuery, usePerformUpdateMutation } from '@/redux/services/users/userApi';
 import { toast } from 'sonner';
+import { AnyPermissionGuard } from '@/components/rbac/PermissionGuard';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -38,7 +39,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
-  const isAdmin = user?.type === 'admin';
   const {
     addTeamModalOpen,
     setAddTeamModalOpen,
@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 't' && e.ctrlKey && isAdmin) {
+      if (e.key === 't' && e.ctrlKey) {
         e.preventDefault();
         setTerminalPosition((prevPosition) =>
           prevPosition === TERMINAL_POSITION.BOTTOM
@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isAdmin]);
+  }, []);
 
   const handleUpdate = async () => {
     try {
@@ -182,28 +182,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                   <div className="h-full overflow-y-auto no-scrollbar">{children}</div>
                 </ResizablePanel>
-                {isTerminalOpen && isAdmin && <ResizableHandle draggable withHandle />}
-                <ResizablePanel
-                  defaultSize={20}
-                  minSize={15}
-                  maxSize={50}
-                  hidden={!isTerminalOpen || !isAdmin}
-                  onResize={() => {
-                    if (fitAddonRef?.current) {
-                      requestAnimationFrame(() => {
-                        fitAddonRef.current.fit();
-                      });
-                    }
-                  }}
-                  className="min-h-[200px] flex flex-col"
+                <AnyPermissionGuard 
+                  permissions={['terminal:create', 'terminal:read', 'terminal:update']}
+                  loadingFallback={null}
                 >
-                  <Terminal
-                    isOpen={isTerminalOpen}
-                    toggleTerminal={toggleTerminal}
-                    isTerminalOpen={isTerminalOpen}
-                    setFitAddonRef={setFitAddonRef}
-                  />
-                </ResizablePanel>
+                  {isTerminalOpen && <ResizableHandle draggable withHandle />}
+                  <ResizablePanel
+                    defaultSize={20}
+                    minSize={15}
+                    maxSize={50}
+                    hidden={!isTerminalOpen}
+                    onResize={() => {
+                      if (fitAddonRef?.current) {
+                        requestAnimationFrame(() => {
+                          fitAddonRef.current.fit();
+                        });
+                      }
+                    }}
+                    className="min-h-[200px] flex flex-col"
+                  >
+                    <Terminal
+                      isOpen={isTerminalOpen}
+                      toggleTerminal={toggleTerminal}
+                      isTerminalOpen={isTerminalOpen}
+                      setFitAddonRef={setFitAddonRef}
+                    />
+                  </ResizablePanel>
+                </AnyPermissionGuard>
               </ResizablePanelGroup>
             </div>
           </Tour>

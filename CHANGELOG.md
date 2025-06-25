@@ -1,4 +1,4 @@
-# [0.1.0](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.8...v0.1.0) (2025-06-25)
+# [0.1.0-alpha.9](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.8...v0.1.0-alpha.9) (2025-06-25)
 
 
 ### Bug Fixes

@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/install.sh'
       - 'installer/**'
+      - '.github/workflows/qemu.yml'
   workflow_dispatch:
 
 env:

@@ -4,11 +4,7 @@ on:
   push:
     branches:
       - master
-      - main
-  pull_request:
-    branches:
-      - master
-      - main
+      - feat/develop
 
 jobs:
   generate-changelog:
@@ -41,4 +37,5 @@ jobs:
           skip-commit: 'false'
           skip-tag: 'false'
           skip-ci: 'true'
-          create-summary: 'true' 
+          create-summary: 'true'
+          skip-git-pull: 'true' 

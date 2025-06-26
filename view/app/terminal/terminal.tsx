@@ -41,7 +41,6 @@ export const Terminal: React.FC<TerminalProps> = ({
   const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const { canAccessResource } = useRBAC();
 
-  const canRead = canAccessResource('terminal', 'read');
   const canCreate = canAccessResource('terminal', 'create');
   const canUpdate = canAccessResource('terminal', 'update');
 
@@ -137,9 +136,6 @@ export const Terminal: React.FC<TerminalProps> = ({
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-[#cccccc]">{t('terminal.title')}</span>
             <span className="text-xs text-[#666666]">{t('terminal.shortcut')}</span>
-            {canRead && !canCreate && !canUpdate && (
-              <span className="text-xs text-yellow-500">(Read Only)</span>
-            )}
           </div>
           <div className="flex items-center gap-2">
             <button

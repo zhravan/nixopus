@@ -14,7 +14,7 @@ import { CreateTeam } from '@/components/features/create-team';
 import { KeyboardShortcuts } from '@/components/features/keyboard-shortcuts';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import useBreadCrumbs from '@/hooks/use-bread-crumbs';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
@@ -23,7 +23,7 @@ import Link from 'next/link';
 import { Tour } from '@/components/Tour';
 import { useTour } from '@/hooks/useTour';
 import { Button } from '@/components/ui/button';
-import { HelpCircle, Loader2 } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { UpdateIcon } from '@radix-ui/react-icons';
 import { useAppSelector } from '@/redux/hooks';
 import { useCheckForUpdatesQuery, usePerformUpdateMutation } from '@/redux/services/users/userApi';
@@ -182,24 +182,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                   <div className="h-full overflow-y-auto no-scrollbar">{children}</div>
                 </ResizablePanel>
-                <AnyPermissionGuard 
-                  permissions={['terminal:create', 'terminal:read', 'terminal:update']}
-                  loadingFallback={null}
+                {isTerminalOpen && <ResizableHandle draggable withHandle />}
+                <ResizablePanel
+                  defaultSize={20}
+                  minSize={15}
+                  maxSize={50}
+                  hidden={!isTerminalOpen}
+                  onResize={() => {
+                    if (fitAddonRef?.current) {
+                      requestAnimationFrame(() => {
+                        fitAddonRef.current.fit();
+                      });
+                    }
+                  }}
+                  className="min-h-[200px] flex flex-col"
                 >
-                  {isTerminalOpen && <ResizableHandle draggable withHandle />}
-                  <ResizablePanel
-                    defaultSize={20}
-                    minSize={15}
-                    maxSize={50}
-                    hidden={!isTerminalOpen}
-                    onResize={() => {
-                      if (fitAddonRef?.current) {
-                        requestAnimationFrame(() => {
-                          fitAddonRef.current.fit();
-                        });
-                      }
-                    }}
-                    className="min-h-[200px] flex flex-col"
+                  <AnyPermissionGuard
+                    permissions={['terminal:create', 'terminal:read', 'terminal:update']}
+                    loadingFallback={null}
                   >
                     <Terminal
                       isOpen={isTerminalOpen}
@@ -207,8 +207,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       isTerminalOpen={isTerminalOpen}
                       setFitAddonRef={setFitAddonRef}
                     />
-                  </ResizablePanel>
-                </AnyPermissionGuard>
+                  </AnyPermissionGuard>
+                </ResizablePanel>
               </ResizablePanelGroup>
             </div>
           </Tour>

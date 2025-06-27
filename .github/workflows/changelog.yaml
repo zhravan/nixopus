@@ -39,4 +39,18 @@ jobs:
           create-summary: 'true'
           pre-release: 'true'
           pre-release-identifier: 'alpha'
-          create-pull-request: 'true'
+      
+      - name: Create Pull Request
+        if: steps.changelog.outputs.skipped == 'false'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(release): update changelog'
+          title: 'chore(release): update changelog'
+          body: |
+            This PR updates the changelog with the latest changes.
+            
+            Generated automatically by the changelog workflow.
+          branch: 'chore/update-changelog'
+          delete-branch: true
+          base: 'master'

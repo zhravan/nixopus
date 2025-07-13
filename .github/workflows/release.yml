@@ -45,14 +45,14 @@ jobs:
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
         run: echo "${{ steps.changelog.outputs.tag }}" > version.txt
       
-      - name: Commit version.txt update
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add version.txt
-          git commit -m "chore(release): update version.txt to ${{ steps.changelog.outputs.tag }}"
-          git push
+      # - name: Commit version.txt update
+      #   if: ${{ steps.changelog.outputs.skipped == 'false' }}
+      #   run: |
+      #     git config user.name 'github-actions[bot]'
+      #     git config user.email 'github-actions[bot]@users.noreply.github.com'
+      #     git add version.txt
+      #     git commit -m "chore(release): update version.txt to ${{ steps.changelog.outputs.tag }}"
+      #     git push
       
       - name: Create Release
         uses: actions/create-release@v1

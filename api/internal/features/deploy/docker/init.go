@@ -23,8 +23,9 @@ type DockerService struct {
 }
 
 type DockerRepository interface {
-	ListAllContainers() ([]container.Summary, error)
-	ListAllImages(opts image.ListOptions) []image.Summary
+    ListAllContainers() ([]container.Summary, error)
+    ListContainers(opts container.ListOptions) ([]container.Summary, error)
+    ListAllImages(opts image.ListOptions) []image.Summary
 
 	StopContainer(containerID string, opts container.StopOptions) error
 	RemoveContainer(containerID string, opts container.RemoveOptions) error
@@ -100,14 +101,24 @@ func NewDockerClient() *client.Client {
 //
 // If an error occurs while listing the containers, it panics with the error.
 func (s *DockerService) ListAllContainers() ([]container.Summary, error) {
-	containers, err := s.Cli.ContainerList(s.Ctx, container.ListOptions{
-		All: true,
-	})
-	if err != nil {
-		panic(err)
-	}
+    containers, err := s.Cli.ContainerList(s.Ctx, container.ListOptions{
+        All: true,
+    })
+    if err != nil {
+        panic(err)
+    }
 
-	return containers, nil
+    return containers, nil
+}
+
+// ListContainers returns containers using the provided docker list options
+// (including native filters like name/status/ancestor and optional limits).
+func (s *DockerService) ListContainers(opts container.ListOptions) ([]container.Summary, error) {
+    containers, err := s.Cli.ContainerList(s.Ctx, opts)
+    if err != nil {
+        return nil, err
+    }
+    return containers, nil
 }
 
 // StopContainer stops the container with the given ID. If the container does not exist,

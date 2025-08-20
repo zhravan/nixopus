@@ -34,7 +34,7 @@ func (c *ContainerController) ListContainers(fuegoCtx fuego.ContextNoBody) (*sha
 	rows := summarizeContainers(containers)
 	pageRows, totalCount := applySearchSortPaginate(rows, params)
 
-	result := c.enrichContainers(pageRows, containers)
+	result := c.appendContainerInfo(pageRows, containers)
 
 	return &shared_types.Response{
 		Status:  "success",
@@ -197,7 +197,7 @@ func applySearchSortPaginate(rows []listRow, p containerListParams) ([]listRow, 
 	return rows[start:end], totalCount
 }
 
-func (c *ContainerController) enrichContainers(pageRows []listRow, summaries []container.Summary) []containertypes.Container {
+func (c *ContainerController) appendContainerInfo(pageRows []listRow, summaries []container.Summary) []containertypes.Container {
 	result := make([]containertypes.Container, 0, len(pageRows))
 	for _, r := range pageRows {
 		info, err := c.dockerService.GetContainerById(r.ID)

@@ -99,30 +99,29 @@ func (t *TaskService) HandleCreateStaticDeployment(ctx context.Context, TaskPayl
 }
 
 // TODOD: Shravan implement types and get back
-func (t *TaskService) ReDeployApplication(ctx context.Context, request *types.ReDeployApplicationRequest, userID uuid.UUID, organizationID uuid.UUID) (shared_types.Application, error) {
+func (t *TaskService) ReDeployApplication(request *types.ReDeployApplicationRequest, userID uuid.UUID, organizationID uuid.UUID) (shared_types.Application, error) {
+    application, err := t.Storage.GetApplicationById(request.ID.String(), organizationID)
+    if err != nil {
+        return shared_types.Application{}, err
+    }
 
-	contextTask := ContextTask{
-		TaskService:    t,
-		ContextConfig:  request,
-		UserId:         userID,
-		OrganizationId: organizationID,
-	}
+    contextTask := ContextTask{
+        TaskService:    t,
+        ContextConfig:  request,
+        UserId:         userID,
+        OrganizationId: organizationID,
+        Application:    &application,
+    }
 
-	// Prepare the context for re-deployment
-	// deployment_details from db
-	// application_details from db
-	// deploy_status
-	// db call to update status
-	// prepareDeploymentConfig (app_details, userId, deploymentRestartType.restart, false, false)
-	// createAndPrepareDeployment(application, DeploymentRequestConfig)
-	// deployRequest, deploySTatus, deploymentConfig
-	// push it to Queue
+    TaskPayload, err := contextTask.PrepareReDeploymentContext()
+    if err != nil {
+        return shared_types.Application{}, err
+    }
 
-	TaskPayload, err := contextTask.PrepareReDeploymentContext()
+    err = ReDeployQueue.Add(TaskReDeploy.WithArgs(context.Background(), TaskPayload))
+    if err != nil {
+        fmt.Printf("error enqueuing redeploy: %v\n", err)
+    }
 
-	if err != nil {
-		return shared_types.Application{}, err
-	}
-	fmt.Print("Re-deploying application with payload: ", TaskPayload)
-	return shared_types.Application{}, nil
+    return application, nil
 }

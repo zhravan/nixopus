@@ -272,5 +272,30 @@ func (c *ContextTask) mergeDeploymentUpdates() shared_types.Application {
 }
 
 func (c *ContextTask) PrepareReDeploymentContext() (shared_types.TaskPayload, error) {
-	return shared_types.TaskPayload{}, nil
+    // Redeploy: keep application config, create a new deployment entry and initial status
+    app := *c.Application
+    app.UpdatedAt = time.Now()
+
+    applicationDeployment := c.GetDeploymentConfig(app.ID)
+
+    if err := c.PersistUpdateApplicationDeploymentData(app, applicationDeployment); err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    initialStatus, err := c.PersistCreateDeploymentStatus(applicationDeployment)
+    if err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    opts := shared_types.UpdateOptions{
+        Force:             c.ContextConfig.(*types.ReDeployApplicationRequest).Force,
+        ForceWithoutCache: c.ContextConfig.(*types.ReDeployApplicationRequest).ForceWithoutCache,
+    }
+
+    return shared_types.TaskPayload{
+        Application:           app,
+        ApplicationDeployment: applicationDeployment,
+        Status:                initialStatus,
+        UpdateOptions:         opts,
+    }, nil
 }

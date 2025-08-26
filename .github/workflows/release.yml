@@ -2,10 +2,8 @@ name: Create Release
 
 on:
   push:
-    tags:
-      - 'v*'
-  release:
-    types: [published]
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -52,7 +50,7 @@ jobs:
           git commit -m "chore(release): update version.txt to ${{ steps.changelog.outputs.tag }}" || echo "No changes to commit"
           git push origin HEAD:master
 
-      - name: Create GitHub Release
+      - name: Create GitHub Pre-Release
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
         uses: softprops/action-gh-release@v2
         with:

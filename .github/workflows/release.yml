@@ -35,13 +35,7 @@ jobs:
           create-summary: 'true'
           pre-release: 'true'
           pre-release-identifier: 'alpha'
-          git-push: 'false'
-
-      - name: Push changes
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        run: |
-          git push origin HEAD:master
-          git push --tags
+          git-push: 'true'
 
       - name: Update version.txt
         if: ${{ steps.changelog.outputs.skipped == 'false' }}

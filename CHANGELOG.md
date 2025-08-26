@@ -1,3 +1,17 @@
+# [0.1.0-alpha.15](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.14...v0.1.0-alpha.15) (2025-08-26)
+
+
+### Bug Fixes
+
+* remove changelog as a seperate action, and uses ssh-key for checkout code ([279d988](https://github.com/raghavyuva/nixopus/commit/279d98857a83be7de1c5bc307abfc1c1a664d8eb))
+
+
+### Features
+
+* makes use of the ssh push in release action instead of the default behaviour ([3d36258](https://github.com/raghavyuva/nixopus/commit/3d36258c421f30baafd3d6f1c856402122208100))
+
+
+
 # [0.1.0-alpha.14](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.13...v0.1.0-alpha.14) (2025-08-26)
 
 
@@ -82,65 +96,6 @@
 
 * Revert "fix(docs): fix incorrect method display, correct extraction logic, an…" (#223) ([4249422](https://github.com/raghavyuva/nixopus/commit/4249422b64a0e22945f50b5e64e1e0471c5ffe4f)), closes [#223](https://github.com/raghavyuva/nixopus/issues/223)
 * temporary changes to install branch ([e4b6759](https://github.com/raghavyuva/nixopus/commit/e4b6759b1b58a5993c33410e839a71be319054cf))
-
-
-
-# [0.1.0-alpha.9](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.8...v0.1.0-alpha.9) (2025-06-25)
-
-
-### Bug Fixes
-
-* ([#179](https://github.com/raghavyuva/nixopus/issues/179)) update installation script URL from 'main' to 'master' branch  ([c45e9e7](https://github.com/raghavyuva/nixopus/commit/c45e9e7841e0f5505a230c0a790baf5ef5ce7ee5))
-* add go version check ([9c36b59](https://github.com/raghavyuva/nixopus/commit/9c36b59b2e9a30901fa4910387a840135069f086))
-* add missing install air hot reload function to main ([00e2554](https://github.com/raghavyuva/nixopus/commit/00e255450d5cfaa5c55f98af82f7c1e42f1b8fad))
-* address review comments ([3359adf](https://github.com/raghavyuva/nixopus/commit/3359adf4ae943d0ac7e4121b0d874c347000a7ea))
-* Domain deployment fails due to unresolved helpers/caddy.json path ([b3bb53c](https://github.com/raghavyuva/nixopus/commit/b3bb53c340f459aadc82ea4117388e43c653cba9))
-* env sample loading issues ([623f8f1](https://github.com/raghavyuva/nixopus/commit/623f8f1980cebcd386f3ce7c6469c51c84b82b56))
-* feature flags shows disabled on login until refresh ([14c247b](https://github.com/raghavyuva/nixopus/commit/14c247bb9f3912881a2aa1e1bd44442683d75152))
-* fixture loader helps us to create dummy data to the table during development, this sets up the base for creating the development environment with different set of fixtures like testing, development, minimal, complete etc ([11fa6d7](https://github.com/raghavyuva/nixopus/commit/11fa6d7769f72bbe90f055857f8acc5383e7bde5))
-* installation message to print out ip:port format ([12f0354](https://github.com/raghavyuva/nixopus/commit/12f0354010e0ef4467e961759b14d9d374afde42))
-* make use of users home directory to source the air command after downloading ([67d5644](https://github.com/raghavyuva/nixopus/commit/67d564486932cf992dbd29e54373bbf67e665d8d))
-* make view server and api server to run in the background without stopping the program at that point ([7e6a6d4](https://github.com/raghavyuva/nixopus/commit/7e6a6d445f8a5dbf6d406754f67ad51f678a1c9c))
-* move to parent directory before starting the view ([ccb3f75](https://github.com/raghavyuva/nixopus/commit/ccb3f75a5419af84ac8f762d6ecc76dae3039110))
-* Optional chaining prevents the null pointer error ([f7d9c9b](https://github.com/raghavyuva/nixopus/commit/f7d9c9b3b91d3d7b4f66f85bdc2c52415bbdb5f5))
-* permission issues related to air installation, go existance check, and echo statements ([ddd3fdc](https://github.com/raghavyuva/nixopus/commit/ddd3fdce46a07ae815f8fa6a530a0217ed400df7))
-* port not displayed after installation with ip based installs ([b88730c](https://github.com/raghavyuva/nixopus/commit/b88730cca224fa7cce7b128c8e5afd8675cfa52d))
-* pressing logout from settings page throws null pointer error ([07b68e6](https://github.com/raghavyuva/nixopus/commit/07b68e60c3cc950c34c24a7d232f3f2c9258e2c8))
-* prevents non admin users to have the default organization, and only be added to the requested organization through invitation ([0897de5](https://github.com/raghavyuva/nixopus/commit/0897de5518dc1e1be29796a6ab656e4e2fc4ab1c))
-* remove asking for confirmation from user when domain validation fails ([0014e84](https://github.com/raghavyuva/nixopus/commit/0014e846972c3a1f9751e91078688c2e55cb11ce))
-* remove base from config.mts for documentation site ([33ce717](https://github.com/raghavyuva/nixopus/commit/33ce71709173dd60f8b3773cffa7ec527dedfacc))
-* remove checkout to feat/develop branch ([af2eb79](https://github.com/raghavyuva/nixopus/commit/af2eb79f1099d05137fceaf216bf7a1823657f79))
-* remove interactive admin credential asking through installation wizard ([cfdb159](https://github.com/raghavyuva/nixopus/commit/cfdb1592bfdce041a64b2706a9c101f3c0885925))
-* remove mac-os temporarily ([534a695](https://github.com/raghavyuva/nixopus/commit/534a695078c2d94ae0b3b3b2599382b45aa554e4))
-* remove Makefile as it is no longer needed ([8cf8d52](https://github.com/raghavyuva/nixopus/commit/8cf8d526ac8ca07cc266ec10ac494088026fd6f5))
-* remove nixopus-staging-redis from the list ([79b4e85](https://github.com/raghavyuva/nixopus/commit/79b4e856b3dac249e3c886fb8f347d37a3a24f9d))
-* remove string quotes on parameter passing in qemu steps ([73746af](https://github.com/raghavyuva/nixopus/commit/73746af599526c40b202942e05491c256ccf30f8))
-* remove triggering the dev env setup on every pull request and pushes ([c85375d](https://github.com/raghavyuva/nixopus/commit/c85375da27771d9dc8a6294ef5c1896ba9906ccb))
-* remove version comparision check ([240716c](https://github.com/raghavyuva/nixopus/commit/240716c4e7dbb95315506c5b1f3b02dbaba97a3d))
-* removed docker compose dependency ([d680381](https://github.com/raghavyuva/nixopus/commit/d68038149f73656f4be5fa4a9034e374518c0994))
-* removed go installation and auto installation of docker git etc deps as it may cause errors and conflicts ([ed9207f](https://github.com/raghavyuva/nixopus/commit/ed9207fc64088d530cbe756ba7adab7a3180b76b))
-* seperate jobs for domain based installation and ip based installation ([b0736ad](https://github.com/raghavyuva/nixopus/commit/b0736ad5fd31c65aeb87d5157a19e282fdcaaeb9))
-* unsupported architecture golang install ([e96271c](https://github.com/raghavyuva/nixopus/commit/e96271cfa7bbfd568f508cbae9e75f84493a59e9))
-* update complete.yml to use the split imports for different fixtures, and add custom support for importing the fixtures using gopkg/yaml ([01e587f](https://github.com/raghavyuva/nixopus/commit/01e587f8aab667427d298ddec00163f4f455ccd0))
-* uses logging module instead of print_debug function for extendability for future changes and to keep consistency ([f709e45](https://github.com/raghavyuva/nixopus/commit/f709e4509befbd71e119a6efd37f339dd927df66))
-
-
-### Features
-
-* add dev environment setup qemu action ([340e2e3](https://github.com/raghavyuva/nixopus/commit/340e2e3ccd74f66910d6fbe907055874705c40fe))
-* Create Issue from dashboard with reporting template and user client infromation in place ([01953f2](https://github.com/raghavyuva/nixopus/commit/01953f2bc47889c3f3cc7f6443a3480752cdd5a8))
-* development environment oneclick setup ([81b275a](https://github.com/raghavyuva/nixopus/commit/81b275aeb8fa05f19f61c13b9c9612db44ef29d0))
-* include build step for macos ([b15c534](https://github.com/raghavyuva/nixopus/commit/b15c53417b6b35f7d833911c3a2ec215547a2ec1))
-* setup script for macos ([b92b04e](https://github.com/raghavyuva/nixopus/commit/b92b04e6b2aaa39d3297d5f3e35bf9e402e012fb))
-* Sponsors Showcase on docs ([bb04962](https://github.com/raghavyuva/nixopus/commit/bb04962d9c6f0bba429268a7c6e2d08b08a32aa9))
-* Sponsorship Marquee on the Home page ([d7e1211](https://github.com/raghavyuva/nixopus/commit/d7e121198b79648b557c502d7d8800e79a9bdcbb))
-* ssh setup logic added for dev setup ([1205995](https://github.com/raghavyuva/nixopus/commit/12059959755cad51d19e8c2675dd096e5fd97526))
-
-
-### Reverts
-
-* Revert "hot-fix: theming issue due to base path and footer preview in the doc…" (#176) ([39c1aa1](https://github.com/raghavyuva/nixopus/commit/39c1aa107857f92f5917385e9221598be8302436)), closes [#176](https://github.com/raghavyuva/nixopus/issues/176)
-* undo changes related to docs ([#195](https://github.com/raghavyuva/nixopus/issues/195)) ([e0b71ec](https://github.com/raghavyuva/nixopus/commit/e0b71ecf75bee61d504523e8c6f6b381dbbeccb3))
 
 
 

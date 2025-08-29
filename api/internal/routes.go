@@ -23,9 +23,13 @@ import (
 	file_manager "github.com/raghavyuva/nixopus-api/internal/features/file-manager/controller"
 	githubConnector "github.com/raghavyuva/nixopus-api/internal/features/github-connector/controller"
 	health "github.com/raghavyuva/nixopus-api/internal/features/health"
+	invitations_controller "github.com/raghavyuva/nixopus-api/internal/features/invitations/controller"
+	invitations_service "github.com/raghavyuva/nixopus-api/internal/features/invitations/service"
+	invitations_storage "github.com/raghavyuva/nixopus-api/internal/features/invitations/storage"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	notificationController "github.com/raghavyuva/nixopus-api/internal/features/notification/controller"
+	notification_email "github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/email"
 	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
 	organization_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
 	organization_storage "github.com/raghavyuva/nixopus-api/internal/features/organization/storage"
@@ -93,6 +97,17 @@ func (router *Router) Routes() {
 		fuego.WithAddr(":"+PORT),
 	)
 
+	// Apply Auth middleware globally (will bypass for whitelisted/public routes in middleware)
+	fuego.Use(server, func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if config.AppConfig.App.Environment == "development" && strings.HasPrefix(r.URL.Path, "/swagger") {
+				next.ServeHTTP(w, r)
+				return
+			}
+			middleware.AuthMiddleware(next, router.app, router.cache).ServeHTTP(w, r)
+		})
+	})
+
 	apiV1 := api.NewVersion(api.CurrentVersion)
 
 	healthGroup := fuego.Group(server, apiV1.Path+"/health")
@@ -119,16 +134,26 @@ func (router *Router) Routes() {
 	authGroup := fuego.Group(server, apiV1.Path+"/auth")
 	router.AuthRoutes(authController, authGroup)
 
-	// Auth middleware for development environment will be bypassed for swagger UI
-	fuego.Use(server, func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if config.AppConfig.App.Environment == "development" && strings.HasPrefix(r.URL.Path, "/swagger") {
-				next.ServeHTTP(w, r)
-				return
-			}
-			middleware.AuthMiddleware(next, router.app, router.cache).ServeHTTP(w, r)
-		})
+	invitationStore := &invitations_storage.InvitationStore{DB: router.app.Store.DB, Ctx: router.app.Ctx}
+	invitationService := &invitations_service.Service{
+		Invitations: invitationStore,
+		Users:       userStorage,
+		Roles:       roleService,
+		Orgs:        orgService,
+		Email:       notification_email.NewEmailManager(router.app.Store.DB, router.app.Ctx),
+		Logger:      l,
+		DB:          router.app.Store.DB,
+	}
+	invitationController := invitations_controller.NewController(router.app.Store, invitationService, orgService, l, notificationManager)
+
+	fuego.Get(server, apiV1.Path+"/invitations/accept", invitationController.AcceptInvite)
+
+	invGroup := fuego.Group(server, apiV1.Path+"/invitations")
+	fuego.Use(invGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "organization")
 	})
+	fuego.Post(invGroup, "", invitationController.CreateInvite)
+	fuego.Get(invGroup, "/organization-users", invitationController.GetOrganizationUsersWithInviteStatus)
 
 	fuego.Use(server, func(next http.Handler) http.Handler {
 		return middleware.AuditMiddleware(next, router.app, l)

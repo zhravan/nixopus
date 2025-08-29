@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/config"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/preferences"
-	"github.com/raghavyuva/nixopus-api/internal/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/uptrace/bun"
 )
@@ -140,6 +139,53 @@ func (m *EmailManager) SendEmailWithTemplate(userID string, data EmailData) erro
 	return nil
 }
 
+// SendEmailToAddress sends an email to a specific address that might not be an existing user
+// TODO: Refactor this with @SendEmailWithTemplate before merge
+func (m *EmailManager) SendEmailToAddress(userID string, toEmail string, data EmailData) error {
+	log.Printf("[email] preparing to send: to=%s subject=\"%s\"", toEmail, data.Subject)
+	smtpConfig, err := m.GetSmtp(userID)
+	if err != nil {
+		log.Printf("[email] smtp config error for user %s: %v", userID, err)
+		return fmt.Errorf("smtp error: %w", err)
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("error getting working directory: %w", err)
+	}
+
+	tmpl, err := template.ParseFiles(filepath.Join(wd, "internal/features/notification/templates/"+data.Template))
+	if err != nil {
+		return fmt.Errorf("template parsing error: %w", err)
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data.Data); err != nil {
+		return fmt.Errorf("template execution error: %w", err)
+	}
+
+	from := smtpConfig.Username
+	to := []string{toEmail}
+
+	msg := []byte(fmt.Sprintf("Subject: %s\r\n"+
+		"From: %s\r\n"+
+		"To: %s\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: %s\r\n"+
+		"\r\n"+
+		"%s", data.Subject, from, toEmail, data.ContentType, body.String()))
+
+	auth := smtp.PlainAuth("", smtpConfig.Username, smtpConfig.Password, smtpConfig.Host)
+	addr := fmt.Sprintf("%s:%d", smtpConfig.Host, smtpConfig.Port)
+
+	if err := smtp.SendMail(addr, auth, from, to, msg); err != nil {
+		log.Printf("[email] send failed: to=%s host=%s err=%v", toEmail, addr, err)
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+	log.Printf("[email] sent successfully: to=%s host=%s", toEmail, addr)
+	return nil
+}
+
 func (m *EmailManager) SendPasswordResetEmail(userID string, token string) error {
 	viewURL := config.AppConfig.CORS.AllowedOrigin
 	resetURL := fmt.Sprintf("%s/reset-password?token=%s", viewURL, token)
@@ -152,7 +198,7 @@ func (m *EmailManager) SendPasswordResetEmail(userID string, token string) error
 		Template:    "password_reset.html",
 		Data:        data,
 		ContentType: "text/html; charset=UTF-8",
-		Category:    string(types.SecurityCategory),
+		Category:    string(shared_types.SecurityCategory),
 		Type:        "password-changes",
 	}
 
@@ -166,7 +212,7 @@ func (m *EmailManager) SendPasswordResetEmail(userID string, token string) error
 }
 
 func (m *EmailManager) SendVerificationEmail(userID string, token string) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(types.SecurityCategory), "security-alerts")
+	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(shared_types.SecurityCategory), "security-alerts")
 	if err != nil {
 		return fmt.Errorf("failed to check notification preferences: %w", err)
 	}
@@ -186,7 +232,7 @@ func (m *EmailManager) SendVerificationEmail(userID string, token string) error 
 		Template:    "verification_email.html",
 		Data:        data,
 		ContentType: "text/html; charset=UTF-8",
-		Category:    string(types.SecurityCategory),
+		Category:    string(shared_types.SecurityCategory),
 		Type:        "security-alerts",
 	}
 
@@ -200,7 +246,7 @@ func (m *EmailManager) SendVerificationEmail(userID string, token string) error 
 }
 
 func (m *EmailManager) SendUpdateUserRoleEmail(userID string, organizationName string, userName string, newRole string) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(types.ActivityCategory), "team-updates")
+	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(shared_types.ActivityCategory), "team-updates")
 	if err != nil {
 		return fmt.Errorf("failed to check notification preferences: %w", err)
 	}
@@ -220,7 +266,7 @@ func (m *EmailManager) SendUpdateUserRoleEmail(userID string, organizationName s
 		Template:    "update_user_role.html",
 		Data:        data,
 		ContentType: "text/html; charset=UTF-8",
-		Category:    string(types.ActivityCategory),
+		Category:    string(shared_types.ActivityCategory),
 		Type:        "team-updates",
 	}
 
@@ -234,7 +280,7 @@ func (m *EmailManager) SendUpdateUserRoleEmail(userID string, organizationName s
 }
 
 func (m *EmailManager) SendAddUserToOrganizationEmail(userID string, data AddUserToOrganizationData) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(types.ActivityCategory), "team-updates")
+	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(shared_types.ActivityCategory), "team-updates")
 	if err != nil {
 		return fmt.Errorf("failed to check notification preferences: %w", err)
 	}
@@ -248,7 +294,7 @@ func (m *EmailManager) SendAddUserToOrganizationEmail(userID string, data AddUse
 		Template:    "add_user_to_organization.html",
 		Data:        data,
 		ContentType: "text/html; charset=UTF-8",
-		Category:    string(types.ActivityCategory),
+		Category:    string(shared_types.ActivityCategory),
 		Type:        "team-updates",
 	}
 
@@ -262,7 +308,7 @@ func (m *EmailManager) SendAddUserToOrganizationEmail(userID string, data AddUse
 }
 
 func (m *EmailManager) SendRemoveUserFromOrganizationEmail(userID string, data RemoveUserFromOrganizationData) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(types.ActivityCategory), "team-updates")
+	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(shared_types.ActivityCategory), "team-updates")
 	if err != nil {
 		return fmt.Errorf("failed to check notification preferences: %w", err)
 	}
@@ -292,32 +338,4 @@ func (m *EmailManager) GetSmtp(ID string) (*shared_types.SMTPConfigs, error) {
 		return nil, err
 	}
 	return config, nil
-}
-
-func (m *EmailManager) sendEmailWithPreferences(userID string, data EmailTemplateData) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, data.Category, data.Type)
-	if err != nil {
-		return fmt.Errorf("failed to check notification preferences: %w", err)
-	}
-
-	if !shouldSend {
-		return nil
-	}
-
-	emailData := EmailData{
-		Subject:     data.Subject,
-		Template:    data.Template,
-		Data:        data.Data,
-		ContentType: "text/html; charset=UTF-8",
-		Category:    data.Category,
-		Type:        data.Type,
-	}
-
-	if err := m.SendEmailWithTemplate(userID, emailData); err != nil {
-		log.Printf("Failed to send email: %s", err)
-		return err
-	}
-
-	log.Printf("Email sent successfully")
-	return nil
 }

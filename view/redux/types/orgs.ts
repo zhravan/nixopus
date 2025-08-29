@@ -115,5 +115,5 @@ export interface CreateInviteRequest {
   email: string;
   name: string;
   role: UserTypes | string;
-  organization_id?: string; // sent via header; optional in body
+  organization_id?: string;
 }

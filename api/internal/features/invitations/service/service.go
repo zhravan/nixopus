@@ -57,8 +57,8 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 		return nil, "", errors.New("missing required fields")
 	}
 
-	// ensure role exists
-	role, err := s.Roles.GetRoleByName(req.Role)
+	roleName := strings.ToLower(req.Role)
+	role, err := s.Roles.GetRoleByName(roleName)
 	if err != nil || role == nil {
 		return nil, "", fmt.Errorf("invalid role")
 	}
@@ -83,7 +83,7 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 		if err != nil {
 			return nil, "", err
 		}
-		user = shared_types.NewUser(req.Email, hashed, req.Email, "", req.Role, false)
+		user = shared_types.NewUser(req.Email, hashed, req.Email, "", roleName, false)
 		if err := s.Users.CreateUser(&user); err != nil {
 			return nil, "", err
 		}
@@ -118,14 +118,14 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 	var inv *shared_types.Invitation
 	if existingInv != nil && existingInv.ID != uuid.Nil {
 		// Update token/expiry/name/role for reinvite
-		if err := s.Invitations.UpdateInvitationForReinvite(existingInv.ID, token, time.Now().Add(72*time.Hour), req.Name, req.Role); err != nil {
+		if err := s.Invitations.UpdateInvitationForReinvite(existingInv.ID, token, time.Now().Add(72*time.Hour), req.Name, roleName); err != nil {
 			return nil, "", err
 		}
 		// reload updated invitation (optional) or reuse with updated fields
 		existingInv.Token = token
 		existingInv.ExpiresAt = time.Now().Add(72 * time.Hour)
 		existingInv.Name = req.Name
-		existingInv.Role = req.Role
+		existingInv.Role = roleName
 		existingInv.UpdatedAt = time.Now()
 		inv = existingInv
 	} else {
@@ -134,7 +134,7 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 			ID:             uuid.New(),
 			Email:          req.Email,
 			Name:           req.Name,
-			Role:           req.Role,
+			Role:           roleName,
 			Token:          token,
 			ExpiresAt:      time.Now().Add(72 * time.Hour),
 			CreatedAt:      time.Now(),

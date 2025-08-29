@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/redux/hooks';
 import {
   useCreateUserMutation,
-  useGetOrganizationUsersQuery,
+  useGetInvitedOrganizationUsersQuery,
   useRemoveUserFromOrganizationMutation,
   useUpdateOrganizationDetailsMutation,
   useUpdateUserRoleMutation
@@ -28,7 +28,7 @@ function useTeamSettings() {
     isLoading,
     error,
     refetch: refetchUsers
-  } = useGetOrganizationUsersQuery(activeOrganization?.id, {
+  } = useGetInvitedOrganizationUsersQuery(activeOrganization?.id as string, {
     skip: !activeOrganization
   });
   const [updateOrganizationDetails, { isLoading: isUpdating, error: updateError }] =
@@ -36,18 +36,41 @@ function useTeamSettings() {
 
   useEffect(() => {
     if (apiUsers) {
-      const transformedUsers = apiUsers.map((user) => {
+      const transformedUsers = apiUsers.map((user: any) => {
         const roleName = user.role?.name || 'Unknown';
         const permissions =
           user.role?.permissions?.map(
-            (permission) => `${permission.resource.toUpperCase()}:${permission.name}`
+            (permission: { resource: string; name: string }) =>
+              `${permission.resource.toUpperCase()}:${permission.name}`
           ) || [];
+        const isVerified: boolean = Boolean(
+          user.user?.is_verified ?? user.user?.is_email_verified ?? false
+        );
+        const acceptedAt: string | null = user.accepted_at || null;
+        const expiresAt: string | null = user.expires_at || null;
+        let status: string = '-';
+        if (!acceptedAt && !isVerified) {
+          if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
+            status = 'Expired';
+          } else {
+            status = 'Pending';
+          }
+        }
         return {
           id: user.user.id,
-          name: user.user?.username || 'Unknown User',
-          email: user.user?.email || '',
+          name: user.user?.username,
+          email: user.user?.email,
           role: roleName,
-          permissions
+          permissions,
+          status,
+          invite: {
+            email: user.invite_email || null,
+            name: user.invite_name || null,
+            role: user.invite_role || null,
+            expires_at: user.expires_at || null,
+            accepted_at: user.accepted_at || null,
+            invited_by: user.invited_by || null
+          }
         };
       });
 

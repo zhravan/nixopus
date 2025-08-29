@@ -80,6 +80,15 @@ export interface OrganizationUsers {
   user: User;
 }
 
+export interface OrganizationUserWithInvite extends OrganizationUsers {
+  expires_at?: string | null;
+  accepted_at?: string | null;
+  invited_by?: string | null;
+  invite_email?: string | null;
+  invite_name?: string | null;
+  invite_role?: string | null;
+}
+
 export interface UpdateOrganizationDetailsRequest {
   id: string;
   name: string;

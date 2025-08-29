@@ -63,6 +63,9 @@ type AppConfig struct {
 	Environment string `mapstructure:"environment"`
 	Version     string `mapstructure:"version"`
 	LogsPath    string `mapstructure:"logs_path"`
+	// APIURL is public base URL for the backend API.
+	// Examples: https://api.example.com/api or http://localhost:8080/api
+	APIURL string `mapstructure:"api_url"`
 }
 
 type ClientContext string

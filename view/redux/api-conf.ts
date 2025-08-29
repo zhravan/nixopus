@@ -15,6 +15,11 @@ export enum AUTHURLS {
   IS_ADMIN_REGISTERED = 'v1/auth/is-admin-registered'
 }
 
+export enum INVITATIONURLS {
+  ORGANIZATION_USERS = 'v1/invitations/organization-users',
+  CREATE_INVITE = 'v1/invitations'
+}
+
 export enum USERURLS {
   USER_ORGANIZATIONS = 'v1/user/organizations',
   CREATE_ORGANIZATION = 'v1/organizations',

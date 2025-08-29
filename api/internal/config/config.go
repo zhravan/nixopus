@@ -185,6 +185,9 @@ func setupEnvVarMappings() {
 	viper.BindEnv("app.environment", "ENV")
 	viper.BindEnv("app.version", "APP_VERSION")
 	viper.BindEnv("app.logs_path", "LOGS_PATH")
+
+	// public API base (e.g., https://api.example.com/api)
+	viper.BindEnv("app.api_url", "API_URL")
 }
 
 func validateConfig(config types.Config) error {

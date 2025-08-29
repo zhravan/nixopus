@@ -23,6 +23,12 @@ func AuthMiddleware(next http.Handler, app *storage.App, cache *cache.Cache) htt
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// Allow certain endpoints to be public (no auth required)
+		if isPublicEndpoint(r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		token := r.Header.Get("Authorization")
 		if token == "" {
 			utils.SendErrorResponse(w, "No authorization token provided", http.StatusUnauthorized)
@@ -160,6 +166,21 @@ func isAuthEndpoint(path string) bool {
 
 	for _, authPath := range authPaths {
 		if path == authPath || strings.HasPrefix(path, authPath+"/") {
+			return true
+		}
+	}
+	return false
+}
+
+func isPublicEndpoint(path string) bool {
+	publicPaths := []string{
+		"/api/v1/health",
+		"/api/v1/webhook",
+		"/ws",
+		"/api/v1/invitations/accept",
+	}
+	for _, p := range publicPaths {
+		if path == p || strings.HasPrefix(path, p+"/") {
 			return true
 		}
 	}

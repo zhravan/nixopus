@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/redux/hooks';
 import {
-  useCreateUserMutation,
-  useGetOrganizationUsersQuery,
+  useCreateInviteMutation,
+  useGetInvitedOrganizationUsersQuery,
   useRemoveUserFromOrganizationMutation,
   useUpdateOrganizationDetailsMutation,
   useUpdateUserRoleMutation
@@ -15,11 +15,11 @@ function useTeamSettings() {
   const { t } = useTranslation();
   const [users, setUsers] = useState<any>([]);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Member', password: '' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Member' });
   const [isEditTeamDialogOpen, setEditTeamDialogOpen] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
-  const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
+  const [createInvite, { isLoading: isCreating }] = useCreateInviteMutation();
   const [removeUserFromOrganization] = useRemoveUserFromOrganizationMutation();
   const [updateUserRole] = useUpdateUserRoleMutation();
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
@@ -28,7 +28,7 @@ function useTeamSettings() {
     isLoading,
     error,
     refetch: refetchUsers
-  } = useGetOrganizationUsersQuery(activeOrganization?.id, {
+  } = useGetInvitedOrganizationUsersQuery(activeOrganization?.id as string, {
     skip: !activeOrganization
   });
   const [updateOrganizationDetails, { isLoading: isUpdating, error: updateError }] =
@@ -36,18 +36,43 @@ function useTeamSettings() {
 
   useEffect(() => {
     if (apiUsers) {
-      const transformedUsers = apiUsers.map((user) => {
-        const roleName = user.role?.name || 'Unknown';
+      const transformedUsers = apiUsers.map((row: any) => {
+        const roleName: string = row.role?.name || row.invite_role;
         const permissions =
-          user.role?.permissions?.map(
-            (permission) => `${permission.resource.toUpperCase()}:${permission.name}`
+          row?.role?.permissions?.map(
+            (permission: { resource: string; name: string }) =>
+              `${permission.resource.toUpperCase()}:${permission.name}`
           ) || [];
+        const isVerified: boolean = Boolean(row?.user?.is_verified || false);
+        const acceptedAt: string | null = row.accepted_at || null;
+        const expiresAt: string | null = row.expires_at || null;
+        let status: string = '-';
+        if (!acceptedAt && !isVerified) {
+          if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
+            status = 'Expired';
+          } else {
+            status = 'Pending';
+          }
+        }
+
+        const id = row?.user?.id || row?.user_id;
+        const name = row?.user?.username || row?.invite_name || '';
+        const email = row?.user?.email || row?.invite_email || '';
         return {
-          id: user.user.id,
-          name: user.user?.username || 'Unknown User',
-          email: user.user?.email || '',
-          role: roleName,
-          permissions
+          id,
+          name,
+          email,
+          role: normalizeRole(roleName),
+          permissions,
+          status,
+          invite: {
+            email: row.invite_email || null,
+            name: row.invite_name || null,
+            role: row.invite_role || null,
+            expires_at: row.expires_at || null,
+            accepted_at: row.accepted_at || null,
+            invited_by: row.invited_by || null
+          }
         };
       });
 
@@ -64,23 +89,30 @@ function useTeamSettings() {
 
   const handleAddUser = async () => {
     const newId = crypto.randomUUID();
-    const tempUser = {
-      username: newUser.name || '',
-      email: newUser.email || '',
-      password: newUser.password || '',
-      organization: activeOrganization?.id || '',
-      type: newUser.role.toLowerCase() as UserTypes
-    };
     const permissions = newUser.role === 'Member' ? ['READ', 'UPDATE'] : ['READ'];
-    setUsers([...users, { id: newId, ...tempUser, name: newUser.name, permissions }]);
+    setUsers([
+      ...users,
+      {
+        id: newId,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        permissions,
+        status: 'Pending'
+      }
+    ]);
     try {
-      const user = await createUser(tempUser as any);
+      await createInvite({
+        email: newUser.email || '',
+        name: newUser.name || '',
+        role: newUser.role
+      }).unwrap();
       await refetchUsers();
-      toast.success(t('settings.teams.messages.userAdded'));
+      toast.success(t('settings.teams.messages.userInvited'));
     } catch (error) {
-      toast.error(t('settings.teams.messages.userAddFailed'));
+      toast.error(t('settings.teams.messages.userInviteFailed'));
     }
-    setNewUser({ name: '', email: '', role: 'Member', password: '' });
+    setNewUser({ name: '', email: '', role: 'Member' });
     setIsAddUserDialogOpen(false);
   };
 
@@ -112,19 +144,24 @@ function useTeamSettings() {
   };
 
   const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
+    const r = normalizeRole(role);
+    switch (r) {
       case 'Owner':
         return 'default';
-      case 'Admin':
+      case 'admin':
         return 'destructive';
-      case 'Member':
+      case 'member':
         return 'default';
-      case 'Viewer':
+      case 'viewer':
         return 'secondary';
       default:
         return 'outline';
     }
   };
+
+  function normalizeRole(r: string): string {
+    return (r || '').toLowerCase();
+  }
 
   const handleUpdateTeam = async () => {
     setEditTeamDialogOpen(false);

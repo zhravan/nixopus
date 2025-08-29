@@ -677,8 +677,8 @@
       },
       "noMembers": "No team members found",
       "messages": {
-        "userAdded": "User added successfully",
-        "userAddFailed": "Failed to add user",
+        "userInvited": "Invitation sent",
+        "userInviteFailed": "Failed to send invitation",
         "userRemoved": "User removed successfully",
         "userRemoveFailed": "Failed to remove user",
         "userUpdated": "User updated successfully",

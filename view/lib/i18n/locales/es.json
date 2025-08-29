@@ -669,8 +669,8 @@
       },
       "noMembers": "No se encontraron miembros del equipo",
       "messages": {
-        "userAdded": "Usuario agregado exitosamente",
-        "userAddFailed": "Error al agregar usuario",
+        "userInvited": "Invitación enviada",
+        "userInviteFailed": "Error al enviar la invitación",
         "userRemoved": "Usuario eliminado exitosamente",
         "userRemoveFailed": "Error al eliminar usuario",
         "userUpdated": "Usuario actualizado exitosamente",

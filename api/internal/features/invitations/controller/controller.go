@@ -103,7 +103,9 @@ func (c *Controller) GetOrganizationUsersWithInviteStatus(ctx fuego.ContextNoBod
 	}
 
 	enriched := make([]UserWithInvite, 0, len(users))
+	presentUserIDs := make(map[uuid.UUID]struct{}, len(users))
 	for _, u := range users {
+		presentUserIDs[u.UserID] = struct{}{}
 		row := UserWithInvite{OrganizationUsers: u}
 		if inv, ok := latestByUser[u.UserID]; ok {
 			if !inv.ExpiresAt.IsZero() {
@@ -125,6 +127,39 @@ func (c *Controller) GetOrganizationUsersWithInviteStatus(ctx fuego.ContextNoBod
 			row.InviteRole = &role
 		}
 		enriched = append(enriched, row)
+	}
+
+	// Append pending invites for users who are not yet members of the organization
+	for _, inv := range latestByUser {
+		if _, exists := presentUserIDs[inv.UserID]; exists {
+			continue
+		}
+		pending := UserWithInvite{
+			OrganizationUsers: shared_types.OrganizationUsers{
+				UserID:         inv.UserID,
+				OrganizationID: inv.OrganizationID,
+				CreatedAt:      inv.CreatedAt,
+				UpdatedAt:      inv.UpdatedAt,
+			},
+		}
+		if !inv.ExpiresAt.IsZero() {
+			t := inv.ExpiresAt
+			pending.ExpiresAt = &t
+		}
+		if inv.AcceptedAt != nil {
+			pending.AcceptedAt = inv.AcceptedAt
+		}
+		if inv.InviterUserID != uuid.Nil {
+			inviter := inv.InviterUserID
+			pending.InvitedBy = &inviter
+		}
+		email := inv.Email
+		name := inv.Name
+		role := inv.Role
+		pending.InviteEmail = &email
+		pending.InviteName = &name
+		pending.InviteRole = &role
+		enriched = append(enriched, pending)
 	}
 
 	return &shared_types.Response{Status: "success", Message: "Fetched Org Users with invite statuses", Data: enriched}, nil

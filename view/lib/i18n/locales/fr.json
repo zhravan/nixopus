@@ -670,8 +670,8 @@
       },
       "noMembers": "Aucun membre d'équipe trouvé",
       "messages": {
-        "userAdded": "Utilisateur ajouté avec succès",
-        "userAddFailed": "Échec de l'ajout de l'utilisateur",
+        "userInvited": "Invitation envoyée",
+        "userInviteFailed": "Échec de l'envoi de l'invitation",
         "userRemoved": "Utilisateur supprimé avec succès",
         "userRemoveFailed": "Échec de la suppression de l'utilisateur",
         "userUpdated": "Utilisateur mis à jour avec succès",

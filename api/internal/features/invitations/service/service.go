@@ -161,11 +161,9 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 		AcceptURL string
 	}{Name: req.Name, Email: req.Email, Password: generatedPassword, AcceptURL: acceptURL}
 
-	// DEBUG: log generated password state prior to email send (for troubleshooting)
 	s.Logger.Log(logger.Info, "invite email debug", fmt.Sprintf("to=%s generatedPassword=%q empty=%t", req.Email, generatedPassword, generatedPassword == ""))
 
 	s.Logger.Log(logger.Info, "sending invite email", fmt.Sprintf("to=%s org=%s", req.Email, req.OrganizationID))
-	// send, log the result for observability
 	if err := s.Email.SendEmailToAddress(inviterID, req.Email, emailhelper.EmailData{
 		Subject:     "You're invited to Nixopus",
 		Template:    "invitation_email.html",
@@ -179,8 +177,6 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 		s.Logger.Log(logger.Info, "invite email sent", req.Email)
 	}
 
-	// notify inviter about sent invite
-	// best-effort, via notification manager pattern
 	return inv, generatedPassword, nil
 }
 
@@ -201,23 +197,21 @@ func (s *Service) AcceptInvite(token string) (*AcceptInviteResponse, error) {
 	if err != nil || role == nil {
 		return nil, fmt.Errorf("invalid role on invite")
 	}
-	// avoid duplicate membership: try via OrganizationService which checks existence
-	addReq := org_types.AddUserToOrganizationRequest{ // aliased package below
+
+	addReq := org_types.AddUserToOrganizationRequest{
 		UserID:         inv.UserID.String(),
 		OrganizationID: inv.OrganizationID.String(),
 		RoleId:         role.ID.String(),
 	}
 	if s.Orgs != nil {
-		_ = s.Orgs.AddUserToOrganization(addReq) // ignore ErrUserAlreadyInOrganization
+		_ = s.Orgs.AddUserToOrganization(addReq)
 	} else {
-		// fallback to direct insert (may fail if duplicate)
 		_ = s.Invitations.AddUserToOrganization(inv.UserID, inv.OrganizationID, role.ID)
 	}
 	if err := s.Invitations.MarkAccepted(inv.ID); err != nil {
 		return nil, err
 	}
-	// notify inviter: person accepted
-	// We can send an email to inviter if SMTP exists; best-effort
+
 	inviter, _ := s.Users.FindUserByID(inv.InviterUserID.String())
 	if inviter != nil {
 		_ = s.Email.SendEmailToAddress(inviter.ID.String(), inviter.Email, emailhelper.EmailData{
@@ -253,7 +247,7 @@ func (s *Service) GetOrganizationUsersWithInviteStatus(orgID string) ([]inv_type
 
 	for _, u := range users {
 		presentUserIDs[u.UserID] = struct{}{}
-	row := inv_types.UserWithInvite{OrganizationUsers: u}
+		row := inv_types.UserWithInvite{OrganizationUsers: u}
 		if inv, ok := latestByUser[u.UserID]; ok {
 			if !inv.ExpiresAt.IsZero() {
 				t := inv.ExpiresAt

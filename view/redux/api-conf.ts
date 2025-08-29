@@ -16,7 +16,8 @@ export enum AUTHURLS {
 }
 
 export enum INVITATIONURLS {
-  ORGANIZATION_USERS = 'v1/invitations/organization-users'
+  ORGANIZATION_USERS = 'v1/invitations/organization-users',
+  CREATE_INVITE = 'v1/invitations'
 }
 
 export enum USERURLS {

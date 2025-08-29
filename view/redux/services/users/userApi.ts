@@ -9,7 +9,8 @@ import {
   RemoveUserFromOrganizationRequest,
   UpdateOrganizationDetailsRequest,
   UpdateUserRoleRequest,
-  UserOrganization
+  UserOrganization,
+  CreateInviteRequest
 } from '@/redux/types/orgs';
 import { baseQueryWithReauth } from '@/redux/base-query';
 import {
@@ -123,6 +124,16 @@ export const userApi = createApi({
       transformResponse: (response: {
         data: import('@/redux/types/orgs').OrganizationUserWithInvite[];
       }) => response.data
+    }),
+    createInvite: builder.mutation<void, CreateInviteRequest>({
+      query(payload) {
+        return {
+          url: INVITATIONURLS.CREATE_INVITE,
+          method: 'POST',
+          body: payload
+        };
+      },
+      invalidatesTags: [{ type: 'User', id: 'LIST' }]
     }),
     updateOrganizationDetails: builder.mutation<Organization, UpdateOrganizationDetailsRequest>({
       query(payload) {
@@ -253,6 +264,7 @@ export const {
   useRequestPasswordResetLinkMutation,
   useGetOrganizationUsersQuery,
   useGetInvitedOrganizationUsersQuery,
+  useCreateInviteMutation,
   useUpdateOrganizationDetailsMutation,
   useCreateUserMutation,
   useUpdateUserRoleMutation,

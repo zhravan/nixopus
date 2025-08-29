@@ -14,6 +14,7 @@ import (
 	auth_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	auth_utils "github.com/raghavyuva/nixopus-api/internal/features/auth/utils"
 	inv_store "github.com/raghavyuva/nixopus-api/internal/features/invitations/storage"
+	inv_types "github.com/raghavyuva/nixopus-api/internal/features/invitations/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	emailhelper "github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/email"
 	org_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
@@ -149,15 +150,9 @@ func (s *Service) CreateInvite(inviterID string, req CreateInviteRequest) (*shar
 	}
 
 	// send invitation email to the invitee's email with link and generated password
-	// Build accept URL off backend API base when provided; fallback to UI origin for backward compatibility
 	base := strings.TrimSpace(config.AppConfig.App.APIURL)
-	// Normalize and join paths robustly to avoid double slashes
-	// If base already includes "/api", append versioned path only
-	// Expected final: {base}/v1/invitations/accept?token=...
-	// Where base may be like: https://api.example.com/api
 	base = strings.TrimRight(base, "/")
 	path := "/api/v1/invitations/accept"
-	// If base does not end with "/api" but contains "/api" elsewhere, we still append path.
 	acceptURL := fmt.Sprintf("%s%s?token=%s", base, path, token)
 	data := struct {
 		Name      string
@@ -235,4 +230,84 @@ func (s *Service) AcceptInvite(token string) (*AcceptInviteResponse, error) {
 		})
 	}
 	return &AcceptInviteResponse{Status: "accepted"}, nil
+}
+
+// GetOrganizationUsersWithInviteStatus returns org members wth invite status
+func (s *Service) GetOrganizationUsersWithInviteStatus(orgID string) ([]inv_types.UserWithInvite, error) {
+	if s.Orgs == nil || s.Invitations == nil {
+		return nil, fmt.Errorf("service not initialized: missing Orgs or Invitations store")
+	}
+
+	users, err := s.Orgs.GetOrganizationUsers(orgID)
+	if err != nil {
+		return nil, err
+	}
+
+	latestByUser, err := s.Invitations.GetLatestInvitationsMapByOrganization(orgID)
+	if err != nil {
+		return nil, err
+	}
+
+	enriched := make([]inv_types.UserWithInvite, 0, len(users))
+	presentUserIDs := make(map[uuid.UUID]struct{}, len(users))
+
+	for _, u := range users {
+		presentUserIDs[u.UserID] = struct{}{}
+	row := inv_types.UserWithInvite{OrganizationUsers: u}
+		if inv, ok := latestByUser[u.UserID]; ok {
+			if !inv.ExpiresAt.IsZero() {
+				t := inv.ExpiresAt
+				row.ExpiresAt = &t
+			}
+			if inv.AcceptedAt != nil {
+				row.AcceptedAt = inv.AcceptedAt
+			}
+			if inv.InviterUserID != uuid.Nil {
+				id := inv.InviterUserID
+				row.InvitedBy = &id
+			}
+			email := inv.Email
+			name := inv.Name
+			role := inv.Role
+			row.InviteEmail = &email
+			row.InviteName = &name
+			row.InviteRole = &role
+		}
+		enriched = append(enriched, row)
+	}
+
+	// Append pending invites for users who are not yet members of the organization
+	for _, inv := range latestByUser {
+		if _, exists := presentUserIDs[inv.UserID]; exists {
+			continue
+		}
+		pending := inv_types.UserWithInvite{
+			OrganizationUsers: shared_types.OrganizationUsers{
+				UserID:         inv.UserID,
+				OrganizationID: inv.OrganizationID,
+				CreatedAt:      inv.CreatedAt,
+				UpdatedAt:      inv.UpdatedAt,
+			},
+		}
+		if !inv.ExpiresAt.IsZero() {
+			t := inv.ExpiresAt
+			pending.ExpiresAt = &t
+		}
+		if inv.AcceptedAt != nil {
+			pending.AcceptedAt = inv.AcceptedAt
+		}
+		if inv.InviterUserID != uuid.Nil {
+			inviter := inv.InviterUserID
+			pending.InvitedBy = &inviter
+		}
+		email := inv.Email
+		name := inv.Name
+		role := inv.Role
+		pending.InviteEmail = &email
+		pending.InviteName = &name
+		pending.InviteRole = &role
+		enriched = append(enriched, pending)
+	}
+
+	return enriched, nil
 }

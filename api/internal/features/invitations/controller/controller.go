@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/go-fuego/fuego"
 	"github.com/google/uuid"
@@ -82,85 +81,9 @@ func (c *Controller) GetOrganizationUsersWithInviteStatus(ctx fuego.ContextNoBod
 	if id == "" {
 		return nil, fuego.HTTPError{Status: http.StatusBadRequest}
 	}
-	users, err := c.orgs.GetOrganizationUsers(id)
+	enriched, err := c.svc.GetOrganizationUsersWithInviteStatus(id)
 	if err != nil {
 		return nil, fuego.HTTPError{Status: http.StatusInternalServerError, Err: err}
 	}
-	// map latest invitation per user to enrich the users payload
-	latestByUser, err := c.svc.Invitations.GetLatestInvitationsMapByOrganization(id)
-	if err != nil {
-		return nil, fuego.HTTPError{Status: http.StatusInternalServerError, Err: err}
-	}
-
-	type UserWithInvite struct {
-		shared_types.OrganizationUsers
-		ExpiresAt   *time.Time `json:"expires_at"`
-		AcceptedAt  *time.Time `json:"accepted_at"`
-		InvitedBy   *uuid.UUID `json:"invited_by"`
-		InviteEmail *string    `json:"invite_email"`
-		InviteName  *string    `json:"invite_name"`
-		InviteRole  *string    `json:"invite_role"`
-	}
-
-	enriched := make([]UserWithInvite, 0, len(users))
-	presentUserIDs := make(map[uuid.UUID]struct{}, len(users))
-	for _, u := range users {
-		presentUserIDs[u.UserID] = struct{}{}
-		row := UserWithInvite{OrganizationUsers: u}
-		if inv, ok := latestByUser[u.UserID]; ok {
-			if !inv.ExpiresAt.IsZero() {
-				t := inv.ExpiresAt
-				row.ExpiresAt = &t
-			}
-			if inv.AcceptedAt != nil {
-				row.AcceptedAt = inv.AcceptedAt
-			}
-			if inv.InviterUserID != uuid.Nil {
-				id := inv.InviterUserID
-				row.InvitedBy = &id
-			}
-			email := inv.Email
-			name := inv.Name
-			role := inv.Role
-			row.InviteEmail = &email
-			row.InviteName = &name
-			row.InviteRole = &role
-		}
-		enriched = append(enriched, row)
-	}
-
-	// Append pending invites for users who are not yet members of the organization
-	for _, inv := range latestByUser {
-		if _, exists := presentUserIDs[inv.UserID]; exists {
-			continue
-		}
-		pending := UserWithInvite{
-			OrganizationUsers: shared_types.OrganizationUsers{
-				UserID:         inv.UserID,
-				OrganizationID: inv.OrganizationID,
-				CreatedAt:      inv.CreatedAt,
-				UpdatedAt:      inv.UpdatedAt,
-			},
-		}
-		if !inv.ExpiresAt.IsZero() {
-			t := inv.ExpiresAt
-			pending.ExpiresAt = &t
-		}
-		if inv.AcceptedAt != nil {
-			pending.AcceptedAt = inv.AcceptedAt
-		}
-		if inv.InviterUserID != uuid.Nil {
-			inviter := inv.InviterUserID
-			pending.InvitedBy = &inviter
-		}
-		email := inv.Email
-		name := inv.Name
-		role := inv.Role
-		pending.InviteEmail = &email
-		pending.InviteName = &name
-		pending.InviteRole = &role
-		enriched = append(enriched, pending)
-	}
-
 	return &shared_types.Response{Status: "success", Message: "Fetched Org Users with invite statuses", Data: enriched}, nil
 }

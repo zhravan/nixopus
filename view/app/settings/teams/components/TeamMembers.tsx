@@ -36,6 +36,7 @@ type EditUser = {
   avatar: string;
   role: 'Owner' | 'Admin' | 'Member' | 'Viewer';
   permissions: string[];
+  status?: 'Pending' | 'Expired' | '-';
 };
 
 type RoleType = 'owner' | 'admin' | 'member' | 'viewer';
@@ -186,6 +187,7 @@ function TeamMembers({
                 <TableHead>{t('settings.teams.members.table.headers.user')}</TableHead>
                 <TableHead>{t('settings.teams.members.table.headers.role')}</TableHead>
                 <TableHead>{t('settings.teams.members.table.headers.permissions')}</TableHead>
+                <TableHead>Status</TableHead>
                 {users.some((user) => hasEditableActions(user)) && (
                   <TableHead className="text-right">
                     {t('settings.teams.members.table.headers.actions')}
@@ -217,6 +219,15 @@ function TeamMembers({
                     <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
                   </TableCell>
                   <TableCell>{renderPermissions(user.permissions, user.id)}</TableCell>
+                  <TableCell>
+                    {user.status === 'Pending' && (
+                      <Badge variant="outline" className="w-max">Pending</Badge>
+                    )}
+                    {user.status === 'Expired' && (
+                      <Badge variant="destructive" className="w-max">Expired</Badge>
+                    )}
+                    {user.status === '-' && <span className="text-muted-foreground">—</span>}
+                  </TableCell>
                   {hasEditableActions(user) && (
                     <TableCell className="text-right">
                       <DropdownMenu>

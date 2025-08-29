@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <p>Hi {{.Name}},</p>
+  <p>You've been invited to join Nixopus.</p>
+  <p>Login with:</p>
+  <ul>
+    <li>Email: {{.Email}}</li>
+  {{if .Password}}
+    <li>Temporary Password: {{.Password}}</li>
+  {{else}}
+    <li>Use your existing password. If you forgot it, you can reset it from the login page.</li>
+  {{end}}
+  </ul>
+  <p>Your invite link:</p>
+  <p><a href="{{.AcceptURL}}">Accept Invitation</a></p>
+  <p>This link will expire automatically.</p>
+</body>
+ </html>

@@ -110,3 +110,10 @@ export interface UpdateUserRoleRequest {
   organization_id: string;
   role_name: UserTypes;
 }
+
+export interface CreateInviteRequest {
+  email: string;
+  name: string;
+  role: UserTypes | string;
+  organization_id?: string; // sent via header; optional in body
+}

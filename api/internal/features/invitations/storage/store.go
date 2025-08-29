@@ -102,13 +102,10 @@ func (s *InvitationStore) ListInvitationsByOrganization(orgID string) ([]shared_
 
 func (s *InvitationStore) GetLatestInvitationsMapByOrganization(orgID string) (map[uuid.UUID]*shared_types.Invitation, error) {
 	var invs []shared_types.Invitation
-	// Order by updated_at desc so the first occurrence per user is the latest
 	err := s.getDB().NewSelect().
 		Model(&invs).
-	// Only pending invitations are relevant when listing invited org users
-	Where("organization_id = ? AND accepted_at IS NULL", orgID).
-	// Use updated_at when available, else fallback to created_at
-	OrderExpr("COALESCE(updated_at, created_at) DESC, created_at DESC").
+		Where("organization_id = ?", orgID).
+		OrderExpr("updated_at DESC").
 		Scan(s.Ctx)
 	if err == sql.ErrNoRows {
 		return map[uuid.UUID]*shared_types.Invitation{}, nil

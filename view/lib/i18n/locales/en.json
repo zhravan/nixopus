@@ -558,10 +558,10 @@
     },
     "teams": {
       "addMember": {
-        "button": "Add User",
+        "button": "Invite User",
         "dialog": {
-          "title": "Add New User",
-          "description": "Add a new user to your organization",
+          "title": "Invite New User",
+          "description": "Invite a new user to your organization",
           "fields": {
             "name": {
               "label": "Name",

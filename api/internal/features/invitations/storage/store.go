@@ -116,7 +116,6 @@ func (s *InvitationStore) GetLatestInvitationsMapByOrganization(orgID string) (m
 	out := make(map[uuid.UUID]*shared_types.Invitation, len(invs))
 	for i := range invs {
 		inv := &invs[i]
-		// first occurrence per user is the latest due to ordering
 		if _, exists := out[inv.UserID]; !exists {
 			out[inv.UserID] = inv
 		}

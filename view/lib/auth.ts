@@ -60,32 +60,32 @@ export function setAuthTokens(tokens: AuthTokens, ctx?: any): void {
     ctx.cookies.set('token', access_token, {
       maxAge: expires_in || 7 * 24 * 60 * 60,
       path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      secure: false,
+      sameSite: 'lax'
     });
 
     if (refresh_token) {
       ctx.cookies.set('refreshToken', refresh_token, {
         maxAge: 14 * 24 * 60 * 60,
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        secure: false,
+        sameSite: 'lax'
       });
     }
   } else {
     setCookie(ctx, 'token', access_token, {
       maxAge: expires_in || 7 * 24 * 60 * 60,
       path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      secure: false,
+      sameSite: 'lax'
     });
 
     if (refresh_token) {
       setCookie(ctx, 'refreshToken', refresh_token, {
         maxAge: 14 * 24 * 60 * 60,
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        secure: false,
+        sameSite: 'lax'
       });
     }
   }

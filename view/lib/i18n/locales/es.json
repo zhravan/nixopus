@@ -550,10 +550,10 @@
     },
     "teams": {
       "addMember": {
-        "button": "Agregar Usuario",
+        "button": "Invitar Usuario",
         "dialog": {
-          "title": "Agregar Nuevo Usuario",
-          "description": "Agregar un nuevo usuario a tu organización",
+          "title": "Invitar Nuevo Usuario",
+          "description": "Invitar un nuevo usuario a tu organización",
           "fields": {
             "name": {
               "label": "Nombre",

@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,8 +32,9 @@ func (s *ServersService) verifySSHConnection(req types.CreateServerRequest) erro
 
 	client, err := sshClient.Connect()
 	if err != nil {
-		s.logger.Log(logger.Error, "SSH connection verification failed", fmt.Sprintf("host=%s, port=%d, user=%s, error=%s", req.Host, req.Port, req.Username, err.Error()))
-		return err
+		msg := err.Error()
+		s.logger.Log(logger.Error, "SSH connection verification failed", fmt.Sprintf("host=%s, port=%d, user=%s, error=%s", req.Host, req.Port, req.Username, msg))
+		return classifySSHError(msg)
 	}
 	defer client.Close()
 
@@ -140,4 +142,21 @@ func (s *ServersService) CreateServer(req types.CreateServerRequest, userID stri
 	}
 
 	return types.CreateServerResponse{ID: server.ID.String()}, nil
+}
+
+func classifySSHError(msg string) error {
+	m := strings.ToLower(msg)
+	// DNS/host resolution errors
+	if strings.Contains(m, "no such host") || strings.Contains(m, "temporary failure in name resolution") || strings.Contains(m, "name or service not known") {
+		return types.ErrInvalidHost
+	}
+	// Authentication errors
+	if strings.Contains(m, "permission denied") || strings.Contains(m, "unable to authenticate") || strings.Contains(m, "auth") {
+		return types.ErrSSHAuthenticationFailed
+	}
+	// Connectivity errors
+	if strings.Contains(m, "connection refused") || strings.Contains(m, "no route to host") || strings.Contains(m, "i/o timeout") || strings.Contains(m, "network is unreachable") || strings.Contains(m, "connection timed out") {
+		return types.ErrSSHConnectionFailed
+	}
+	return types.ErrSSHConnectionFailed
 }

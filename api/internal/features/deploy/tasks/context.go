@@ -299,3 +299,37 @@ func (c *ContextTask) PrepareReDeploymentContext() (shared_types.TaskPayload, er
         UpdateOptions:         opts,
     }, nil
 }
+
+func (c *ContextTask) PrepareRollbackContext() (shared_types.TaskPayload, error) {
+    // Load the target deployment to determine commit to roll back to
+    target := c.ContextConfig.(*types.RollbackDeploymentRequest)
+    dep, err := c.TaskService.Storage.GetApplicationDeploymentById(target.ID.String())
+    if err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    app := *c.Application
+    app.UpdatedAt = time.Now()
+
+    applicationDeployment := c.GetDeploymentConfig(app.ID)
+    applicationDeployment.CommitHash = dep.CommitHash
+
+    if err := c.PersistUpdateApplicationDeploymentData(app, applicationDeployment); err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    initialStatus, err := c.PersistCreateDeploymentStatus(applicationDeployment)
+    if err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    return shared_types.TaskPayload{
+        Application:           app,
+        ApplicationDeployment: applicationDeployment,
+        Status:                initialStatus,
+        UpdateOptions: shared_types.UpdateOptions{
+            Force:             false,
+            ForceWithoutCache: false,
+        },
+    }, nil
+}

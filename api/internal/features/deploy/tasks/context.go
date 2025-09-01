@@ -333,3 +333,29 @@ func (c *ContextTask) PrepareRollbackContext() (shared_types.TaskPayload, error)
         },
     }, nil
 }
+
+func (c *ContextTask) PrepareRestartContext() (shared_types.TaskPayload, error) {
+    // For restart, create a fresh deployment record and initial status
+    app := *c.Application
+    app.UpdatedAt = time.Now()
+
+    applicationDeployment := c.GetDeploymentConfig(app.ID)
+    if err := c.PersistUpdateApplicationDeploymentData(app, applicationDeployment); err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    initialStatus, err := c.PersistCreateDeploymentStatus(applicationDeployment)
+    if err != nil {
+        return shared_types.TaskPayload{}, err
+    }
+
+    return shared_types.TaskPayload{
+        Application:           app,
+        ApplicationDeployment: applicationDeployment,
+        Status:                initialStatus,
+        UpdateOptions: shared_types.UpdateOptions{
+            Force:             false,
+            ForceWithoutCache: false,
+        },
+    }, nil
+}

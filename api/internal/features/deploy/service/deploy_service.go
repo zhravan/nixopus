@@ -57,7 +57,10 @@ func (s *DeployService) UpdateDeployment(deployment *types.UpdateDeploymentReque
 	return application, nil
 }
 
-// ReDeployApplication redeploys an existing application
+// ReDeployApplication redeploys an existing application.
+//
+// Deprecated: This method is deprecated and will be removed in a future version.
+// Use TaskService.ReDeployApplication instead for queue-based handling.
 func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployApplicationRequest, userID uuid.UUID, organizationID uuid.UUID) (shared_types.Application, error) {
 	application, err := s.storage.GetApplicationById(redeployRequest.ID.String(), organizationID)
 	if err != nil {
@@ -76,6 +79,9 @@ func (s *DeployService) ReDeployApplication(redeployRequest *types.ReDeployAppli
 }
 
 // StartDeploymentInBackground starts the deployment process in a separate goroutine.
+//
+// Deprecated: This method is part of the legacy goroutine-based deploy path
+// and will be removed after full migration to TaskQ handlers.
 // It takes the application, deployment request, user ID, application status, and
 // deployment configuration as parameters.
 // It logs any errors that occur during the deployment process and updates the
@@ -192,6 +198,9 @@ func (s *DeployService) DeleteDeployment(deployment *types.DeleteDeploymentReque
 	return s.storage.DeleteDeployment(deployment, userID)
 }
 
+// RollbackDeployment triggers a rollback via the legacy service flow.
+//
+// Deprecated: Use TaskService.RollbackDeployment instead for queue-based rollback.
 func (s *DeployService) RollbackDeployment(deployment *types.RollbackDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) error {
 	deployment_details, err := s.storage.GetApplicationDeploymentById(deployment.ID.String())
 	if err != nil {
@@ -215,6 +224,9 @@ func (s *DeployService) RollbackDeployment(deployment *types.RollbackDeploymentR
 	return nil
 }
 
+// RestartDeployment restarts containers via the legacy service flow.
+//
+// Deprecated: Use TaskService.RestartDeployment instead for queue-based restart.
 func (s *DeployService) RestartDeployment(deployment *types.RestartDeploymentRequest, userID uuid.UUID, organizationID uuid.UUID) error {
 	deployment_details, err := s.storage.GetApplicationDeploymentById(deployment.ID.String())
 	if err != nil {

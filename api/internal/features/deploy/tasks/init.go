@@ -20,6 +20,8 @@ var (
     TaskUpdateDeployment  *taskq.Task
     ReDeployQueue         taskq.Queue
     TaskReDeploy          *taskq.Task
+    RollbackQueue         taskq.Queue
+    TaskRollback          *taskq.Task
 )
 
 var (
@@ -29,6 +31,8 @@ var (
     TASK_UPDATE_DEPLOYMENT  = "task_update_deployment"
     QUEUE_REDEPLOYMENT      = "redeploy-deployment"
     TASK_REDEPLOYMENT       = "task_redeploy_deployment"
+    QUEUE_ROLLBACK          = "rollback-deployment"
+    TASK_ROLLBACK           = "task_rollback_deployment"
 )
 
 func (t *TaskService) SetupCreateDeploymentQueue() {
@@ -95,6 +99,30 @@ func (t *TaskService) SetupCreateDeploymentQueue() {
             Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
                 fmt.Println("Redeploying application")
                 err := t.HandleReDeploy(ctx, data)
+                if err != nil {
+                    return err
+                }
+                return nil
+            },
+        })
+
+        // Rollback queue and task registration
+        RollbackQueue = queue.RegisterQueue(&taskq.QueueOptions{
+            Name:                QUEUE_ROLLBACK,
+            ConsumerIdleTimeout: 10 * time.Minute,
+            MinNumWorker:        1,
+            MaxNumWorker:        10,
+            ReservationSize:     10,
+            ReservationTimeout:  10 * time.Second,
+            WaitTimeout:         5 * time.Second,
+            BufferSize:          100,
+        })
+
+        TaskRollback = taskq.RegisterTask(&taskq.TaskOptions{
+            Name: TASK_ROLLBACK,
+            Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
+                fmt.Println("Rolling back deployment")
+                err := t.HandleRollback(ctx, data)
                 if err != nil {
                     return err
                 }

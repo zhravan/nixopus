@@ -12,7 +12,6 @@ import { ResourceGuard, AnyPermissionGuard } from '@/components/rbac/PermissionG
 import useContainerList from './hooks/use-container-list';
 import { TypographyH1, TypographyH2, TypographyMuted } from '@/components/ui/typography';
 import PageLayout from '@/components/layout/page-layout';
-// import { ContainerCard } from './components/card';
 import ContainersTable from './components/table';
 import PaginationWrapper from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -49,7 +48,6 @@ export default function ContainersPage() {
     getGradientFromName,
     setShowPruneImagesConfirm,
     setShowPruneBuildCacheConfirm,
-    // added controls
     page,
     setPage,
     totalPages,

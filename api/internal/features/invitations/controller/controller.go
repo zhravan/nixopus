@@ -2,9 +2,11 @@ package controller
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/go-fuego/fuego"
 	"github.com/google/uuid"
+	"github.com/raghavyuva/nixopus-api/internal/config"
 	inv_service "github.com/raghavyuva/nixopus-api/internal/features/invitations/service"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
@@ -72,6 +74,15 @@ func (c *Controller) AcceptInvite(ctx fuego.ContextNoBody) (*shared_types.Respon
 	if err != nil {
 		return nil, fuego.HTTPError{Status: http.StatusBadRequest, Err: err}
 	}
+	// On successful acceptance, redirect to hosted frontend URL instead of returning JSON.
+	// Uses CORS.AllowedOrigin as the public frontend origin.
+	frontend := strings.TrimSpace(config.AppConfig.CORS.AllowedOrigin)
+	if frontend != "" {
+		frontend = strings.TrimRight(frontend, "/")
+		http.Redirect(ctx.Response(), ctx.Request(), frontend+"/?invite=accepted", http.StatusFound)
+		return nil, nil
+	}
+	// Fallback to JSON if frontend origin is not configured
 	return &shared_types.Response{Status: "success", Message: "Invitation accepted", Data: res}, nil
 }
 

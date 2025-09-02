@@ -1,4 +1,4 @@
-import { USERURLS } from '@/redux/api-conf';
+import { INVITATIONURLS, USERURLS } from '@/redux/api-conf';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import {
   AddUserToOrganizationRequest,
@@ -9,7 +9,8 @@ import {
   RemoveUserFromOrganizationRequest,
   UpdateOrganizationDetailsRequest,
   UpdateUserRoleRequest,
-  UserOrganization
+  UserOrganization,
+  CreateInviteRequest
 } from '@/redux/types/orgs';
 import { baseQueryWithReauth } from '@/redux/base-query';
 import {
@@ -107,6 +108,32 @@ export const userApi = createApi({
       transformResponse: (response: { data: OrganizationUsers[] }) => {
         return response.data;
       }
+    }),
+
+    getInvitedOrganizationUsers: builder.query<
+      import('@/redux/types/orgs').OrganizationUserWithInvite[],
+      string
+    >({
+      query(organizationId) {
+        return {
+          url: `${INVITATIONURLS.ORGANIZATION_USERS}?id=${organizationId}`,
+          method: 'GET'
+        };
+      },
+      providesTags: [{ type: 'User', id: 'LIST' }],
+      transformResponse: (response: {
+        data: import('@/redux/types/orgs').OrganizationUserWithInvite[];
+      }) => response.data
+    }),
+    createInvite: builder.mutation<void, CreateInviteRequest>({
+      query(payload) {
+        return {
+          url: INVITATIONURLS.CREATE_INVITE,
+          method: 'POST',
+          body: payload
+        };
+      },
+      invalidatesTags: [{ type: 'User', id: 'LIST' }]
     }),
     updateOrganizationDetails: builder.mutation<Organization, UpdateOrganizationDetailsRequest>({
       query(payload) {
@@ -236,6 +263,8 @@ export const {
   useUpdateUserNameMutation,
   useRequestPasswordResetLinkMutation,
   useGetOrganizationUsersQuery,
+  useGetInvitedOrganizationUsersQuery,
+  useCreateInviteMutation,
   useUpdateOrganizationDetailsMutation,
   useCreateUserMutation,
   useUpdateUserRoleMutation,

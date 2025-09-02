@@ -558,10 +558,10 @@
     },
     "teams": {
       "addMember": {
-        "button": "Add User",
+        "button": "Invite User",
         "dialog": {
-          "title": "Add New User",
-          "description": "Add a new user to your organization",
+          "title": "Invite New User",
+          "description": "Invite a new user to your organization",
           "fields": {
             "name": {
               "label": "Name",
@@ -677,8 +677,8 @@
       },
       "noMembers": "No team members found",
       "messages": {
-        "userAdded": "User added successfully",
-        "userAddFailed": "Failed to add user",
+        "userInvited": "Invitation sent",
+        "userInviteFailed": "Failed to send invitation",
         "userRemoved": "User removed successfully",
         "userRemoveFailed": "Failed to remove user",
         "userUpdated": "User updated successfully",

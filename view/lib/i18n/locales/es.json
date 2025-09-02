@@ -550,10 +550,10 @@
     },
     "teams": {
       "addMember": {
-        "button": "Agregar Usuario",
+        "button": "Invitar Usuario",
         "dialog": {
-          "title": "Agregar Nuevo Usuario",
-          "description": "Agregar un nuevo usuario a tu organización",
+          "title": "Invitar Nuevo Usuario",
+          "description": "Invitar un nuevo usuario a tu organización",
           "fields": {
             "name": {
               "label": "Nombre",
@@ -669,8 +669,8 @@
       },
       "noMembers": "No se encontraron miembros del equipo",
       "messages": {
-        "userAdded": "Usuario agregado exitosamente",
-        "userAddFailed": "Error al agregar usuario",
+        "userInvited": "Invitación enviada",
+        "userInviteFailed": "Error al enviar la invitación",
         "userRemoved": "Usuario eliminado exitosamente",
         "userRemoveFailed": "Error al eliminar usuario",
         "userUpdated": "Usuario actualizado exitosamente",

@@ -123,7 +123,6 @@ export default function ContainersPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <TypographyMuted>Page size</TypographyMuted>
             <Select
               value={String(pageSize)}
               onValueChange={(v) => {
@@ -144,7 +143,6 @@ export default function ContainersPage() {
               </SelectContent>
             </Select>
             <div className="hidden sm:flex items-center gap-2 ml-2">
-              <TypographyMuted>View</TypographyMuted>
               <Button
                 variant="outline"
                 size="icon"

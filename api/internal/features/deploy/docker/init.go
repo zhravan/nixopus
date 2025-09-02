@@ -99,13 +99,13 @@ func NewDockerClient() *client.Client {
 // ListAllContainers returns a list of all containers running on the host, along with their
 // IDs, names, and statuses. The returned list is sorted by container ID in ascending order.
 //
-// If an error occurs while listing the containers, it panics with the error.
+// If an error occurs while listing the containers, it returns the error (no panic).
 func (s *DockerService) ListAllContainers() ([]container.Summary, error) {
     containers, err := s.Cli.ContainerList(s.Ctx, container.ListOptions{
         All: true,
     })
     if err != nil {
-        panic(err)
+        return nil, err
     }
 
     return containers, nil

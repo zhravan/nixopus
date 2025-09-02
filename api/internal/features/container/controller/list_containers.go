@@ -30,9 +30,9 @@ func (c *ContainerController) ListContainers(fuegoCtx fuego.ContextNoBody) (*sha
 			Status: http.StatusInternalServerError,
 		}
 	}
-    // Build summaries, then search/sort/paginate
-    rows := summarizeContainers(containers)
-    pageRows, totalCount := applySearchSortPaginate(rows, params)
+	// Build summaries, then search/sort/paginate
+	rows := summarizeContainers(containers)
+	pageRows, totalCount := applySearchSortPaginate(rows, params)
 
 	result := c.appendContainerInfo(pageRows, containers)
 
@@ -42,24 +42,24 @@ func (c *ContainerController) ListContainers(fuegoCtx fuego.ContextNoBody) (*sha
 		Data: map[string]interface{}{
 			"containers":  result,
 			"total_count": totalCount,
-            "page":        params.Page,
-            "page_size":   params.PageSize,
-            "sort_by":     params.SortBy,
-            "sort_order":  params.SortOrder,
-            "search":      params.Search,
-            "status":      params.Status,
-            "name":        params.Name,
-            "image":       params.Image,
-        },
-    }, nil
+			"page":        params.Page,
+			"page_size":   params.PageSize,
+			"sort_by":     params.SortBy,
+			"sort_order":  params.SortOrder,
+			"search":      params.Search,
+			"status":      params.Status,
+			"name":        params.Name,
+			"image":       params.Image,
+		},
+	}, nil
 }
 
 func parseContainerListParams(r *http.Request) containertypes.ContainerListParams {
-    q := r.URL.Query()
-    pageStr := q.Get("page")
-    pageSizeStr := q.Get("page_size")
-    sortBy := strings.ToLower(strings.TrimSpace(q.Get("sort_by")))
-    sortOrder := strings.ToLower(strings.TrimSpace(q.Get("sort_order")))
+	q := r.URL.Query()
+	pageStr := q.Get("page")
+	pageSizeStr := q.Get("page_size")
+	sortBy := strings.ToLower(strings.TrimSpace(q.Get("sort_by")))
+	sortOrder := strings.ToLower(strings.TrimSpace(q.Get("sort_order")))
 
 	if pageStr == "" {
 		pageStr = "1"
@@ -83,101 +83,111 @@ func parseContainerListParams(r *http.Request) containertypes.ContainerListParam
 		pageSize = 10
 	}
 
-    return containertypes.ContainerListParams{
-        Page:      page,
-        PageSize:  pageSize,
-        Search:    strings.TrimSpace(q.Get("search")),
-        SortBy:    sortBy,
-        SortOrder: sortOrder,
-        Status:    strings.TrimSpace(q.Get("status")),
-        Name:      strings.TrimSpace(q.Get("name")),
-        Image:     strings.TrimSpace(q.Get("image")),
-    }
+	return containertypes.ContainerListParams{
+		Page:      page,
+		PageSize:  pageSize,
+		Search:    strings.TrimSpace(q.Get("search")),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+		Status:    strings.TrimSpace(q.Get("status")),
+		Name:      strings.TrimSpace(q.Get("name")),
+		Image:     strings.TrimSpace(q.Get("image")),
+	}
 }
 
 func buildDockerFilters(p containertypes.ContainerListParams) filters.Args {
-    f := filters.NewArgs()
-    if p.Status != "" {
-        f.Add("status", p.Status)
-    }
-    if p.Name != "" {
-        f.Add("name", p.Name)
-    }
-    if p.Image != "" {
-        f.Add("ancestor", p.Image)
-    }
-    return f
+	f := filters.NewArgs()
+	if p.Status != "" {
+		f.Add("status", p.Status)
+	}
+	if p.Name != "" {
+		f.Add("name", p.Name)
+	}
+	if p.Image != "" {
+		f.Add("ancestor", p.Image)
+	}
+	return f
 }
 
 func summarizeContainers(summaries []container.Summary) []containertypes.ContainerListRow {
-    rows := make([]containertypes.ContainerListRow, 0, len(summaries))
-    for _, csum := range summaries {
-        name := ""
-        if len(csum.Names) > 0 {
-            n := csum.Names[0]
-            if len(n) > 1 {
-                name = n[1:]
-            } else {
-                name = n
-            }
-        }
-        rows = append(rows, containertypes.ContainerListRow{
-            ID:      csum.ID,
-            Name:    name,
-            Image:   csum.Image,
-            Status:  csum.Status,
-            State:   csum.State,
-            Created: csum.Created,
-            Labels:  csum.Labels,
-        })
-    }
-    return rows
+	rows := make([]containertypes.ContainerListRow, 0, len(summaries))
+	for _, csum := range summaries {
+		name := ""
+		if len(csum.Names) > 0 {
+			n := csum.Names[0]
+			if len(n) > 1 {
+				name = n[1:]
+			} else {
+				name = n
+			}
+		}
+		rows = append(rows, containertypes.ContainerListRow{
+			ID:      csum.ID,
+			Name:    name,
+			Image:   csum.Image,
+			Status:  csum.Status,
+			State:   csum.State,
+			Created: csum.Created,
+			Labels:  csum.Labels,
+		})
+	}
+	return rows
 }
 
 func applySearchSortPaginate(rows []containertypes.ContainerListRow, p containertypes.ContainerListParams) ([]containertypes.ContainerListRow, int) {
-    if p.Search != "" {
-        lower := strings.ToLower(p.Search)
-        filtered := make([]containertypes.ContainerListRow, 0, len(rows))
-        for _, r := range rows {
-            if strings.Contains(strings.ToLower(r.Name), lower) ||
-                strings.Contains(strings.ToLower(r.Image), lower) ||
-                strings.Contains(strings.ToLower(r.Status), lower) {
-                filtered = append(filtered, r)
-            }
-        }
-        rows = filtered
-    }
+	if p.Search != "" {
+		lower := strings.ToLower(p.Search)
+		filtered := make([]containertypes.ContainerListRow, 0, len(rows))
+		for _, r := range rows {
+			if strings.Contains(strings.ToLower(r.Name), lower) ||
+				strings.Contains(strings.ToLower(r.Image), lower) ||
+				strings.Contains(strings.ToLower(r.Status), lower) {
+				filtered = append(filtered, r)
+			}
+		}
+		rows = filtered
+	}
 
-    sort.Slice(rows, func(i, j int) bool {
-        var less bool
-        switch p.SortBy {
-        case "status":
-            less = strings.ToLower(rows[i].Status) < strings.ToLower(rows[j].Status)
-        case "name":
-            less = strings.ToLower(rows[i].Name) < strings.ToLower(rows[j].Name)
-        default:
-            less = rows[i].Created < rows[j].Created
-        }
-        if p.SortOrder == "desc" {
-            return !less
-        }
-        return less
-    })
+	sort.SliceStable(rows, func(i, j int) bool {
+		switch p.SortBy {
+		case "status":
+			a := strings.ToLower(rows[i].Status)
+			b := strings.ToLower(rows[j].Status)
+			if p.SortOrder == "desc" {
+				return a > b
+			}
+			return a < b
+		case "name":
+			a := strings.ToLower(rows[i].Name)
+			b := strings.ToLower(rows[j].Name)
+			if p.SortOrder == "desc" {
+				return a > b
+			}
+			return a < b
+		default:
+			ai := rows[i].Created
+			aj := rows[j].Created
+			if p.SortOrder == "desc" {
+				return ai > aj
+			}
+			return ai < aj
+		}
+	})
 
-    totalCount := len(rows)
-    start := (p.Page - 1) * p.PageSize
-    if start > totalCount {
-        start = totalCount
-    }
-    end := start + p.PageSize
-    if end > totalCount {
-        end = totalCount
-    }
-    return rows[start:end], totalCount
+	totalCount := len(rows)
+	start := (p.Page - 1) * p.PageSize
+	if start > totalCount {
+		start = totalCount
+	}
+	end := start + p.PageSize
+	if end > totalCount {
+		end = totalCount
+	}
+	return rows[start:end], totalCount
 }
 
 func (c *ContainerController) appendContainerInfo(pageRows []containertypes.ContainerListRow, summaries []container.Summary) []containertypes.Container {
-    result := make([]containertypes.Container, 0, len(pageRows))
+	result := make([]containertypes.Container, 0, len(pageRows))
 	for _, r := range pageRows {
 		info, err := c.dockerService.GetContainerById(r.ID)
 		if err != nil {

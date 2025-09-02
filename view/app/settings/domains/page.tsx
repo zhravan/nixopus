@@ -14,7 +14,7 @@ import Skeleton from '@/app/file-manager/components/skeleton/Skeleton';
 import DisabledFeature from '@/components/features/disabled-feature';
 import { FeatureNames } from '@/types/feature-flags';
 import { ResourceGuard } from '@/components/rbac/PermissionGuard';
-import { TypographyH2 } from '@/components/ui/typography';
+import PageLayout from '@/components/layout/page-layout';
 
 const Page = () => {
   const { t } = useTranslation();
@@ -56,7 +56,7 @@ const Page = () => {
 
   return (
     <ResourceGuard resource="domain" action="read">
-      <div className="container mx-auto py-6 space-y-8 max-w-4xl">
+      <PageLayout maxWidth="6xl" padding="md" spacing="lg">
         <DashboardPageHeader
           label={t('settings.domains.page.title')}
           description={t('settings.domains.page.description')}
@@ -87,7 +87,7 @@ const Page = () => {
         {addDomainDialogOpen && (
           <UpdateDomainDialog open={addDomainDialogOpen} setOpen={setAddDomainDialogOpen} />
         )}
-      </div>
+      </PageLayout>
     </ResourceGuard>
   );
 };

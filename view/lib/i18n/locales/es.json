@@ -629,6 +629,7 @@
         "loading": "Cargando actividades recientes...",
         "error": "Error al cargar las actividades recientes",
         "noActivities": "No se encontraron actividades recientes",
+        "viewAll": "Ver Todo",
         "actions": {
           "create": "{username} creó un nuevo {resource}",
           "update": "{username} actualizó un {resource}",
@@ -711,6 +712,14 @@
       "verifyError": "Código de verificación inválido"
     }
   },
+  "activities": {
+    "title": "Actividades",
+    "description": "Ver todas las actividades y cambios en tu organización",
+    "list": {
+      "title": "Actividades del Equipo",
+      "description": "Actividades recientes en tu organización"
+    }
+  },
   "languages": {
     "en": "Inglés",
     "es": "Español",
@@ -786,6 +795,16 @@
     "header": {
       "title": "Gestor de Archivos",
       "subtitle": "Administra tus archivos aquí"
+    },
+    "contextMenu": {
+      "info": "Detalles",
+      "rename": "Renombrar",
+      "copy": "Copiar",
+      "move": "Mover",
+      "share": "Compartir",
+      "download": "Descargar",
+      "delete": "Eliminar",
+      "cancel": "Cancelar"
     },
     "actions": {
       "upload": "Subir Archivo",

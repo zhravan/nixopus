@@ -1,17 +1,19 @@
 package controller
 
 import (
-	"net/http"
+    "net/http"
+    "strings"
 
-	"github.com/go-fuego/fuego"
-	"github.com/google/uuid"
-	inv_service "github.com/raghavyuva/nixopus-api/internal/features/invitations/service"
-	"github.com/raghavyuva/nixopus-api/internal/features/logger"
-	"github.com/raghavyuva/nixopus-api/internal/features/notification"
-	org_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
-	"github.com/raghavyuva/nixopus-api/internal/storage"
-	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
-	"github.com/raghavyuva/nixopus-api/internal/utils"
+    "github.com/go-fuego/fuego"
+    "github.com/google/uuid"
+    "github.com/raghavyuva/nixopus-api/internal/config"
+    inv_service "github.com/raghavyuva/nixopus-api/internal/features/invitations/service"
+    "github.com/raghavyuva/nixopus-api/internal/features/logger"
+    "github.com/raghavyuva/nixopus-api/internal/features/notification"
+    org_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
+    "github.com/raghavyuva/nixopus-api/internal/storage"
+    shared_types "github.com/raghavyuva/nixopus-api/internal/types"
+    "github.com/raghavyuva/nixopus-api/internal/utils"
 )
 
 type Controller struct {
@@ -64,15 +66,24 @@ func (c *Controller) CreateInvite(ctx fuego.ContextWithBody[CreateInviteRequest]
 }
 
 func (c *Controller) AcceptInvite(ctx fuego.ContextNoBody) (*shared_types.Response, error) {
-	token := ctx.QueryParam("token")
-	if token == "" {
-		return nil, fuego.HTTPError{Status: http.StatusBadRequest, Detail: "token is required"}
-	}
-	res, err := c.svc.AcceptInvite(token)
-	if err != nil {
-		return nil, fuego.HTTPError{Status: http.StatusBadRequest, Err: err}
-	}
-	return &shared_types.Response{Status: "success", Message: "Invitation accepted", Data: res}, nil
+    token := ctx.QueryParam("token")
+    if token == "" {
+        return nil, fuego.HTTPError{Status: http.StatusBadRequest, Detail: "token is required"}
+    }
+    res, err := c.svc.AcceptInvite(token)
+    if err != nil {
+        return nil, fuego.HTTPError{Status: http.StatusBadRequest, Err: err}
+    }
+    // On successful acceptance, redirect to hosted frontend URL instead of returning JSON.
+    // Uses CORS.AllowedOrigin as the public frontend origin.
+    frontend := strings.TrimSpace(config.AppConfig.CORS.AllowedOrigin)
+    if frontend != "" {
+        frontend = strings.TrimRight(frontend, "/")
+        http.Redirect(ctx.Response(), ctx.Request(), frontend+"/?invite=accepted", http.StatusFound)
+        return nil, nil
+    }
+    // Fallback to JSON if frontend origin is not configured
+    return &shared_types.Response{Status: "success", Message: "Invitation accepted", Data: res}, nil
 }
 
 // GetOrganizationUsersWithInviteStatus returns users in org and pending invites

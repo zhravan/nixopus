@@ -33,6 +33,7 @@ from app.commands.conf.base import BaseEnvironmentManager
 import re
 from app.commands.service.up import Up, UpConfig
 from app.commands.proxy.load import Load, LoadConfig
+from app.commands.service.base import BaseDockerService
 from .ssh import SSH, SSHConfig
 from .messages import (
     installation_failed,
@@ -187,33 +188,21 @@ class Install:
             self.logger.debug(f"Compose file not found at {compose_file}; skipping docker cleanup")
             return
 
-        cmd = [
-            "docker",
-            "compose",
-            "-f",
-            compose_file,
-            "down",
-            "--rmi",
-            "all",
-            "--volumes",
-            "--remove-orphans",
-        ]
-
+        # Use shared cleanup helper to keep behavior consistent across commands
         try:
-            self.logger.debug(f"Executing docker cleanup: {' '.join(cmd)}")
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-            stdout = (result.stdout or "").strip()
-            stderr = (result.stderr or "").strip()
-            if stdout:
-                self.logger.debug(stdout)
-            if stderr:
-                self.logger.debug(stderr)
-            if result.returncode == 0:
+            success, output = BaseDockerService.cleanup_docker_resources(
+                logger=self.logger,
+                compose_file=compose_file,
+                remove_images="all",
+                remove_volumes=True,
+                remove_orphans=True,
+            )
+            if success:
                 self.logger.info("Docker resources cleaned (images, volumes, orphans)")
             else:
-                self.logger.warning(f"Docker cleanup exited with code {result.returncode}; continuing")
+                self.logger.warning("Docker cleanup did not fully succeed; continuing")
         except Exception as e:
-            # Do not fail installation because cleanup is best effort
+            # best effort cleanup, hence safely ignore errors
             self.logger.warning(f"Failed to cleanup docker resources: {e}")
 
     def _handle_installation_error(self, error, context=""):

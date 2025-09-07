@@ -177,7 +177,9 @@ class Install:
         compose_file = self._get_config("compose_file_path")
 
         if self.dry_run:
-            self.logger.info("[dry-run] Would run: docker compose -f {compose_file} down --rmi all --volumes --remove-orphans")
+            self.logger.info(
+                f"[dry-run] Would run: docker compose -f {compose_file} down --rmi all --volumes --remove-orphans"
+            )
             return
 
         if not compose_file or not os.path.exists(compose_file):

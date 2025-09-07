@@ -1,5 +1,6 @@
 import typer
 import os
+import subprocess
 import yaml
 import json
 import shutil
@@ -96,6 +97,11 @@ class Install:
             ("Starting services", self._start_services),
         ]
         
+        # If force is enabled, add a Docker cleanup step before cloning to ensure fresh images/containers
+        if self.force:
+            # Insert cleanup as the third step (index 2), right before cloning the repo
+            steps.insert(2, ("Cleaning up Docker resources", self._cleanup_docker))
+
         # Only add proxy steps if both api_domain and view_domain are provided
         if self.api_domain and self.view_domain:
             steps.append(("Loading proxy configuration", self._load_proxy))
@@ -129,6 +135,43 @@ class Install:
             self._handle_installation_error(e)
             self.logger.error(f"{installation_failed}: {str(e)}")
             raise typer.Exit(1)
+
+    def _cleanup_docker(self):
+        if self.dry_run:
+            self.logger.info("[dry-run] Would run: docker compose down --rmi all --volumes --remove-orphans")
+            return
+
+        compose_file = self._get_config('compose_file_path')
+        if not os.path.exists(compose_file):
+            # Nothing to clean specific to this deployment
+            self.logger.debug(f"Compose file not found at {compose_file}; skipping docker cleanup")
+            return
+
+        cmd = [
+            "docker", "compose",
+            "-f", compose_file,
+            "down",
+            "--rmi", "all",
+            "--volumes",
+            "--remove-orphans",
+        ]
+
+        try:
+            self.logger.debug(f"Executing docker cleanup: {' '.join(cmd)}")
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            stdout = (result.stdout or '').strip()
+            stderr = (result.stderr or '').strip()
+            if stdout:
+                self.logger.debug(stdout)
+            if stderr:
+                self.logger.debug(stderr)
+            if result.returncode == 0:
+                self.logger.info("Docker resources cleaned (images, volumes, orphans)")
+            else:
+                self.logger.warning(f"Docker cleanup exited with code {result.returncode}; continuing")
+        except Exception as e:
+            # Do not fail installation because cleanup is best-effort
+            self.logger.warning(f"Failed to cleanup docker resources: {e}")
 
     def _handle_installation_error(self, error, context=""):
         context_msg = f" during {context}" if context else ""

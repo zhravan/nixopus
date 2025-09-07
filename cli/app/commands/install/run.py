@@ -213,7 +213,7 @@ class Install:
             else:
                 self.logger.warning(f"Docker cleanup exited with code {result.returncode}; continuing")
         except Exception as e:
-            # Do not fail installation because cleanup is best-effort
+            # Do not fail installation because cleanup is best effort
             self.logger.warning(f"Failed to cleanup docker resources: {e}")
 
     def _handle_installation_error(self, error, context=""):

@@ -1,3 +1,12 @@
+# [0.1.0-alpha.25](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.24...v0.1.0-alpha.25) (2025-09-10)
+
+
+### Bug Fixes
+
+* go sum and go mod conflicts ([5efb26d](https://github.com/raghavyuva/nixopus/commit/5efb26db2e24cdd52d0979041bc300c34096ad81))
+
+
+
 # [0.1.0-alpha.24](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.23...v0.1.0-alpha.24) (2025-09-10)
 
 

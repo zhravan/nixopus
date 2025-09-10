@@ -14,7 +14,7 @@ import Skeleton from '@/app/file-manager/components/skeleton/Skeleton';
 import DisabledFeature from '@/components/features/disabled-feature';
 import { FeatureNames } from '@/types/feature-flags';
 import { ResourceGuard } from '@/components/rbac/PermissionGuard';
-import { TypographyH2 } from '@/components/ui/typography';
+import PageLayout from '@/components/layout/page-layout';
 
 const Page = () => {
   const { t } = useTranslation();
@@ -56,7 +56,7 @@ const Page = () => {
 
   return (
     <ResourceGuard resource="domain" action="read">
-      <div className="container mx-auto py-6 space-y-8 max-w-4xl">
+      <PageLayout maxWidth="6xl" padding="md" spacing="lg">
         <DashboardPageHeader
           label={t('settings.domains.page.title')}
           description={t('settings.domains.page.description')}
@@ -72,10 +72,7 @@ const Page = () => {
           </Alert>
         ) : domains && domains.length > 0 ? (
           <>
-            <div className="flex justify-between items-center mt-8">
-              <TypographyH2 className="text-xl font-medium text-foreground">
-                {t('settings.domains.page.domainsList.title')}
-              </TypographyH2>
+            <div className="flex justify-end items-center mt-8">
               <ResourceGuard resource="domain" action="create">
                 <Button variant="default" onClick={() => setAddDomainDialogOpen(true)}>
                   {t('settings.domains.page.domainsList.addButton')}
@@ -90,7 +87,7 @@ const Page = () => {
         {addDomainDialogOpen && (
           <UpdateDomainDialog open={addDomainDialogOpen} setOpen={setAddDomainDialogOpen} />
         )}
-      </div>
+      </PageLayout>
     </ResourceGuard>
   );
 };

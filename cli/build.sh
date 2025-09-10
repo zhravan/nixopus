@@ -2,6 +2,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -138,6 +141,22 @@ EOF
     log_success "Spec file created: $SPEC_FILE"
 }
 
+run_pyinstaller_build() {
+    # Skip PyInstaller when in dev mode or explicitly disabled
+    if [[ "$dev_mode" == true || "$skip_pyinstaller" == true ]]; then
+        log_warning "Skipping PyInstaller build (dev mode or skip requested)"
+        return
+    fi
+    # Ensure spec file exists even if manually deleted
+    if [[ ! -f "$SPEC_FILE" ]]; then
+        log_warning "Spec file missing; regenerating..."
+        create_spec_file
+    fi
+
+    log_info "Building with PyInstaller on host..."
+    poetry run pyinstaller --clean --noconfirm $SPEC_FILE
+}
+
 build_wheel() {
     log_info "Building wheel package..."
     
@@ -149,7 +168,7 @@ build_wheel() {
 build_binary() {
     log_info "Building binary"
     
-    poetry run pyinstaller --clean --noconfirm $SPEC_FILE
+    run_pyinstaller_build
     
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')
     ARCH=$(uname -m)
@@ -161,36 +180,73 @@ build_binary() {
     
     BINARY_DIR_NAME="${APP_NAME}_${OS}_${ARCH}"
     
-    
-    if [[ -d "$BUILD_DIR/$APP_NAME" ]]; then        
+    mkdir -p "$BUILD_DIR"
+
+    # If PyInstaller produced the default folder, rename to OS/ARCH-specific name
+    if [[ -d "$BUILD_DIR/$APP_NAME" ]]; then
         mv "$BUILD_DIR/$APP_NAME" "$BUILD_DIR/$BINARY_DIR_NAME"
-
-        
-        cat > "$BUILD_DIR/$APP_NAME" << EOF
-#!/bin/bash
-# Nixopus CLI wrapper
-SCRIPT_DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-exec "\$SCRIPT_DIR/$BINARY_DIR_NAME/$APP_NAME" "\$@"
-EOF
-        chmod +x "$BUILD_DIR/$APP_NAME"
-
-        log_success "Binary directory built: $BUILD_DIR/$BINARY_DIR_NAME/"
-        log_success "Wrapper script created: $BUILD_DIR/$APP_NAME"
     else
-        log_error "Build failed - directory $BUILD_DIR/$APP_NAME not found"
-        exit 1
+        log_warning "No PyInstaller output directory found; proceeding with dev-mode wrapper only"
     fi
+
+    # Always (re)create the wrapper launcher
+    cat > "$BUILD_DIR/$APP_NAME" << 'EOF'
+#!/bin/bash
+
+# Nixopus CLI wrapper
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Detect OS/ARCH for bundled binary name
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+ARCH="$(uname -m)"
+case "$ARCH" in
+    x86_64) ARCH="amd64" ;;
+    aarch64|arm64) ARCH="arm64" ;;
+esac
+
+APP_NAME="nixopus"
+BINARY_DIR_NAME="${APP_NAME}_${OS}_${ARCH}"
+BUNDLED_BIN="${SCRIPT_DIR}/${BINARY_DIR_NAME}/${APP_NAME}"
+
+# If PyInstaller bundled binary exists, prefer it
+if [[ -x "$BUNDLED_BIN" ]]; then
+    exec "$BUNDLED_BIN" "$@"
+fi
+
+# Dev-mode fallback: use an isolated venv next to this wrapper
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+VENV_DIR="${SCRIPT_DIR}/.venv"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+if [[ ! -d "$VENV_DIR" ]]; then
+    echo "[INFO] Creating local virtualenv at $VENV_DIR"
+    "$PYTHON_BIN" -m venv "$VENV_DIR"
+    "$VENV_DIR/bin/python" -m pip install -U pip wheel
+    # Install the CLI project in editable mode to use local sources
+    "$VENV_DIR/bin/python" -m pip install -e "$PROJECT_DIR"
+fi
+
+exec "$VENV_DIR/bin/python" -m app.main "$@"
+EOF
+    chmod +x "$BUILD_DIR/$APP_NAME"
+
+    if [[ -d "$BUILD_DIR/$BINARY_DIR_NAME" ]]; then
+        log_success "Binary directory built: $BUILD_DIR/$BINARY_DIR_NAME/"
+    fi
+    log_success "Wrapper script created: $BUILD_DIR/$APP_NAME"
 }
 
 test_binary() {
-    
+
     log_info "Testing binary..."
 
     WRAPPER_PATH="$BUILD_DIR/$APP_NAME"
-    
+
     if [[ -f "$WRAPPER_PATH" ]]; then
         chmod +x "$WRAPPER_PATH"
-        
+
         if "$WRAPPER_PATH" --version; then
             log_success "Binary test passed"
         else
@@ -220,11 +276,19 @@ create_release_archive() {
     cd $BUILD_DIR
     
 
+    # Collect files that actually exist
+    FILES_TO_INCLUDE=("$APP_NAME")
+    if [[ -d "$BINARY_DIR_NAME" ]]; then
+        FILES_TO_INCLUDE+=("$BINARY_DIR_NAME")
+    else
+        log_warning "Bundled binary directory $BINARY_DIR_NAME not found; archiving wrapper only"
+    fi
+
     if [[ "$OS" == "darwin" || "$OS" == "linux" ]]; then
-        tar -czf "${ARCHIVE_NAME}.tar.gz" "$BINARY_DIR_NAME" "$APP_NAME"
+        tar -czf "${ARCHIVE_NAME}.tar.gz" "${FILES_TO_INCLUDE[@]}"
         log_success "Archive created: $BUILD_DIR/${ARCHIVE_NAME}.tar.gz"
     elif [[ "$OS" == "mingw"* || "$OS" == "cygwin"* || "$OS" == "msys"* ]]; then
-        zip -r "${ARCHIVE_NAME}.zip" "$BINARY_DIR_NAME" "$APP_NAME"
+        zip -r "${ARCHIVE_NAME}.zip" "${FILES_TO_INCLUDE[@]}"
         log_success "Archive created: $BUILD_DIR/${ARCHIVE_NAME}.zip"
     fi
     
@@ -245,6 +309,8 @@ show_usage() {
     echo "  --no-test     Skip binary testing"
     echo "  --no-archive  Skip creating release archive"
     echo "  --no-cleanup  Skip cleanup of temporary files"
+    echo "  --dev         Development mode (skip PyInstaller, wrapper uses local .venv)"
+    echo "  --skip-pyinstaller  Skip PyInstaller build explicitly"
     echo "  --help        Show this help message"
     echo ""
     echo "Example:"
@@ -257,6 +323,8 @@ main() {
     local skip_test=false
     local skip_archive=false
     local skip_cleanup=false
+    skip_pyinstaller=false
+    dev_mode=false
     
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -270,6 +338,15 @@ main() {
                 ;;
             --no-cleanup)
                 skip_cleanup=true
+                shift
+                ;;
+            --skip-pyinstaller)
+                skip_pyinstaller=true
+                shift
+                ;;
+            --dev)
+                dev_mode=true
+                skip_pyinstaller=true
                 shift
                 ;;
             --help)

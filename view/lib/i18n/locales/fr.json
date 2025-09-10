@@ -630,6 +630,7 @@
         "loading": "Chargement des activités récentes...",
         "error": "Échec du chargement des activités récentes",
         "noActivities": "Aucune activité récente trouvée",
+        "viewAll": "Voir Tout",
         "actions": {
           "create": "{username} a créé un nouveau {resource}",
           "update": "{username} a mis à jour un {resource}",
@@ -712,6 +713,14 @@
       "verifyError": "Code de vérification invalide"
     }
   },
+  "activities": {
+    "title": "Activités",
+    "description": "Voir toutes les activités et changements dans votre organisation",
+    "list": {
+      "title": "Activités d'Équipe",
+      "description": "Activités récentes dans votre organisation"
+    }
+  },
   "languages": {
     "en": "Anglais",
     "es": "Espagnol",
@@ -787,6 +796,16 @@
     "header": {
       "title": "Gestionnaire de Fichiers",
       "subtitle": "Gérez vos fichiers ici"
+    },
+    "contextMenu": {
+      "info": "Détails",
+      "rename": "Renommer",
+      "copy": "Copier",
+      "move": "Déplacer",
+      "share": "Partager",
+      "download": "Télécharger",
+      "delete": "Supprimer",
+      "cancel": "Annuler"
     },
     "actions": {
       "upload": "Télécharger un Fichier",
@@ -899,6 +918,13 @@
       }
     },
     "configuration": {
+      "sections": {
+        "basicConfiguration": "Configuration de Base",
+        "dockerConfiguration": "Configuration Docker",
+        "environmentVariables": "Variables d'Environnement",
+        "commands": "Commandes",
+        "deploymentInformation": "Informations de Déploiement"
+      },
       "fields": {
         "applicationName": {
           "label": "Nom de l'Application",

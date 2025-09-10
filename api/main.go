@@ -28,7 +28,7 @@ func main() {
 	app := storage.NewApp(&types.Config{}, store, ctx)
 
 	// Initialize task queue (Redis) and start consumers alongside the server
-	redisClient, err := redisclient.New(config.AppConfig.RedisURL)
+	redisClient, err := redisclient.New(config.AppConfig.Redis.URL)
 	if err != nil {
 		log.Fatalf("failed to create redis client for queue due to %v", err)
 	}

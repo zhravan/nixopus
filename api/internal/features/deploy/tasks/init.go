@@ -13,18 +13,30 @@ import (
 )
 
 var (
-	onceQueues            sync.Once
-	CreateDeploymentQueue taskq.Queue
-	TaskCreateDeployment  *taskq.Task
-	UpdateDeploymentQueue taskq.Queue
-	TaskUpdateDeployment  *taskq.Task
+    onceQueues            sync.Once
+    CreateDeploymentQueue taskq.Queue
+    TaskCreateDeployment  *taskq.Task
+    UpdateDeploymentQueue taskq.Queue
+    TaskUpdateDeployment  *taskq.Task
+    ReDeployQueue         taskq.Queue
+    TaskReDeploy          *taskq.Task
+    RollbackQueue         taskq.Queue
+    TaskRollback          *taskq.Task
+    RestartQueue          taskq.Queue
+    TaskRestart           *taskq.Task
 )
 
 var (
-	TASK_CREATE_DEPLOYMENT  = "task_create_deployment"
-	QUEUE_CREATE_DEPLOYMENT = "create-deployment"
-	QUEUE_UPDATE_DEPLOYMENT = "update-deployment"
-	TASK_UPDATE_DEPLOYMENT  = "task_update_deployment"
+    TASK_CREATE_DEPLOYMENT  = "task_create_deployment"
+    QUEUE_CREATE_DEPLOYMENT = "create-deployment"
+    QUEUE_UPDATE_DEPLOYMENT = "update-deployment"
+    TASK_UPDATE_DEPLOYMENT  = "task_update_deployment"
+    QUEUE_REDEPLOYMENT      = "redeploy-deployment"
+    TASK_REDEPLOYMENT       = "task_redeploy_deployment"
+    QUEUE_ROLLBACK          = "rollback-deployment"
+    TASK_ROLLBACK           = "task_rollback_deployment"
+    QUEUE_RESTART           = "restart-deployment"
+    TASK_RESTART            = "task_restart_deployment"
 )
 
 func (t *TaskService) SetupCreateDeploymentQueue() {
@@ -62,18 +74,90 @@ func (t *TaskService) SetupCreateDeploymentQueue() {
 			BufferSize:          100,
 		})
 
-		TaskUpdateDeployment = taskq.RegisterTask(&taskq.TaskOptions{
-			Name: TASK_UPDATE_DEPLOYMENT,
-			Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
-				fmt.Println("Updating deployment")
-				err := t.HandleUpdateDeployment(ctx, data)
-				if err != nil {
-					return err
-				}
-				return nil
-			},
-		})
-	})
+        TaskUpdateDeployment = taskq.RegisterTask(&taskq.TaskOptions{
+            Name: TASK_UPDATE_DEPLOYMENT,
+            Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
+                fmt.Println("Updating deployment")
+                err := t.HandleUpdateDeployment(ctx, data)
+                if err != nil {
+                    return err
+                }
+                return nil
+            },
+        })
+
+        // Redeploy queue and task registration
+        ReDeployQueue = queue.RegisterQueue(&taskq.QueueOptions{
+            Name:                QUEUE_REDEPLOYMENT,
+            ConsumerIdleTimeout: 10 * time.Minute,
+            MinNumWorker:        1,
+            MaxNumWorker:        10,
+            ReservationSize:     10,
+            ReservationTimeout:  10 * time.Second,
+            WaitTimeout:         5 * time.Second,
+            BufferSize:          100,
+        })
+
+        TaskReDeploy = taskq.RegisterTask(&taskq.TaskOptions{
+            Name: TASK_REDEPLOYMENT,
+            Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
+                fmt.Println("Redeploying application")
+                err := t.HandleReDeploy(ctx, data)
+                if err != nil {
+                    return err
+                }
+                return nil
+            },
+        })
+
+        // Rollback queue and task registration
+        RollbackQueue = queue.RegisterQueue(&taskq.QueueOptions{
+            Name:                QUEUE_ROLLBACK,
+            ConsumerIdleTimeout: 10 * time.Minute,
+            MinNumWorker:        1,
+            MaxNumWorker:        10,
+            ReservationSize:     10,
+            ReservationTimeout:  10 * time.Second,
+            WaitTimeout:         5 * time.Second,
+            BufferSize:          100,
+        })
+
+        TaskRollback = taskq.RegisterTask(&taskq.TaskOptions{
+            Name: TASK_ROLLBACK,
+            Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
+                fmt.Println("Rolling back deployment")
+                err := t.HandleRollback(ctx, data)
+                if err != nil {
+                    return err
+                }
+                return nil
+            },
+        })
+
+        // Restart queue and task registration
+        RestartQueue = queue.RegisterQueue(&taskq.QueueOptions{
+            Name:                QUEUE_RESTART,
+            ConsumerIdleTimeout: 10 * time.Minute,
+            MinNumWorker:        1,
+            MaxNumWorker:        10,
+            ReservationSize:     10,
+            ReservationTimeout:  10 * time.Second,
+            WaitTimeout:         5 * time.Second,
+            BufferSize:          100,
+        })
+
+        TaskRestart = taskq.RegisterTask(&taskq.TaskOptions{
+            Name: TASK_RESTART,
+            Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
+                fmt.Println("Restarting deployment")
+                err := t.HandleRestart(ctx, data)
+                if err != nil {
+                    return err
+                }
+                return nil
+            },
+        })
+    })
 }
 
 func (t *TaskService) StartConsumers(ctx context.Context) error {

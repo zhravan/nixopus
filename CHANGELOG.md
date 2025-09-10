@@ -1,3 +1,12 @@
+# [0.1.0-alpha.24](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.23...v0.1.0-alpha.24) (2025-09-10)
+
+
+### Features
+
+* migrate async tasks to queue setup via taskq ([#385](https://github.com/raghavyuva/nixopus/issues/385)) ([528c6dc](https://github.com/raghavyuva/nixopus/commit/528c6dcee3554bb6ce38a40896cd6d03a4574ff4))
+
+
+
 # [0.1.0-alpha.23](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.22...v0.1.0-alpha.23) (2025-09-10)
 
 

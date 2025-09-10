@@ -41,7 +41,6 @@ var (
 	TASK_RESTART            = "task_restart_deployment"
 )
 
-// Caddy client simple lazy singleton (no interface/once)
 var caddyClient *caddygo.Client
 
 func GetCaddyClient() *caddygo.Client {

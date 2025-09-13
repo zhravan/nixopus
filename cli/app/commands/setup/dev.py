@@ -1,6 +1,10 @@
 import os
+import platform
+import shutil
 import subprocess
 import sys
+import time
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -16,9 +20,6 @@ from app.commands.install.ssh import SSH, SSHConfig
 from app.commands.clone.clone import Clone, CloneConfig
 
 # Import installer infrastructure
-import sys
-import os
-from pathlib import Path
 
 # Add the project root to Python path for installer imports
 current_file = Path(__file__).resolve()
@@ -147,8 +148,6 @@ class DevSetup:
         except Exception as e:
             self.logger.error(f"Setup failed at phase: {e}")
             if self.config.verbose:
-                import traceback
-
                 self.logger.error(traceback.format_exc())
             raise
 
@@ -324,7 +323,7 @@ class DevSetup:
             return
 
         if not INSTALLER_AVAILABLE:
-            self.logger.warning("Installer module not available - using Docker directly for database setup")
+            self.logger.warning("Installer module not available - using Docker directly for database + Redis setup")
             self._setup_database_docker_direct()
             return
 
@@ -347,45 +346,71 @@ class DevSetup:
             raise
 
     def _setup_database_docker_direct(self):
-        """Fallback method to setup database using direct Docker commands"""
-        self.logger.info("Setting up PostgreSQL with Docker directly...")
+        """Fallback method to setup Postgres and Redis using direct Docker commands"""
+        self.logger.info("Setting up PostgreSQL and Redis with Docker directly...")
 
         try:
-            # Check if container already exists
-            check_cmd = ["docker", "ps", "-a", "--format", "{{.Names}}", "--filter", "name=nixopus-db"]
-            result = subprocess.run(check_cmd, capture_output=True, text=True, check=True)
+            # Ensure Docker CLI is available
+            if not shutil.which("docker"):
+                raise Exception(
+                    "Docker is not installed or not in PATH. Please install Docker Desktop (macOS) or Docker Engine (Linux) and ensure it is running."
+                )
 
-            if "nixopus-db" in result.stdout:
+            # PostgreSQL
+            check_db_cmd = ["docker", "ps", "-a", "--format", "{{.Names}}", "--filter", "name=nixopus-db"]
+            db_result = subprocess.run(check_db_cmd, capture_output=True, text=True, check=True)
+            if "nixopus-db" in db_result.stdout:
                 self.logger.info("Database container already exists")
-                return
+            else:
+                db_run_cmd = [
+                    "docker",
+                    "run",
+                    "-d",
+                    "--name",
+                    "nixopus-db",
+                    "-e",
+                    "POSTGRES_USER=postgres",
+                    "-e",
+                    "POSTGRES_PASSWORD=changeme",
+                    "-e",
+                    "POSTGRES_DB=postgres",
+                    "-e",
+                    "POSTGRES_HOST_AUTH_METHOD=trust",
+                    "-p",
+                    f"{self.config.db_port}:5432",
+                    "--health-cmd",
+                    "pg_isready -U postgres -d postgres",
+                    "postgres:14-alpine",
+                ]
+                subprocess.run(db_run_cmd, check=True)
+                self.logger.success("Database container started")
 
-            # Start PostgreSQL container
-            docker_cmd = [
-                "docker",
-                "run",
-                "-d",
-                "--name",
-                "nixopus-db",
-                "-e",
-                "POSTGRES_USER=postgres",
-                "-e",
-                "POSTGRES_PASSWORD=changeme",
-                "-e",
-                "POSTGRES_DB=postgres",
-                "-e",
-                "POSTGRES_HOST_AUTH_METHOD=trust",
-                "-p",
-                f"{self.config.db_port}:5432",
-                "--health-cmd",
-                "pg_isready -U postgres -d postgres",
-                "postgres:14-alpine",
-            ]
-
-            subprocess.run(docker_cmd, check=True)
-            self.logger.success("Database container started")
+            # Redis
+            check_redis_cmd = ["docker", "ps", "-a", "--format", "{{.Names}}", "--filter", "name=nixopus-redis"]
+            redis_result = subprocess.run(check_redis_cmd, capture_output=True, text=True, check=True)
+            if "nixopus-redis" in redis_result.stdout:
+                self.logger.info("Redis container already exists")
+            else:
+                redis_run_cmd = [
+                    "docker",
+                    "run",
+                    "-d",
+                    "--name",
+                    "nixopus-redis",
+                    "-p",
+                    f"{self.config.redis_port}:6379",
+                    "--health-cmd",
+                    "redis-cli ping || exit 1",
+                    "redis:7-alpine",
+                ]
+                subprocess.run(redis_run_cmd, check=True)
+                self.logger.success("Redis container started")
 
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Database setup failed: {e}")
+            self.logger.error(f"Container setup failed: {e}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Infrastructure setup error: {e}")
             raise
 
     def _setup_ssh(self):
@@ -397,6 +422,8 @@ class DevSetup:
             return
 
         try:
+            # Ensure SSH tooling is present (client and, where applicable, server)
+            self._ensure_ssh_tools()
             ssh_config = SSHConfig(
                 path=self.config.ssh_key_path,
                 key_type=self.config.ssh_key_type,
@@ -419,6 +446,59 @@ class DevSetup:
         except Exception as e:
             self.logger.error(f"SSH setup failed: {e}")
             raise
+
+    def _ensure_ssh_tools(self):
+        """Install or guide installing SSH client/server based on OS/distro."""
+        os_name = platform.system().lower()
+
+        def have(cmd: str) -> bool:
+            return shutil.which(cmd) is not None
+
+        if os_name == "darwin":
+            # macOS ships with ssh; server is via Remote Login. Install brew openssh if missing.
+            if not have("ssh"):
+                if have("brew"):
+                    self.logger.info("Installing OpenSSH via Homebrew (ssh client)...")
+                    subprocess.run(["brew", "install", "openssh"], check=True)
+                else:
+                    raise Exception(
+                        "ssh client not found. Install Command Line Tools (xcode-select --install) or Homebrew and 'brew install openssh'."
+                    )
+            # Provide guidance for enabling the server on macOS
+            self.logger.info("For SSH server on macOS, enable 'Remote Login' in System Settings > Sharing.")
+            return
+
+        # Linux: ensure ssh client and server packages
+        try:
+            package_manager = HostInformation.get_package_manager()
+        except Exception as e:
+            self.logger.warning(f"Could not determine package manager for SSH install: {e}")
+            return
+
+        install_cmds = []
+        if package_manager == "apt":
+            install_cmds = [["sudo", "apt-get", "update"], ["sudo", "apt-get", "install", "-y", "openssh-client", "openssh-server"]]
+        elif package_manager in ("yum", "dnf"):
+            pkg = "dnf" if package_manager == "dnf" else "yum"
+            install_cmds = [["sudo", pkg, "install", "-y", "openssh-clients", "openssh-server"]]
+        elif package_manager == "apk":
+            install_cmds = [["sudo", "apk", "add", "openssh-client", "openssh-server"]]
+        elif package_manager == "pacman":
+            install_cmds = [["sudo", "pacman", "-S", "--noconfirm", "openssh"]]
+
+        for cmd in install_cmds:
+            try:
+                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except subprocess.CalledProcessError as e:
+                self.logger.warning(f"SSH install step failed: {' '.join(cmd)} ({e})")
+
+        # Try to enable and start sshd if available (ignore failures)
+        if have("systemctl"):
+            for svc in ["ssh", "sshd", "ssh.service", "sshd.service"]:
+                try:
+                    subprocess.run(["sudo", "systemctl", "enable", "--now", svc], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                except Exception:
+                    pass
 
     def _configure_environment(self):
         """Phase 7: Configure environment variables and service configuration"""
@@ -445,8 +525,6 @@ class DevSetup:
         api_env = self.workspace_path / "api" / ".env"
 
         if api_env_sample.exists():
-            import shutil
-
             shutil.copy2(api_env_sample, api_env)
 
             # Update API environment variables
@@ -455,6 +533,7 @@ class DevSetup:
                 {
                     "PORT": str(self.config.api_port),
                     "DB_PORT": str(self.config.db_port),
+                    "REDIS_URL": f"redis://localhost:{self.config.redis_port}",
                     "ALLOWED_ORIGIN": f"http://localhost:{self.config.view_port}",
                     "SSH_PRIVATE_KEY": os.path.expanduser(self.config.ssh_key_path),
                     "SSH_HOST": "localhost",
@@ -474,8 +553,6 @@ class DevSetup:
         view_env = self.workspace_path / "view" / ".env"
 
         if view_env_sample.exists():
-            import shutil
-
             shutil.copy2(view_env_sample, view_env)
 
             # Update view environment variables
@@ -551,8 +628,6 @@ class DevSetup:
         self.logger.info("Starting API service with Air hot reload...")
 
         # Check if Air is installed
-        import shutil
-
         if not shutil.which("air"):
             # Install Air if not available
             air_install_cmd = ["go", "install", "github.com/air-verse/air@latest"]
@@ -603,8 +678,6 @@ class DevSetup:
             service_manager = ServiceManager(project_root=self.workspace_path, env="development", debug=self.config.verbose)
 
             # Wait for API to be ready
-            import time
-
             max_retries = 10
             for attempt in range(max_retries):
                 if service_manager.check_api_up_status(self.config.api_port):
@@ -655,7 +728,9 @@ class DevSetup:
         print("Troubleshooting:")
         print("   - Check containers: docker ps")
         print("   - Database logs:    docker logs nixopus-db")
+        print("   - Redis logs:       docker logs nixopus-redis")
         print("   - Restart database: docker restart nixopus-db")
+        print("   - Restart Redis:    docker restart nixopus-redis")
         print()
         print("Community & Support:")
         print("   - Discord: https://discord.com/invite/skdcq39Wpv")

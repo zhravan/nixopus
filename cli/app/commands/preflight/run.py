@@ -23,7 +23,7 @@ class PreflightRunner:
         return shutil.which(cmd) is not None
 
     def check_windows_environment(self) -> None:
-        """On Windows hosts, verify Docker Desktop and WSL2 readiness.
+        """On Windows hosts, verify Docker Desktop, WSL2 readiness.
 
         1.  Ensures docker CLI exists and Docker daemon is reachable.
         2. Checks WSL presence and recommends WSL2 if not detected.
@@ -34,13 +34,13 @@ class PreflightRunner:
         if self.logger:
             self.logger.info("Running Windows preflight checks...")
 
-        # Docker CLI present
+        # check Docker CLI 
         if not self._have("docker"):
             raise Exception("Docker CLI not found on Windows. Please install Docker Desktop and ensure 'docker' is in PATH.")
 
-        # Docker daemon responsive
+        # pin g Docker daemon
         try:
-            # Try a quick daemon ping via 'docker info'
+            # quick daemon ping via 'docker info'
             subprocess.run(["docker", "info"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if self.logger:
                 self.logger.success("Docker daemon is running.")

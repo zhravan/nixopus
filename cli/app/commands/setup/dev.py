@@ -464,8 +464,10 @@ class DevSetup:
         try:
             # Ensure SSH tooling is present (client and, where applicable, server)
             self._ensure_ssh_tools()
+
+            normalized_key_path = str(Path(self.config.ssh_key_path).expanduser())
             ssh_config = SSHConfig(
-                path=self.config.ssh_key_path,
+                path=normalized_key_path,
                 key_type=self.config.ssh_key_type,
                 key_size=4096,
                 passphrase="",
@@ -539,7 +541,9 @@ class DevSetup:
                 if not installed_client and have("winget"):
                     try:
                         self.logger.info("Installing OpenSSH Client via winget (requires admin consent)...")
-                        subprocess.run(["winget", "install", "--id", "Microsoft.OpenSSH.Beta", "--source", "winget"], check=True)
+                        subprocess.run(
+                            ["winget", "install", "--id", "Microsoft.OpenSSH.Beta", "--source", "winget"], check=True
+                        )
                         installed_client = True
                     except Exception as e:
                         self.logger.warning(f"winget install of OpenSSH failed: {e}")
@@ -654,7 +658,7 @@ class DevSetup:
                     "DB_PORT": str(self.config.db_port),
                     "REDIS_URL": f"redis://localhost:{self.config.redis_port}",
                     "ALLOWED_ORIGIN": f"http://localhost:{self.config.view_port}",
-                    "SSH_PRIVATE_KEY": os.path.expanduser(self.config.ssh_key_path),
+                    "SSH_PRIVATE_KEY": str(Path(self.config.ssh_key_path).expanduser()),
                     "SSH_HOST": "localhost",
                     "SSH_PORT": "22",
                     "SSH_USER": os.environ.get("USER", "admin"),

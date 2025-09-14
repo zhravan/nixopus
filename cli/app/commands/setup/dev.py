@@ -159,6 +159,8 @@ class DevSetup:
             self.logger.info("Running preflight checks...")
             try:
                 preflight_runner = PreflightRunner(logger=self.logger, verbose=self.config.verbose)
+                # Run OS-specific preflight checks
+                preflight_runner.check_windows_environment()
                 preflight_runner.check_ports_from_config()
                 self.logger.success("Preflight checks passed")
             except Exception as e:

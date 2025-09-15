@@ -271,10 +271,10 @@ class DevSetup:
                 os.chdir(self.workspace_path)
 
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"❌ Project dependency setup failed: {e}")
+            self.logger.error(f"Project dependency setup failed: {e}")
             raise
         except Exception as e:
-            self.logger.error(f"❌ Project dependency setup failed: {e}")
+            self.logger.error(f"Project dependency setup failed: {e}")
             raise
         finally:
             os.chdir(original_cwd)
@@ -324,6 +324,24 @@ class DevSetup:
             redis_image = redis_env.get("REDIS_IMAGE", "redis:7-alpine")
             redis_port = str(redis_env.get("REDIS_PORT", self.config.redis_port))
 
+            # Named volumes for persistence (overridable via YAML)
+            db_volume_name = db_env.get("DB_VOLUME", f"{db_container_name}-data")
+            redis_volume_name = redis_env.get("REDIS_VOLUME", f"{redis_container_name}-data")
+
+            # Ensure volumes exist (best-effort)
+            for vol_name in [db_volume_name, redis_volume_name]:
+                try:
+                    inspect = subprocess.run(
+                        ["docker", "volume", "inspect", vol_name],
+                        check=False,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    if inspect.returncode != 0:
+                        subprocess.run(["docker", "volume", "create", vol_name], check=True)
+                except Exception as e:
+                    self.logger.warning(f"Could not ensure volume '{vol_name}': {e}")
+
             # PostgreSQL
             check_db_cmd = [
                 "docker",
@@ -352,6 +370,8 @@ class DevSetup:
                     f"POSTGRES_DB={pg_db}",
                     "-e",
                     f"POSTGRES_HOST_AUTH_METHOD={pg_auth}",
+                    "-v",
+                    f"{db_volume_name}:/var/lib/postgresql/data",
                     "-p",
                     f"{db_port}:5432",
                     "--health-cmd",
@@ -381,6 +401,8 @@ class DevSetup:
                     "-d",
                     "--name",
                     redis_container_name,
+                    "-v",
+                    f"{redis_volume_name}:/data",
                     "-p",
                     f"{redis_port}:6379",
                     "--health-cmd",

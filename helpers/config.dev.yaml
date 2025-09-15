@@ -47,7 +47,7 @@ services:
       DB_IMAGE: ${DB_IMAGE:-postgres:14-alpine}
       DB_CONTAINER_NAME: ${DB_CONTAINER_NAME:-nixopus-db}
       POSTGRES_USER: ${USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-postgres}
       POSTGRES_HOST_AUTH_METHOD: trust
 

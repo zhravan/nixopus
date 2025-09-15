@@ -1,3 +1,40 @@
+# [0.1.0-alpha.29](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.28...v0.1.0-alpha.29) (2025-09-15)
+
+
+### Bug Fixes
+
+* **ui:** Open Channels tab by default in Notification Settings ([#398](https://github.com/raghavyuva/nixopus/issues/398)) ([3689cd3](https://github.com/raghavyuva/nixopus/commit/3689cd3ca91a3525e1dddc88fd74338c195d5477))
+
+
+
+# [0.1.0-alpha.28](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.27...v0.1.0-alpha.28) (2025-09-11)
+
+
+### Features
+
+* exec commands on container ([#399](https://github.com/raghavyuva/nixopus/issues/399)) ([3cb776d](https://github.com/raghavyuva/nixopus/commit/3cb776daa77dc8df7817df19ff1e0e8a2727788d))
+* TaskQ tuning for complete deployment lifecycle ([#393](https://github.com/raghavyuva/nixopus/issues/393)) ([49fe8e1](https://github.com/raghavyuva/nixopus/commit/49fe8e191e9e0a8c0a4480e5d36a21cb3dbf8d11))
+
+
+
+# [0.1.0-alpha.27](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.26...v0.1.0-alpha.27) (2025-09-10)
+
+
+### Features
+
+* install with different branches / forked repositories ([#391](https://github.com/raghavyuva/nixopus/issues/391)) ([8a15b5c](https://github.com/raghavyuva/nixopus/commit/8a15b5c3399a6e2854915e3be6e4ab718fe4a575))
+
+
+
+# [0.1.0-alpha.26](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.25...v0.1.0-alpha.26) (2025-09-10)
+
+
+### Features
+
+* add redis service in docker compose for taskQ ([#386](https://github.com/raghavyuva/nixopus/issues/386)) ([f0a55f1](https://github.com/raghavyuva/nixopus/commit/f0a55f1bef0f1b3119a7ccbabe37030bb4b3ffe6))
+
+
+
 # [0.1.0-alpha.25](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.24...v0.1.0-alpha.25) (2025-09-10)
 
 

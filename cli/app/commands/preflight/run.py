@@ -34,7 +34,7 @@ class PreflightRunner:
         if self.logger:
             self.logger.info("Running Windows preflight checks...")
 
-        # check Docker CLI 
+        # check Docker CLI
         if not self._have("docker"):
             raise Exception("Docker CLI not found on Windows. Please install Docker Desktop and ensure 'docker' is in PATH.")
 

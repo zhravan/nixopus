@@ -122,7 +122,8 @@ class DevSetup:
             try:
                 preflight_runner = PreflightRunner(logger=self.logger, verbose=self.config.verbose)
                 # Run OS-specific preflight checks
-                preflight_runner.check_windows_environment()
+                if platform.system().lower() == "windows":
+                    preflight_runner.check_windows_environment()  # pyright: ignore
                 preflight_runner.check_ports_from_config()
                 self.logger.success("Preflight checks passed")
             except Exception as e:

@@ -2,7 +2,6 @@ import os
 import platform
 import shutil
 import subprocess
-import sys
 import time
 import traceback
 from dataclasses import dataclass
@@ -18,43 +17,6 @@ from app.commands.conflict.conflict import ConflictConfig, ConflictService
 from app.commands.install.deps import install_all_deps
 from app.commands.install.ssh import SSH, SSHConfig
 from app.commands.clone.clone import Clone, CloneConfig
-
-# Import installer infrastructure
-
-# Add the project root to Python path for installer imports
-current_file = Path(__file__).resolve()
-project_root = current_file.parent.parent.parent.parent  # cli/app/commands/setup -> project root
-installer_path = project_root / "installer"
-
-if installer_path.exists() and str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
-try:
-    from installer.service_manager import ServiceManager
-
-    INSTALLER_AVAILABLE = True
-except ImportError:
-    # Fallback when installer module is not available
-    INSTALLER_AVAILABLE = False
-
-    class ServiceManager:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def check_system_requirements(self):
-            pass
-
-        def start_services(self, env):
-            pass
-
-        def verify_installation(self, env):
-            pass
-
-        def check_api_up_status(self, port):
-            return True
-
-        def setup_admin(self, email, password, port):
-            pass
 
 
 @dataclass
@@ -317,35 +279,16 @@ class DevSetup:
             os.chdir(original_cwd)
 
     def _setup_infrastructure(self):
-        """Phase 5: Setup PostgreSQL and Redis using existing service manager"""
+        """Phase 5: Setup PostgreSQL and Redis using Docker"""
         self.logger.info("Phase 5: Setting up database infrastructure...")
 
         if self.config.dry_run:
             self.logger.info("[DRY RUN] Would setup PostgreSQL and Redis containers")
             return
 
-        if not INSTALLER_AVAILABLE:
-            self.logger.warning("Installer module not available - using Docker directly for database + Redis setup")
-            self._setup_database_docker_direct()
-            return
-
-        try:
-            # Use existing service manager from installer
-            service_manager = ServiceManager(
-                project_root=self.workspace_path, env="development", debug=self.config.verbose  # Use development mode
-            )
-
-            service_manager.check_system_requirements()
-
-            # Start database services
-            service_manager.start_services("development")
-            service_manager.verify_installation("development")
-
-            self.logger.success("Database infrastructure ready")
-
-        except Exception as e:
-            self.logger.error(f"Infrastructure setup failed: {e}")
-            raise
+        # Always use Docker directly for dev databases
+        self._setup_database_docker_direct()
+        self.logger.success("Database infrastructure ready")
 
     def _setup_database_docker_direct(self):
         """Fallback method to setup Postgres and Redis using direct Docker commands"""
@@ -792,34 +735,8 @@ class DevSetup:
             self.logger.info(f"[DRY RUN] Would create admin: {self.config.admin_email}")
             return
 
-        if not INSTALLER_AVAILABLE:
-            self.logger.warning("Installer module not available - skipping admin account creation")
-            self.logger.info("You can create admin manually via API after setup")
-            return
-
-        try:
-            service_manager = ServiceManager(project_root=self.workspace_path, env="development", debug=self.config.verbose)
-
-            # Wait for API to be ready
-            max_retries = 10
-            for attempt in range(max_retries):
-                if service_manager.check_api_up_status(self.config.api_port):
-                    break
-                self.logger.info(f"Waiting for API... (attempt {attempt + 1}/{max_retries})")
-                time.sleep(3)
-            else:
-                raise Exception("API service not responding after maximum retries")
-
-            # Create admin account
-            service_manager.setup_admin(
-                email=self.config.admin_email, password=self.config.admin_password, port=self.config.api_port
-            )
-
-            self.logger.success("Admin account created")
-
-        except Exception as e:
-            self.logger.error(f"Admin account creation failed: {e}")
-            # Don't raise - this is not critical for development setup
+        # TODO: Add this as an issue; open for contributors
+        self.logger.warning("Automated admin creation is not configured in this setup.")
 
     def _display_completion_info(self):
         """Phase 10: Display completion information and guidance"""

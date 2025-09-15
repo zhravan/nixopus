@@ -14,6 +14,7 @@ from app.commands.install.command import install_app
 from app.commands.preflight.command import preflight_app
 from app.commands.proxy.command import proxy_app
 from app.commands.service.command import service_app
+from app.commands.setup.command import setup_app
 from app.commands.test.command import test_app
 from app.commands.uninstall.command import uninstall_app
 from app.commands.version.command import main_version_callback, version_app
@@ -96,6 +97,7 @@ app.add_typer(clone_app, name="clone")
 app.add_typer(conflict_app, name="conflict")
 app.add_typer(conf_app, name="conf")
 app.add_typer(service_app, name="service")
+app.add_typer(setup_app, name="setup")
 app.add_typer(proxy_app, name="proxy")
 app.add_typer(install_app, name="install")
 app.add_typer(uninstall_app, name="uninstall")

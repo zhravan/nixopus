@@ -356,10 +356,40 @@ class DevSetup:
                     "Docker is not installed or not in PATH. Please install Docker Desktop (macOS) or Docker Engine (Linux) and ensure it is running."
                 )
 
+            try:
+                db_env = self.nixopus_config.get_service_env_values("services.db.env")
+            except Exception:
+                db_env = {}
+
+            try:
+                redis_env = self.nixopus_config.get_service_env_values("services.redis.env")
+            except Exception:
+                redis_env = {}
+
+            db_container_name = db_env.get("DB_CONTAINER_NAME", "nixopus-db")
+            db_image = db_env.get("DB_IMAGE", "postgres:14-alpine")
+            db_port = str(db_env.get("DB_PORT", self.config.db_port))
+            pg_user = db_env.get("POSTGRES_USER", "postgres")
+            pg_password = db_env.get("POSTGRES_PASSWORD", "postgres")
+            pg_db = db_env.get("POSTGRES_DB", "postgres")
+            pg_auth = db_env.get("POSTGRES_HOST_AUTH_METHOD", "trust")
+
+            redis_container_name = redis_env.get("REDIS_CONTAINER_NAME", "nixopus-redis")
+            redis_image = redis_env.get("REDIS_IMAGE", "redis:7-alpine")
+            redis_port = str(redis_env.get("REDIS_PORT", self.config.redis_port))
+
             # PostgreSQL
-            check_db_cmd = ["docker", "ps", "-a", "--format", "{{.Names}}", "--filter", "name=nixopus-db"]
+            check_db_cmd = [
+                "docker",
+                "ps",
+                "-a",
+                "--format",
+                "{{.Names}}",
+                "--filter",
+                f"name={db_container_name}",
+            ]
             db_result = subprocess.run(check_db_cmd, capture_output=True, text=True, check=True)
-            if "nixopus-db" in db_result.stdout:
+            if db_container_name in db_result.stdout:
                 self.logger.info("Database container already exists")
             else:
                 db_run_cmd = [
@@ -367,28 +397,36 @@ class DevSetup:
                     "run",
                     "-d",
                     "--name",
-                    "nixopus-db",
+                    db_container_name,
                     "-e",
-                    "POSTGRES_USER=postgres",
+                    f"POSTGRES_USER={pg_user}",
                     "-e",
-                    "POSTGRES_PASSWORD=changeme",
+                    f"POSTGRES_PASSWORD={pg_password}",
                     "-e",
-                    "POSTGRES_DB=postgres",
+                    f"POSTGRES_DB={pg_db}",
                     "-e",
-                    "POSTGRES_HOST_AUTH_METHOD=trust",
+                    f"POSTGRES_HOST_AUTH_METHOD={pg_auth}",
                     "-p",
-                    f"{self.config.db_port}:5432",
+                    f"{db_port}:5432",
                     "--health-cmd",
-                    "pg_isready -U postgres -d postgres",
-                    "postgres:14-alpine",
+                    f"pg_isready -U {pg_user} -d {pg_db}",
+                    db_image,
                 ]
                 subprocess.run(db_run_cmd, check=True)
                 self.logger.success("Database container started")
 
             # Redis
-            check_redis_cmd = ["docker", "ps", "-a", "--format", "{{.Names}}", "--filter", "name=nixopus-redis"]
+            check_redis_cmd = [
+                "docker",
+                "ps",
+                "-a",
+                "--format",
+                "{{.Names}}",
+                "--filter",
+                f"name={redis_container_name}",
+            ]
             redis_result = subprocess.run(check_redis_cmd, capture_output=True, text=True, check=True)
-            if "nixopus-redis" in redis_result.stdout:
+            if redis_container_name in redis_result.stdout:
                 self.logger.info("Redis container already exists")
             else:
                 redis_run_cmd = [
@@ -396,12 +434,12 @@ class DevSetup:
                     "run",
                     "-d",
                     "--name",
-                    "nixopus-redis",
+                    redis_container_name,
                     "-p",
-                    f"{self.config.redis_port}:6379",
+                    f"{redis_port}:6379",
                     "--health-cmd",
                     "redis-cli ping || exit 1",
-                    "redis:7-alpine",
+                    redis_image,
                 ]
                 subprocess.run(redis_run_cmd, check=True)
                 self.logger.success("Redis container started")
@@ -468,6 +506,77 @@ class DevSetup:
             self.logger.info("For SSH server on macOS, enable 'Remote Login' in System Settings > Sharing.")
             return
 
+        if os_name == "windows":
+            # Windows 10/11: Prefer built-in OpenSSH via Windows Capabilities, fallback to winget/choco.
+            def run_powershell(ps_cmd: str, check: bool = True):
+                return subprocess.run(
+                    ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_cmd],
+                    check=check,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+
+            if not have("ssh"):
+                installed_client = False
+                # Try Windows capability for OpenSSH Client
+                try:
+                    self.logger.info("Checking OpenSSH Client capability on Windows...")
+                    state_res = run_powershell(
+                        "(Get-WindowsCapability -Online | Where-Object { $_.Name -like 'OpenSSH.Client*' }).State",
+                        check=False,
+                    )
+                    if "Installed" not in state_res.stdout:
+                        self.logger.info("Installing OpenSSH Client capability (requires admin)...")
+                        run_powershell("Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0", check=True)
+                    installed_client = True
+                except Exception as e:
+                    self.logger.warning(f"Windows capability install for OpenSSH Client failed: {e}")
+
+                # Fallback: winget
+                if not installed_client and have("winget"):
+                    try:
+                        self.logger.info("Installing OpenSSH Client via winget (requires admin consent)...")
+                        subprocess.run(["winget", "install", "--id", "Microsoft.OpenSSH.Beta", "--source", "winget"], check=True)
+                        installed_client = True
+                    except Exception as e:
+                        self.logger.warning(f"winget install of OpenSSH failed: {e}")
+
+                # Fallback: choco
+                if not installed_client and have("choco"):
+                    try:
+                        self.logger.info("Installing OpenSSH via Chocolatey (requires admin)...")
+                        subprocess.run(["choco", "install", "openssh", "-y"], check=True)
+                        installed_client = True
+                    except Exception as e:
+                        self.logger.warning(f"Chocolatey install of OpenSSH failed: {e}")
+
+                if not have("ssh"):
+                    self.logger.error(
+                        "ssh client not found on Windows. Please install 'OpenSSH Client' via Optional Features or run PowerShell as Administrator: Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0"
+                    )
+                    return
+
+            # Try to install and start the OpenSSH Server optionally (best-effort)
+            try:
+                state_res = run_powershell(
+                    "(Get-WindowsCapability -Online | Where-Object { $_.Name -like 'OpenSSH.Server*' }).State",
+                    check=False,
+                )
+                if "Installed" not in state_res.stdout:
+                    self.logger.info("Installing OpenSSH Server capability (optional, requires admin)...")
+                    run_powershell("Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0", check=False)
+
+                # Enable and start sshd service (ignore failures if not elevated)
+                self.logger.info("Ensuring sshd service is enabled and started (optional)...")
+                run_powershell("Set-Service -Name sshd -StartupType 'Automatic'", check=False)
+                run_powershell("Start-Service sshd", check=False)
+            except Exception as e:
+                self.logger.warning(f"OpenSSH Server setup skipped/failed: {e}")
+
+            self.logger.info("Windows SSH tooling ready.")
+            return
+
         # Linux: ensure ssh client and server packages
         try:
             package_manager = HostInformation.get_package_manager()
@@ -477,7 +586,10 @@ class DevSetup:
 
         install_cmds = []
         if package_manager == "apt":
-            install_cmds = [["sudo", "apt-get", "update"], ["sudo", "apt-get", "install", "-y", "openssh-client", "openssh-server"]]
+            install_cmds = [
+                ["sudo", "apt-get", "update"],
+                ["sudo", "apt-get", "install", "-y", "openssh-client", "openssh-server"],
+            ]
         elif package_manager in ("yum", "dnf"):
             pkg = "dnf" if package_manager == "dnf" else "yum"
             install_cmds = [["sudo", pkg, "install", "-y", "openssh-clients", "openssh-server"]]
@@ -496,7 +608,12 @@ class DevSetup:
         if have("systemctl"):
             for svc in ["ssh", "sshd", "ssh.service", "sshd.service"]:
                 try:
-                    subprocess.run(["sudo", "systemctl", "enable", "--now", svc], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.run(
+                        ["sudo", "systemctl", "enable", "--now", svc],
+                        check=False,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
                 except Exception:
                     pass
 

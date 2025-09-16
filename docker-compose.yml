@@ -99,6 +99,8 @@ services:
       ]
     networks:
       - nixopus-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   nixopus-network:

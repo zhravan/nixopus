@@ -177,6 +177,7 @@ func setupEnvVarMappings() {
 
 	// Proxy
 	viper.BindEnv("proxy.caddy_endpoint", "CADDY_ENDPOINT")
+	viper.BindEnv("proxy.upstream_host", "PROXY_UPSTREAM_HOST")
 
 	// CORS
 	viper.BindEnv("cors.allowed_origin", "ALLOWED_ORIGIN")

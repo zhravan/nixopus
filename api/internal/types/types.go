@@ -53,6 +53,7 @@ type DockerConfig struct {
 
 type ProxyConfig struct {
 	CaddyEndpoint string `mapstructure:"caddy_endpoint" validate:"required"`
+	UpstreamHost  string `mapstructure:"upstream_host"`
 }
 
 type CORSConfig struct {

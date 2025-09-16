@@ -114,7 +114,7 @@ class Install:
         self.main_task = None
         self._validate_domains()
         self._validate_repo()
-        
+
         # Log when using custom repository/branch and staging compose file
         if self._is_custom_repo_or_branch():
             if self.logger:
@@ -126,13 +126,13 @@ class Install:
             return self.repo
         if key == "branch_name" and self.branch is not None:
             return self.branch
-            
+
         # Override compose_file_path to use docker-compose-staging.yml when custom repo/branch is provided
         if key == "compose_file_path" and self._is_custom_repo_or_branch():
             # Get the base directory and replace docker-compose.yml with docker-compose-staging.yml
             default_compose_path = _config.get_config_value(key, self._user_config, DEFAULTS)
             return default_compose_path.replace("docker-compose.yml", "docker-compose-staging.yml")
-            
+
         try:
             return _config.get_config_value(key, self._user_config, DEFAULTS)
         except ValueError:
@@ -163,11 +163,11 @@ class Install:
         """Check if custom repository or branch is provided (different from defaults)"""
         default_repo = _config.get_yaml_value(DEFAULT_REPO)  # "https://github.com/raghavyuva/nixopus"
         default_branch = _config.get_yaml_value(DEFAULT_BRANCH)  # "master"
-        
+
         # Check if either repo or branch differs from defaults
         repo_differs = self.repo is not None and self.repo != default_repo
         branch_differs = self.branch is not None and self.branch != default_branch
-        
+
         return repo_differs or branch_differs
 
     def run(self):
@@ -318,18 +318,22 @@ class Install:
             with open(caddy_json_template, "r") as f:
                 config_str = f.read()
 
-            host_ip = HostInformation.get_public_ip()
+            upstream_host = _config.get_yaml_value("services.api.env.PROXY_UPSTREAM_HOST")
+            if upstream_host.startswith("${"):
+                match = re.search(r"\$\{[^:]*:-([^}]+)\}", upstream_host)
+                upstream_host = match.group(1) if match else "127.0.0.1"
+
             view_port = self._get_config("view_port")
             api_port = self._get_config("api_port")
 
-            view_domain = self.view_domain if self.view_domain is not None else host_ip
-            api_domain = self.api_domain if self.api_domain is not None else host_ip
+            view_domain = self.view_domain if self.view_domain is not None else upstream_host
+            api_domain = self.api_domain if self.api_domain is not None else upstream_host
 
             config_str = config_str.replace("{env.APP_DOMAIN}", view_domain)
             config_str = config_str.replace("{env.API_DOMAIN}", api_domain)
 
-            app_reverse_proxy_url = f"{host_ip}:{view_port}"
-            api_reverse_proxy_url = f"{host_ip}:{api_port}"
+            app_reverse_proxy_url = f"{upstream_host}:{view_port}"
+            api_reverse_proxy_url = f"{upstream_host}:{api_port}"
             config_str = config_str.replace("{env.APP_REVERSE_PROXY_URL}", app_reverse_proxy_url)
             config_str = config_str.replace("{env.API_REVERSE_PROXY_URL}", api_reverse_proxy_url)
 

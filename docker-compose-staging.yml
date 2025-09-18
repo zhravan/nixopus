@@ -13,6 +13,7 @@ services:
       - ${NIXOPUS_HOME:-/etc/nixopus}/source/api/.env
     environment:
       - HOST_NAME=nixopus-staging-db
+      - REDIS_URL=redis://nixopus-staging-redis:6379
     volumes:
       - ./logs:/app/logs
       - ${NIXOPUS_HOME:-/etc/nixopus}:/etc/nixopus
@@ -22,6 +23,8 @@ services:
       - nixopus-network
     depends_on:
       nixopus-staging-db:
+        condition: service_healthy
+      nixopus-staging-redis:
         condition: service_healthy
 
   nixopus-staging-db:
@@ -85,6 +88,23 @@ services:
       ]
     networks:
       - nixopus-network
+
+  nixopus-staging-redis:
+    image: redis:7-alpine
+    container_name: nixopus-staging-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ${NIXOPUS_HOME:-/etc/nixopus}/redis:/data
+    command: redis-server --appendonly yes
+    networks:
+      - nixopus-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   nixopus-network:

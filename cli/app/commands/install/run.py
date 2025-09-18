@@ -114,7 +114,6 @@ class Install:
         self.main_task = None
         self._validate_domains()
         self._validate_repo()
-
         # Log when using custom repository/branch and staging compose file
         if self._is_custom_repo_or_branch():
             if self.logger:
@@ -126,13 +125,11 @@ class Install:
             return self.repo
         if key == "branch_name" and self.branch is not None:
             return self.branch
-
         # Override compose_file_path to use docker-compose-staging.yml when custom repo/branch is provided
         if key == "compose_file_path" and self._is_custom_repo_or_branch():
             # Get the base directory and replace docker-compose.yml with docker-compose-staging.yml
             default_compose_path = _config.get_config_value(key, self._user_config, DEFAULTS)
             return default_compose_path.replace("docker-compose.yml", "docker-compose-staging.yml")
-
         try:
             return _config.get_config_value(key, self._user_config, DEFAULTS)
         except ValueError:
@@ -163,11 +160,9 @@ class Install:
         """Check if custom repository or branch is provided (different from defaults)"""
         default_repo = _config.get_yaml_value(DEFAULT_REPO)  # "https://github.com/raghavyuva/nixopus"
         default_branch = _config.get_yaml_value(DEFAULT_BRANCH)  # "master"
-
         # Check if either repo or branch differs from defaults
         repo_differs = self.repo is not None and self.repo != default_repo
         branch_differs = self.branch is not None and self.branch != default_branch
-
         return repo_differs or branch_differs
 
     def run(self):

@@ -95,12 +95,10 @@ services:
         "--config",
         "/etc/caddy/Caddyfile",
         "--adapter",
-        "caddyfile"
+        "caddyfile",
       ]
     networks:
       - nixopus-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
 networks:
   nixopus-network:

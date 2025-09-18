@@ -13,7 +13,6 @@ services:
       - ${NIXOPUS_HOME:-/etc/nixopus}/source/api/.env
     environment:
       - HOST_NAME=nixopus-staging-db
-      - REDIS_URL=redis://nixopus-staging-redis:6379
     volumes:
       - ./logs:/app/logs
       - ${NIXOPUS_HOME:-/etc/nixopus}:/etc/nixopus

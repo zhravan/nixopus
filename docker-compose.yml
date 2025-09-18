@@ -95,7 +95,7 @@ services:
         "--config",
         "/etc/caddy/Caddyfile",
         "--adapter",
-        "caddyfile",
+        "caddyfile"
       ]
     networks:
       - nixopus-network

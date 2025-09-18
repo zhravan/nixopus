@@ -82,10 +82,7 @@ func (t *TaskService) HandleCreateDockerfileDeployment(ctx context.Context, Task
 		taskCtx.LogAndUpdateStatus("Failed to convert port to int: "+err.Error(), shared_types.Failed)
 		return err
 	}
-	upstreamHost := config.AppConfig.Proxy.UpstreamHost
-	if upstreamHost == "" {
-		upstreamHost = "127.0.0.1"
-	}
+	upstreamHost := config.AppConfig.SSH.Host
 
 	err = client.AddDomainWithAutoTLS(TaskPayload.Application.Domain, upstreamHost, port, caddygo.DomainOptions{})
 	if err != nil {

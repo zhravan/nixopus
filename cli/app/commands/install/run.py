@@ -318,22 +318,18 @@ class Install:
             with open(caddy_json_template, "r") as f:
                 config_str = f.read()
 
-            upstream_host = _config.get_yaml_value("services.api.env.PROXY_UPSTREAM_HOST")
-            if upstream_host.startswith("${"):
-                match = re.search(r"\$\{[^:]*:-([^}]+)\}", upstream_host)
-                upstream_host = match.group(1) if match else "127.0.0.1"
-
+            host_ip = HostInformation.get_public_ip()
             view_port = self._get_config("view_port")
             api_port = self._get_config("api_port")
 
-            view_domain = self.view_domain if self.view_domain is not None else upstream_host
-            api_domain = self.api_domain if self.api_domain is not None else upstream_host
+            view_domain = self.view_domain if self.view_domain is not None else host_ip
+            api_domain = self.api_domain if self.api_domain is not None else host_ip
 
             config_str = config_str.replace("{env.APP_DOMAIN}", view_domain)
             config_str = config_str.replace("{env.API_DOMAIN}", api_domain)
 
-            app_reverse_proxy_url = f"{upstream_host}:{view_port}"
-            api_reverse_proxy_url = f"{upstream_host}:{api_port}"
+            app_reverse_proxy_url = f"{host_ip}:{view_port}"
+            api_reverse_proxy_url = f"{host_ip}:{api_port}"
             config_str = config_str.replace("{env.APP_REVERSE_PROXY_URL}", app_reverse_proxy_url)
             config_str = config_str.replace("{env.API_REVERSE_PROXY_URL}", api_reverse_proxy_url)
 

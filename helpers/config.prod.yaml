@@ -26,7 +26,7 @@ services:
       API_IMAGE: ${API_IMAGE:-ghcr.io/raghavyuva/nixopus-api:latest}
       API_CONTAINER_NAME: ${API_CONTAINER_NAME:-nixopus-api}
       DOCKER_PORT: ${DOCKER_PORT:-2376}
-      APP_VERSION: ${APP_VERSION:-0.1.0-alpha.11}
+      APP_VERSION: ${APP_VERSION:-0.1.0-alpha.12}
   view:
     env:
       PORT: ${VIEW_PORT:-7443}

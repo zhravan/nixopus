@@ -72,11 +72,11 @@ func (s *ExtensionService) DeleteExtension(id string) error {
 	return nil
 }
 
-func (s *ExtensionService) ListExtensions(category *types.ExtensionCategory) ([]types.Extension, error) {
-	extensions, err := s.storage.ListExtensions(category)
+func (s *ExtensionService) ListExtensions(params types.ExtensionListParams) (*types.ExtensionListResponse, error) {
+	response, err := s.storage.ListExtensions(params)
 	if err != nil {
 		s.logger.Log(logger.Error, err.Error(), "")
 		return nil, err
 	}
-	return extensions, nil
+	return response, nil
 }

@@ -2,22 +2,52 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/go-fuego/fuego"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-func (c *ExtensionsController) GetExtensions(ctx fuego.ContextNoBody) ([]types.Extension, error) {
-	categoryParam := ctx.QueryParam("category")
+func (c *ExtensionsController) GetExtensions(ctx fuego.ContextNoBody) (*types.ExtensionListResponse, error) {
+	params := types.ExtensionListParams{}
 
-	var category *types.ExtensionCategory
+	categoryParam := ctx.QueryParam("category")
 	if categoryParam != "" {
 		cat := types.ExtensionCategory(categoryParam)
-		category = &cat
+		params.Category = &cat
 	}
 
-	extensions, err := c.service.ListExtensions(category)
+	searchParam := ctx.QueryParam("search")
+	if searchParam != "" {
+		params.Search = searchParam
+	}
+
+	sortByParam := ctx.QueryParam("sort_by")
+	if sortByParam != "" {
+		params.SortBy = types.ExtensionSortField(sortByParam)
+	}
+
+	sortDirParam := ctx.QueryParam("sort_dir")
+	if sortDirParam != "" {
+		params.SortDir = types.SortDirection(sortDirParam)
+	}
+
+	pageParam := ctx.QueryParam("page")
+	if pageParam != "" {
+		if page, err := strconv.Atoi(pageParam); err == nil && page > 0 {
+			params.Page = page
+		}
+	}
+
+	pageSizeParam := ctx.QueryParam("page_size")
+	if pageSizeParam != "" {
+		if pageSize, err := strconv.Atoi(pageSizeParam); err == nil && pageSize > 0 {
+			params.PageSize = pageSize
+		}
+	}
+
+	response, err := c.service.ListExtensions(params)
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
@@ -26,7 +56,7 @@ func (c *ExtensionsController) GetExtensions(ctx fuego.ContextNoBody) ([]types.E
 		}
 	}
 
-	return extensions, nil
+	return response, nil
 }
 
 func (c *ExtensionsController) GetExtension(ctx fuego.ContextNoBody) (types.Extension, error) {

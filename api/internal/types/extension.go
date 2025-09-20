@@ -111,3 +111,38 @@ type ExecutionStep struct {
 
 	Execution *ExtensionExecution `json:"execution,omitempty" bun:"rel:belongs-to,join:execution_id=id"`
 }
+
+type SortDirection string
+
+const (
+	SortDirectionAsc  SortDirection = "asc"
+	SortDirectionDesc SortDirection = "desc"
+)
+
+type ExtensionSortField string
+
+const (
+	ExtensionSortFieldName       ExtensionSortField = "name"
+	ExtensionSortFieldAuthor     ExtensionSortField = "author"
+	ExtensionSortFieldCategory   ExtensionSortField = "category"
+	ExtensionSortFieldIsVerified ExtensionSortField = "is_verified"
+	ExtensionSortFieldCreatedAt  ExtensionSortField = "created_at"
+	ExtensionSortFieldUpdatedAt  ExtensionSortField = "updated_at"
+)
+
+type ExtensionListParams struct {
+	Category *ExtensionCategory `json:"category,omitempty"`
+	Search   string             `json:"search,omitempty"`
+	SortBy   ExtensionSortField `json:"sort_by,omitempty"`
+	SortDir  SortDirection      `json:"sort_dir,omitempty"`
+	Page     int                `json:"page,omitempty"`
+	PageSize int                `json:"page_size,omitempty"`
+}
+
+type ExtensionListResponse struct {
+	Extensions []Extension `json:"extensions"`
+	Total      int         `json:"total"`
+	Page       int         `json:"page"`
+	PageSize   int         `json:"page_size"`
+	TotalPages int         `json:"total_pages"`
+}

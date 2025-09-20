@@ -6,18 +6,7 @@ import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Check } from 'lucide-react';
 
-export interface Extension {
-  id: string;
-  name: string;
-  description: string;
-  author: string;
-  icon: string;
-  category: string;
-  rating: number;
-  downloads: number;
-  isVerified: boolean;
-  isInstalled?: boolean;
-}
+import { Extension } from '@/redux/types/extension';
 
 interface ExtensionCardProps {
   extension: Extension;
@@ -45,7 +34,7 @@ export function ExtensionCard({ extension, onInstall, onViewDetails }: Extension
               <span className="text-sm text-muted-foreground">
                 {t('extensions.madeBy')} {extension.author}
               </span>
-              {extension.isVerified && (
+              {extension.is_verified && (
                 <div className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
                   <Check className="h-2.5 w-2.5 text-primary-foreground" />
                 </div>
@@ -61,9 +50,10 @@ export function ExtensionCard({ extension, onInstall, onViewDetails }: Extension
           <Button
             className="font-medium min-w-[100px]"
             onClick={() => onInstall?.(extension)}
-            disabled={extension.isInstalled}
+            // disabled={extension.is_installed}
           >
-            {extension.isInstalled ? t('common.installed') : t('extensions.install')}
+            {/* {extension.is_installed ? t('common.installed') : t('extensions.install')} */}
+            {t('extensions.install')}
           </Button>
           <Button
             variant="ghost"

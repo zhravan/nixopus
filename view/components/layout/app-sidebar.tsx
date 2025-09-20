@@ -96,7 +96,7 @@ export function AppSidebar({
   const { canAccessResource } = useRBAC();
 
   const hasAnyPermission = React.useMemo(() => {
-    const allowedResources = ['dashboard', 'settings', 'extensions'];
+    const allowedResources = ['dashboard', 'settings',];
 
     return (resource: string) => {
       if (!user || !activeOrg) return false;

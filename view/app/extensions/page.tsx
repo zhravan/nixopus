@@ -9,6 +9,7 @@ import ExtensionsHero from '@/app/extensions/components/extensions-hero';
 import { useExtensions } from './hooks/use-extensions';
 import PaginationWrapper from '@/components/ui/pagination';
 import { RBACGuard } from '@/components/rbac/RBACGuard';
+import DisabledFeature from '@/components/features/disabled-feature';
 
 export default function ExtensionsPage() {
   const { t } = useTranslation();
@@ -29,48 +30,47 @@ export default function ExtensionsPage() {
   } = useExtensions();
 
   return (
-    // <RBACGuard 
-    //   resource="extensions" 
-    //   action="read"
-    //   loadingFallback={<Skeleton className="h-96" />}
-    // >
-    <PageLayout maxWidth="7xl" padding="md" spacing="lg">
-      <ExtensionsHero isLoading={isLoading} />
-      <ExtensionsHeader
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
-        sortConfig={sortConfig}
-        onSortChange={handleSortChange}
-        isLoading={isLoading}
-      />
-
-      <div className="space-y-6">
-        {totalExtensions > 0 && (
-          <div className="text-sm text-muted-foreground self-end justify-end flex">
-            Showing {extensions.length} of {totalExtensions} extensions
-          </div>
-        )}
-
-        <ExtensionsGrid
-          extensions={extensions}
+    <RBACGuard
+      resource="extensions"
+      action="read"
+      loadingFallback={<DisabledFeature />}
+    >
+      <PageLayout maxWidth="7xl" padding="md" spacing="lg">
+        <ExtensionsHero isLoading={isLoading} />
+        <ExtensionsHeader
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          sortConfig={sortConfig}
+          onSortChange={handleSortChange}
           isLoading={isLoading}
-          error={error || undefined}
-          onInstall={handleInstall}
-          onViewDetails={handleViewDetails}
         />
 
-        {totalPages > 1 && (
-          <div className="flex justify-center pt-6">
-            <PaginationWrapper
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        )}
-      </div>
-    </PageLayout>
-    // </RBACGuard>
+        <div className="space-y-6">
+          {totalExtensions > 0 && (
+            <div className="text-sm text-muted-foreground self-end justify-end flex">
+              Showing {extensions.length} of {totalExtensions} extensions
+            </div>
+          )}
 
+          <ExtensionsGrid
+            extensions={extensions}
+            isLoading={isLoading}
+            error={error || undefined}
+            onInstall={handleInstall}
+            onViewDetails={handleViewDetails}
+          />
+
+          {totalPages > 1 && (
+            <div className="flex justify-center pt-6">
+              <PaginationWrapper
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </div>
+      </PageLayout>
+    </RBACGuard>
   );
 }

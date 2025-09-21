@@ -127,3 +127,95 @@ OASidebarItem {
   --vp-c-brand-3: #008f4d;
   --vp-c-brand-soft: rgba(0, 191, 99, 0.14);
 }
+
+/* Command block styles */
+.command-block-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5em 0;
+}
+
+.command-block {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0,0,0,0.18);
+  border-radius: 12px;
+  border: 1px solid #9be935;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 400px;
+  max-width: 90vw;
+}
+
+.command-text {
+  flex: 1;
+  padding: 1.2em 1.5em;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 1.05em;
+  color: #fff;
+  background: rgba(0,0,0,0.18);
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 600px;
+}
+
+.copy-button {
+  color: #fff;
+  border: none;
+  padding: 1.2em 1.5em;
+  font-weight: 600;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  border-left: 1px solid #9be935;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 420px) {
+  .VPHero .name {
+    font-size: 2rem;
+  }
+
+  .VPHero .text {
+    font-size: 1.75rem;
+  }
+
+  .VPHero .tagline {
+    white-space: normal;
+    font-size: 0.9rem;
+  }
+
+  .command-block {
+    min-width: 0;
+    width: 90vw;
+  }
+
+  .command-text {
+    font-size: 0.9em;
+    padding: 1em;
+    text-align: left;
+  }
+
+  .copy-button {
+    padding: 1em;
+  }
+}
+
+@media (max-width: 320px) {
+    .VPHero .name {
+        font-size: 1.8rem;
+    }
+    .VPHero .text {
+        font-size: 1.6rem;
+    }
+    .command-text {
+        font-size: 0.8em;
+    }
+}

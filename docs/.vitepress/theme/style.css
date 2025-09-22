@@ -136,15 +136,16 @@ OASidebarItem {
   margin: 1.5em 0;
 }
 
+/* Light mode styles (default) */
 .command-block {
   position: relative;
   display: inline-flex;
   align-items: center;
-  background: #1a1a1a;
+  background: #f8f8f8;
   border-radius: 8px;
-  border: 1px solid #333;
+  border: 1px solid #e0e0e0;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
   min-width: 400px;
   max-width: 90vw;
 }
@@ -154,8 +155,8 @@ OASidebarItem {
   padding: 1.2em 1.5em;
   font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
   font-size: 1.05em;
-  color: #e0e0e0;
-  background: #1a1a1a;
+  color: #333;
+  background: #f8f8f8;
   overflow-x: auto;
   white-space: nowrap;
   max-width: 600px;
@@ -164,14 +165,14 @@ OASidebarItem {
 }
 
 .command-text .prompt {
-  color: #9be935;
+  color: #22c55e;
   font-weight: bold;
   margin-right: 0.5em;
   user-select: none;
 }
 
 .copy-button {
-  color: #888;
+  color: #666;
   background: transparent;
   border: none;
   padding: 1.2em 1.5em;
@@ -180,7 +181,7 @@ OASidebarItem {
   cursor: pointer;
   transition: all 0.3s ease;
   outline: none;
-  border-left: 1px solid #333;
+  border-left: 1px solid #e0e0e0;
   width: 100px;
   display: flex;
   align-items: center;
@@ -188,6 +189,27 @@ OASidebarItem {
   gap: 0.5em;
   position: relative;
   overflow: hidden;
+}
+
+/* Dark mode styles */
+.dark .command-block {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.dark .command-text {
+  color: #e0e0e0;
+  background: #1a1a1a;
+}
+
+.dark .command-text .prompt {
+  color: #9be935;
+}
+
+.dark .copy-button {
+  color: #888;
+  border-left: 1px solid #333;
 }
 
 .copy-button:hover {
@@ -200,13 +222,17 @@ OASidebarItem {
 }
 
 .copy-button.copied {
-  /* background: rgba(255, 255, 255, 0.08); */
-  color: #9be935;
+  color: #22c55e;
   transform: scale(1.02);
 }
 
 .copy-button.copied:hover {
   cursor: pointer;
+}
+
+/* Dark mode copy button states */
+.dark .copy-button.copied {
+  color: #9be935;
 }
 
 .copy-icon {

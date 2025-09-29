@@ -1,0 +1,23 @@
+FROM node:18-alpine
+
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Install deps (cached layer)
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --network-timeout 600000 && yarn cache clean
+
+# In dev, app code is bind-mounted
+ARG PORT=7443
+ENV PORT=${PORT} \
+    NEXT_PUBLIC_PORT=${PORT} \
+    NODE_ENV=development \
+    NEXT_TELEMETRY_DISABLED=1 \
+    CHOKIDAR_USEPOLLING=1 \
+    WATCHPACK_POLLING=true
+
+EXPOSE ${PORT}
+
+CMD ["sh", "-c", "yarn dev -p ${PORT}"]
+

@@ -14,6 +14,8 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword/epmodels"
+	"github.com/supertokens/supertokens-golang/recipe/passwordless"
+	"github.com/supertokens/supertokens-golang/recipe/passwordless/plessmodels"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/session/sessmodels"
 	"github.com/supertokens/supertokens-golang/recipe/userroles"
@@ -24,6 +26,41 @@ import (
 )
 
 var app *storage.App
+
+// Permission constants to avoid duplication
+var (
+	adminPermissions = []string{
+		"user:create", "user:read", "user:update", "user:delete",
+		"organization:create", "organization:read", "organization:update", "organization:delete",
+		"role:create", "role:read", "role:update", "role:delete",
+		"permission:create", "permission:read", "permission:update", "permission:delete",
+		"domain:create", "domain:read", "domain:update", "domain:delete",
+		"github-connector:create", "github-connector:read", "github-connector:update", "github-connector:delete",
+		"notification:create", "notification:read", "notification:update", "notification:delete",
+		"file-manager:create", "file-manager:read", "file-manager:update", "file-manager:delete",
+		"deploy:create", "deploy:read", "deploy:update", "deploy:delete",
+		"container:create", "container:read", "container:update", "container:delete",
+		"audit:create", "audit:read", "audit:update", "audit:delete",
+		"terminal:create", "terminal:read", "terminal:update", "terminal:delete",
+		"dashboard:read",
+	}
+
+	memberPermissions = []string{
+		"user:read", "user:update",
+		"organization:read", "organization:update",
+		"container:read",
+		"audit:read",
+		"domain:read",
+		"notification:read",
+		"file-manager:read",
+		"deploy:read",
+		"dashboard:read",
+	}
+
+	viewerPermissions = []string{
+		"user:read", "organization:read", "container:read", "audit:read", "domain:read", "notification:read", "file-manager:read", "deploy:read", "dashboard:read",
+	}
+)
 
 // Init initializes the SuperTokens authentication system
 func Init(appInstance *storage.App) {
@@ -85,6 +122,13 @@ func Init(appInstance *storage.App) {
 						return originalImplementation
 					},
 				},
+			}),
+			passwordless.Init(plessmodels.TypeInput{
+				FlowType: "MAGIC_LINK",
+				ContactMethodEmail: plessmodels.ContactMethodEmailConfig{
+					Enabled: true,
+				},
+				Override: createPasswordlessOverrides(),
 			}),
 			session.Init(&sessmodels.TypeInput{
 				ExposeAccessTokenToFrontendInCookieBasedAuth: true,
@@ -160,14 +204,23 @@ func createUserInDatabase(supertokensUserID, email string) {
 	}
 
 	// Add user to organization as admin
-	if err := addUserToOrganizationWithRole(*user, organization, "admin", &tx); err != nil {
+	if err := addUserToOrganization(*user, organization, &tx); err != nil {
 		log.Printf("Failed to add user to organization: %v", err)
 		return
 	}
 
-	// Assign SuperTokens role to the user in the default tenant
-	if _, roleErr := userroles.AddRoleToUser("public", supertokensUserID, "admin", nil); roleErr != nil {
-		log.Printf("Failed to assign SuperTokens role to user: %v", roleErr)
+	// Create organization specific admin role and assign it to the user
+	roleName := fmt.Sprintf("orgid_%s_admin", organization.ID.String())
+
+	// Create the organization specific role first
+	if _, createRoleErr := userroles.CreateNewRoleOrAddPermissions(roleName, GetAdminPermissions(), nil); createRoleErr != nil {
+		log.Printf("Failed to create organization-specific role %s: %v", roleName, createRoleErr)
+		return
+	}
+
+	// Then assign the role to the user
+	if _, roleErr := userroles.AddRoleToUser("public", supertokensUserID, roleName, nil); roleErr != nil {
+		log.Printf("Failed to assign SuperTokens role %s to user %s: %v", roleName, supertokensUserID, roleErr)
 		return
 	}
 
@@ -187,45 +240,15 @@ func createUserInDatabase(supertokensUserID, email string) {
 
 // seedDefaultRolesAndPermissions creates initial roles and permissions in SuperTokens
 func seedDefaultRolesAndPermissions() error {
-	adminPerms := []string{
-		"user:create", "user:read", "user:update", "user:delete",
-		"organization:create", "organization:read", "organization:update", "organization:delete",
-		"role:create", "role:read", "role:update", "role:delete",
-		"permission:create", "permission:read", "permission:update", "permission:delete",
-		"domain:create", "domain:read", "domain:update", "domain:delete",
-		"github-connector:create", "github-connector:read", "github-connector:update", "github-connector:delete",
-		"notification:create", "notification:read", "notification:update", "notification:delete",
-		"file-manager:create", "file-manager:read", "file-manager:update", "file-manager:delete",
-		"deploy:create", "deploy:read", "deploy:update", "deploy:delete",
-		"container:create", "container:read", "container:update", "container:delete",
-		"audit:create", "audit:read", "audit:update", "audit:delete",
-		"terminal:create", "terminal:read", "terminal:update", "terminal:delete",
-		"dashboard:read",
-	}
-
-	if _, err := userroles.CreateNewRoleOrAddPermissions("admin", adminPerms, nil); err != nil {
+	if _, err := userroles.CreateNewRoleOrAddPermissions("admin", GetAdminPermissions(), nil); err != nil {
 		return err
 	}
 
-	memberPerms := []string{
-		"user:read", "user:update",
-		"organization:read", "organization:update",
-		"container:read",
-		"audit:read",
-		"domain:read",
-		"notification:read",
-		"file-manager:read",
-		"deploy:read",
-		"dashboard:read",
-	}
-	if _, err := userroles.CreateNewRoleOrAddPermissions("member", memberPerms, nil); err != nil {
+	if _, err := userroles.CreateNewRoleOrAddPermissions("member", GetMemberPermissions(), nil); err != nil {
 		return err
 	}
 
-	viewerPerms := []string{
-		"user:read", "organization:read", "container:read", "audit:read", "domain:read", "notification:read", "file-manager:read", "deploy:read", "dashboard:read",
-	}
-	if _, err := userroles.CreateNewRoleOrAddPermissions("viewer", viewerPerms, nil); err != nil {
+	if _, err := userroles.CreateNewRoleOrAddPermissions("viewer", GetViewerPermissions(), nil); err != nil {
 		return err
 	}
 
@@ -254,10 +277,8 @@ func createDefaultOrganizationForUser(user types.User, tx *bun.Tx) (types.Organi
 	return organization, nil
 }
 
-// addUserToOrganizationWithRole adds a user to an organization with a specific role
-func addUserToOrganizationWithRole(user types.User, organization types.Organization, roleName string, tx *bun.Tx) error {
-	log.Printf("Adding user to organization with role %s", roleName)
-
+// addUserToOrganization adds a user to an organization
+func addUserToOrganization(user types.User, organization types.Organization, tx *bun.Tx) error {
 	orgUser := types.OrganizationUsers{
 		ID:             uuid.New(),
 		UserID:         user.ID,
@@ -271,8 +292,8 @@ func addUserToOrganizationWithRole(user types.User, organization types.Organizat
 		return fmt.Errorf("failed to add user to organization: %w", err)
 	}
 
-	log.Printf("Added user %s (ID: %s) to organization %s (ID: %s) with role %s",
-		user.Email, user.ID, organization.Name, organization.ID, roleName)
+	log.Printf("Added user %s (ID: %s) to organization %s (ID: %s)",
+		user.Email, user.ID, organization.Name, organization.ID)
 	return nil
 }
 
@@ -310,4 +331,66 @@ func createDefaultFeatureFlags(organizationID uuid.UUID, tx *bun.Tx) error {
 
 	log.Printf("Created %d default feature flags for organization %s", len(defaultFeatures), organizationID)
 	return nil
+}
+
+// GetAdminPermissions returns the admin permissions list
+func GetAdminPermissions() []string {
+	return adminPermissions
+}
+
+// GetMemberPermissions returns the member permissions list
+func GetMemberPermissions() []string {
+	return memberPermissions
+}
+
+// GetViewerPermissions returns the viewer permissions list
+func GetViewerPermissions() []string {
+	return viewerPermissions
+}
+
+// GetRolesAndPermissionsForUserInOrganization retrieves roles and permissions for a user from SuperTokens, filtered by organization
+func GetRolesAndPermissionsForUserInOrganization(userId, organizationId string) ([]string, []string, error) {
+	// Get roles for the user
+	rolesResponse, err := userroles.GetRolesForUser("public", userId, nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get roles for user %s: %w", userId, err)
+	}
+
+	allRoles := rolesResponse.OK.Roles
+
+	// Filter roles to only include organization specific roles
+	var orgRoles []string
+	var allPermissions []string
+	permissionSet := make(map[string]bool)
+
+	for _, role := range allRoles {
+		// Check if this role is organization specific
+		if strings.HasPrefix(role, "orgid_") && strings.Contains(role, organizationId) {
+			orgRoles = append(orgRoles, role)
+		} else if role == "admin" || role == "member" || role == "viewer" {
+			orgRoles = append(orgRoles, role)
+		} else {
+			// Skip roles that don't belong to the organization
+			continue
+		}
+
+		// Get permissions for the role
+		permissionsResponse, err := userroles.GetPermissionsForRole(role, nil)
+		if err != nil {
+			continue
+		}
+
+		if permissionsResponse.UnknownRoleError != nil {
+			continue
+		}
+
+		for _, permission := range permissionsResponse.OK.Permissions {
+			if !permissionSet[permission] {
+				permissionSet[permission] = true
+				allPermissions = append(allPermissions, permission)
+			}
+		}
+	}
+
+	return orgRoles, allPermissions, nil
 }

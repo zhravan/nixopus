@@ -16,6 +16,8 @@ services:
       - ./logs:/app/logs
       - ${NIXOPUS_HOME:-/etc/nixopus}:/etc/nixopus
       - /var/run/docker.sock:/var/run/docker.sock
+      # LXD unix socket, if not present on host, else mount=no-op directory)
+      - /var/snap/lxd/common/lxd/unix.socket:/var/snap/lxd/common/lxd/unix.socket
       - ${NIXOPUS_HOME:-/etc/nixopus}/source/api/.env:/app/.env
     networks:
       - nixopus-network

@@ -14,13 +14,53 @@ import (
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword/epmodels"
+	"github.com/supertokens/supertokens-golang/recipe/passwordless"
+	"github.com/supertokens/supertokens-golang/recipe/passwordless/plessmodels"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/session/sessmodels"
+	"github.com/supertokens/supertokens-golang/recipe/userroles"
+	"github.com/supertokens/supertokens-golang/recipe/userroles/userrolesclaims"
+	"github.com/supertokens/supertokens-golang/recipe/userroles/userrolesmodels"
 	"github.com/supertokens/supertokens-golang/supertokens"
 	"github.com/uptrace/bun"
 )
 
 var app *storage.App
+
+// Permission constants to avoid duplication
+var (
+	adminPermissions = []string{
+		"user:create", "user:read", "user:update", "user:delete",
+		"organization:create", "organization:read", "organization:update", "organization:delete",
+		"role:create", "role:read", "role:update", "role:delete",
+		"permission:create", "permission:read", "permission:update", "permission:delete",
+		"domain:create", "domain:read", "domain:update", "domain:delete",
+		"github-connector:create", "github-connector:read", "github-connector:update", "github-connector:delete",
+		"notification:create", "notification:read", "notification:update", "notification:delete",
+		"file-manager:create", "file-manager:read", "file-manager:update", "file-manager:delete",
+		"deploy:create", "deploy:read", "deploy:update", "deploy:delete",
+		"container:create", "container:read", "container:update", "container:delete",
+		"audit:create", "audit:read", "audit:update", "audit:delete",
+		"terminal:create", "terminal:read", "terminal:update", "terminal:delete",
+		"dashboard:read",
+	}
+
+	memberPermissions = []string{
+		"user:read", "user:update",
+		"organization:read", "organization:update",
+		"container:read",
+		"audit:read",
+		"domain:read",
+		"notification:read",
+		"file-manager:read",
+		"deploy:read",
+		"dashboard:read",
+	}
+
+	viewerPermissions = []string{
+		"user:read", "organization:read", "container:read", "audit:read", "domain:read", "notification:read", "file-manager:read", "deploy:read", "dashboard:read",
+	}
+)
 
 // Init initializes the SuperTokens authentication system
 func Init(appInstance *storage.App) {
@@ -42,6 +82,7 @@ func Init(appInstance *storage.App) {
 			WebsiteBasePath: &websiteBasePath,
 		},
 		RecipeList: []supertokens.Recipe{
+			userroles.Init(&userrolesmodels.TypeInput{}),
 			emailpassword.Init(&epmodels.TypeInput{
 				Override: &epmodels.OverrideStruct{
 					APIs: func(originalImplementation epmodels.APIInterface) epmodels.APIInterface {
@@ -64,6 +105,15 @@ func Init(appInstance *storage.App) {
 							// If sign up was successful, create user in our database
 							if err == nil && response.OK != nil {
 								createUserInDatabase(response.OK.User.ID, response.OK.User.Email)
+
+								// Add roles and permissions to the newly created session
+								if options.Req != nil {
+									ctx := options.Req.Context()
+									sessContainer := session.GetSessionFromRequestContext(ctx)
+									if sessContainer != nil {
+										_ = addRolesAndPermissionsToSession(sessContainer)
+									}
+								}
 							}
 
 							return response, err
@@ -72,6 +122,13 @@ func Init(appInstance *storage.App) {
 						return originalImplementation
 					},
 				},
+			}),
+			passwordless.Init(plessmodels.TypeInput{
+				FlowType: "MAGIC_LINK",
+				ContactMethodEmail: plessmodels.ContactMethodEmailConfig{
+					Enabled: true,
+				},
+				Override: createPasswordlessOverrides(),
 			}),
 			session.Init(&sessmodels.TypeInput{
 				ExposeAccessTokenToFrontendInCookieBasedAuth: true,
@@ -82,6 +139,21 @@ func Init(appInstance *storage.App) {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	if seedErr := seedDefaultRolesAndPermissions(); seedErr != nil {
+		log.Printf("Failed to seed roles and permissions via SuperTokens: %v", seedErr)
+	}
+}
+
+// addRolesAndPermissionsToSession fetches and sets the user's roles and permissions claims in the session
+func addRolesAndPermissionsToSession(sessionContainer sessmodels.SessionContainer) error {
+	if err := sessionContainer.FetchAndSetClaim(userrolesclaims.UserRoleClaim); err != nil {
+		return err
+	}
+	if err := sessionContainer.FetchAndSetClaim(userrolesclaims.PermissionClaim); err != nil {
+		return err
+	}
+	return nil
 }
 
 // createUserInDatabase creates a user in our database when they sign up through SuperTokens
@@ -132,8 +204,23 @@ func createUserInDatabase(supertokensUserID, email string) {
 	}
 
 	// Add user to organization as admin
-	if err := addUserToOrganizationWithRole(*user, organization, "admin", &tx); err != nil {
+	if err := addUserToOrganization(*user, organization, &tx); err != nil {
 		log.Printf("Failed to add user to organization: %v", err)
+		return
+	}
+
+	// Create organization specific admin role and assign it to the user
+	roleName := fmt.Sprintf("orgid_%s_admin", organization.ID.String())
+
+	// Create the organization specific role first
+	if _, createRoleErr := userroles.CreateNewRoleOrAddPermissions(roleName, GetAdminPermissions(), nil); createRoleErr != nil {
+		log.Printf("Failed to create organization-specific role %s: %v", roleName, createRoleErr)
+		return
+	}
+
+	// Then assign the role to the user
+	if _, roleErr := userroles.AddRoleToUser("public", supertokensUserID, roleName, nil); roleErr != nil {
+		log.Printf("Failed to assign SuperTokens role %s to user %s: %v", roleName, supertokensUserID, roleErr)
 		return
 	}
 
@@ -149,6 +236,23 @@ func createUserInDatabase(supertokensUserID, email string) {
 
 	log.Printf("Successfully created user %s (ID: %s) in database with SuperTokens ID %s and default organization %s (ID: %s)",
 		email, user.ID, supertokensUserID, organization.Name, organization.ID)
+}
+
+// seedDefaultRolesAndPermissions creates initial roles and permissions in SuperTokens
+func seedDefaultRolesAndPermissions() error {
+	if _, err := userroles.CreateNewRoleOrAddPermissions("admin", GetAdminPermissions(), nil); err != nil {
+		return err
+	}
+
+	if _, err := userroles.CreateNewRoleOrAddPermissions("member", GetMemberPermissions(), nil); err != nil {
+		return err
+	}
+
+	if _, err := userroles.CreateNewRoleOrAddPermissions("viewer", GetViewerPermissions(), nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // createDefaultOrganizationForUser creates a default organization for a user
@@ -173,34 +277,23 @@ func createDefaultOrganizationForUser(user types.User, tx *bun.Tx) (types.Organi
 	return organization, nil
 }
 
-// addUserToOrganizationWithRole adds a user to an organization with a specific role
-func addUserToOrganizationWithRole(user types.User, organization types.Organization, roleName string, tx *bun.Tx) error {
-	log.Printf("Adding user to organization with role %s", roleName)
-
-	// Get the role by name
-	var role types.Role
-	err := tx.NewSelect().Model(&role).Where("name = ?", roleName).Scan(app.Ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get role %s: %w", roleName, err)
-	}
-
-	// Create organization user relationship
+// addUserToOrganization adds a user to an organization
+func addUserToOrganization(user types.User, organization types.Organization, tx *bun.Tx) error {
 	orgUser := types.OrganizationUsers{
 		ID:             uuid.New(),
 		UserID:         user.ID,
 		OrganizationID: organization.ID,
-		RoleID:         role.ID,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
 
-	_, err = tx.NewInsert().Model(&orgUser).Exec(app.Ctx)
+	_, err := tx.NewInsert().Model(&orgUser).Exec(app.Ctx)
 	if err != nil {
 		return fmt.Errorf("failed to add user to organization: %w", err)
 	}
 
-	log.Printf("Added user %s (ID: %s) to organization %s (ID: %s) with role %s (ID: %s)",
-		user.Email, user.ID, organization.Name, organization.ID, roleName, role.ID)
+	log.Printf("Added user %s (ID: %s) to organization %s (ID: %s)",
+		user.Email, user.ID, organization.Name, organization.ID)
 	return nil
 }
 
@@ -238,4 +331,66 @@ func createDefaultFeatureFlags(organizationID uuid.UUID, tx *bun.Tx) error {
 
 	log.Printf("Created %d default feature flags for organization %s", len(defaultFeatures), organizationID)
 	return nil
+}
+
+// GetAdminPermissions returns the admin permissions list
+func GetAdminPermissions() []string {
+	return adminPermissions
+}
+
+// GetMemberPermissions returns the member permissions list
+func GetMemberPermissions() []string {
+	return memberPermissions
+}
+
+// GetViewerPermissions returns the viewer permissions list
+func GetViewerPermissions() []string {
+	return viewerPermissions
+}
+
+// GetRolesAndPermissionsForUserInOrganization retrieves roles and permissions for a user from SuperTokens, filtered by organization
+func GetRolesAndPermissionsForUserInOrganization(userId, organizationId string) ([]string, []string, error) {
+	// Get roles for the user
+	rolesResponse, err := userroles.GetRolesForUser("public", userId, nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get roles for user %s: %w", userId, err)
+	}
+
+	allRoles := rolesResponse.OK.Roles
+
+	// Filter roles to only include organization specific roles
+	var orgRoles []string
+	var allPermissions []string
+	permissionSet := make(map[string]bool)
+
+	for _, role := range allRoles {
+		// Check if this role is organization specific
+		if strings.HasPrefix(role, "orgid_") && strings.Contains(role, organizationId) {
+			orgRoles = append(orgRoles, role)
+		} else if role == "admin" || role == "member" || role == "viewer" {
+			orgRoles = append(orgRoles, role)
+		} else {
+			// Skip roles that don't belong to the organization
+			continue
+		}
+
+		// Get permissions for the role
+		permissionsResponse, err := userroles.GetPermissionsForRole(role, nil)
+		if err != nil {
+			continue
+		}
+
+		if permissionsResponse.UnknownRoleError != nil {
+			continue
+		}
+
+		for _, permission := range permissionsResponse.OK.Permissions {
+			if !permissionSet[permission] {
+				permissionSet[permission] = true
+				allPermissions = append(allPermissions, permission)
+			}
+		}
+	}
+
+	return orgRoles, allPermissions, nil
 }

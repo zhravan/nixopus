@@ -10,6 +10,7 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/utils"
 )
 
+// TODO: Update the users session for the new role
 func (c *OrganizationsController) UpdateUserRole(f fuego.ContextWithBody[types.UpdateUserRoleRequest]) (*shared_types.Response, error) {
 	_, r := f.Response(), f.Request()
 	request, err := f.Body()

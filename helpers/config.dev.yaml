@@ -122,6 +122,7 @@ deps:
   yarn:
     package: "yarn"
     command: "yarn"
+    version: ">=1.22.0, <2.0.0"
     version-command: ["yarn", "--version"]
   python:
     package: "python"

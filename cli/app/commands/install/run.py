@@ -3,6 +3,8 @@ import os
 import re
 import shutil
 import subprocess
+import time
+import urllib.request
 
 import typer
 import yaml
@@ -37,7 +39,7 @@ from app.utils.lib import FileManager, HostInformation
 from app.utils.protocols import LoggerProtocol
 from app.utils.timeout import TimeoutWrapper
 
-from .deps import install_all_deps
+from .deps import get_deps_from_config, get_installed_deps, install_all_deps, install_dep
 from .messages import (
     clone_failed,
     configuration_key_has_no_default_value,
@@ -199,12 +201,12 @@ class Install:
             ("Preflight checks", self._run_preflight_checks),
         ]
         
-        # Skip dependency installation in development mode
+        # Development mode: check and install dependencies (skip if exists)
+        # Production mode: install all dependencies
         if not self.development:
             steps.append(("Installing dependencies", self._install_dependencies))
         else:
-            if self.logger:
-                self.logger.info("Development mode: Skipping system dependency installation")
+            steps.append(("Checking dependencies", self._check_and_install_dependencies_dev))
         
         steps.extend([
             ("Cloning repository", self._setup_clone_and_config),
@@ -217,8 +219,13 @@ class Install:
         steps.extend([
             ("Creating environment files", self._create_env_files),
             ("Generating SSH keys", self._setup_ssh),
-            ("Starting services", self._start_services),
+            ("Starting backend services", self._start_services),
         ])
+        
+        # Development mode: start frontend and validate
+        if self.development:
+            steps.append(("Starting frontend", self._start_frontend))
+            steps.append(("Validating services", self._validate_services))
 
         # If force is enabled, add a Docker cleanup step before cloning to ensure fresh images/containers
         if self.force:
@@ -308,6 +315,38 @@ class Install:
                 result = install_all_deps(verbose=self.verbose, output="json", dry_run=self.dry_run)
         except TimeoutError:
             raise Exception(dependency_installation_timeout)
+    
+    def _check_and_install_dependencies_dev(self):
+        """Check dependencies and install only if missing (development mode)"""
+        deps = get_deps_from_config()
+        os_name = HostInformation.get_os_name()
+        package_manager = HostInformation.get_package_manager()
+        
+        if not package_manager:
+            raise Exception("No supported package manager found")
+        
+        # Check which deps are installed
+        installed = get_installed_deps(deps, os_name, package_manager, verbose=self.verbose)
+        to_install = [dep for dep in deps if not installed.get(dep["name"])]
+        
+        if not to_install:
+            if self.verbose:
+                self.logger.info("All dependencies already installed")
+            return
+        
+        # Install missing dependencies
+        if not self.verbose:
+            self.logger.info(f"Installing {len(to_install)} missing dependencies...")
+        
+        for dep in to_install:
+            if self.verbose:
+                self.logger.info(f"Installing {dep['name']}...")
+            success = install_dep(dep, package_manager, self.logger, dry_run=self.dry_run)
+            if not success and not self.dry_run:
+                self.logger.warning(f"Failed to install {dep['name']}, continuing...")
+        
+        if not self.verbose:
+            self.logger.info("Dependencies ready")
 
     def _setup_clone_and_config(self):
         clone_config = CloneConfig(
@@ -428,7 +467,135 @@ class Install:
             raise Exception(f"{services_start_failed}: {operation_timed_out}")
         if not result.success:
             raise Exception(services_start_failed)
+    
+    def _start_frontend(self):
+        """Install frontend dependencies and start dev server (development only)"""
+        install_dir = self.dev_install_path or os.getcwd()
+        view_dir = os.path.join(install_dir, "view")
+        
+        if not os.path.exists(view_dir):
+            raise Exception(f"Frontend directory not found: {view_dir}")
+        
+        if self.dry_run:
+            self.logger.info("[DRY RUN] Would install frontend dependencies and start server")
+            return
+        
+        # Install dependencies
+        if not self.verbose:
+            self.logger.info("Installing frontend dependencies...")
+        
+        try:
+            yarn_install = subprocess.run(
+                ["yarn", "install"],
+                cwd=view_dir,
+                capture_output=not self.verbose,
+                text=True,
+                timeout=300
+            )
+            
+            if yarn_install.returncode != 0:
+                raise Exception("Frontend dependency installation failed")
+        except subprocess.TimeoutExpired:
+            raise Exception("Frontend dependency installation timed out")
+        except FileNotFoundError:
+            raise Exception("yarn not found. Please install yarn first.")
+        
+        # Create logs directory
+        log_dir = os.path.join(install_dir, "logs")
+        FileManager.create_directory(log_dir, logger=self.logger)
+        
+        # Start dev server in background
+        log_file_path = os.path.join(log_dir, "frontend.log")
+        pid_file_path = os.path.join(log_dir, "frontend.pid")
+        
+        if not self.verbose:
+            self.logger.info("Starting frontend server...")
+        
+        try:
+            log_file = open(log_file_path, "w")
+            process = subprocess.Popen(
+                ["yarn", "dev"],
+                cwd=view_dir,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                start_new_session=True
+            )
+            
+            # Save PID
+            with open(pid_file_path, "w") as f:
+                f.write(str(process.pid))
+            
+            # Wait for startup
+            time.sleep(5)
+            
+            # Check if process is still running
+            if process.poll() is not None:
+                raise Exception("Frontend server failed to start. Check logs/frontend.log")
+            
+            if not self.verbose:
+                self.logger.info("Frontend server started")
+            
+        except FileNotFoundError:
+            raise Exception("yarn not found. Please install yarn first.")
+        except Exception as e:
+            raise Exception(f"Failed to start frontend: {str(e)}")
 
+    def _validate_services(self):
+        """Validate backend and frontend are accessible (development only)"""
+        if self.dry_run:
+            self.logger.info("[DRY RUN] Would validate services")
+            return
+        
+        # Get ports from config
+        api_port = self._get_config("api_port") or "8080"
+        view_port = self._get_config("view_port") or "3000"
+        
+        if not self.verbose:
+            self.logger.info("Validating services...")
+        
+        # Check backend with retries
+        backend_url = f"http://localhost:{api_port}/api/v1/health"
+        backend_ready = False
+        
+        for i in range(5):
+            try:
+                response = urllib.request.urlopen(backend_url, timeout=5)
+                if response.status == 200:
+                    backend_ready = True
+                    break
+            except Exception:
+                if i < 4:
+                    time.sleep(2)
+        
+        if self.verbose:
+            if backend_ready:
+                self.logger.info(f"Backend ready at http://localhost:{api_port}")
+            else:
+                self.logger.warning("Backend not responding yet (may need more time)")
+        
+        # Check frontend
+        frontend_url = f"http://localhost:{view_port}"
+        frontend_ready = False
+        
+        for i in range(3):
+            try:
+                response = urllib.request.urlopen(frontend_url, timeout=5)
+                # Any response means frontend is running (404 is ok for Next.js)
+                frontend_ready = True
+                break
+            except Exception:
+                if i < 2:
+                    time.sleep(2)
+        
+        if self.verbose:
+            if frontend_ready:
+                self.logger.info(f"Frontend ready at http://localhost:{view_port}")
+            else:
+                self.logger.warning("Frontend not responding yet (may need more time)")
+        
+        if not self.verbose and (backend_ready or frontend_ready):
+            self.logger.info("Services validated")
+    
     def _load_proxy(self):
         proxy_port = self._get_config("proxy_port")
         full_source_path = self._get_config("full_source_path")
@@ -457,23 +624,60 @@ class Install:
         if self.development:
             # Development mode specific message
             install_dir = self.dev_install_path or os.getcwd()
-            self.logger.info(f"Development environment installed in: {install_dir}")
-            self.logger.info("")
-            self.logger.info("Next steps:")
-            self.logger.info("  1. Start the frontend:")
-            self.logger.info(f"     cd {os.path.join(install_dir, 'view')}")
-            self.logger.info("     npm install")
-            self.logger.info("     npm run dev")
-            self.logger.info("")
-            self.logger.info("  2. Access the application:")
-            self.logger.info("     - Frontend: http://localhost:3000")
-            self.logger.info("     - Backend API: http://localhost:8080")
-            self.logger.info("     - Register: http://localhost:3000/register")
-            self.logger.info("")
-            self.logger.info("Development mode active:")
-            self.logger.info(f"  - Config: {os.path.join(install_dir, 'nixopus-dev')}")
-            self.logger.info(f"  - Logs: {os.path.join(install_dir, 'logs')}")
-            self.logger.info("  - SSH: ~/.ssh/id_rsa_nixopus")
+            
+            # Get ports from config
+            api_port = self._get_config("api_port") or "8080"
+            view_port = self._get_config("view_port") or "3000"
+            
+            if not self.verbose:
+                # Minimal output
+                self.logger.info("")
+                self.logger.info("Services Running:")
+                self.logger.info(f"  • Frontend:  http://localhost:{view_port}")
+                self.logger.info(f"  • Backend:   http://localhost:{api_port}")
+                self.logger.info(f"  • Register:  http://localhost:{view_port}/register")
+                self.logger.info("")
+                self.logger.info("View Logs:")
+                self.logger.info(f"  • Frontend:  tail -f {os.path.join(install_dir, 'logs', 'frontend.log')}")
+                self.logger.info("  • Backend:   docker logs -f nixopus-api-dev")
+                self.logger.info("")
+                self.logger.info("Stop Services:")
+                self.logger.info(f"  • Frontend:  kill $(cat {os.path.join(install_dir, 'logs', 'frontend.pid')})")
+                self.logger.info(f"  • Backend:   cd {install_dir} && docker-compose -f docker-compose-dev.yml down")
+            else:
+                # Verbose output
+                self.logger.info("")
+                self.logger.info(f"Development environment installed in: {install_dir}")
+                self.logger.info("")
+                self.logger.info("Services Running:")
+                self.logger.info(f"  • Frontend:  http://localhost:{view_port}")
+                self.logger.info(f"  • Backend:   http://localhost:{api_port}")
+                self.logger.info(f"  • Database:  localhost:5432 (postgres/changeme)")
+                self.logger.info("  • Redis:     localhost:6379")
+                self.logger.info(f"  • SuperTokens: http://localhost:3567")
+                self.logger.info("")
+                self.logger.info("Access Application:")
+                self.logger.info(f"  • Main:      http://localhost:{view_port}")
+                self.logger.info(f"  • Register:  http://localhost:{view_port}/register")
+                self.logger.info(f"  • API Docs:  http://localhost:{api_port}/api/docs")
+                self.logger.info("")
+                self.logger.info("View Logs:")
+                self.logger.info(f"  • Frontend:  tail -f {os.path.join(install_dir, 'logs', 'frontend.log')}")
+                self.logger.info("  • Backend:   docker logs -f nixopus-api-dev")
+                self.logger.info("  • Database:  docker logs -f nixopus-db")
+                self.logger.info(f"  • All:       cd {install_dir} && docker-compose -f docker-compose-dev.yml logs -f")
+                self.logger.info("")
+                self.logger.info("Development Commands:")
+                self.logger.info(f"  • Database:  docker exec -it nixopus-db psql -U postgres")
+                self.logger.info("  • Redis:     docker exec -it nixopus-redis redis-cli")
+                self.logger.info(f"  • Restart:   cd {install_dir} && docker-compose -f docker-compose-dev.yml restart api")
+                self.logger.info("")
+                self.logger.info("Configuration:")
+                self.logger.info(f"  • Config:    {os.path.join(install_dir, 'nixopus-dev')}")
+                self.logger.info(f"  • Backend:   {os.path.join(install_dir, 'api', '.env')}")
+                self.logger.info(f"  • Frontend:  {os.path.join(install_dir, 'view', '.env.local')}")
+                self.logger.info(f"  • Logs:      {os.path.join(install_dir, 'logs')}")
+                self.logger.info("  • SSH Key:   ~/.ssh/id_rsa_nixopus")
         else:
             # Production mode message
             nixopus_accessible_at = self._get_access_url()

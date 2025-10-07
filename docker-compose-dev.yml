@@ -1,5 +1,3 @@
-version: "3.8"
-
 # docker compose -f docker-compose-dev.yml up --build
 # TODO: add cli tool seutp configuration for this
 services:
@@ -26,13 +24,15 @@ services:
       - SSL_MODE=disable
       - REDIS_URL=redis://nixopus-redis:6379
       - CADDY_ENDPOINT=http://nixopus-caddy:2019
-      - SUPERTOKENS_API_DOMAIN=http://supertokens:3567
+      - SUPERTOKENS_API_DOMAIN=http://localhost:${API_PORT:-8443}
       - SUPERTOKENS_CONNECTION_URI=http://supertokens:3567
       - SUPERTOKENS_WEBSITE_DOMAIN=http://localhost:${NEXT_PUBLIC_PORT:-7443}
+      - SUPERTOKENS_API_KEY=NixopusSuperTokensAPIKey
       - ENV=development
     volumes:
       - ./api:/app
       - ./api/.env:/app/.env:ro
+      - ./helpers:/etc/nixopus/source/helpers:ro
       - ./logs:/app/logs
       - /var/run/docker.sock:/var/run/docker.sock
       # Speed up go builds by caching modules & tmp directory
@@ -92,6 +92,7 @@ services:
   supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:latest
     container_name: supertokens
+    
     depends_on:
       nixopus-db:
         condition: service_healthy
@@ -99,6 +100,8 @@ services:
       - "3567:3567"
     environment:
       - POSTGRESQL_CONNECTION_URI=postgresql://${USERNAME:-postgres}:${PASSWORD:-changeme}@nixopus-db:${DB_PORT:-5432}/${DB_NAME:-postgres}
+      - POSTGRESQL_TABLE_NAMES_PREFIX=supertokens_
+    
     networks:
       - nixopus-network
     restart: unless-stopped

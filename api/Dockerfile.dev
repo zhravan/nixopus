@@ -10,6 +10,7 @@ WORKDIR /app
 # Pre-download dependencies
 COPY go.mod go.sum ./
 RUN go mod download
+COPY . .
 
 # Source code is mounted via volume
 ENV PORT=${API_PORT}

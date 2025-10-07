@@ -98,6 +98,8 @@ class Install:
         view_domain: str = None,
         repo: str = None,
         branch: str = None,
+        development: bool = False,
+        dev_install_path: str = None,
     ):
         self.logger = logger
         self.verbose = verbose
@@ -109,18 +111,40 @@ class Install:
         self.view_domain = view_domain
         self.repo = repo
         self.branch = branch
+        self.development = development
+        self.dev_install_path = os.path.abspath(os.path.expanduser(dev_install_path)) if dev_install_path else None
         self._user_config = _config.load_user_config(self.config_file)
         self.progress = None
         self.main_task = None
         self._validate_domains()
         self._validate_repo()
         
-        # Log when using custom repository/branch and staging compose file
-        if self._is_custom_repo_or_branch():
+        # Log mode
+        if self.development:
+            if self.logger:
+                install_location = self.dev_install_path or os.getcwd()
+                self.logger.info(f"Development mode enabled - installing to: {install_location}")
+        elif self._is_custom_repo_or_branch():
             if self.logger:
                 self.logger.info("Custom repository/branch detected - will use docker-compose-staging.yml")
 
     def _get_config(self, key: str):
+        # Development mode overrides
+        if self.development:
+            install_dir = self.dev_install_path or os.getcwd()
+            if key == "compose_file_path":
+                return os.path.join(install_dir, "docker-compose-dev.yml")
+            if key == "full_source_path":
+                return install_dir
+            if key == "nixopus_config_dir":
+                return os.path.join(install_dir, "nixopus-dev")
+            if key == "api_env_file_path":
+                return os.path.join(install_dir, "api", ".env")
+            if key == "view_env_file_path":
+                return os.path.join(install_dir, "view", ".env.local")
+            if key == "ssh_key_path":
+                return os.path.expanduser("~/.ssh/id_rsa_nixopus")
+        
         # Override repo_url and branch_name if provided via command line
         if key == "repo_url" and self.repo is not None:
             return self.repo
@@ -173,21 +197,37 @@ class Install:
     def run(self):
         steps = [
             ("Preflight checks", self._run_preflight_checks),
-            ("Installing dependencies", self._install_dependencies),
+        ]
+        
+        # Skip dependency installation in development mode
+        if not self.development:
+            steps.append(("Installing dependencies", self._install_dependencies))
+        else:
+            if self.logger:
+                self.logger.info("Development mode: Skipping system dependency installation")
+        
+        steps.extend([
             ("Cloning repository", self._setup_clone_and_config),
-            ("Setting up proxy config", self._setup_proxy_config),
+        ])
+        
+        # Skip proxy setup in development mode
+        if not self.development:
+            steps.append(("Setting up proxy config", self._setup_proxy_config))
+        
+        steps.extend([
             ("Creating environment files", self._create_env_files),
             ("Generating SSH keys", self._setup_ssh),
             ("Starting services", self._start_services),
-        ]
+        ])
 
         # If force is enabled, add a Docker cleanup step before cloning to ensure fresh images/containers
         if self.force:
-            # Insert cleanup as the third step (index 2), right before cloning the repo
-            steps.insert(2, ("Cleaning up Docker resources", self._cleanup_docker))
+            # Insert cleanup before cloning
+            clone_index = next(i for i, (name, _) in enumerate(steps) if name == "Cloning repository")
+            steps.insert(clone_index, ("Cleaning up Docker resources", self._cleanup_docker))
 
-        # Only add proxy steps if both api_domain and view_domain are provided
-        if self.api_domain and self.view_domain:
+        # Only add proxy loading if both api_domain and view_domain are provided and not in dev mode
+        if self.api_domain and self.view_domain and not self.development:
             steps.append(("Loading proxy configuration", self._load_proxy))
 
         try:
@@ -341,6 +381,9 @@ class Install:
         self.logger.debug(f"{proxy_config_created}: {caddy_json_template}")
 
     def _setup_ssh(self):
+        # In development mode, always add to authorized_keys for localhost access
+        add_to_auth_keys = True if self.development else True
+        
         config = SSHConfig(
             path=self._get_config("ssh_key_path"),
             key_type=self._get_config("ssh_key_type"),
@@ -351,7 +394,7 @@ class Install:
             dry_run=self.dry_run,
             force=self.force,
             set_permissions=True,
-            add_to_authorized_keys=True,
+            add_to_authorized_keys=add_to_auth_keys,
             create_ssh_directory=True,
         )
         ssh_operation = SSH(logger=self.logger)
@@ -362,6 +405,9 @@ class Install:
             raise Exception(f"{ssh_setup_failed}: {operation_timed_out}")
         if not result.success:
             raise Exception(ssh_setup_failed)
+        
+        if self.development and not self.dry_run:
+            self.logger.info("SSH key configured for local development with host access")
 
     def _start_services(self):
         config = UpConfig(
@@ -406,32 +452,77 @@ class Install:
             raise Exception(proxy_load_failed)
 
     def _show_success_message(self):
-        nixopus_accessible_at = self._get_access_url()
-
         self.logger.success("Installation Complete!")
-        self.logger.info(f"Nixopus is accessible at: {nixopus_accessible_at}")
-        self.logger.highlight("Thank you for installing Nixopus!")
-        self.logger.info("Please visit the documentation at https://docs.nixopus.com for more information.")
-        self.logger.info("If you have any questions, please visit the community forum at https://discord.gg/skdcq39Wpv")
-        self.logger.highlight("See you in the community!")
+        
+        if self.development:
+            # Development mode specific message
+            install_dir = self.dev_install_path or os.getcwd()
+            self.logger.info(f"Development environment installed in: {install_dir}")
+            self.logger.info("")
+            self.logger.info("Next steps:")
+            self.logger.info("  1. Start the frontend:")
+            self.logger.info(f"     cd {os.path.join(install_dir, 'view')}")
+            self.logger.info("     npm install")
+            self.logger.info("     npm run dev")
+            self.logger.info("")
+            self.logger.info("  2. Access the application:")
+            self.logger.info("     - Frontend: http://localhost:3000")
+            self.logger.info("     - Backend API: http://localhost:8080")
+            self.logger.info("     - Register: http://localhost:3000/register")
+            self.logger.info("")
+            self.logger.info("Development mode active:")
+            self.logger.info(f"  - Config: {os.path.join(install_dir, 'nixopus-dev')}")
+            self.logger.info(f"  - Logs: {os.path.join(install_dir, 'logs')}")
+            self.logger.info("  - SSH: ~/.ssh/id_rsa_nixopus")
+        else:
+            # Production mode message
+            nixopus_accessible_at = self._get_access_url()
+            self.logger.info(f"Nixopus is accessible at: {nixopus_accessible_at}")
+            self.logger.highlight("Thank you for installing Nixopus!")
+            self.logger.info("Please visit the documentation at https://docs.nixopus.com for more information.")
+            self.logger.info("If you have any questions, please visit the community forum at https://discord.gg/skdcq39Wpv")
+            self.logger.highlight("See you in the community!")
 
     def _update_environment_variables(self, env_values: dict) -> dict:
         updated_env = env_values.copy()
-        host_ip = HostInformation.get_public_ip()
-        secure = self.api_domain is not None and self.view_domain is not None
+        
+        # Development mode overrides
+        if self.development:
+            # Get values from config.dev.yaml instead of hardcoding
+            dev_api_port = self._get_config("api_port") or "8080"
+            dev_view_port = self._get_config("view_port") or "3000"
+            current_user = os.getenv("USER", "user")
+            
+            # Only override what's necessary for development
+            key_map = {
+                "SSH_HOST": "host.docker.internal",
+                "SSH_USER": current_user,
+                "SSH_PRIVATE_KEY": "/root/.ssh/id_rsa_nixopus",
+                "SUPERTOKENS_API_DOMAIN": f"http://localhost:{dev_api_port}",
+                "SUPERTOKENS_WEBSITE_DOMAIN": f"http://localhost:{dev_view_port}",
+                "WEBSOCKET_URL": f"ws://localhost:{dev_api_port}/ws",
+                "API_URL": f"http://localhost:{dev_api_port}/api",
+                "NEXT_PUBLIC_API_URL": f"http://localhost:{dev_api_port}/api",
+                "NEXT_PUBLIC_WEBSITE_DOMAIN": f"http://localhost:{dev_view_port}",
+                "WEBHOOK_URL": f"http://localhost:{dev_api_port}/api/v1/webhook",
+            }
+        else:
+            # Production mode
+            host_ip = HostInformation.get_public_ip()
+            secure = self.api_domain is not None and self.view_domain is not None
 
-        api_host = self.api_domain if secure else f"{host_ip}:{self._get_config('api_port')}"
-        view_host = self.view_domain if secure else f"{host_ip}:{self._get_config('view_port')}"
-        protocol = "https" if secure else "http"
-        ws_protocol = "wss" if secure else "ws"
-        key_map = {
-            "ALLOWED_ORIGIN": f"{protocol}://{view_host}",
-            "SSH_HOST": host_ip,
-            "SSH_PRIVATE_KEY": self._get_config("ssh_key_path"),
-            "WEBSOCKET_URL": f"{ws_protocol}://{api_host}/ws",
-            "API_URL": f"{protocol}://{api_host}/api",
-            "WEBHOOK_URL": f"{protocol}://{api_host}/api/v1/webhook",
-        }
+            api_host = self.api_domain if secure else f"{host_ip}:{self._get_config('api_port')}"
+            view_host = self.view_domain if secure else f"{host_ip}:{self._get_config('view_port')}"
+            protocol = "https" if secure else "http"
+            ws_protocol = "wss" if secure else "ws"
+            key_map = {
+                "ALLOWED_ORIGIN": f"{protocol}://{view_host}",
+                "SSH_HOST": host_ip,
+                "SSH_PRIVATE_KEY": self._get_config("ssh_key_path"),
+                "WEBSOCKET_URL": f"{ws_protocol}://{api_host}/ws",
+                "API_URL": f"{protocol}://{api_host}/api",
+                "WEBHOOK_URL": f"{protocol}://{api_host}/api/v1/webhook",
+            }
 
         for key, value in key_map.items():
             if key in updated_env:

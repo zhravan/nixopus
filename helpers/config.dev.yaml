@@ -30,11 +30,11 @@ services:
 
   view:
     env:
-      PORT: ${VIEW_PORT:-7443}
+      PORT: ${VIEW_PORT:-3000}
       WEBSOCKET_URL: ${WEBSOCKET_URL:-}
       API_URL: ${API_URL:-}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
-      NEXT_PUBLIC_PORT: ${NEXT_PUBLIC_PORT:-7443}
+      NEXT_PUBLIC_PORT: ${NEXT_PUBLIC_PORT:-3000}
       LOGS_PATH: ${LOGS_PATH:-./logs}
 
   redis:
@@ -81,11 +81,6 @@ deps:
     command: "poetry"
     version: ">=1.2.0, <2.0.0"
     version-command: ["poetry", "--version"]
-  redis:
-    package: "redis-server"
-    command: "redis-server"
-    version: ">=7.0.0, <8.0.0"
-    version-command: ["redis-server", "--version"]
   git:
     package: "git"
     command: "git"
@@ -115,11 +110,6 @@ deps:
     command: "sshd"
     version: ">=8.0, <10.0"
     version-command: ["sshd", "-V"]
-  go:
-    package: "go"
-    command: "go"
-    version: ">=1.23.0, <2.0.0"
-    version-command: ["go", "version"]
   node:
     package: "node"
     command: "node"
@@ -137,24 +127,15 @@ deps:
     package: "python"
     command: "python"
     version-command: ["python", "--version"]
-  postgresql:
-    package: "postgresql"
-    command: "psql"
-    version-command: ["psql", "--version"]
-  air:
-    package: "air"
-    command: "air"
-    version: ">=1.40.0, <2.0.0"
-    version-command: ["air", "-v"]
 
 nixopus-config-dir: ./nixopus-dev
-compose-file-path: docker-compose.yml
+compose-file-path: docker-compose-dev.yml
 clone:
   repo: "https://github.com/raghavyuva/nixopus"
   branch: "feat/dev_environment"
   source-path: .
 
-ports: [8080, 7443, 6379, 5432, 22]
+ports: [8080, 3000, 6379, 5432, 22]
 ssh_key_size: 4096
 ssh_key_type: rsa
 ssh_passphrase:

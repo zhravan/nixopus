@@ -490,7 +490,7 @@ class Install:
                 cwd=view_dir,
                 capture_output=not self.verbose,
                 text=True,
-                timeout=300
+                timeout=600
             )
             
             if yarn_install.returncode != 0:

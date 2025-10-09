@@ -6,6 +6,7 @@ from app.utils.timeout import TimeoutWrapper
 
 from .deps import install_all_deps
 from .run import Install
+from .development import DevelopmentInstall
 from .ssh import SSH, SSHConfig
 
 install_app = typer.Typer(help="Install Nixopus", invoke_without_command=True)
@@ -86,19 +87,16 @@ def development(
 ):
     """Install Nixopus for local development in specified or current directory"""
     logger = Logger(verbose=verbose)
-    install = Install(
+    install = DevelopmentInstall(
         logger=logger,
         verbose=verbose,
         timeout=timeout,
         force=force,
         dry_run=dry_run,
         config_file=config_file,
-        api_domain=None,
-        view_domain=None,
         repo=repo,
         branch=branch,
-        development=True,
-        dev_install_path=path,
+        install_path=path,
     )
     install.run()
 

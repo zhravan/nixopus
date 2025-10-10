@@ -1,16 +1,17 @@
 package types
 
 type Config struct {
-	Server     ServerConfig     `mapstructure:"server"`
-	Database   DatabaseConfig   `mapstructure:"database"`
-	Redis      RedisConfig      `mapstructure:"redis"`
-	SSH        SSHConfig        `mapstructure:"ssh"`
-	Deployment DeploymentConfig `mapstructure:"deployment"`
-	Docker     DockerConfig     `mapstructure:"docker"`
-	Proxy      ProxyConfig      `mapstructure:"proxy"`
-	CORS       CORSConfig       `mapstructure:"cors"`
-	App        AppConfig        `mapstructure:"app"`
+	Server      ServerConfig      `mapstructure:"server"`
+	Database    DatabaseConfig    `mapstructure:"database"`
+	Redis       RedisConfig       `mapstructure:"redis"`
+	SSH         SSHConfig         `mapstructure:"ssh"`
+	Deployment  DeploymentConfig  `mapstructure:"deployment"`
+	Docker      DockerConfig      `mapstructure:"docker"`
+	Proxy       ProxyConfig       `mapstructure:"proxy"`
+	CORS        CORSConfig        `mapstructure:"cors"`
+	App         AppConfig         `mapstructure:"app"`
 	Supertokens SupertokensConfig `mapstructure:"supertokens"`
+	LXD         LXDConfig         `mapstructure:"lxd"`
 }
 
 type SupertokensConfig struct {
@@ -71,6 +72,13 @@ type AppConfig struct {
 	Environment string `mapstructure:"environment"`
 	Version     string `mapstructure:"version"`
 	LogsPath    string `mapstructure:"logs_path"`
+}
+
+type LXDConfig struct {
+	Enabled                 bool   `mapstructure:"enabled"`
+	SocketPath              string `mapstructure:"socket_path"`
+	Project                 string `mapstructure:"project"`
+	OperationTimeoutSeconds int    `mapstructure:"operation_timeout_seconds"`
 }
 
 type ClientContext string

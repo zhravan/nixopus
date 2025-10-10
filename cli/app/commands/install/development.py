@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 import time
 import urllib.request
@@ -75,6 +76,9 @@ class DevelopmentInstall(BaseInstall):
 
         self.install_path = os.path.abspath(os.path.expanduser(install_path)) if install_path else os.getcwd()
         
+        # Check platform and WSL requirement for Windows
+        self._check_platform_support()
+        
         # Load config from config.dev.yaml
         self._config = Config(default_env="DEVELOPMENT")
         self._defaults = self._load_dev_defaults()
@@ -82,6 +86,44 @@ class DevelopmentInstall(BaseInstall):
         if self.logger:
             self.logger.info(f"Development mode - installing to: {self.install_path}")
 
+    def _check_platform_support(self):
+        """Check if platform is supported for development"""
+        if platform.system() != "Windows":
+            return
+        
+        # Check if running in WSL
+        is_wsl = False
+        try:
+            if os.path.exists("/proc/version"):
+                with open("/proc/version", "r") as f:
+                    is_wsl = "microsoft" in f.read().lower() or "wsl" in f.read().lower()
+        except Exception:
+            is_wsl = False
+        
+        if is_wsl:
+            if self.verbose:
+                self.logger.info("Running in WSL2 - full support available")
+            return
+        
+        # Native Windows - show warning
+        self.logger.warning("Running on native Windows")
+        self.logger.warning("")
+        self.logger.warning("Nixopus development environment requires WSL2 for full feature support.")
+        self.logger.warning("")
+        self.logger.warning("Developmet setup not available on native Windows:")
+        self.logger.warning("  - SSH file manager (container to host access)")
+        self.logger.warning("  - Docker container management")
+        self.logger.warning("")
+        self.logger.warning("To install WSL2:")
+        self.logger.warning("  1. Open PowerShell as Administrator")
+        self.logger.warning("  2. Run: wsl --install")
+        self.logger.warning("  3. Restart your computer")
+        self.logger.warning("  4. Run this command again in WSL2 terminal")
+        self.logger.warning("")
+        self.logger.error("Development installation is only supported on macOS, Linux, or WSL2")
+        self.logger.info("Visit: https://docs.microsoft.com/en-us/windows/wsl/install")
+        raise typer.Exit(1)
+    
     def _load_dev_defaults(self):
         """Load defaults from config.dev.yaml"""
         config_dir = self._config.get_yaml_value(NIXOPUS_CONFIG_DIR)

@@ -95,12 +95,12 @@ services:
         "--config",
         "/etc/caddy/Caddyfile",
         "--adapter",
-        "caddyfile"
+        "caddyfile",
       ]
     networks:
       - nixopus-network
-  
-  supertokens:
+
+  nixopus-supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:latest
     depends_on:
       nixopus-db:

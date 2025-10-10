@@ -56,7 +56,11 @@ services:
       supertokens:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${API_PORT:-8080}/api/v1/health >/dev/null || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://127.0.0.1:${API_PORT:-8080}/api/v1/health >/dev/null || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -92,15 +96,19 @@ services:
     networks:
       - nixopus-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${USERNAME:-postgres} -d ${DB_NAME:-postgres}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${USERNAME:-postgres} -d ${DB_NAME:-postgres}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 20
 
-  supertokens:
+  nixopus-supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:latest
     container_name: supertokens
-    
+
     depends_on:
       nixopus-db:
         condition: service_healthy
@@ -109,7 +117,7 @@ services:
     environment:
       - POSTGRESQL_CONNECTION_URI=postgresql://${USERNAME:-postgres}:${PASSWORD:-changeme}@nixopus-db:${DB_PORT:-5432}/${DB_NAME:-postgres}
       - POSTGRESQL_TABLE_NAMES_PREFIX=supertokens_
-    
+
     networks:
       - nixopus-network
     restart: unless-stopped
@@ -138,7 +146,7 @@ services:
         "--config",
         "/etc/caddy/Caddyfile",
         "--adapter",
-        "caddyfile"
+        "caddyfile",
       ]
     networks:
       - nixopus-network

@@ -191,6 +191,12 @@ func setupEnvVarMappings() {
 	viper.BindEnv("supertokens.api_domain", "SUPERTOKENS_API_DOMAIN")
 	viper.BindEnv("supertokens.website_domain", "SUPERTOKENS_WEBSITE_DOMAIN")
 	viper.BindEnv("supertokens.connection_uri", "SUPERTOKENS_CONNECTION_URI")
+
+	// LXD
+	viper.BindEnv("lxd.enabled", "LXD_ENABLED")
+	viper.BindEnv("lxd.socket_path", "LXD_SOCKET_PATH")
+	viper.BindEnv("lxd.project", "LXD_PROJECT")
+	viper.BindEnv("lxd.operation_timeout_seconds", "LXD_OPERATION_TIMEOUT_SECONDS")
 }
 
 func validateConfig(config types.Config) error {

@@ -424,7 +424,7 @@ class Install:
         view_host = self.view_domain if secure else f"{host_ip}:{self._get_config('view_port')}"
         protocol = "https" if secure else "http"
         ws_protocol = "wss" if secure else "ws"
-        super_tokens_api_port = self._get_config("super_tokens_api_port") or 3567
+        super_tokens_api_port = self._get_config("services.api.env.SUPERTOKENS_API_PORT") or 3567
         key_map = {
             "ALLOWED_ORIGIN": f"{protocol}://{view_host}",
             "SSH_HOST": host_ip,

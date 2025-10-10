@@ -32,6 +32,11 @@ services:
       SUPERTOKENS_WEBSITE_DOMAIN: ${SUPERTOKENS_WEBSITE_DOMAIN:-http://localhost:3000}
       SUPERTOKENS_CONNECTION_URI: ${SUPERTOKENS_CONNECTION_URI:-http://localhost:3567}
       SUPERTOKENS_API_PORT: ${SUPERTOKENS_API_PORT:-3567}
+      # TODO: LXD - optional for now, mandatory include for cli installation
+      LXD_ENABLED: ${LXD_ENABLED:-false}
+      LXD_SOCKET_PATH: ${LXD_SOCKET_PATH:-/var/snap/lxd/common/lxd/unix.socket}
+      LXD_PROJECT: ${LXD_PROJECT:-default}
+      LXD_OPERATION_TIMEOUT_SECONDS: ${LXD_OPERATION_TIMEOUT_SECONDS:-60}
 
   view:
     env:
@@ -85,7 +90,7 @@ services:
           "--config",
           "/etc/caddy/Caddyfile",
           "--adapter",
-          "caddyfile",
+          "caddyfile"
         ]
 
 networks:

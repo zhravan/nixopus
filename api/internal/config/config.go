@@ -257,6 +257,16 @@ func validateConfig(config types.Config) error {
 		errors = append(errors, "SuperTokens connection URI is required")
 	}
 
+	// TODO: @zhravan Remove once LXD is mandated
+	if config.LXD.Enabled {
+		if config.LXD.SocketPath == "" {
+			log.Printf("Warning: LXD is enabled but socket_path is not set; default will be used if available")
+		}
+		if config.LXD.OperationTimeoutSeconds <= 0 {
+			log.Printf("Info: LXD operation_timeout_seconds not set; will use default 60 seconds")
+		}
+	}
+
 	if len(errors) > 0 {
 		return fmt.Errorf("configuration validation failed: %v", errors)
 	}

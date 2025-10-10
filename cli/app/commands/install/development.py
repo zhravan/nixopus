@@ -3,13 +3,30 @@ import subprocess
 import time
 import urllib.request
 
+import typer
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 
 from app.commands.clone.clone import Clone, CloneConfig
 from app.commands.conf.base import BaseEnvironmentManager
 from app.commands.preflight.run import PreflightRunner
+from app.commands.service.base import BaseDockerService
 from app.commands.service.up import Up, UpConfig
-from app.utils.config import Config
+from app.utils.config import (
+    API_ENV_FILE,
+    API_PORT,
+    Config,
+    DEFAULT_BRANCH,
+    DEFAULT_COMPOSE_FILE,
+    DEFAULT_PATH,
+    DEFAULT_REPO,
+    NIXOPUS_CONFIG_DIR,
+    PORTS,
+    SSH_FILE_PATH,
+    SSH_KEY_SIZE,
+    SSH_KEY_TYPE,
+    VIEW_ENV_FILE,
+    VIEW_PORT,
+)
 from app.utils.lib import FileManager, HostInformation
 from app.utils.protocols import LoggerProtocol
 from app.utils.timeout import TimeoutWrapper
@@ -21,6 +38,7 @@ from .messages import (
     created_env_file,
     env_file_creation_failed,
     env_file_permissions_failed,
+    installation_failed,
     installing_nixopus,
     operation_timed_out,
     services_start_failed,
@@ -28,13 +46,10 @@ from .messages import (
 )
 from .ssh import SSH, SSHConfig
 
-# Load config defaults
-_config = Config()
-
 
 class DevelopmentInstall(BaseInstall):
     """Development installation flow - installs to current directory with auto-start"""
-    
+
     def __init__(
         self,
         logger: LoggerProtocol = None,
@@ -57,58 +72,43 @@ class DevelopmentInstall(BaseInstall):
             repo=repo,
             branch=branch,
         )
-        
+
         self.install_path = os.path.abspath(os.path.expanduser(install_path)) if install_path else os.getcwd()
         
-        # Load defaults from config.dev.yaml
+        # Load config from config.dev.yaml
+        self._config = Config(default_env="DEVELOPMENT")
         self._defaults = self._load_dev_defaults()
         
         if self.logger:
             self.logger.info(f"Development mode - installing to: {self.install_path}")
-    
+
     def _load_dev_defaults(self):
         """Load defaults from config.dev.yaml"""
-        from app.utils.config import (
-            API_ENV_FILE,
-            API_PORT,
-            DEFAULT_BRANCH,
-            DEFAULT_COMPOSE_FILE,
-            DEFAULT_PATH,
-            DEFAULT_REPO,
-            NIXOPUS_CONFIG_DIR,
-            PORTS,
-            SSH_FILE_PATH,
-            SSH_KEY_SIZE,
-            SSH_KEY_TYPE,
-            VIEW_ENV_FILE,
-            VIEW_PORT,
-        )
-        
-        config_dir = _config.get_yaml_value(NIXOPUS_CONFIG_DIR)
-        source_path = _config.get_yaml_value(DEFAULT_PATH)
+        config_dir = self._config.get_yaml_value(NIXOPUS_CONFIG_DIR)
+        source_path = self._config.get_yaml_value(DEFAULT_PATH)
         
         return {
-            "ssh_key_type": _config.get_yaml_value(SSH_KEY_TYPE),
-            "ssh_key_size": _config.get_yaml_value(SSH_KEY_SIZE),
+            "ssh_key_type": self._config.get_yaml_value(SSH_KEY_TYPE),
+            "ssh_key_size": self._config.get_yaml_value(SSH_KEY_SIZE),
             "ssh_passphrase": None,
             "service_name": "all",
             "service_detach": True,
-            "required_ports": [int(port) for port in _config.get_yaml_value(PORTS)],
-            "repo_url": _config.get_yaml_value(DEFAULT_REPO),
-            "branch_name": _config.get_yaml_value(DEFAULT_BRANCH),
+            "required_ports": [int(port) for port in self._config.get_yaml_value(PORTS)],
+            "repo_url": self._config.get_yaml_value(DEFAULT_REPO),
+            "branch_name": self._config.get_yaml_value(DEFAULT_BRANCH),
             "source_path": source_path,
             "config_dir": config_dir,
-            "api_env_file_path": _config.get_yaml_value(API_ENV_FILE),
-            "view_env_file_path": _config.get_yaml_value(VIEW_ENV_FILE),
-            "compose_file": _config.get_yaml_value(DEFAULT_COMPOSE_FILE),
+            "api_env_file_path": self._config.get_yaml_value(API_ENV_FILE),
+            "view_env_file_path": self._config.get_yaml_value(VIEW_ENV_FILE),
+            "compose_file": self._config.get_yaml_value(DEFAULT_COMPOSE_FILE),
             "full_source_path": self.install_path,
             "ssh_key_path": os.path.expanduser("~/.ssh/id_rsa_nixopus"),
             "compose_file_path": os.path.join(self.install_path, "docker-compose-dev.yml"),
-            "view_port": _config.get_yaml_value(VIEW_PORT),
-            "api_port": _config.get_yaml_value(API_PORT),
+            "view_port": self._config.get_yaml_value(VIEW_PORT),
+            "api_port": self._config.get_yaml_value(API_PORT),
             "nixopus_config_dir": os.path.join(self.install_path, "nixopus-dev"),
         }
-    
+
     def _get_config(self, key: str):
         """Get config value with development-specific overrides"""
         # Development-specific path overrides
@@ -124,10 +124,10 @@ class DevelopmentInstall(BaseInstall):
             return os.path.join(self.install_path, "view", ".env.local")
         if key == "ssh_key_path":
             return os.path.expanduser("~/.ssh/id_rsa_nixopus")
-        
+
         # Use parent's _get_config with dev defaults
         return super()._get_config(key, self._user_config, self._defaults)
-    
+
     def run(self):
         """Execute development installation workflow"""
         steps = [
@@ -140,11 +140,9 @@ class DevelopmentInstall(BaseInstall):
             ("Starting frontend", self._start_frontend),
             ("Validating services", self._validate_services),
         ]
-        
-        # Add cleanup step if force enabled
+
         if self.force:
-            from app.commands.service.base import BaseDockerService
-            
+
             def cleanup():
                 compose_file = self._get_config("compose_file_path")
                 if os.path.exists(compose_file):
@@ -158,10 +156,10 @@ class DevelopmentInstall(BaseInstall):
                         )
                     except Exception as e:
                         self.logger.warning(f"Docker cleanup failed: {e}")
-            
+
             clone_index = next(i for i, (name, _) in enumerate(steps) if name == "Cloning repository")
             steps.insert(clone_index, ("Cleaning up Docker resources", cleanup))
-        
+
         try:
             with Progress(
                 SpinnerColumn(),
@@ -173,7 +171,7 @@ class DevelopmentInstall(BaseInstall):
             ) as progress:
                 self.progress = progress
                 self.main_task = progress.add_task(installing_nixopus, total=len(steps))
-                
+
                 for i, (step_name, step_func) in enumerate(steps):
                     progress.update(self.main_task, description=f"{installing_nixopus} - {step_name} ({i+1}/{len(steps)})")
                     try:
@@ -182,56 +180,61 @@ class DevelopmentInstall(BaseInstall):
                     except Exception as e:
                         progress.update(self.main_task, description=f"Failed at {step_name}")
                         raise
-                
+
                 progress.update(self.main_task, completed=True, description="Installation completed")
-            
+
             self._show_success_message()
         
         except Exception as e:
-            self.logger.error(f"Installation failed: {str(e)}")
-            raise
+            self._handle_installation_error(e)
+            raise typer.Exit(1)
     
+    def _handle_installation_error(self, error):
+        """Handle installation errors with clean output"""
+        if self.verbose:
+            self.logger.error(f"{installation_failed}: {str(error)}")
+        else:
+            self.logger.error(str(error))
+
     def _run_preflight_checks(self):
         """Check ports and system requirements"""
         preflight_runner = PreflightRunner(logger=self.logger, verbose=self.verbose)
         preflight_runner.check_ports_from_config(
-            config_key="required_ports",
-            user_config=self._user_config,
-            defaults=self._defaults
+            config_key="required_ports", user_config=self._user_config, defaults=self._defaults
         )
-    
+
     def _check_and_install_dependencies(self):
         """Check dependencies and install only if missing"""
         deps = get_deps_from_config()
         os_name = HostInformation.get_os_name()
         package_manager = HostInformation.get_package_manager()
-        
+
         if not package_manager:
             raise Exception("No supported package manager found")
-        
+
         # Check which deps are installed
         installed = get_installed_deps(deps, os_name, package_manager, verbose=self.verbose)
         to_install = [dep for dep in deps if not installed.get(dep["name"])]
-        
+
         if not to_install:
             if self.verbose:
                 self.logger.info("All dependencies already installed")
             return
-        
+
         # Install missing dependencies
         if not self.verbose:
             self.logger.info(f"Installing {len(to_install)} missing dependencies...")
-        
+
         for dep in to_install:
             if self.verbose:
                 self.logger.info(f"Installing {dep['name']}...")
             success = install_dep(dep, package_manager, self.logger, dry_run=self.dry_run)
             if not success and not self.dry_run:
                 self.logger.warning(f"Failed to install {dep['name']}, continuing...")
-        
+
         if not self.verbose:
             self.logger.info("Dependencies ready")
-    
+
     def _setup_clone_and_config(self):
         """Clone repository to installation directory"""
         clone_config = CloneConfig(
@@ -251,24 +254,24 @@ class DevelopmentInstall(BaseInstall):
             raise Exception(f"{clone_failed}: {operation_timed_out}")
         if not result.success:
             raise Exception(f"{clone_failed}: {result.error}")
-    
+
     def _create_env_files(self):
         """Create environment files for backend and frontend"""
         api_env_file = self._get_config("api_env_file_path")
         view_env_file = self._get_config("view_env_file_path")
-        
+
         FileManager.create_directory(FileManager.get_directory_path(api_env_file), logger=self.logger)
         FileManager.create_directory(FileManager.get_directory_path(view_env_file), logger=self.logger)
-        
+
         services = [
             ("api", "services.api.env", api_env_file),
             ("view", "services.view.env", view_env_file),
         ]
-        
+
         env_manager = BaseEnvironmentManager(self.logger)
-        
+
         for service_name, service_key, env_file in services:
-            env_values = _config.get_service_env_values(service_key)
+            env_values = self._config.get_service_env_values(service_key)
             updated_env_values = self._update_environment_variables(env_values)
             success, error = env_manager.write_env_file(env_file, updated_env_values)
             if not success:
@@ -277,16 +280,16 @@ class DevelopmentInstall(BaseInstall):
             if not file_perm_success:
                 raise Exception(f"{env_file_permissions_failed} {service_name}: {file_perm_error}")
             self.logger.debug(created_env_file.format(service_name=service_name, env_file=env_file))
-    
+
     def _update_environment_variables(self, env_values: dict) -> dict:
         """Update environment variables with development-specific values"""
         updated_env = env_values.copy()
-        
+
         # Get values from config
         api_port = self._get_config("api_port") or "8080"
         view_port = self._get_config("view_port") or "3000"
         current_user = os.getenv("USER", "user")
-        
+
         # Development-specific overrides
         key_map = {
             "SSH_HOST": "host.docker.internal",
@@ -300,13 +303,13 @@ class DevelopmentInstall(BaseInstall):
             "NEXT_PUBLIC_WEBSITE_DOMAIN": f"http://localhost:{view_port}",
             "WEBHOOK_URL": f"http://localhost:{api_port}/api/v1/webhook",
         }
-        
+
         for key, value in key_map.items():
             if key in updated_env:
                 updated_env[key] = value
-        
+
         return updated_env
-    
+
     def _setup_ssh(self):
         """Generate SSH key and add to authorized_keys for localhost access"""
         config = SSHConfig(
@@ -322,7 +325,7 @@ class DevelopmentInstall(BaseInstall):
             add_to_authorized_keys=True,
             create_ssh_directory=True,
         )
-        
+
         ssh_operation = SSH(logger=self.logger)
         try:
             with TimeoutWrapper(self.timeout):
@@ -331,10 +334,10 @@ class DevelopmentInstall(BaseInstall):
             raise Exception(f"{ssh_setup_failed}: {operation_timed_out}")
         if not result.success:
             raise Exception(ssh_setup_failed)
-        
+
         if not self.dry_run and self.verbose:
             self.logger.info("SSH key configured for local development with host access")
-    
+
     def _start_backend(self):
         """Start backend services using Docker Compose"""
         config = UpConfig(
@@ -346,7 +349,7 @@ class DevelopmentInstall(BaseInstall):
             dry_run=self.dry_run,
             compose_file=self._get_config("compose_file_path"),
         )
-        
+
         up_service = Up(logger=self.logger)
         try:
             with TimeoutWrapper(self.timeout):
@@ -355,95 +358,91 @@ class DevelopmentInstall(BaseInstall):
             raise Exception(f"{services_start_failed}: {operation_timed_out}")
         if not result.success:
             raise Exception(services_start_failed)
-    
+
     def _start_frontend(self):
         """Install frontend dependencies and start dev server"""
         view_dir = os.path.join(self.install_path, "view")
-        
+
         if not os.path.exists(view_dir):
             raise Exception(f"Frontend directory not found: {view_dir}")
-        
+
         if self.dry_run:
             self.logger.info("[DRY RUN] Would install frontend dependencies and start server")
             return
-        
+
         # Install dependencies
         if not self.verbose:
             self.logger.info("Installing frontend dependencies...")
-        
+
         try:
             yarn_install = subprocess.run(
                 ["yarn", "install", "--non-interactive"],
                 cwd=view_dir,
                 capture_output=not self.verbose,
                 text=True,
-                timeout=self.timeout  # Use configurable timeout
+                timeout=self.timeout,  # Use configurable timeout
             )
-            
+
             if yarn_install.returncode != 0:
                 raise Exception("Frontend dependency installation failed")
         except subprocess.TimeoutExpired:
             raise Exception("Frontend dependency installation timed out")
         except FileNotFoundError:
             raise Exception("yarn not found. Please install yarn first.")
-        
+
         # Create logs directory
         log_dir = os.path.join(self.install_path, "logs")
         FileManager.create_directory(log_dir, logger=self.logger)
-        
+
         # Start dev server in background
         log_file_path = os.path.join(log_dir, "frontend.log")
         pid_file_path = os.path.join(log_dir, "frontend.pid")
-        
+
         if not self.verbose:
             self.logger.info("Starting frontend server...")
-        
+
         try:
             log_file = open(log_file_path, "w")
             process = subprocess.Popen(
-                ["yarn", "dev"],
-                cwd=view_dir,
-                stdout=log_file,
-                stderr=subprocess.STDOUT,
-                start_new_session=True
+                ["yarn", "dev"], cwd=view_dir, stdout=log_file, stderr=subprocess.STDOUT, start_new_session=True
             )
-            
+
             # Save PID
             with open(pid_file_path, "w") as f:
                 f.write(str(process.pid))
-            
+
             # Wait for startup
             time.sleep(5)
-            
+
             # Check if process is still running
             if process.poll() is not None:
                 raise Exception("Frontend server failed to start. Check logs/frontend.log")
-            
+
             if not self.verbose:
                 self.logger.info("Frontend server started")
-        
+
         except FileNotFoundError:
             raise Exception("yarn not found. Please install yarn first.")
         except Exception as e:
             raise Exception(f"Failed to start frontend: {str(e)}")
-    
+
     def _validate_services(self):
         """Validate backend and frontend are accessible"""
         if self.dry_run:
             self.logger.info("[DRY RUN] Would validate services")
             return
-        
+
         # Get ports from config
         api_port = self._get_config("api_port") or "8080"
         view_port = self._get_config("view_port") or "3000"
-        
+
         if not self.verbose:
             self.logger.info("Validating services...")
-        
+
         # Check backend with retries
         backend_url = f"http://localhost:{api_port}/api/v1/health"
         backend_ready = False
-        
+
         for i in range(5):
             try:
                 response = urllib.request.urlopen(backend_url, timeout=5)
@@ -453,17 +452,17 @@ class DevelopmentInstall(BaseInstall):
             except Exception:
                 if i < 4:
                     time.sleep(2)
-        
+
         if self.verbose:
             if backend_ready:
                 self.logger.info(f"Backend ready at http://localhost:{api_port}")
             else:
                 self.logger.warning("Backend not responding yet (may need more time)")
-        
+
         # Check frontend
         frontend_url = f"http://localhost:{view_port}"
         frontend_ready = False
-        
+
         for i in range(3):
             try:
                 response = urllib.request.urlopen(frontend_url, timeout=5)
@@ -472,24 +471,24 @@ class DevelopmentInstall(BaseInstall):
             except Exception:
                 if i < 2:
                     time.sleep(2)
-        
+
         if self.verbose:
             if frontend_ready:
                 self.logger.info(f"Frontend ready at http://localhost:{view_port}")
             else:
                 self.logger.warning("Frontend not responding yet (may need more time)")
-        
+
         if not self.verbose and (backend_ready or frontend_ready):
             self.logger.info("Services validated")
-    
+
     def _show_success_message(self):
         """Show success message with service URLs and commands"""
         self.logger.success("Installation Complete!")
-        
+
         # Get ports from config
         api_port = self._get_config("api_port") or "8080"
         view_port = self._get_config("view_port") or "3000"
-        
+
         if not self.verbose:
             # Minimal output
             self.logger.info("")
@@ -539,4 +538,3 @@ class DevelopmentInstall(BaseInstall):
             self.logger.info(f"  • Frontend:  {os.path.join(self.install_path, 'view', '.env.local')}")
             self.logger.info(f"  • Logs:      {os.path.join(self.install_path, 'logs')}")
             self.logger.info("  • SSH Key:   ~/.ssh/id_rsa_nixopus")
-

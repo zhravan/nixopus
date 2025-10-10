@@ -20,6 +20,7 @@ services:
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:3000}
       ENV: ${ENV:-development}
       LOGS_PATH: ${LOGS_PATH:-./logs}
+      API_ENV_FILE: ${API_ENV_FILE:-./api/.env}
       API_VOLUME: ${API_VOLUME:-./configs}
       DOCKER_PORT: ${DOCKER_PORT:-2376}
       APP_VERSION: ${APP_VERSION:-0.1.0-alpha.11}
@@ -34,6 +35,7 @@ services:
       WEBSOCKET_URL: ${WEBSOCKET_URL:-}
       API_URL: ${API_URL:-}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
+      VIEW_ENV_FILE: ${VIEW_ENV_FILE:-./view/.env}
       NEXT_PUBLIC_PORT: ${NEXT_PUBLIC_PORT:-3000}
       LOGS_PATH: ${LOGS_PATH:-./logs}
 
@@ -136,7 +138,7 @@ clone:
   branch: "feat/dev_environment"
   source-path: .
 
-ports: [8080, 3000, 6379, 5432, 22]
+ports: [8080, 3000, 6379, 5432]
 ssh_key_size: 4096
 ssh_key_type: rsa
 ssh_passphrase:

@@ -82,6 +82,7 @@ DEFAULTS = {
     "view_port": _config.get_yaml_value(VIEW_PORT),
     "api_port": _config.get_yaml_value(API_PORT),
     "docker_port": _config.get_yaml_value(DOCKER_PORT),
+    "supertokens_api_port": 3567,
 }
 
 

@@ -436,7 +436,7 @@ class Install:
             "SUPERTOKENS_API_KEY": "NixopusSuperTokensAPIKey",
             "SUPERTOKENS_API_DOMAIN": f"{protocol}://{api_host}/api",
             "SUPERTOKENS_WEBSITE_DOMAIN": f"{protocol}://{view_host}",
-            "SUPERTOKENS_CONNECTION_URI": f"{protocol}://{api_host}/api",
+            "SUPERTOKENS_CONNECTION_URI": f"{protocol}://{api_host}:{self._get_config('super_tokens_api_port')}/api",
         }
 
         for key, value in key_map.items():

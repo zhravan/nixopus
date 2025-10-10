@@ -96,6 +96,7 @@
       "termsOfService": "Términos de Servicio",
       "and": "y",
       "privacyPolicy": "Política de Privacidad",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
       "errors": {
         "loginFailed": "Error al iniciar sesión",
         "invalidCredentials": "Email o contraseña inválidos",
@@ -724,7 +725,8 @@
     "en": "Inglés",
     "es": "Español",
     "fr": "Francés",
-    "kn": "Kannada"
+    "kn": "Canarés",
+    "ml": "Malayalam"
   },
   "dashboard": {
     "title": "Panel de control",

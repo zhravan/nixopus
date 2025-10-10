@@ -426,7 +426,7 @@ class Install:
         view_host = self.view_domain if secure else f"{host_ip}:{self._get_config('view_port')}"
         protocol = "https" if secure else "http"
         ws_protocol = "wss" if secure else "ws"
-        # super_tokens_api_port = self._get_config("services.api.env.SUPERTOKENS_API_PORT") or 3567
+        super_tokens_api_port = self._get_config("supertokens_api_port") or 3567
         key_map = {
             "ALLOWED_ORIGIN": f"{protocol}://{view_host}",
             "SSH_HOST": host_ip,
@@ -439,7 +439,7 @@ class Install:
             "SUPERTOKENS_API_KEY": "NixopusSuperTokensAPIKey",
             "SUPERTOKENS_API_DOMAIN": f"{protocol}://{api_host}/api",
             "SUPERTOKENS_WEBSITE_DOMAIN": f"{protocol}://{view_host}",
-            "SUPERTOKENS_CONNECTION_URI": f"{protocol}://{api_host}:{self._get_config('supertokens_api_port')}/api",
+            "SUPERTOKENS_CONNECTION_URI": f"{protocol}://{api_host}:{super_tokens_api_port}/api",
         }
 
         for key, value in key_map.items():

@@ -444,10 +444,8 @@ class Install:
         protocol = protocol.replace("https", "http")
         try:
             ipaddress.ip_address(api_host)
-            # It's a valid IP — skip port
             return f"{protocol}://{api_host}"
         except ValueError:
-            # Not an IP — include port
             return f"{protocol}://{api_host}:{supertokens_api_port}"
 
     def _update_environment_variables(self, env_values: dict) -> dict:

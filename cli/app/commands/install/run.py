@@ -467,6 +467,7 @@ class Install:
             "API_URL": f"{protocol}://{api_host}/api",
             "WEBHOOK_URL": f"{protocol}://{api_host}/api/v1/webhook",
             "NEXT_PUBLIC_API_URL": f"{protocol}://{api_host}/api",
+            "VIEW_DOMAIN": f"{protocol}://{view_host}",
             "NEXT_PUBLIC_WEBSITE_DOMAIN": f"{protocol}://{view_host}",
             "SUPERTOKENS_API_KEY": "NixopusSuperTokensAPIKey",
             "SUPERTOKENS_API_DOMAIN": f"{protocol}://{api_host}/api",

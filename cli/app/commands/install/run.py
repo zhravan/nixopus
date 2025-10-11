@@ -87,7 +87,6 @@ DEFAULTS = {
     "supertokens_api_port": _config.get_yaml_value(SUPERTOKENS_API_PORT),
 }
 
-
 class Install:
     def __init__(
         self,
@@ -440,12 +439,14 @@ class Install:
         self.logger.info("If you have any questions, please visit the community forum at https://discord.gg/skdcq39Wpv")
         self.logger.highlight("See you in the community!")
 
-    def _get_supertokens_connection_uri(self, protocol: str, api_host: str, supertokens_api_port: int):
+    def _get_supertokens_connection_uri(self, protocol: str, api_host: str, supertokens_api_port: int, host_ip: str):
         protocol = protocol.replace("https", "http")
         try:
             ipaddress.ip_address(api_host)
-            return f"{protocol}://{api_host}"
+            # If api_host is an IP, use the host_ip instead, x.y.z.w:supertokens_api_port
+            return f"{protocol}://{host_ip}:{supertokens_api_port}"
         except ValueError:
+            # If api_host is not IP rather domain, then use domain:supertokens_api_port
             return f"{protocol}://{api_host}:{supertokens_api_port}"
 
     def _update_environment_variables(self, env_values: dict) -> dict:
@@ -471,7 +472,9 @@ class Install:
             "SUPERTOKENS_API_DOMAIN": f"{protocol}://{api_host}/api",
             "SUPERTOKENS_WEBSITE_DOMAIN": f"{protocol}://{view_host}",
             # TODO: temp fix, remove this once we have a secure connection
-            "SUPERTOKENS_CONNECTION_URI": self._get_supertokens_connection_uri(protocol, api_host, supertokens_api_port),
+            "SUPERTOKENS_CONNECTION_URI": self._get_supertokens_connection_uri(
+                protocol, api_host, supertokens_api_port, host_ip
+            ),
         }
 
         for key, value in key_map.items():

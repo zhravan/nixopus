@@ -15,6 +15,10 @@ func (s *ExtensionService) executeUserStep(sshClient *ssh.SSH, props map[string]
 	home, _ := props["home"].(string)
 	groups, _ := props["groups"].(string)
 
+	if username == "" {
+		return "", fmt.Errorf("username is required for user operations")
+	}
+
 	tools := s.userTools(sshClient)
 	var cmd string
 	switch action {
@@ -22,41 +26,46 @@ func (s *ExtensionService) executeUserStep(sshClient *ssh.SSH, props map[string]
 		var err error
 		cmd, err = s.buildEnsureUserCmd(tools, username, shell, home, groups)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to build ensure user command: %w", err)
 		}
 	case "delete":
 		var err error
 		cmd, err = s.buildDeleteUserCmd(tools, username)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to build delete user command: %w", err)
 		}
 	case "modify":
 		var err error
 		cmd, err = s.buildModifyUserCmd(username, shell, home, groups)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to build modify user command: %w", err)
 		}
 	case "add_groups":
 		var err error
 		cmd, err = s.buildAddGroupsCmd(username, groups)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to build add groups command: %w", err)
 		}
 	case "remove_groups":
 		var err error
 		cmd, err = s.buildRemoveGroupsCmd(tools, username, groups)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to build remove groups command: %w", err)
 		}
 	case "check":
 		cmd = s.buildCheckUserCmd(username)
 	default:
-		return "unsupported user action", nil
+		return "", fmt.Errorf("unsupported user action: %s", action)
 	}
 	if timeout > 0 {
 		cmd = fmt.Sprintf("timeout %ds %s", timeout, cmd)
 	}
-	return sshClient.RunCommand(cmd)
+
+	output, err := sshClient.RunCommand(cmd)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute user command '%s': %w (output: %s)", cmd, err, output)
+	}
+	return output, nil
 }
 
 func (s *ExtensionService) buildEnsureUserCmd(tools UserToolset, username string, shell string, home string, groups string) (string, error) {

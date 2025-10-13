@@ -175,11 +175,21 @@ func (p *Parser) validateStep(step ExecutionStep) error {
 		if _, ok := step.Properties["action"]; !ok {
 			return fmt.Errorf("file step requires 'action' property")
 		}
-		if _, ok := step.Properties["src"]; !ok {
-			return fmt.Errorf("file step requires 'src' property")
-		}
-		if _, ok := step.Properties["dest"]; !ok {
-			return fmt.Errorf("file step requires 'dest' property")
+		action, _ := step.Properties["action"].(string)
+
+		// For mkdir action, only dest is required
+		if action == "mkdir" {
+			if _, ok := step.Properties["dest"]; !ok {
+				return fmt.Errorf("file step with mkdir action requires 'dest' property")
+			}
+		} else {
+			// For other actions (move, copy, upload, delete), both src and dest are required
+			if _, ok := step.Properties["src"]; !ok {
+				return fmt.Errorf("file step requires 'src' property")
+			}
+			if _, ok := step.Properties["dest"]; !ok {
+				return fmt.Errorf("file step requires 'dest' property")
+			}
 		}
 	}
 	if step.Type == "service" {

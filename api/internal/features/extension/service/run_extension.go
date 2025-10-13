@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/types"
@@ -13,8 +14,21 @@ func (s *ExtensionService) StartRun(extensionID string, variableValues map[strin
 		return nil, err
 	}
 
+	s.logger.Log(logger.Info, fmt.Sprintf("Extension ParsedContent: %s", ext.ParsedContent), "")
+
 	var spec types.ExtensionSpec
-	_ = json.Unmarshal([]byte(ext.ParsedContent), &spec)
+	var jsonString string
+	if err := json.Unmarshal([]byte(ext.ParsedContent), &jsonString); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("Failed to unmarshal JSON string: %v", err), "")
+		return nil, err
+	}
+
+	if err := json.Unmarshal([]byte(jsonString), &spec); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("Failed to unmarshal extension spec: %v", err), "")
+		return nil, err
+	}
+
+	s.logger.Log(logger.Info, fmt.Sprintf("Parsed spec - Run steps: %d, Validate steps: %d", len(spec.Execution.Run), len(spec.Execution.Validate)), "")
 
 	varsJSON, _ := json.Marshal(variableValues)
 	exec := &types.ExtensionExecution{

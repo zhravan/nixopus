@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS execution_steps (
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
-    CONSTRAINT valid_phase CHECK (phase IN ('pre_install', 'install', 'post_install', 'validate'))
+    CONSTRAINT valid_phase CHECK (phase IN ('pre_install', 'install', 'post_install', 'run', 'validate'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_extensions_category ON extensions(category);

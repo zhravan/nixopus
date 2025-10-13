@@ -40,10 +40,10 @@ type UserToolset struct {
 
 func (s *ExtensionService) userTools(sshClient *ssh.SSH) UserToolset {
 	return UserToolset{
-		add:      s.firstAvailable(sshClient, "useradd", "adduser"),
-		del:      s.firstAvailable(sshClient, "userdel", "deluser"),
-		mod:      s.firstAvailable(sshClient, "usermod", "chsh"),
-		groupDel: s.firstAvailable(sshClient, "gpasswd", "deluser"),
+		add:      s.firstAvailable(sshClient, "/usr/sbin/useradd", "/usr/bin/useradd", "useradd", "/usr/sbin/adduser", "/usr/bin/adduser", "adduser"),
+		del:      s.firstAvailable(sshClient, "/usr/sbin/userdel", "/usr/bin/userdel", "userdel", "/usr/sbin/deluser", "/usr/bin/deluser", "deluser"),
+		mod:      s.firstAvailable(sshClient, "/usr/sbin/usermod", "/usr/bin/usermod", "usermod", "/usr/bin/chsh", "chsh"),
+		groupDel: s.firstAvailable(sshClient, "/usr/bin/gpasswd", "gpasswd", "/usr/sbin/deluser", "/usr/bin/deluser", "deluser"),
 	}
 }
 

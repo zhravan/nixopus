@@ -1,38 +1,32 @@
 metadata:
-  id: "copy-file"
-  name: "Copy File to Remote"
-  description: "Copies a file from local system to a destination on the remote server."
+  id: "create-directory"
+  name: "Create Directory in Home"
+  description: "Creates a directory in the home directory with optional permissions."
   author: "Nixopus Team"
-  icon: "📤"
+  icon: "📁"
   category: "Storage"
   version: "1.0.0"
   isVerified: false
+  type: "run"
 
 variables:
-  source_path:
+  directory_name:
     type: "string"
-    description: "Local path of the file to upload"
-    default: ""
-    is_required: true
+    description: "Name of the directory to create in home directory"
+    default: "test-directory"
+    is_required: false
 
-  destination_path:
+  permissions:
     type: "string"
-    description: "Destination path on the remote server"
-    default: ""
-    is_required: true
+    description: "Directory permissions (e.g., 755, 700)"
+    default: "755"
+    is_required: false
 
 execution:
   run:
-    - name: "Upload file to remote"
+    - name: "Create directory in home"
       type: "file"
       properties:
-        action: "upload"
-        src: "{{ source_path }}"
-        dest: "{{ destination_path }}"
-
-  validate:
-    - name: "Verify file exists at destination"
-      type: "command"
-      properties:
-        cmd: "test -f {{ destination_path }}"
-        timeout: 10
+        action: "mkdir"
+        dest: "~/{{ directory_name }}"
+      timeout: 30

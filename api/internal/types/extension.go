@@ -125,19 +125,37 @@ type ExecutionStep struct {
 
 // SpecStep defines a single step in the extension spec (parsed from YAML/JSON)
 type SpecStep struct {
-	Name         string                 `json:"name"`
-	Type         string                 `json:"type"`
-	Properties   map[string]interface{} `json:"properties"`
-	IgnoreErrors bool                   `json:"ignore_errors"`
-	Timeout      int                    `json:"timeout"`
+	Name         string                 `json:"Name"`
+	Type         string                 `json:"Type"`
+	Properties   map[string]interface{} `json:"Properties"`
+	IgnoreErrors bool                   `json:"IgnoreErrors"`
+	Timeout      int                    `json:"Timeout"`
 }
 
 // ExtensionSpec is the parsed extension content used for execution
 type ExtensionSpec struct {
+	Metadata struct {
+		ID          string `json:"ID"`
+		Name        string `json:"Name"`
+		Description string `json:"Description"`
+		Author      string `json:"Author"`
+		Icon        string `json:"Icon"`
+		Category    string `json:"Category"`
+		Type        string `json:"Type"`
+		Version     string `json:"Version"`
+		IsVerified  bool   `json:"IsVerified"`
+	} `json:"Metadata"`
+	Variables map[string]struct {
+		Type              string `json:"Type"`
+		Description       string `json:"Description"`
+		Default           string `json:"Default"`
+		IsRequired        bool   `json:"IsRequired"`
+		ValidationPattern string `json:"ValidationPattern"`
+	} `json:"Variables"`
 	Execution struct {
-		Run      []SpecStep `json:"run"`
-		Validate []SpecStep `json:"validate"`
-	} `json:"execution"`
+		Run      []SpecStep `json:"Run"`
+		Validate []SpecStep `json:"Validate"`
+	} `json:"Execution"`
 }
 
 type SortDirection string

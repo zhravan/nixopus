@@ -18,6 +18,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "preview": "Preview"
+    "enabled": "Enabled",
+    "disabled": "Disabled"
   },
   "containers": {
     "title": "Containers",
@@ -98,10 +100,11 @@
       "submit": "Login",
       "emailPlaceholder": "m@example.com",
       "loading": "Loading...",
-      "terms": "By clicking continue, you agree to our",
+      "terms": "By continuing, you agree to our",
       "termsOfService": "Terms of Service",
       "and": "and",
       "privacyPolicy": "Privacy Policy",
+      "forgotPassword": "Forgot your password?",
       "errors": {
         "loginFailed": "Login failed",
         "invalidCredentials": "Invalid email or password",
@@ -291,7 +294,15 @@
       "messages": {
         "updated": "Feature flag updated successfully",
         "updateFailed": "Failed to update feature flag"
-      }
+      },
+      "searchPlaceholder": "Search features...",
+      "filters": {
+        "all": "All",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "noResults": "No features found matching your search criteria",
+      "noFeatures": "No features available"
     },
     "account": {
       "title": "Account Information",
@@ -742,7 +753,8 @@
     "en": "English",
     "es": "Spanish",
     "fr": "French",
-    "kn": "Kannada"
+    "kn": "Kannada",
+    "ml": "Malayalam"
   },
   "dashboard": {
     "title": "Dashboard",

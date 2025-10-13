@@ -1,3 +1,74 @@
+# [0.1.0-alpha.37](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.36...v0.1.0-alpha.37) (2025-10-12)
+
+
+### Bug Fixes
+
+* feature flag ui and feature flag writes missing RBAC permissions ([#493](https://github.com/raghavyuva/nixopus/issues/493)) ([2e1c857](https://github.com/raghavyuva/nixopus/commit/2e1c857231d4587e736a157974585c670e0e09a4))
+
+
+
+# [0.1.0-alpha.36](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.35...v0.1.0-alpha.36) (2025-10-11)
+
+
+### Bug Fixes
+
+* supertokens URI for ip vs domain ([#489](https://github.com/raghavyuva/nixopus/issues/489)) ([aaddb3c](https://github.com/raghavyuva/nixopus/commit/aaddb3c06192ebc1df203690f754ec1b26280134))
+
+
+
+# [0.1.0-alpha.35](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.34...v0.1.0-alpha.35) (2025-10-11)
+
+
+### Bug Fixes
+
+* **cli:** force HTTP protocol for SuperTokens connection URI ([#487](https://github.com/raghavyuva/nixopus/issues/487)) ([eb2c0dd](https://github.com/raghavyuva/nixopus/commit/eb2c0ddb9e3df80e606933082a92a66ef65c24cd))
+
+
+
+# [0.1.0-alpha.34](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.33...v0.1.0-alpha.34) (2025-10-11)
+
+
+### Bug Fixes
+
+* supertokens api url in appinfo.ts ([#486](https://github.com/raghavyuva/nixopus/issues/486)) ([901df3f](https://github.com/raghavyuva/nixopus/commit/901df3f92859f1dbc9bc644041da7e5d7436979e))
+
+
+
+# [0.1.0-alpha.33](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.32...v0.1.0-alpha.33) (2025-10-11)
+
+
+### Bug Fixes
+
+* env config for psql setup with supertokens ([#483](https://github.com/raghavyuva/nixopus/issues/483)) ([5e8db05](https://github.com/raghavyuva/nixopus/commit/5e8db05b8c4b20b729952a79f6c1edbff32bf6db))
+
+
+
+# [0.1.0-alpha.32](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.31...v0.1.0-alpha.32) (2025-10-10)
+
+
+### Features
+
+* integrate SuperTokens authentication system ([#440](https://github.com/raghavyuva/nixopus/issues/440)) ([3e2b678](https://github.com/raghavyuva/nixopus/commit/3e2b6780b3830462fbc5490771ea037d9a1f9c96))
+
+
+
+# [0.1.0-alpha.31](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.30...v0.1.0-alpha.31) (2025-10-08)
+
+
+### Bug Fixes
+
+* **ci:** discord notification on webhooks ([a8261f9](https://github.com/raghavyuva/nixopus/commit/a8261f914aea1481021bd60656036439b88fc8a2))
+* **i18n:** update terms phrasing for clarity in English locale ([#460](https://github.com/raghavyuva/nixopus/issues/460)) ([0b96b29](https://github.com/raghavyuva/nixopus/commit/0b96b29a459b8db0414d01c3e720e525e536d6c4))
+* **terminal:** custom key event handler for Ctrl + J ([#459](https://github.com/raghavyuva/nixopus/issues/459)) ([291bec7](https://github.com/raghavyuva/nixopus/commit/291bec7e44a577a539286fefa3df8c73fdc997c9))
+
+
+### Features
+
+* automated discord notifications for new releases ([#439](https://github.com/raghavyuva/nixopus/issues/439)) ([180f299](https://github.com/raghavyuva/nixopus/commit/180f299fe935d04242bf39ba2843fb925cc91910))
+* **i18n:** add support to malayalam ([#420](https://github.com/raghavyuva/nixopus/issues/420)) ([0a919b2](https://github.com/raghavyuva/nixopus/commit/0a919b2d4e312f838822891ce0ab88f8a1d817e0))
+
+
+
 # [0.1.0-alpha.30](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.29...v0.1.0-alpha.30) (2025-09-19)
 
 

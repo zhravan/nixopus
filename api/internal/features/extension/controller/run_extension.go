@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/go-fuego/fuego"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
@@ -48,4 +49,38 @@ func (c *ExtensionsController) CancelExecution(ctx fuego.ContextNoBody) (*types.
 		return nil, fuego.HTTPError{Err: err, Status: http.StatusInternalServerError}
 	}
 	return &types.Response{Status: "success", Message: "Execution cancelled"}, nil
+}
+
+type ListLogsResponse struct {
+	Logs      []types.ExtensionLog `json:"logs"`
+	NextAfter int64                `json:"next_after"`
+}
+
+func (c *ExtensionsController) ListExecutionLogs(ctx fuego.ContextNoBody) (*ListLogsResponse, error) {
+	execID := ctx.PathParam("execution_id")
+	if execID == "" {
+		return nil, fuego.HTTPError{Err: nil, Status: http.StatusBadRequest}
+	}
+	afterSeq := int64(0)
+	if v := ctx.QueryParam("afterSeq"); v != "" {
+		if parsed, err := strconv.ParseInt(v, 10, 64); err == nil {
+			afterSeq = parsed
+		}
+	}
+	limit := 200
+	if v := ctx.QueryParam("limit"); v != "" {
+		if parsed, err := strconv.Atoi(v); err == nil {
+			limit = parsed
+		}
+	}
+	logs, err := c.service.ListExecutionLogs(execID, afterSeq, limit)
+	if err != nil {
+		c.logger.Log(logger.Error, err.Error(), "")
+		return nil, fuego.HTTPError{Err: err, Status: http.StatusInternalServerError}
+	}
+	var next int64 = afterSeq
+	if len(logs) > 0 {
+		next = logs[len(logs)-1].Sequence
+	}
+	return &ListLogsResponse{Logs: logs, NextAfter: next}, nil
 }

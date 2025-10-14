@@ -242,3 +242,35 @@ func (s *ExtensionService) ListExecutionsByExtensionID(extensionID string) ([]ty
 	}
 	return execs, nil
 }
+
+func (s *ExtensionService) appendLog(executionID uuid.UUID, stepID *uuid.UUID, level string, message string, data map[string]interface{}) {
+	seq, err := s.storage.NextLogSequence(executionID.String())
+	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to get next log sequence: %v", err), "")
+		return
+	}
+	var payload []byte
+	if data != nil {
+		payload, _ = json.Marshal(data)
+	} else {
+		payload = []byte("{}")
+	}
+	log := &types.ExtensionLog{
+		ExecutionID: executionID,
+		StepID:      stepID,
+		Level:       level,
+		Message:     message,
+		Data:        payload,
+		Sequence:    seq,
+	}
+	_ = s.storage.CreateExtensionLog(log)
+}
+
+func (s *ExtensionService) ListExecutionLogs(executionID string, afterSeq int64, limit int) ([]types.ExtensionLog, error) {
+	logs, err := s.storage.ListExtensionLogs(executionID, afterSeq, limit)
+	if err != nil {
+		s.logger.Log(logger.Error, err.Error(), "")
+		return nil, err
+	}
+	return logs, nil
+}

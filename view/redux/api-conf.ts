@@ -136,5 +136,6 @@ export enum EXTENSIONURLS {
   RUN_EXTENSION = 'v1/extensions/{extension_id}/run',
   CANCEL_EXECUTION = 'v1/extensions/execution/{execution_id}/cancel',
   GET_EXECUTION = 'v1/extensions/execution/{execution_id}',
-  LIST_EXECUTIONS = 'v1/extensions/by-extension-id/{extension_id}/executions'
+  LIST_EXECUTIONS = 'v1/extensions/by-extension-id/{extension_id}/executions',
+  GET_EXECUTION_LOGS = 'v1/extensions/execution/{execution_id}/logs'
 }

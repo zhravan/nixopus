@@ -21,6 +21,7 @@ func (s *ExtensionService) executeRun(ctx *RunContext) {
 	_ = s.storage.UpdateExecution(ctx.Exec)
 
 	s.logger.Log(logger.Info, fmt.Sprintf("Starting extension execution: %s", ctx.Exec.ID.String()), "")
+	s.appendLog(ctx.Exec.ID, nil, "info", "execution_started", map[string]interface{}{})
 
 	steps := ctx.Steps
 
@@ -39,6 +40,7 @@ func (s *ExtensionService) executeRun(ctx *RunContext) {
 	_ = s.storage.UpdateExecution(ctx.Exec)
 
 	s.logger.Log(logger.Info, fmt.Sprintf("Extension execution completed successfully: %s", ctx.Exec.ID.String()), "")
+	s.appendLog(ctx.Exec.ID, nil, "info", "execution_completed", map[string]interface{}{"status": ctx.Exec.Status})
 }
 
 func (s *ExtensionService) processPhase(
@@ -93,6 +95,8 @@ func (s *ExtensionService) beginStep(step *types.ExecutionStep) {
 
 	// Log to console
 	s.logger.Log(logger.Info, fmt.Sprintf("STEP STARTED: %s", step.StepName), "")
+	sid := step.ID
+	s.appendLog(step.ExecutionID, &sid, "info", "step_started", map[string]interface{}{"step_name": step.StepName, "phase": step.Phase, "order": step.StepOrder})
 
 	_ = s.storage.UpdateExecutionStep(step)
 }
@@ -107,6 +111,8 @@ func (s *ExtensionService) finalizeStep(ctx *RunContext, outcome StepOutcome) bo
 			outcome.Step.StepName,
 			outcome.Output)
 		s.logger.Log(logger.Info, fmt.Sprintf("STEP COMPLETED: %s - %s", outcome.Step.StepName, outcome.Output), "")
+		sid := outcome.Step.ID
+		s.appendLog(ctx.Exec.ID, &sid, "info", "step_completed", map[string]interface{}{"step_name": outcome.Step.StepName, "output": outcome.Output})
 		ctx.Exec.ExecutionLog = ctx.Exec.ExecutionLog + "\n" + successLog
 		_ = s.storage.UpdateExecutionStep(outcome.Step)
 		_ = s.storage.UpdateExecution(ctx.Exec)
@@ -122,6 +128,8 @@ func (s *ExtensionService) finalizeStep(ctx *RunContext, outcome StepOutcome) bo
 		outcome.Err,
 		outcome.Output)
 	s.logger.Log(logger.Error, fmt.Sprintf("STEP FAILED: %s - Error: %v, Output: %s", outcome.Step.StepName, outcome.Err, outcome.Output), "")
+	sid := outcome.Step.ID
+	s.appendLog(ctx.Exec.ID, &sid, "error", "step_failed", map[string]interface{}{"step_name": outcome.Step.StepName, "error": outcome.Err.Error(), "output": outcome.Output})
 	ctx.Exec.ExecutionLog = ctx.Exec.ExecutionLog + "\n" + errorLog
 	_ = s.storage.UpdateExecutionStep(outcome.Step)
 	_ = s.storage.UpdateExecution(ctx.Exec)

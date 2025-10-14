@@ -108,6 +108,14 @@ export const extensionsApi = createApi({
       }),
       providesTags: (result, error, { extensionId }) => [{ type: 'Extension', id: extensionId }],
       transformResponse: (response: ExtensionExecution[]) => response
+    }),
+    getExecutionLogs: builder.query<{ logs: any[]; next_after: number }, { executionId: string; afterSeq?: number; limit?: number }>({
+      query: ({ executionId, afterSeq = 0, limit = 200 }) => ({
+        url: `${EXTENSIONURLS.GET_EXECUTION_LOGS.replace('{execution_id}', executionId)}?afterSeq=${afterSeq}&limit=${limit}`,
+        method: 'GET'
+      }),
+      providesTags: (result, error, { executionId }) => [{ type: 'Execution', id: executionId }],
+      transformResponse: (response: { logs: any[]; next_after: number }) => response
     })
   })
 });
@@ -121,5 +129,6 @@ export const {
   useDeleteExtensionMutation,
   useCancelExecutionMutation,
   useGetExecutionQuery,
-  useListExecutionsQuery
+  useListExecutionsQuery,
+  useGetExecutionLogsQuery
 } = extensionsApi;

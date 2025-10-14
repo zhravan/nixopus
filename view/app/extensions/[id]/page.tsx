@@ -1,6 +1,7 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import PageLayout from '@/components/layout/page-layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,9 +14,19 @@ import ExecutionsTab from './components/LogsTab';
 export default function ExtensionDetailsPage() {
   const { t } = useTranslation();
   const params = useParams();
+  const search = useSearchParams();
   const id = (params?.id as string) || '';
 
   const { data: extension, isLoading } = useGetExtensionQuery({ id });
+  const [tab, setTab] = useState<string>('overview');
+
+  useEffect(() => {
+    const exec = search?.get('exec');
+    const openLogs = search?.get('openLogs') === '1';
+    if (exec && openLogs) {
+      setTab('executions');
+    }
+  }, [search]);
 
   return (
     <PageLayout maxWidth="6xl" padding="md" spacing="lg">
@@ -38,7 +49,7 @@ export default function ExtensionDetailsPage() {
       </div>
 
       <div className="mt-6">
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList>
             <TabsTrigger value="overview">
               <Info className="mr-2 h-4 w-4" />

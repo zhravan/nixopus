@@ -435,6 +435,7 @@ func (router *Router) ExtensionRoutes(s *fuego.Server, extensionController *exte
 	fuego.Post(s, "/{extension_id}/run", extensionController.RunExtension)
 	fuego.Post(s, "/execution/{execution_id}/cancel", extensionController.CancelExecution)
 	fuego.Get(s, "/execution/{execution_id}", extensionController.GetExecution)
+	fuego.Get(s, "/execution/{execution_id}/logs", extensionController.ListExecutionLogs)
 	fuego.Post(s, "/{extension_id}/fork", extensionController.ForkExtension)
 	fuego.Delete(s, "/{id}", extensionController.DeleteFork)
 }

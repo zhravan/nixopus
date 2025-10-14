@@ -30,6 +30,10 @@ type ExtensionStorageInterface interface {
 	UpdateExecution(exec *types.ExtensionExecution) error
 	GetExecutionByID(id string) (*types.ExtensionExecution, error)
 	ListExecutionsByExtensionID(extensionID string) ([]types.ExtensionExecution, error)
+	CreateExtensionLog(log *types.ExtensionLog) error
+	CreateExtensionLogs(logs []types.ExtensionLog) error
+	ListExtensionLogs(executionID string, afterSeq int64, limit int) ([]types.ExtensionLog, error)
+	NextLogSequence(executionID string) (int64, error)
 	BeginTx() (bun.Tx, error)
 	WithTx(tx bun.Tx) ExtensionStorageInterface
 }
@@ -297,4 +301,46 @@ func (s *ExtensionStorage) ListExecutionsByExtensionID(extensionID string) ([]ty
 		return nil, err
 	}
 	return execs, nil
+}
+
+func (s *ExtensionStorage) NextLogSequence(executionID string) (int64, error) {
+	var seq int64
+	_, err := s.getDB().NewUpdate().Table("extension_executions").
+		Set("log_seq = log_seq + 1").
+		Where("id = ?", executionID).
+		Returning("log_seq").
+		Exec(s.Ctx, &seq)
+	if err != nil {
+		return 0, err
+	}
+	return seq, nil
+}
+
+func (s *ExtensionStorage) CreateExtensionLog(log *types.ExtensionLog) error {
+	_, err := s.getDB().NewInsert().Model(log).Exec(s.Ctx)
+	return err
+}
+
+func (s *ExtensionStorage) CreateExtensionLogs(logs []types.ExtensionLog) error {
+	if len(logs) == 0 {
+		return nil
+	}
+	_, err := s.getDB().NewInsert().Model(&logs).Exec(s.Ctx)
+	return err
+}
+
+func (s *ExtensionStorage) ListExtensionLogs(executionID string, afterSeq int64, limit int) ([]types.ExtensionLog, error) {
+	if limit <= 0 || limit > 1000 {
+		limit = 200
+	}
+	var logs []types.ExtensionLog
+	q := s.getDB().NewSelect().Model(&logs).Where("execution_id = ?", executionID)
+	if afterSeq > 0 {
+		q = q.Where("sequence > ?", afterSeq)
+	}
+	err := q.Order("sequence ASC").Limit(limit).Scan(s.Ctx)
+	if err != nil {
+		return nil, err
+	}
+	return logs, nil
 }

@@ -65,10 +65,12 @@ export function useExtensions() {
 
   const handleRun = async (values: Record<string, unknown>) => {
     if (!selectedExtension) return;
-    await runExtensionMutation({
+    const exec = await runExtensionMutation({
       extensionId: selectedExtension.extension_id,
       body: { variables: values }
-    });
+    }).unwrap();
+    setRunModalOpen(false);
+    router.push(`/extensions/${selectedExtension.id}?exec=${exec.id}&openLogs=1`);
   };
 
   const handleCancel = async (executionId: string) => {

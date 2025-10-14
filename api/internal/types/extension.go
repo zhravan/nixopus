@@ -100,6 +100,7 @@ type ExtensionExecution struct {
 	ExitCode       int             `json:"exit_code" bun:"exit_code"`
 	ErrorMessage   string          `json:"error_message" bun:"error_message"`
 	ExecutionLog   string          `json:"execution_log" bun:"execution_log"`
+	LogSeq         int64           `json:"log_seq" bun:"log_seq"`
 	CreatedAt      time.Time       `json:"created_at" bun:"created_at,notnull,default:now()"`
 
 	Extension *Extension      `json:"extension,omitempty" bun:"rel:belongs-to,join:extension_id=id"`
@@ -121,6 +122,18 @@ type ExecutionStep struct {
 	CreatedAt     time.Time       `json:"created_at" bun:"created_at,notnull,default:now()"`
 
 	Execution *ExtensionExecution `json:"execution,omitempty" bun:"rel:belongs-to,join:execution_id=id"`
+}
+
+type ExtensionLog struct {
+	bun.BaseModel `bun:"table:extension_logs,alias:el" swaggerignore:"true"`
+	ID            uuid.UUID       `json:"id" bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
+	ExecutionID   uuid.UUID       `json:"execution_id" bun:"execution_id,notnull,type:uuid"`
+	StepID        *uuid.UUID      `json:"step_id,omitempty" bun:"step_id,nullzero,type:uuid"`
+	Level         string          `json:"level" bun:"level,notnull"`
+	Message       string          `json:"message" bun:"message,notnull"`
+	Data          json.RawMessage `json:"data" bun:"data,notnull,type:jsonb"`
+	Sequence      int64           `json:"sequence" bun:"sequence,notnull"`
+	CreatedAt     time.Time       `json:"created_at" bun:"created_at,notnull,default:now()"`
 }
 
 // SpecStep defines a single step in the extension spec (parsed from YAML/JSON)

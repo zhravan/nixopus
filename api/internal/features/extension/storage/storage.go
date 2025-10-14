@@ -166,7 +166,7 @@ func (s *ExtensionStorage) ListExtensions(params types.ExtensionListParams) (*ty
 			return q.Where("name ILIKE ?", searchPattern).
 				WhereOr("description ILIKE ?", searchPattern).
 				WhereOr("author ILIKE ?", searchPattern).
-				WhereOr("category ILIKE ?", searchPattern)
+				WhereOr("category::text ILIKE ?", searchPattern)
 		})
 	}
 
@@ -196,7 +196,7 @@ func (s *ExtensionStorage) ListExtensions(params types.ExtensionListParams) (*ty
 			return q.Where("name ILIKE ?", searchPattern).
 				WhereOr("description ILIKE ?", searchPattern).
 				WhereOr("author ILIKE ?", searchPattern).
-				WhereOr("category ILIKE ?", searchPattern)
+				WhereOr("category::text ILIKE ?", searchPattern)
 		})
 	}
 

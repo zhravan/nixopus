@@ -40,6 +40,7 @@ export default function ExtensionsPage() {
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
           sortConfig={sortConfig}
+          onSortChange={handleSortChange}
           isLoading={isLoading}
         />
 

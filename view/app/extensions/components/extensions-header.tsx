@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExtensionSortField, SortDirection } from '@/redux/types/extension';
 
 interface ExtensionsHeaderProps {
   searchTerm?: string;
   onSearchChange?: (value: string) => void;
-  sortConfig?: { key: string; direction: 'asc' | 'desc' };
-  onSortChange?: (key: string, direction: 'asc' | 'desc') => void;
+  sortConfig?: { key: ExtensionSortField; direction: SortDirection };
+  onSortChange?: (key: ExtensionSortField, direction: SortDirection) => void;
   isLoading?: boolean;
 }
 
@@ -31,9 +32,6 @@ function ExtensionsHeader({
   const sortOptions = [
     { value: 'name_asc', label: t('extensions.sortOptions.name') + ' (A-Z)' },
     { value: 'name_desc', label: t('extensions.sortOptions.name') + ' (Z-A)' },
-    { value: 'popularity_desc', label: t('extensions.sortOptions.popularity') },
-    { value: 'recent_desc', label: t('extensions.sortOptions.recent') },
-    { value: 'rating_desc', label: t('extensions.sortOptions.rating') }
   ];
 
   return (
@@ -54,13 +52,13 @@ function ExtensionsHeader({
               className="pl-10 w-full sm:w-[300px]"
             />
           </div>
-          <Select
-            value={sortConfig ? `${sortConfig.key}_${sortConfig.direction}` : 'popularity_desc'}
-            onValueChange={(value) => {
-              const [key, direction] = value.split('_');
-              onSortChange?.(key, direction as 'asc' | 'desc');
-            }}
-          >
+        <Select
+          value={sortConfig ? `${sortConfig.key}_${sortConfig.direction}` : 'name_asc'}
+          onValueChange={(value) => {
+            const [key, direction] = value.split('_') as [ExtensionSortField, SortDirection];
+            onSortChange?.(key, direction);
+          }}
+        >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder={t('extensions.sortBy')} />
             </SelectTrigger>

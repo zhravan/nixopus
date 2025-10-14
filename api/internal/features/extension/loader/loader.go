@@ -40,7 +40,7 @@ func (l *ExtensionLoader) LoadExtensionsFromDirectory(ctx context.Context, dirPa
 			continue
 		}
 
-		log.Printf("Successfully loaded extension: %s (%s)", extension.Name, extension.ExtensionID)
+		// log.Printf("Successfully loaded extension: %s (%s)", extension.Name, extension.ExtensionID)
 	}
 
 	return nil
@@ -65,7 +65,7 @@ func (l *ExtensionLoader) upsertExtension(ctx context.Context, extension *types.
 
 	if err == nil {
 		if existingExtension.ContentHash == extension.ContentHash {
-			log.Printf("Extension %s unchanged, skipping", extension.ExtensionID)
+			// log.Printf("Extension %s unchanged, skipping", extension.ExtensionID)
 			return tx.Commit()
 		}
 

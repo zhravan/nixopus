@@ -1,9 +1,9 @@
 metadata:
-  id: "deploy-excalidraw"
-  name: "Excalidraw"
-  description: "Excalidraw is a virtual collaborative whiteboard tool that lets you easily sketch diagrams that have a hand-drawn feel to them."
+  id: "deploy-slash"
+  name: "Slash"
+  description: "An open source, self-hosted platform for sharing and managing your most frequently used links. Easily create customizable, human-readable shortcuts to streamline your link management."
   author: "Nixopus Team"
-  icon: "✏️"
+  icon: "🔗"
   category: "Containers"
   type: "install"
   version: "1.0.0"
@@ -12,8 +12,8 @@ metadata:
 variables:
   image:
     type: "string"
-    description: "Docker image for Excalidraw"
-    default: "excalidraw/excalidraw"
+    description: "Docker image for Slash"
+    default: "yourselfhosted/slash"
     is_required: true
 
   tag:
@@ -24,25 +24,31 @@ variables:
 
   container_name:
     type: "string"
-    description: "Name of the container"
-    default: "excalidraw"
+    description: "Name of the Slash container"
+    default: "slash"
     is_required: true
 
   host_port:
     type: "integer"
-    description: "Host port to expose"
-    default: 5000
+    description: "Host port to expose Slash"
+    default: 5231
     is_required: true
 
   container_port:
     type: "integer"
-    description: "Container port to map"
-    default: 80
+    description: "Container port for Slash"
+    default: 5231
+    is_required: true
+
+  data_volume_name:
+    type: "string"
+    description: "Named Docker volume for Slash data persistence"
+    default: "slash-data"
     is_required: true
 
 execution:
   run:
-    - name: "Pull Excalidraw image"
+    - name: "Pull Slash image"
       type: "docker"
       properties:
         action: "pull"
@@ -50,7 +56,7 @@ execution:
         tag: "{{ tag }}"
       timeout: 300
 
-    - name: "Run Excalidraw container"
+    - name: "Run Slash container"
       type: "docker"
       properties:
         action: "run"
@@ -59,11 +65,6 @@ execution:
         tag: "{{ tag }}"
         ports: "{{ host_port }}:{{ container_port }}"
         restart: "unless-stopped"
-      timeout: 120
-
-  validate:
-    - name: "Check HTTP response from Excalidraw"
-      type: "command"
-      properties:
-        cmd: "curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:{{ host_port }} | grep -E '^(200|301|302)$'"
-      timeout: 60
+        volumes:
+          - "{{ data_volume_name }}:/var/opt/slash"
+      timeout: 180

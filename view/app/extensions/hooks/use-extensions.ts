@@ -13,7 +13,7 @@ export function useExtensions() {
     direction: 'asc'
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(12);
+  const [itemsPerPage] = useState(9);
   const [runModalOpen, setRunModalOpen] = useState(false);
   const [selectedExtension, setSelectedExtension] = useState<Extension | null>(null);
 

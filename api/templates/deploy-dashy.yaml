@@ -1,10 +1,10 @@
 metadata:
-  id: "deploy-uptime-kuma"
-  name: "Uptime Kuma"
-  description: "Uptime Kuma is a self-hosted monitoring tool"
+  id: "deploy-dashy"
+  name: "Dashy"
+  description: "Dashy is a self-hosted, highly configurable personal dashboard."
   author: "Nixopus Team"
-  icon: "🕒"
-  category: "Monitoring"
+  icon: "📊"
+  category: "Containers"
   type: "install"
   version: "1.0.0"
   isVerified: false
@@ -12,37 +12,43 @@ metadata:
 variables:
   image:
     type: "string"
-    description: "Docker image for Uptime Kuma"
-    default: "louislam/uptime-kuma"
+    description: "Docker image for Dashy"
+    default: "lissy93/dashy"
     is_required: true
 
   tag:
     type: "string"
     description: "Docker image tag"
-    default: "1"
+    default: "latest"
     is_required: true
 
   container_name:
     type: "string"
-    description: "Name of the Uptime Kuma container"
-    default: "uptime-kuma"
+    description: "Name of the Dashy container"
+    default: "dashy"
     is_required: true
 
   host_port:
     type: "integer"
-    description: "Host port to expose Uptime Kuma"
-    default: 3001
+    description: "Host port to expose Dashy"
+    default: 8080
     is_required: true
 
-  volume_name:
+  container_port:
+    type: "integer"
+    description: "Container port for Dashy"
+    default: 8080
+    is_required: true
+
+  user_data_volume:
     type: "string"
-    description: "Named Docker volume for persistent data"
-    default: "uptime-kuma"
+    description: "Named Docker volume for Dashy user data (/app/user-data)"
+    default: "dashy-user-data"
     is_required: true
 
 execution:
   run:
-    - name: "Pull Uptime Kuma image"
+    - name: "Pull Dashy image"
       type: "docker"
       properties:
         action: "pull"
@@ -50,21 +56,21 @@ execution:
         tag: "{{ tag }}"
       timeout: 300
 
-    - name: "Run Uptime Kuma container"
+    - name: "Run Dashy container"
       type: "docker"
       properties:
         action: "run"
         name: "{{ container_name }}"
         image: "{{ image }}"
         tag: "{{ tag }}"
-        ports: "{{ host_port }}:3001"
-        restart: "always"
+        ports: "{{ host_port }}:{{ container_port }}"
+        restart: "unless-stopped"
         volumes:
-          - "{{ volume_name }}:/app/data"
+          - "{{ user_data_volume }}:/app/user-data"
       timeout: 180
 
   validate:
-    - name: "Check HTTP response from Uptime Kuma"
+    - name: "Check HTTP response from Dashy"
       type: "command"
       properties:
         cmd: "sh -c 'for i in $(seq 1 30); do code=$(curl -fsS -o /dev/null -w \"%{http_code}\\n\" http://localhost:{{ host_port }} || true); echo \"HTTP $code\"; echo $code | grep -E \"^(200|301|302)$\" && exit 0; sleep 2; done; exit 1'"

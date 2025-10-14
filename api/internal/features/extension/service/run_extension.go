@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	"github.com/raghavyuva/nixopus-api/internal/features/ssh"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 )
 
@@ -68,6 +69,7 @@ func (s *ExtensionService) StartRun(extensionID string, variableValues map[strin
 		return nil, err
 	}
 
-	go s.executeRun(exec, spec, variableValues)
+	ctx := NewRunContext(exec, spec, variableValues, ssh.NewSSH(), steps)
+	go s.executeRun(ctx)
 	return exec, nil
 }

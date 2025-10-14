@@ -146,11 +146,11 @@ type ExtensionSpec struct {
 		IsVerified  bool   `json:"IsVerified"`
 	} `json:"Metadata"`
 	Variables map[string]struct {
-		Type              string `json:"Type"`
-		Description       string `json:"Description"`
-		Default           string `json:"Default"`
-		IsRequired        bool   `json:"IsRequired"`
-		ValidationPattern string `json:"ValidationPattern"`
+		Type              string      `json:"Type"`
+		Description       string      `json:"Description"`
+		Default           interface{} `json:"Default"`
+		IsRequired        bool        `json:"IsRequired"`
+		ValidationPattern string      `json:"ValidationPattern"`
 	} `json:"Variables"`
 	Execution struct {
 		Run      []SpecStep `json:"Run"`

@@ -2,67 +2,58 @@ package service
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
+	"github.com/raghavyuva/nixopus-api/internal/features/extension/engine"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
-	"github.com/raghavyuva/nixopus-api/internal/features/ssh"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-func (s *ExtensionService) executeRun(exec *types.ExtensionExecution, spec types.ExtensionSpec, vars map[string]interface{}) {
-	exec.StartedAt = time.Now()
-	_ = s.storage.UpdateExecution(exec)
-
-	s.logger.Log(logger.Info, fmt.Sprintf("Starting extension execution: %s", exec.ID.String()), "")
-
-	replacer := buildReplacer(vars)
-	sshClient := ssh.NewSSH()
-	steps, _ := s.storage.ListExecutionSteps(exec.ID.String())
-
-	if stop := s.processPhase(exec, &steps, "run", spec.Execution.Run, 0, sshClient, replacer); stop {
-		s.logger.Log(logger.Error, fmt.Sprintf("Extension execution failed during run phase: %s", exec.ID.String()), "")
-		return
-	}
-	if stop := s.processPhase(exec, &steps, "validate", spec.Execution.Validate, len(spec.Execution.Run), sshClient, replacer); stop {
-		s.logger.Log(logger.Error, fmt.Sprintf("Extension execution failed during validate phase: %s", exec.ID.String()), "")
-		return
-	}
-
-	exec.Status = types.ExecutionStatusCompleted
-	finished := time.Now()
-	exec.CompletedAt = &finished
-	_ = s.storage.UpdateExecution(exec)
-
-	s.logger.Log(logger.Info, fmt.Sprintf("Extension execution completed successfully: %s", exec.ID.String()), "")
+type StepOutcome struct {
+	Step   *types.ExecutionStep
+	Output string
+	Err    error
+	Ignore bool
 }
 
-func buildReplacer(vars map[string]interface{}) func(string) string {
-	return func(in string) string {
-		out := in
-		for k, v := range vars {
-			token := fmt.Sprintf("{{ %s }}", k)
-			out = strings.ReplaceAll(out, token, fmt.Sprint(v))
-		}
-		return out
+func (s *ExtensionService) executeRun(ctx *RunContext) {
+	ctx.Exec.StartedAt = time.Now()
+	_ = s.storage.UpdateExecution(ctx.Exec)
+
+	s.logger.Log(logger.Info, fmt.Sprintf("Starting extension execution: %s", ctx.Exec.ID.String()), "")
+
+	steps := ctx.Steps
+
+	if stop := s.processPhase(ctx, &steps, "run", ctx.Spec.Execution.Run, 0); stop {
+		s.logger.Log(logger.Error, fmt.Sprintf("Extension execution failed during run phase: %s", ctx.Exec.ID.String()), "")
+		return
 	}
+	if stop := s.processPhase(ctx, &steps, "validate", ctx.Spec.Execution.Validate, len(ctx.Spec.Execution.Run)); stop {
+		s.logger.Log(logger.Error, fmt.Sprintf("Extension execution failed during validate phase: %s", ctx.Exec.ID.String()), "")
+		return
+	}
+
+	ctx.Exec.Status = types.ExecutionStatusCompleted
+	finished := time.Now()
+	ctx.Exec.CompletedAt = &finished
+	_ = s.storage.UpdateExecution(ctx.Exec)
+
+	s.logger.Log(logger.Info, fmt.Sprintf("Extension execution completed successfully: %s", ctx.Exec.ID.String()), "")
 }
 
 func (s *ExtensionService) processPhase(
-	exec *types.ExtensionExecution,
+	ctx *RunContext,
 	steps *[]types.ExecutionStep,
 	phase string,
 	specSteps []types.SpecStep,
 	offset int,
-	sshClient *ssh.SSH,
-	replacer func(string) string,
 ) bool {
 	s.logger.Log(logger.Info, fmt.Sprintf("Processing phase: %s with %d spec steps, offset: %d", phase, len(specSteps), offset), "")
 	s.logger.Log(logger.Info, fmt.Sprintf("Available steps: %d", len(*steps)), "")
 
 	for idx := range specSteps {
-		if s.shouldCancel(exec) {
-			s.markCancelled(exec)
+		if s.shouldCancel(ctx) {
+			s.markCancelled(ctx)
 			return true
 		}
 
@@ -74,30 +65,26 @@ func (s *ExtensionService) processPhase(
 		}
 		s.beginStep(step)
 
-		out, runErr := s.executeSpecStep(specSteps[idx], sshClient, replacer)
+		out, runErr := s.executeSpecStep(ctx, specSteps[idx])
 		step.Output = out
-		if runErr != nil {
-			if s.failStep(exec, step, out, runErr, specSteps[idx].IgnoreErrors) {
-				return true
-			}
-			continue
+		outcome := StepOutcome{Step: step, Output: out, Err: runErr, Ignore: specSteps[idx].IgnoreErrors}
+		if s.finalizeStep(ctx, outcome) {
+			return true
 		}
-
-		s.completeStep(exec, step, out)
 	}
 	return false
 }
 
-func (s *ExtensionService) shouldCancel(exec *types.ExtensionExecution) bool {
-	cur, err := s.storage.GetExecutionByID(exec.ID.String())
+func (s *ExtensionService) shouldCancel(ctx *RunContext) bool {
+	cur, err := s.storage.GetExecutionByID(ctx.Exec.ID.String())
 	return err == nil && cur.Status == types.ExecutionStatusCancelled
 }
 
-func (s *ExtensionService) markCancelled(exec *types.ExtensionExecution) {
-	exec.Status = types.ExecutionStatusCancelled
+func (s *ExtensionService) markCancelled(ctx *RunContext) {
+	ctx.Exec.Status = types.ExecutionStatusCancelled
 	finished := time.Now()
-	exec.CompletedAt = &finished
-	_ = s.storage.UpdateExecution(exec)
+	ctx.Exec.CompletedAt = &finished
+	_ = s.storage.UpdateExecution(ctx.Exec)
 }
 
 func (s *ExtensionService) beginStep(step *types.ExecutionStep) {
@@ -110,53 +97,45 @@ func (s *ExtensionService) beginStep(step *types.ExecutionStep) {
 	_ = s.storage.UpdateExecutionStep(step)
 }
 
-func (s *ExtensionService) completeStep(exec *types.ExtensionExecution, step *types.ExecutionStep, out string) {
-	step.Status = types.ExecutionStatusCompleted
-	completed := time.Now()
-	step.CompletedAt = &completed
-
-	// Enhanced logging with timestamp and step details
-	successLog := fmt.Sprintf("[%s] STEP COMPLETED: %s\nOutput: %s",
-		completed.Format("2006-01-02 15:04:05"),
-		step.StepName,
-		out)
-
-	// Log to console
-	s.logger.Log(logger.Info, fmt.Sprintf("STEP COMPLETED: %s - %s", step.StepName, out), "")
-
-	exec.ExecutionLog = exec.ExecutionLog + "\n" + successLog
-	_ = s.storage.UpdateExecutionStep(step)
-	_ = s.storage.UpdateExecution(exec)
-}
-
-func (s *ExtensionService) failStep(exec *types.ExtensionExecution, step *types.ExecutionStep, out string, runErr error, ignore bool) bool {
-	step.Status = types.ExecutionStatusFailed
-	completed := time.Now()
-	step.CompletedAt = &completed
-
-	// Enhanced logging with timestamp and step details
-	errorLog := fmt.Sprintf("[%s] STEP FAILED: %s\nError: %v\nOutput: %s",
-		completed.Format("2006-01-02 15:04:05"),
-		step.StepName,
-		runErr,
-		out)
-
-	// Log to console
-	s.logger.Log(logger.Error, fmt.Sprintf("STEP FAILED: %s - Error: %v, Output: %s", step.StepName, runErr, out), "")
-
-	exec.ExecutionLog = exec.ExecutionLog + "\n" + errorLog
-	_ = s.storage.UpdateExecutionStep(step)
-	_ = s.storage.UpdateExecution(exec)
-
-	if ignore {
+func (s *ExtensionService) finalizeStep(ctx *RunContext, outcome StepOutcome) bool {
+	if outcome.Err == nil {
+		outcome.Step.Status = types.ExecutionStatusCompleted
+		completed := time.Now()
+		outcome.Step.CompletedAt = &completed
+		successLog := fmt.Sprintf("[%s] STEP COMPLETED: %s\nOutput: %s",
+			completed.Format("2006-01-02 15:04:05"),
+			outcome.Step.StepName,
+			outcome.Output)
+		s.logger.Log(logger.Info, fmt.Sprintf("STEP COMPLETED: %s - %s", outcome.Step.StepName, outcome.Output), "")
+		ctx.Exec.ExecutionLog = ctx.Exec.ExecutionLog + "\n" + successLog
+		_ = s.storage.UpdateExecutionStep(outcome.Step)
+		_ = s.storage.UpdateExecution(ctx.Exec)
 		return false
 	}
 
-	exec.Status = types.ExecutionStatusFailed
-	exec.ErrorMessage = runErr.Error()
+	outcome.Step.Status = types.ExecutionStatusFailed
+	completed := time.Now()
+	outcome.Step.CompletedAt = &completed
+	errorLog := fmt.Sprintf("[%s] STEP FAILED: %s\nError: %v\nOutput: %s",
+		completed.Format("2006-01-02 15:04:05"),
+		outcome.Step.StepName,
+		outcome.Err,
+		outcome.Output)
+	s.logger.Log(logger.Error, fmt.Sprintf("STEP FAILED: %s - Error: %v, Output: %s", outcome.Step.StepName, outcome.Err, outcome.Output), "")
+	ctx.Exec.ExecutionLog = ctx.Exec.ExecutionLog + "\n" + errorLog
+	_ = s.storage.UpdateExecutionStep(outcome.Step)
+	_ = s.storage.UpdateExecution(ctx.Exec)
+
+	if outcome.Ignore {
+		return false
+	}
+	// perform rollback for prior successful steps
+	ctx.rollback()
+	ctx.Exec.Status = types.ExecutionStatusFailed
+	ctx.Exec.ErrorMessage = outcome.Err.Error()
 	finished := time.Now()
-	exec.CompletedAt = &finished
-	_ = s.storage.UpdateExecution(exec)
+	ctx.Exec.CompletedAt = &finished
+	_ = s.storage.UpdateExecution(ctx.Exec)
 	return true
 }
 
@@ -174,50 +153,13 @@ func (s *ExtensionService) getStepByPhaseAndOrder(steps *[]types.ExecutionStep, 
 	return nil
 }
 
-func (s *ExtensionService) executeSpecStep(spec types.SpecStep, sshClient *ssh.SSH, replacer func(string) string) (string, error) {
-	switch spec.Type {
-	case "command":
-		cmd, _ := spec.Properties["cmd"].(string)
-		if cmd == "" {
-			return "", fmt.Errorf("command is required for command step")
+func (s *ExtensionService) executeSpecStep(ctx *RunContext, spec types.SpecStep) (string, error) {
+	if m := engine.GetModule(spec.Type); m != nil {
+		out, comp, err := m.Execute(ctx.SSH, spec, ctx.Vars)
+		if err == nil && comp != nil {
+			ctx.pushCompensation(comp)
 		}
-		cmd = replacer(cmd)
-		prefix := s.timeoutPrefix(sshClient, spec.Timeout)
-		output, err := sshClient.RunCommand(prefix + cmd)
-		if err != nil {
-			return "", fmt.Errorf("failed to execute command '%s': %w (output: %s)", cmd, err, output)
-		}
-		return output, nil
-	case "file":
-		output, err := executeFileStep(sshClient, spec.Properties, replacer)
-		if err != nil {
-			return "", fmt.Errorf("file operation failed: %w", err)
-		}
-		return output, nil
-	case "service":
-		name, _ := spec.Properties["name"].(string)
-		action, _ := spec.Properties["action"].(string)
-		if name == "" {
-			return "", fmt.Errorf("service name is required for service step")
-		}
-		if action == "" {
-			return "", fmt.Errorf("service action is required for service step")
-		}
-		name = replacer(name)
-		// Prefer systemctl; if not available, fallback to service
-		cmd := s.serviceCmd(sshClient, action, name, spec.Timeout)
-		output, err := sshClient.RunCommand(cmd)
-		if err != nil {
-			return "", fmt.Errorf("failed to execute service command '%s': %w (output: %s)", cmd, err, output)
-		}
-		return output, nil
-	case "user":
-		output, err := s.executeUserStep(sshClient, spec.Properties, replacer, spec.Timeout)
-		if err != nil {
-			return "", fmt.Errorf("user operation failed: %w", err)
-		}
-		return output, nil
-	default:
-		return "", fmt.Errorf("unsupported step type: %s", spec.Type)
+		return out, err
 	}
+	return "", fmt.Errorf("unsupported step type: %s", spec.Type)
 }

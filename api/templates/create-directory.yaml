@@ -28,5 +28,5 @@ execution:
       type: "file"
       properties:
         action: "mkdir"
-        dest: "~/{{ directory_name }}"
+        dest: "{{ directory_name }}"
       timeout: 30

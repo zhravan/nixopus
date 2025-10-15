@@ -18,7 +18,9 @@
     "edit": "Editar",
     "preview": "Previsualizar",
     "enabled": "Habilitado",
-    "disabled": "Deshabilitado"
+    "disabled": "Deshabilitado",
+    "readMore": "Leer más",
+    "readLess": "Leer menos"
   },
   "containers": {
     "title": "Contenedores",

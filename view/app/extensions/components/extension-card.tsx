@@ -12,6 +12,8 @@ import ExtensionForkDialog from './extension-fork-dialog';
 import { useDeleteExtensionMutation } from '@/redux/services/extensions/extensionsApi';
 import { toast } from 'sonner';
 
+const MAX_DESCRIPTION_CHARS = 90;
+
 interface ExtensionCardProps {
   extension: Extension;
   onInstall?: (extension: Extension) => void;
@@ -23,6 +25,7 @@ export function ExtensionCard({ extension, onInstall, onViewDetails }: Extension
   const [forkOpen, setForkOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [deleteExtension] = useDeleteExtensionMutation();
+  const [expanded, setExpanded] = React.useState(false);
 
   const onDelete = async () => {
     try {
@@ -80,7 +83,17 @@ export function ExtensionCard({ extension, onInstall, onViewDetails }: Extension
         </div>
 
         <CardDescription className="text-sm leading-relaxed text-muted-foreground">
-          {extension.description}
+          {expanded || extension.description.length <= MAX_DESCRIPTION_CHARS
+            ? extension.description
+            : `${extension.description.slice(0, MAX_DESCRIPTION_CHARS)}…`}
+          {extension.description.length > MAX_DESCRIPTION_CHARS && (
+            <button
+              className="ml-2 text-primary hover:underline text-sm"
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? (t('common.readLess') || 'Read less') : (t('common.readMore') || 'Read more')}
+            </button>
+          )}
         </CardDescription>
         <div className="flex gap-2 pt-6 justify-start">
           <Button

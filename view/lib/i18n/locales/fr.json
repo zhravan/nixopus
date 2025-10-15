@@ -19,7 +19,9 @@
     "edit": "Modifier",
     "preview": "Aperçu",
     "enabled": "Activé",
-    "disabled": "Désactivé"
+    "disabled": "Désactivé",
+    "readMore": "Lire plus",
+    "readLess": "Lire moins"
   },
   "containers": {
     "title": "Conteneurs",

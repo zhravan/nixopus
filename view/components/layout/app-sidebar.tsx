@@ -28,6 +28,12 @@ const data = {
       resource: 'dashboard'
     },
     {
+      title: 'navigation.extensions',
+      url: '/extensions',
+      icon: Puzzle,
+      resource: 'extensions'
+    },
+    {
       title: 'navigation.selfHost',
       url: '/self-host',
       icon: Package,
@@ -44,12 +50,6 @@ const data = {
       url: '/file-manager',
       icon: Folder,
       resource: 'file-manager'
-    },
-    {
-      title: 'navigation.extensions',
-      url: '/extensions',
-      icon: Puzzle,
-      resource: 'extensions'
     },
     {
       title: 'navigation.settings',

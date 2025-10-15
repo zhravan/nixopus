@@ -1,24 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import PageLayout from '@/components/layout/page-layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {  Info, Terminal } from 'lucide-react';
-import { useGetExtensionQuery } from '@/redux/services/extensions/extensionsApi';
+import { useGetExtensionQuery, useRunExtensionMutation } from '@/redux/services/extensions/extensionsApi';
 import OverviewTab from './components/OverviewTab';
 import ExecutionsTab from './components/LogsTab';
+import { Button } from '@/components/ui/button';
+import ExtensionInput from '@/app/extensions/components/extension-input';
 
 export default function ExtensionDetailsPage() {
   const { t } = useTranslation();
   const params = useParams();
   const search = useSearchParams();
+  const router = useRouter();
   const id = (params?.id as string) || '';
 
   const { data: extension, isLoading } = useGetExtensionQuery({ id });
   const [tab, setTab] = useState<string>('overview');
+  const [runModalOpen, setRunModalOpen] = useState(false);
+  const [runExtension, { isLoading: isRunning } ] = useRunExtensionMutation();
 
   useEffect(() => {
     const exec = search?.get('exec');
@@ -46,6 +51,19 @@ export default function ExtensionDetailsPage() {
             </div>
           )}
         </div>
+        <div>
+          {isLoading ? (
+            <Skeleton className="h-9 w-28" />
+          ) : (
+            <Button
+              className="min-w-[112px]"
+              onClick={() => setRunModalOpen(true)}
+              disabled={!extension || isRunning}
+            >
+              {extension?.extension_type === 'install' ? (t('extensions.install') || 'Install') : (t('extensions.run') || 'Run')}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="mt-6">
@@ -70,6 +88,17 @@ export default function ExtensionDetailsPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <ExtensionInput
+        open={runModalOpen}
+        onOpenChange={setRunModalOpen}
+        extension={extension}
+        onSubmit={async (values) => {
+          if (!extension) return;
+          const exec = await runExtension({ extensionId: extension.extension_id, body: { variables: values } }).unwrap();
+          setRunModalOpen(false);
+          router.push(`/extensions/${extension.id}?exec=${exec.id}&openLogs=1`);
+        }}
+      />
     </PageLayout>
   );
 }

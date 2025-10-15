@@ -185,6 +185,15 @@ func (s *ExtensionService) ListExtensions(params types.ExtensionListParams) (*ty
 	return response, nil
 }
 
+func (s *ExtensionService) ListCategories() ([]types.ExtensionCategory, error) {
+	cats, err := s.storage.ListCategories()
+	if err != nil {
+		s.logger.Log(logger.Error, err.Error(), "")
+		return nil, err
+	}
+	return cats, nil
+}
+
 func (s *ExtensionService) ParseMultipartRunRequest(r *http.Request) (map[string]interface{}, error) {
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		return nil, err

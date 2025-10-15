@@ -429,6 +429,7 @@ func (router *Router) ContainerRoutes(s *fuego.Server, containerController *cont
 
 func (router *Router) ExtensionRoutes(s *fuego.Server, extensionController *extension.ExtensionsController) {
 	fuego.Get(s, "", extensionController.GetExtensions)
+	fuego.Get(s, "/categories", extensionController.GetCategories)
 	fuego.Get(s, "/{id}", extensionController.GetExtension)
 	fuego.Get(s, "/by-extension-id/{extension_id}", extensionController.GetExtensionByExtensionID)
 	fuego.Get(s, "/by-extension-id/{extension_id}/executions", extensionController.ListExecutionsByExtensionID)

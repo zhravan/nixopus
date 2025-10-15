@@ -6,6 +6,7 @@ import PageLayout from '@/components/layout/page-layout';
 import ExtensionsHeader from '@/app/extensions/components/extensions-header';
 import ExtensionsGrid from '@/app/extensions/components/extensions-grid';
 import ExtensionsHero from '@/app/extensions/components/extensions-hero';
+import CategoryBadges from '@/app/extensions/components/category-badges';
 import { useExtensions } from './hooks/use-extensions';
 import PaginationWrapper from '@/components/ui/pagination';
 import ExtensionInput from '@/app/extensions/components/extension-input';
@@ -16,6 +17,7 @@ export default function ExtensionsPage() {
     extensions,
     isLoading,
     error,
+    categories,
     searchTerm,
     sortConfig,
     currentPage,
@@ -23,6 +25,8 @@ export default function ExtensionsPage() {
     totalExtensions,
     handleSearchChange,
     handleSortChange,
+    selectedCategory,
+    handleCategoryChange,
     handlePageChange,
     handleInstall,
     handleViewDetails,
@@ -45,11 +49,20 @@ export default function ExtensionsPage() {
         />
 
         <div className="space-y-6">
-          {totalExtensions > 0 && (
-            <div className="text-sm text-muted-foreground self-end justify-end flex">
-              Showing {extensions.length} of {totalExtensions} extensions
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <CategoryBadges
+                categories={categories}
+                selected={selectedCategory}
+                onChange={handleCategoryChange}
+              />
             </div>
-          )}
+            {totalExtensions > 0 && (
+              <div className="text-sm text-muted-foreground whitespace-nowrap">
+                Showing {extensions.length} of {totalExtensions} extensions
+              </div>
+            )}
+          </div>
 
           <ExtensionsGrid
             extensions={extensions}

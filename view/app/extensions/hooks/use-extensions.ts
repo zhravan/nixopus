@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Extension, ExtensionListParams, SortDirection, ExtensionSortField } from '@/redux/types/extension';
-import { useGetExtensionsQuery, useRunExtensionMutation, useCancelExecutionMutation } from '@/redux/services/extensions/extensionsApi';
+import { Extension, ExtensionListParams, SortDirection, ExtensionSortField, ExtensionCategory } from '@/redux/types/extension';
+import { useGetExtensionsQuery, useRunExtensionMutation, useCancelExecutionMutation, useGetExtensionCategoriesQuery } from '@/redux/services/extensions/extensionsApi';
 
 export function useExtensions() {
   const router = useRouter();
@@ -16,9 +16,11 @@ export function useExtensions() {
   const [itemsPerPage] = useState(9);
   const [runModalOpen, setRunModalOpen] = useState(false);
   const [selectedExtension, setSelectedExtension] = useState<Extension | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ExtensionCategory | null>(null);
 
   const queryParams: ExtensionListParams = {
     search: searchTerm || undefined,
+    category: selectedCategory || undefined,
     sort_by: sortConfig.key,
     sort_dir: sortConfig.direction,
     page: currentPage,
@@ -30,6 +32,8 @@ export function useExtensions() {
     isLoading,
     error: apiError
   } = useGetExtensionsQuery(queryParams);
+
+  const { data: categories = [] } = useGetExtensionCategoriesQuery();
 
   const extensions = response?.extensions || [];
   const totalPages = response?.total_pages || 0;
@@ -43,6 +47,11 @@ export function useExtensions() {
   const handleSortChange = (key: ExtensionSortField, direction: SortDirection) => {
     setSortConfig({ key, direction });
     setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  const handleCategoryChange = (value: string | null) => {
+    setSelectedCategory((value as ExtensionCategory) || null);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -81,6 +90,7 @@ export function useExtensions() {
     extensions,
     isLoading,
     error,
+    categories,
     searchTerm,
     sortConfig,
     currentPage,
@@ -88,6 +98,8 @@ export function useExtensions() {
     totalExtensions,
     handleSearchChange,
     handleSortChange,
+    selectedCategory,
+    handleCategoryChange,
     handlePageChange,
     handleInstall,
     handleViewDetails,

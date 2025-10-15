@@ -129,6 +129,7 @@ export enum IMAGEURLS {
 
 export enum EXTENSIONURLS {
   GET_EXTENSIONS = 'v1/extensions',
+  GET_CATEGORIES = 'v1/extensions/categories',
   GET_EXTENSION = 'v1/extensions/{id}',
   GET_EXTENSION_BY_ID = 'v1/extensions/by-extension-id/{extension_id}',
   FORK_EXTENSION = 'v1/extensions/{extension_id}/fork',

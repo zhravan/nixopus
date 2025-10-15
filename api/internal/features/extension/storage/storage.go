@@ -23,6 +23,7 @@ type ExtensionStorageInterface interface {
 	UpdateExtension(extension *types.Extension) error
 	DeleteExtension(id string) error
 	ListExtensions(params types.ExtensionListParams) (*types.ExtensionListResponse, error)
+	ListCategories() ([]types.ExtensionCategory, error)
 	CreateExecution(exec *types.ExtensionExecution) error
 	CreateExecutionSteps(steps []types.ExecutionStep) error
 	ListExecutionSteps(executionID string) ([]types.ExecutionStep, error)
@@ -222,6 +223,19 @@ func (s *ExtensionStorage) ListExtensions(params types.ExtensionListParams) (*ty
 		PageSize:   params.PageSize,
 		TotalPages: totalPages,
 	}, nil
+}
+
+func (s *ExtensionStorage) ListCategories() ([]types.ExtensionCategory, error) {
+	var categories []types.ExtensionCategory
+	err := s.getDB().NewSelect().
+		TableExpr("extensions").
+		ColumnExpr("DISTINCT category").
+		Where("deleted_at IS NULL").
+		Scan(s.Ctx, &categories)
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
 }
 
 func (s *ExtensionStorage) CreateExecution(exec *types.ExtensionExecution) error {

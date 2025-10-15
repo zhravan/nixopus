@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from '@/redux/base-query';
-import { Extension, ExtensionListParams, ExtensionListResponse, ExtensionExecution } from '@/redux/types/extension';
+import { Extension, ExtensionListParams, ExtensionListResponse, ExtensionExecution, ExtensionCategory } from '@/redux/types/extension';
 import { EXTENSIONURLS } from '@/redux/api-conf';
 
 export const extensionsApi = createApi({
@@ -42,6 +42,13 @@ export const extensionsApi = createApi({
       },
       providesTags: ['Extensions'],
       transformResponse: (response: ExtensionListResponse) => response
+    }),
+    getExtensionCategories: builder.query<ExtensionCategory[], void>({
+      query: () => ({
+        url: EXTENSIONURLS.GET_CATEGORIES,
+        method: 'GET'
+      }),
+      providesTags: ['Extensions']
     }),
     getExtension: builder.query<Extension, { id: string }>({
       query: ({ id }) => ({
@@ -122,6 +129,7 @@ export const extensionsApi = createApi({
 
 export const {
   useGetExtensionsQuery,
+  useGetExtensionCategoriesQuery,
   useGetExtensionQuery,
   useGetExtensionByExtensionIdQuery,
   useRunExtensionMutation,

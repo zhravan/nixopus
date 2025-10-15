@@ -12,6 +12,7 @@ import (
 	"net/smtp"
 
 	"github.com/google/uuid"
+	"github.com/raghavyuva/nixopus-api/internal/config"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification/helpers/preferences"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
@@ -47,12 +48,6 @@ type ResetEmailData struct {
 
 type VerificationEmailData struct {
 	VerifyURL string `json:"verify_url"`
-}
-
-type UpdateUserRoleData struct {
-	OrganizationName string `json:"organization_name"`
-	UserName         string `json:"user_name"`
-	NewRole          string `json:"new_role"`
 }
 
 type AddUserToOrganizationData struct {
@@ -140,7 +135,7 @@ func (m *EmailManager) SendEmailWithTemplate(userID string, data EmailData) erro
 }
 
 func (m *EmailManager) SendPasswordResetEmail(userID string, token string) error {
-	viewURL := os.Getenv("ALLOWED_ORIGIN")
+	viewURL := config.AppConfig.CORS.AllowedOrigin
 	resetURL := fmt.Sprintf("%s/reset-password?token=%s", viewURL, token)
 	data := ResetEmailData{
 		ResetURL: resetURL,
@@ -174,7 +169,7 @@ func (m *EmailManager) SendVerificationEmail(userID string, token string) error 
 		return nil
 	}
 
-	viewURL := os.Getenv("ALLOWED_ORIGIN")
+	viewURL := config.AppConfig.CORS.AllowedOrigin
 	verifyURL := fmt.Sprintf("%s/verify-email?token=%s", viewURL, token)
 	data := VerificationEmailData{
 		VerifyURL: verifyURL,
@@ -195,40 +190,6 @@ func (m *EmailManager) SendVerificationEmail(userID string, token string) error 
 	}
 
 	log.Printf("Verification email sent successfully")
-	return nil
-}
-
-func (m *EmailManager) SendUpdateUserRoleEmail(userID string, organizationName string, userName string, newRole string) error {
-	shouldSend, err := m.prefManager.CheckUserNotificationPreferences(userID, string(types.ActivityCategory), "team-updates")
-	if err != nil {
-		return fmt.Errorf("failed to check notification preferences: %w", err)
-	}
-
-	if !shouldSend {
-		return nil
-	}
-
-	data := UpdateUserRoleData{
-		OrganizationName: organizationName,
-		UserName:         userName,
-		NewRole:          newRole,
-	}
-
-	emailData := EmailData{
-		Subject:     "User Role Updated",
-		Template:    "update_user_role.html",
-		Data:        data,
-		ContentType: "text/html; charset=UTF-8",
-		Category:    string(types.ActivityCategory),
-		Type:        "team-updates",
-	}
-
-	if err := m.SendEmailWithTemplate(userID, emailData); err != nil {
-		log.Printf("Failed to send update user role email: %s", err)
-		return err
-	}
-
-	log.Printf("Update user role email sent successfully")
 	return nil
 }
 

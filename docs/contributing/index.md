@@ -36,40 +36,60 @@ Before contributing, please review and agree to our [Code of Conduct](/code-of-c
 
 If you prefer to set up your development environment manually:
 
+1. Fork the repository: Go to [nixopus GitHub repository](https://github.com/raghavyuva/nixopus). Click on Fork to create your own copy under your GitHub account.
+
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/raghavyuva/nixopus.git
+git clone git@github.com:your_username/nixopus.git
 cd nixopus
 ```
 
-2. Install Go (version 1.23.6 or newer), and PostgreSQL.
+2. Install Go (version 1.23.6 or newer) and PostgreSQL.
 
 3. Set up PostgreSQL databases:
 
 ```bash
-createdb postgres -U postgres
-
+createdb nixopus -U postgres
 createdb nixopus_test -U postgres
 ```
 
-4. Copy and configure environment variables:
-
-```bash
-cp .env.sample .env
-```
-
-5. Install project dependencies:
+4. Copy and configure environment variables (API service):
 
 ```bash
 cd api
+cp .env.sample .env
+# Update .env to match your local DB (e.g., DB_NAME=nixopus, USERNAME=postgres, PASSWORD=...)
+# Configure SuperTokens authentication:
+# SUPERTOKENS_API_KEY=your-secure-api-key
+# SUPERTOKENS_API_DOMAIN=http://localhost:3567
+# SUPERTOKENS_WEBSITE_DOMAIN=http://localhost:3000
+# SUPERTOKENS_CONNECTION_URI=http://localhost:3567
+```
+
+5. Set up SuperTokens Core (required for authentication):
+
+```bash
+# Using Docker (recommended)
+docker run -p 3567:3567 -d \
+  --name supertokens-core \
+  registry.supertokens.io/supertokens/supertokens-postgresql
+
+# Or install locally
+npm install -g supertokens
+supertokens start
+```
+
+6. Install project dependencies:
+
+```bash
 go mod download
 
 cd ../view
 yarn install
 ```
 
-6. Load development fixtures (optional but recommended):
+7. Load development fixtures (optional but recommended):
 
 ```bash
 cd ../api

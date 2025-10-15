@@ -9,8 +9,8 @@ import AccountSection from './components/AccountSection';
 import SecuritySection from './components/SecuritySection';
 import { useTranslation } from '@/hooks/use-translation';
 import FeatureFlagsSettings from './components/FeatureFlagsSettings';
-import { RBACGuard } from '@/components/rbac/RBACGuard';
 import { useRBAC } from '@/lib/rbac';
+import PageLayout from '@/components/layout/page-layout';
 
 function Page() {
   const { t, isLoading } = useTranslation();
@@ -22,10 +22,8 @@ function Page() {
     email,
     usernameError,
     usernameSuccess,
-    emailSent,
     isLoading: settingsLoading,
     handleUsernameChange,
-    handlePasswordResetRequest,
     setUsername,
     setUsernameError,
     userSettings,
@@ -36,15 +34,14 @@ function Page() {
     isUpdatingAutoUpdate,
     handleThemeChange,
     handleLanguageChange,
-    handleAutoUpdateChange,
+    // handleAutoUpdateChange,
     handleFontUpdate
   } = useGeneralSettings();
 
   const hasFeatureFlagsReadPermission = canAccessResource('feature-flags', 'read');
-  const totalTabs = hasFeatureFlagsReadPermission ? 3 : 2;
 
   return (
-    <div className="container mx-auto py-6 space-y-8 max-w-4xl">
+    <PageLayout maxWidth="6xl" padding="md" spacing="lg">
       <DashboardPageHeader label={t('settings.title')} description={t('settings.description')} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <AvatarSection onImageChange={onImageChange} user={user} />
@@ -87,19 +84,15 @@ function Page() {
               isUpdatingAutoUpdate={isUpdatingAutoUpdate}
               handleThemeChange={handleThemeChange}
               handleLanguageChange={handleLanguageChange}
-              handleAutoUpdateChange={handleAutoUpdateChange}
+              // handleAutoUpdateChange={handleAutoUpdateChange}
               handleFontUpdate={handleFontUpdate}
             />
-            <SecuritySection
-              emailSent={emailSent}
-              isLoading={settingsLoading}
-              handlePasswordResetRequest={handlePasswordResetRequest}
-            />
+            <SecuritySection />
             {hasFeatureFlagsReadPermission && <FeatureFlagsSettings />}
           </Tabs>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

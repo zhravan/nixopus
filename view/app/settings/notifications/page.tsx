@@ -12,7 +12,7 @@ import Skeleton from '@/app/file-manager/components/skeleton/Skeleton';
 import DisabledFeature from '@/components/features/disabled-feature';
 import { FeatureNames } from '@/types/feature-flags';
 import { ResourceGuard } from '@/components/rbac/PermissionGuard';
-import { useRBAC } from '@/lib/rbac';
+import PageLayout from '@/components/layout/page-layout';
 
 export type NotificationChannelConfig = {
   [key: string]: string;
@@ -33,8 +33,6 @@ const Page: React.FC = () => {
     handleUpdatePreference
   } = useNotificationSettings();
   const { isFeatureEnabled, isLoading: isFeatureFlagsLoading } = useFeatureFlags();
-  const { canAccessResource } = useRBAC();
-  const hasFeatureFlagsReadPermission = canAccessResource('feature-flags', 'read');
 
   if (isFeatureFlagsLoading) {
     return <Skeleton />;
@@ -66,6 +64,8 @@ const Page: React.FC = () => {
       });
     }
   };
+  
+ // TODO: Implement proper FeatureFlagRead permission management when this feature is taken up
 
   const handleSaveDiscord = (data: Record<string, string>) => {
     if (discordConfig) {
@@ -88,12 +88,12 @@ const Page: React.FC = () => {
 
   return (
     <ResourceGuard resource="notification" action="read">
-      <div className="container mx-auto py-6 space-y-8 max-w-4xl">
+      <PageLayout maxWidth="6xl" padding="md" spacing="lg">
         <DashboardPageHeader
           label={t('settings.notifications.page.title')}
           description={t('settings.notifications.page.description')}
         />
-        <Tabs defaultValue={hasFeatureFlagsReadPermission ? "channels" : "preferences"} className="w-full">
+        <Tabs defaultValue="channels" className="w-full">
           <TabsList className={`grid w-full grid-cols-2`}>
             <ResourceGuard resource="notification" action="create">
               <TabsTrigger value="channels">
@@ -107,7 +107,7 @@ const Page: React.FC = () => {
           <ResourceGuard resource="notification" action="create">
             <TabsContent value="channels">
               <NotificationChannelsTab
-                smtpConfigs={smtpConfigs}
+                smtpConfigs={smtpConfigs || undefined}
                 slackConfig={slackConfig}
                 discordConfig={discordConfig}
                 isLoading={isLoading}
@@ -125,7 +125,7 @@ const Page: React.FC = () => {
             />
           </TabsContent>
         </Tabs>
-      </div>
+      </PageLayout>
     </ResourceGuard>
   );
 };

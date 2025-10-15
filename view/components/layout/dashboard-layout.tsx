@@ -18,16 +18,10 @@ import React, { useEffect } from 'react';
 import { Terminal } from '@/app/terminal/terminal';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { useTranslation } from '@/hooks/use-translation';
-import Link from 'next/link';
 import { Tour } from '@/components/Tour';
 import { useTour } from '@/hooks/useTour';
 import { Button } from '@/components/ui/button';
-import { HelpCircle } from 'lucide-react';
-import { UpdateIcon } from '@radix-ui/react-icons';
-import { useAppSelector } from '@/redux/hooks';
-import { useCheckForUpdatesQuery, usePerformUpdateMutation } from '@/redux/services/users/userApi';
-import { toast } from 'sonner';
+import { HelpCircle } from 'lucide-react';  
 import { AnyPermissionGuard } from '@/components/rbac/PermissionGuard';
 import { ModeToggler } from '@/components/ui/theme-toggler';
 import { RBACGuard } from '@/components/rbac/RBACGuard';
@@ -39,8 +33,6 @@ enum TERMINAL_POSITION {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { t } = useTranslation();
-  const user = useAppSelector((state) => state.auth.user);
   const {
     addTeamModalOpen,
     setAddTeamModalOpen,
@@ -52,18 +44,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     handleTeamNameChange,
     handleTeamDescriptionChange
   } = useTeamSwitcher();
+
   const { getBreadcrumbs } = useBreadCrumbs();
   const breadcrumbs = React.useMemo(() => getBreadcrumbs(), [getBreadcrumbs]);
   const { isTerminalOpen, toggleTerminal } = useTerminalState();
   const [TerminalPosition, setTerminalPosition] = React.useState(TERMINAL_POSITION.BOTTOM);
   const [fitAddonRef, setFitAddonRef] = React.useState<any | null>(null);
   const { startTour } = useTour();
-  const {
-    data: updateCheck,
-    refetch: checkForUpdates,
-    isFetching: isCheckingForUpdates
-  } = useCheckForUpdatesQuery();
-  const [performUpdate, { isLoading: isPerformingUpdate }] = usePerformUpdateMutation();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -80,20 +67,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleUpdate = async () => {
-    try {
-      await checkForUpdates();
-      await performUpdate();
-      toast.success('Update Completed Successfully');
-    } catch (error) {
-      console.error('Update failed:', error);
-      toast.error('Update failed, please try again');
-    }
-  };
-
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar toggleAddTeamModal={toggleAddTeamModal} />
+      <AppSidebar 
+        toggleAddTeamModal={toggleAddTeamModal}
+        addTeamModalOpen={addTeamModalOpen}
+      />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4 justify-between w-full">
@@ -120,14 +99,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={handleUpdate} disabled={isPerformingUpdate}>
-                {isPerformingUpdate ? (
-                  <UpdateIcon className="h-4 w-4 animate-spin text-green-500" />
-                ) : (
-                  <UpdateIcon className="h-4 w-4" />
-                )}
-                {t('navigation.update')}
-              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -147,18 +118,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <Tour>
             <div className="flex h-[calc(100vh-5rem)]">
-              {addTeamModalOpen && (
-                <CreateTeam
-                  open={addTeamModalOpen}
-                  setOpen={setAddTeamModalOpen}
-                  createTeam={createTeam}
-                  teamName={teamName}
-                  teamDescription={teamDescription}
-                  handleTeamNameChange={handleTeamNameChange}
-                  handleTeamDescriptionChange={handleTeamDescriptionChange}
-                  isLoading={isLoading}
-                />
-              )}
+              <CreateTeam
+                open={addTeamModalOpen}
+                setOpen={setAddTeamModalOpen}
+                createTeam={createTeam}
+                teamName={teamName}
+                teamDescription={teamDescription}
+                handleTeamNameChange={handleTeamNameChange}
+                handleTeamDescriptionChange={handleTeamDescriptionChange}
+                isLoading={isLoading}
+              />
               <ResizablePanelGroup
                 direction={
                   TERMINAL_POSITION.BOTTOM === TerminalPosition ? 'vertical' : 'horizontal'

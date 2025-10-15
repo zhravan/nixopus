@@ -1,9 +1,13 @@
+# Workflow: Build and Push Docker Containers
+# Description: Builds and pushes Docker images for the API and Web UI whenever a version tag is pushed or a release is published.
+# Why: Provides reproducible, versioned container images for deployments.
+
 name: Package Manager
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'  # Trigger on version tag push
   release:
     types: [published]
   workflow_dispatch:
@@ -25,6 +29,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Create .env files
         run: |

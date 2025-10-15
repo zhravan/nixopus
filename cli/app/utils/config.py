@@ -1,7 +1,9 @@
 import os
-import sys
-import yaml
 import re
+import sys
+
+import yaml
+
 from app.utils.message import MISSING_CONFIG_KEY_MESSAGE
 
 
@@ -148,3 +150,4 @@ VIEW_PORT = "services.view.env.NEXT_PUBLIC_PORT"
 API_PORT = "services.api.env.PORT"
 CADDY_CONFIG_VOLUME = "services.caddy.env.CADDY_CONFIG_VOLUME"
 DOCKER_PORT = "services.api.env.DOCKER_PORT"
+SUPERTOKENS_API_PORT = "services.api.env.SUPERTOKENS_API_PORT"

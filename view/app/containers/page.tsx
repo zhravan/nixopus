@@ -1,10 +1,8 @@
 'use client';
 
-import { RefreshCw, Play, StopCircle, Trash2, Loader2, Scissors } from 'lucide-react';
+import React from 'react';
+import { RefreshCw, Trash2, Loader2, Scissors, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { cn, isNixopusContainer } from '@/lib/utils';
 import ContainersLoading from './skeleton';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { FeatureNames } from '@/types/feature-flags';
@@ -13,156 +11,26 @@ import DisabledFeature from '@/components/features/disabled-feature';
 import { ResourceGuard, AnyPermissionGuard } from '@/components/rbac/PermissionGuard';
 import useContainerList from './hooks/use-container-list';
 import { TypographyH1, TypographyH2, TypographyMuted } from '@/components/ui/typography';
-import { useTranslation } from '@/hooks/use-translation';
-
-interface ContainerActionsProps {
-  container: any;
-  onAction: (id: string, action: 'start' | 'stop' | 'remove') => void;
-}
-
-const ContainerActions = ({ container, onAction }: ContainerActionsProps) => {
-  const containerName: string = typeof container?.name === 'string' ? container.name : '';
-  const isProtected = isNixopusContainer(containerName);
-
-  return (
-    <div className="flex gap-2">
-      <ResourceGuard
-        resource="container"
-        action="update"
-        loadingFallback={<Skeleton className="h-8 w-8" />}
-      >
-        {container.status !== 'running' && (
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={isProtected}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(container.id, 'start');
-            }}
-          >
-            <Play className="h-4 w-4" />
-          </Button>
-        )}
-        {container.status === 'running' && (
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={isProtected}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(container.id, 'stop');
-            }}
-          >
-            <StopCircle className="h-4 w-4" />
-          </Button>
-        )}
-      </ResourceGuard>
-      <ResourceGuard
-        resource="container"
-        action="delete"
-        loadingFallback={<Skeleton className="h-8 w-8" />}
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          disabled={isProtected}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAction(container.id, 'remove');
-          }}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </ResourceGuard>
-    </div>
-  );
-};
-
-interface ContainerInfoProps {
-  container: any;
-}
-
-const ContainerInfo = ({ container }: ContainerInfoProps) => {
-  const { t } = useTranslation();
-  return (
-    <div className="space-y-3">
-      <div className="text-sm">
-        <span className="font-medium">Ports:</span>
-        <div className="flex flex-wrap gap-2 mt-1">
-          {container?.ports?.length > 0 ? (
-            container.ports.map((port: any) => (
-              <Badge key={`${port.private_port}-${port.public_port}`} variant="outline">
-                {port.public_port} → {port.private_port}
-              </Badge>
-            ))
-          ) : (
-            <span className="text-xs text-muted-foreground">{t("containers.no_ports_exposed")}</span>
-          )}
-        </div>
-      </div>
-      <div className="text-sm">
-        <span className="font-medium">Memory:</span>
-        <span className="ml-2">
-          {`${(container.host_config.memory / (1024 * 1024)).toFixed(2)} MB`}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-interface ContainerCardProps {
-  container: any;
-  onClick: () => void;
-  getGradientFromName: (name: string) => string;
-  onAction: (id: string, action: 'start' | 'stop' | 'remove') => void;
-}
-
-const ContainerCard = ({
-  container,
-  onClick,
-  getGradientFromName,
-  onAction
-}: ContainerCardProps) => {
-  return (
-    <Card
-      className={cn(
-        'group relative overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer h-full flex flex-col',
-        getGradientFromName(container.name)
-      )}
-      onClick={onClick}
-    >
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
-      <div className="absolute inset-0 bg-gradient-to-br opacity-20 transition-opacity duration-300 group-hover:opacity-30" />
-      <CardContent className="relative p-6 z-10 flex-1 flex flex-col">
-        <div className="flex items-start justify-between mb-4">
-          <div className="space-y-2 flex-1 min-w-0">
-            <h3 className="text-xl font-semibold truncate">{container.name}</h3>
-            <p className="text-sm text-muted-foreground truncate" title={container.image}>{container.image}</p>
-            <Badge variant={container.status === 'running' ? 'default' : 'secondary'}>
-              {container.status}
-            </Badge>
-          </div>
-          <div className="flex-shrink-0 ml-4">
-            <ContainerActions
-              container={container}
-              onAction={onAction}
-            />
-          </div>
-        </div>
-        <div className="mt-auto">
-          <ContainerInfo container={container} />
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
+import PageLayout from '@/components/layout/page-layout';
+import ContainersTable from './components/table';
+import PaginationWrapper from '@/components/ui/pagination';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchBar } from '@/components/ui/search-bar';
+import { ContainerCard } from './components/card';
 
 export default function ContainersPage() {
+  const [viewMode, setViewMode] = React.useState<'table' | 'card'>(() => {
+    if (typeof window !== 'undefined') {
+      const existing = window.localStorage.getItem('containers_view');
+      return (existing as 'table' | 'card') || 'table';
+    }
+    return 'table';
+  });
   const {
     containers,
     isLoading,
+    isFetching,
+    initialized,
     handleRefresh,
     handleContainerAction,
     handleDeleteConfirm,
@@ -179,10 +47,22 @@ export default function ContainersPage() {
     setContainerToDelete,
     getGradientFromName,
     setShowPruneImagesConfirm,
-    setShowPruneBuildCacheConfirm
+    setShowPruneBuildCacheConfirm,
+    page,
+    setPage,
+    totalPages,
+    totalCount,
+    pageSize,
+    setPageSize,
+    search,
+    searchInput,
+    setSearchInput,
+    sortBy,
+    sortOrder,
+    handleSort
   } = useContainerList();
 
-  if (isLoading) {
+  if (!initialized && isLoading) {
     return <ContainersLoading />;
   }
 
@@ -194,57 +74,98 @@ export default function ContainersPage() {
     return <DisabledFeature />;
   }
 
-  // TODO: Add pagination for containers listing
-
   return (
     <ResourceGuard
       resource="container"
       action="read"
       loadingFallback={<ContainersLoading />}
     >
-      <div className="min-h-screen w-full overflow-x-hidden">
-        <div className="relative w-full">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-              <span>
-                <TypographyH1 className="text-2xl font-bold">{t('containers.title')}</TypographyH1>
-                <TypographyMuted>{t('containers.description')}</TypographyMuted>
-              </span>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isRefreshing}>
-                  {isRefreshing ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                  )}
-                  {t('containers.refresh')}
-                </Button>
-                <AnyPermissionGuard
-                  permissions={['container:delete']}
-                  loadingFallback={<Skeleton className="h-8 w-20" />}
-                >
-                  <Button variant="outline" size="sm" onClick={() => setShowPruneImagesConfirm(true)}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {t('containers.prune_images')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPruneBuildCacheConfirm(true)}
-                  >
-                    <Scissors className="mr-2 h-4 w-4" />
-                    {t('containers.prune_build_cache')}
-                  </Button>
-                </AnyPermissionGuard>
-              </div>
+      <PageLayout maxWidth="6xl" padding="md" spacing="lg" className="relative z-10">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <span>
+            <TypographyH1 className="text-2xl font-bold">{t('containers.title')}</TypographyH1>
+          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isRefreshing || isFetching}>
+              {isRefreshing || isFetching ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              {t('containers.refresh')}
+            </Button>
+            <AnyPermissionGuard
+              permissions={['container:delete']}
+              loadingFallback={<Skeleton className="h-8 w-20" />}
+            >
+              <Button variant="outline" size="sm" onClick={() => setShowPruneImagesConfirm(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t('containers.prune_images')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPruneBuildCacheConfirm(true)}
+              >
+                <Scissors className="mr-2 h-4 w-4" />
+                {t('containers.prune_build_cache')}
+              </Button>
+            </AnyPermissionGuard>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+          <div className="flex-1 min-w-[220px]">
+            <SearchBar
+              searchTerm={searchInput}
+              handleSearchChange={(e) => setSearchInput(e.target.value)}
+              label={t('common.searchFiles')}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => {
+                const num = parseInt(v, 10);
+                setPageSize(num);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[110px]">
+                <SelectValue placeholder="Page size" />
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 20, 50, 100].map((s) => (
+                  <SelectItem key={s} value={String(s)}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="hidden sm:flex items-center gap-2 ml-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  const next = viewMode === 'table' ? 'card' : 'table';
+                  setViewMode(next);
+                  if (typeof window !== 'undefined') window.localStorage.setItem('containers_view', next);
+                }}
+              >
+                {viewMode === 'table' ? <Grid className="h-4 w-4" /> : <List className="h-4 w-4" />}
+              </Button>
             </div>
-            {containers.length === 0 && (
-              <div className="flex justify-center items-center h-full">
-                <TypographyH2 className="text-muted-foreground">
-                  {t('containers.no_containers')}
-                </TypographyH2>
-              </div>
-            )}
+          </div>
+        </div>
+        {containers.length === 0 && (
+          <div className="flex justify-center items-center h-full">
+            <TypographyH2 className="text-muted-foreground">
+              {t('containers.no_containers')}
+            </TypographyH2>
+          </div>
+        )}
+        {viewMode === 'card' ? (
+          <>
             {containers.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3  gap-4 md:gap-6">
                 {containers.map((container) => (
@@ -258,8 +179,25 @@ export default function ContainersPage() {
                 ))}
               </div>
             )}
+          </>
+        ) : (
+          <ContainersTable
+            containersData={containers}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+            onAction={handleContainerAction}
+          />
+        )}
+
+        {totalCount > 0 && (
+          <div className="mt-4 flex items-center justify-between flex-wrap gap-2">
+            <TypographyMuted>{totalCount} containers</TypographyMuted>
+            {totalPages > 1 && (
+              <PaginationWrapper currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
           </div>
-        </div>
+        )}
         <AnyPermissionGuard
           permissions={['container:delete']}
           loadingFallback={null}
@@ -298,7 +236,7 @@ export default function ContainersPage() {
             icon={Scissors}
           />
         </AnyPermissionGuard>
-      </div>
+      </PageLayout>
     </ResourceGuard>
   );
 }

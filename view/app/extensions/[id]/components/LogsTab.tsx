@@ -7,6 +7,7 @@ import { useGetExecutionLogsQuery, useListExecutionsQuery } from '@/redux/servic
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import AceEditor from '@/components/ui/ace-editor';
+import { Badge } from '@/components/ui/badge';
 
 export default function ExecutionsTab() {
   const { t } = useTranslation();
@@ -72,6 +73,17 @@ export default function ExecutionsTab() {
     setOpen(true);
   };
 
+  const StatusBadge = ({ status }: { status: string }) => {
+    const s = (status || '').toLowerCase();
+    const cls =
+      s === 'completed'
+        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+        : s === 'failed'
+          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+          : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+    return <Badge className={cls}>{status}</Badge>;
+  };
+
   const ExecutionRow = useMemo(() => ({ e }: { e: any }) => (
     <div
       key={e.id}
@@ -79,7 +91,9 @@ export default function ExecutionsTab() {
       onClick={() => onOpenLogs(e.id)}
     >
       <div className="col-span-4 truncate">{e.id}</div>
-      <div className="col-span-2 text-muted-foreground capitalize">{e.status}</div>
+      <div className="col-span-2 capitalize">
+        <StatusBadge status={e.status} />
+      </div>
       <div className="col-span-3 text-muted-foreground">{new Date(e.started_at).toLocaleString()}</div>
       <div className="col-span-3 text-muted-foreground">
         {e.completed_at ? new Date(e.completed_at).toLocaleString() : '-'}

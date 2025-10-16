@@ -35,7 +35,7 @@ services:
       WEBSOCKET_URL: ${WEBSOCKET_URL:-}
       API_URL: ${API_URL:-}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
-      VIEW_ENV_FILE: ${VIEW_ENV_FILE:-./view/.env}
+      VIEW_ENV_FILE: ${VIEW_ENV_FILE:-./view/.env.local}
       NEXT_PUBLIC_PORT: ${NEXT_PUBLIC_PORT:-3000}
       LOGS_PATH: ${LOGS_PATH:-./logs}
 
@@ -135,7 +135,7 @@ nixopus-config-dir: ./nixopus-dev
 compose-file-path: docker-compose-dev.yml
 clone:
   repo: "https://github.com/raghavyuva/nixopus"
-  branch: "feat/dev_environment"
+  branch: "master"
   source-path: .
 
 ports: [8080, 3000, 6379, 5432]

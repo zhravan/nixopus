@@ -42,7 +42,8 @@ var (
 		"container:create", "container:read", "container:update", "container:delete",
 		"audit:create", "audit:read", "audit:update", "audit:delete",
 		"terminal:create", "terminal:read", "terminal:update", "terminal:delete",
-		"dashboard:read",
+		"feature_flags:read", "feature_flags:update",
+		"dashboard:read", "extension:read", "extension:create", "extension:update", "extension:delete",
 	}
 
 	memberPermissions = []string{
@@ -59,6 +60,14 @@ var (
 
 	viewerPermissions = []string{
 		"user:read", "organization:read", "container:read", "audit:read", "domain:read", "notification:read", "file-manager:read", "deploy:read", "dashboard:read",
+		"feature_flags:read",
+		"dashboard:read",
+		"extension:read",
+	}
+
+	viewerPermissions = []string{
+		"user:read", "organization:read", "container:read", "audit:read", "domain:read", "notification:read", "file-manager:read", "deploy:read", "feature_flags:read", "dashboard:read",
+		"extension:read",
 	}
 )
 
@@ -70,6 +79,7 @@ func Init(appInstance *storage.App) {
 	websiteBasePath := "/auth"
 
 	err := supertokens.Init(supertokens.TypeInput{
+		Debug: true,
 		Supertokens: &supertokens.ConnectionInfo{
 			ConnectionURI: config.Supertokens.ConnectionURI,
 			APIKey:        config.Supertokens.APIKey,

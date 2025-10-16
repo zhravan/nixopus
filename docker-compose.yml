@@ -11,6 +11,7 @@ services:
       - ${NIXOPUS_HOME:-/etc/nixopus}/source/api/.env
     environment:
       - HOST_NAME=nixopus-db
+
     volumes:
       - ./logs:/app/logs
       - ${NIXOPUS_HOME:-/etc/nixopus}:/etc/nixopus
@@ -31,10 +32,11 @@ services:
       - POSTGRES_PASSWORD=${PASSWORD}
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_HOST_AUTH_METHOD=trust
+
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
-      - ${NIXOPUS_HOME:-/etc/nixopus}/db:/var/lib/postgresql/data
+      - nixopus-db-data:/var/lib/postgresql/data
     networks:
       - nixopus-network
     healthcheck:
@@ -100,7 +102,7 @@ services:
     networks:
       - nixopus-network
 
-  nixopus-supertokens:
+  supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:latest
     depends_on:
       nixopus-db:
@@ -124,3 +126,6 @@ services:
 networks:
   nixopus-network:
     driver: bridge
+
+volumes:
+  nixopus-db-data:

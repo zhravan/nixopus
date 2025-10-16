@@ -39,6 +39,11 @@ def install_callback(
     branch: str = typer.Option(
         None, "--branch", "-b", help="Git branch to clone (defaults to config value)"
     ),
+     include_lxd: bool = typer.Option(
+        False,
+        "--include-lxd",
+        help="Install and initialize LXD on the host (Linux-only). Uses local unix socket; no TCP listener.",
+    ),
 ):
     """Install Nixopus"""
     if ctx.invoked_subcommand is None:
@@ -54,6 +59,7 @@ def install_callback(
             view_domain=view_domain,
             repo=repo,
             branch=branch,
+            include_lxd=include_lxd,
         )
         install.run()
 

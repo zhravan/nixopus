@@ -9,6 +9,7 @@ require (
 	github.com/docker/go-connections v0.5.0
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/go-fuego/fuego v0.18.6
+	github.com/go-playground/validator/v10 v10.24.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
@@ -113,6 +114,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/gookit/color v1.4.2 // indirect
 	github.com/gorilla/schema v1.4.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect

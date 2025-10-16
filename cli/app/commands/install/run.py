@@ -183,7 +183,7 @@ class Install:
             ("Setting up proxy config", self._setup_proxy_config),
             ("Creating environment files", self._create_env_files),
             ("Generating SSH keys", self._setup_ssh),
-            ("Installing LXD (optional)", self._maybe_install_lxd),
+            ("Installing LXD (optional)", self._install_lxd_if_enabled),
             ("Starting services", self._start_services),
         ]
 
@@ -517,7 +517,7 @@ class Install:
             host_ip = HostInformation.get_public_ip()
             return f"http://{host_ip}:{view_port}"
 
-    def _maybe_install_lxd(self):
+    def _install_lxd_if_enabled(self):
         if not self.include_lxd:
             return
         os_name = HostInformation.get_os_name()

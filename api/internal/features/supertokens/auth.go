@@ -55,11 +55,6 @@ var (
 		"notification:read",
 		"file-manager:read",
 		"deploy:read",
-		"dashboard:read",
-	}
-
-	viewerPermissions = []string{
-		"user:read", "organization:read", "container:read", "audit:read", "domain:read", "notification:read", "file-manager:read", "deploy:read", "dashboard:read",
 		"feature_flags:read",
 		"dashboard:read",
 		"extension:read",

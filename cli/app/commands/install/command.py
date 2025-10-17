@@ -51,36 +51,20 @@ def install_callback(
     """Install Nixopus for production"""
     if ctx.invoked_subcommand is None:
         logger = Logger(verbose=verbose)
-        if development:
-            # Warn when incompatible production-only options are provided alongside --development
-            if api_domain or view_domain:
-                logger.warning("Ignoring --api-domain/--view-domain in development mode")
-            dev_install = DevelopmentInstall(
-                logger=logger,
-                verbose=verbose,
-                timeout=timeout,
-                force=force,
-                dry_run=dry_run,
-                config_file=config_file,
-                repo=repo,
-                branch=branch,
-                install_path=dev_path,
-            )
-            dev_install.run()
-        else:
-            install = Install(
-                logger=logger,
-                verbose=verbose,
-                timeout=timeout,
-                force=force,
-                dry_run=dry_run,
-                config_file=config_file,
-                api_domain=api_domain,
-                view_domain=view_domain,
-                repo=repo,
-                branch=branch,
-            )
-            install.run()
+        install = Install(
+            logger=logger,
+            verbose=verbose,
+            timeout=timeout,
+            force=force,
+            dry_run=dry_run,
+            config_file=config_file,
+            api_domain=api_domain,
+            view_domain=view_domain,
+            repo=repo,
+            branch=branch,
+            development=False,
+        )
+        install.run()
 
 
 def main_install_callback(value: bool):
@@ -108,8 +92,12 @@ def development(
     config_file: str = typer.Option(
         None, "--config-file", "-c", help="Path to custom config file (defaults to config.dev.yaml)"
     ),
-    repo: str = typer.Option(None, "--repo", "-r", help="GitHub repository URL to clone (defaults to config value)"),
-    branch: str = typer.Option(None, "--branch", "-b", help="Git branch to clone (defaults to config value)"),
+    repo: str = typer.Option(
+        None, "--repo", "-r", help="GitHub repository URL to clone (defaults to config value)"
+    ),
+    branch: str = typer.Option(
+        None, "--branch", "-b", help="Git branch to clone (defaults to config value)"
+    ),
 ):
     """Install Nixopus for local development in specified or current directory"""
     logger = Logger(verbose=verbose)

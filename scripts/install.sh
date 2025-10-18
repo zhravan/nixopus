@@ -21,17 +21,6 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 
-# Find a tarball package name from the available package list
-find_tar_package() {
-    while IFS= read -r package; do
-        if [[ "$package" == *.tar || "$package" == *.tar.gz || "$package" == *.tgz ]]; then
-            echo "$package"
-            return 0
-        fi
-    done <<< "$CLI_PACKAGES"
-    return 1
-}
-
 # Validate repository URL format
 validate_repo_url() {
     local repo_url="$1"
@@ -191,22 +180,9 @@ install_package() {
     package_name=$(build_package_name "$arch" "$pkg_type")
     
     if ! package_exists "$package_name"; then
-        if [[ "$pkg_type" == "tar" ]]; then
-            local fallback_package
-            fallback_package=$(find_tar_package)
-            if [[ -n "$fallback_package" ]]; then
-                log_info "Package $package_name not found; using available tarball $fallback_package instead"
-                package_name="$fallback_package"
-            else
-                log_error "Package $package_name not found in available packages"
-                echo "$CLI_PACKAGES"
-                exit 1
-            fi
-        else
-            log_error "Package $package_name not found in available packages"
-            echo "$CLI_PACKAGES"
-            exit 1
-        fi
+        log_error "Package $package_name not found in available packages"
+        echo "$CLI_PACKAGES"
+        exit 1
     fi
     
     download_url="$REPO_URL/releases/download/nixopus-$CLI_VERSION/$package_name"

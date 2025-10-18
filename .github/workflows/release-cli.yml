@@ -298,7 +298,9 @@ jobs:
           retention-days: 30
 
   create-release:
-    needs: build-and-package
+    needs:
+      - build-and-package
+      - build-and-package-macos
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -327,7 +329,7 @@ jobs:
           while IFS= read -r -d '' file; do
             filename=$(basename "$file")
             PACKAGE_FILES+=("$filename")
-          done < <(find ./artifacts -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.tar" -o -name "*.apk" \) -print0)
+          done < <(find ./artifacts -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.tar" -o -name "*.apk" -o -name "*.pkg" \) -print0)
 
           echo "Found package files: ${PACKAGE_FILES[@]}"
 
@@ -371,7 +373,7 @@ jobs:
 
           echo "Creating release with tag: $RELEASE_TAG"
           echo "Files to upload:"
-          find ./artifacts -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.tar" -o -name "*.apk" \) -exec ls -la {} \;
+          find ./artifacts -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.tar" -o -name "*.apk" -o -name "*.pkg" \) -exec ls -la {} \;
 
           gh release create "$RELEASE_TAG" \
             --title "Nixopus CLI v$CLI_VERSION" \
@@ -379,6 +381,6 @@ jobs:
             --target ${{ github.ref_name }} \
             --prerelease
 
-          find ./artifacts -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.tar" -o -name "*.apk" \) -exec gh release upload "$RELEASE_TAG" {} \;
+          find ./artifacts -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.tar" -o -name "*.apk" -o -name "*.pkg" \) -exec gh release upload "$RELEASE_TAG" {} \;
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

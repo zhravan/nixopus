@@ -283,7 +283,6 @@ jobs:
             --license "FSL" \
             --url "https://github.com/nixopus/cli" \
             --prefix / \
-            --osxpkg-identifier com.nixopus.cli \
             packaging/=/
           PKG_SOURCE="nixopus-${VERSION}.pkg"
           PKG_TARGET="nixopus-${VERSION}-darwin-$PKG_ARCH.pkg"

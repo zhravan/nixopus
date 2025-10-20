@@ -151,7 +151,7 @@ class DevelopmentInstall(BaseInstall):
             "nixopus_config_dir": os.path.join(self.install_path, "nixopus-dev"),
         }
 
-    def _get_config(self, key: str):
+    def _get_config(self, key: str, user_config=None, defaults=None):
         """Get config value with development-specific overrides"""
         # Development-specific path overrides
         if key == "compose_file_path":
@@ -168,7 +168,7 @@ class DevelopmentInstall(BaseInstall):
             return os.path.expanduser("~/.ssh/id_rsa_nixopus")
 
         # Use parent's _get_config with dev defaults
-        return super()._get_config(key, self._user_config, self._defaults)
+        return super()._get_config(key, user_config or self._user_config, defaults or self._defaults)
 
     def run(self):
         """Execute development installation workflow"""

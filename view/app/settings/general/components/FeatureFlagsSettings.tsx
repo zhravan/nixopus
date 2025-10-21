@@ -66,7 +66,7 @@ export default function FeatureFlagsSettings() {
     
     return featureFlags.filter((feature) => {
       const matchesSearch = feature.feature_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t(`settings.featureFlags.features.${feature.feature_name}.title`).toLowerCase().includes(searchTerm.toLowerCase());
+        t(`settings.featureFlags.features.${feature.feature_name}.title` as any).toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesFilter = filterEnabled === 'all' || 
         (filterEnabled === 'enabled' && feature.is_enabled) ||
@@ -205,7 +205,7 @@ export default function FeatureFlagsSettings() {
                       <div className="flex items-center gap-2">
                         <GroupIcon className="h-4 w-4 text-muted-foreground" />
                         <TypographySmall className="font-semibold">
-                          {t(`settings.featureFlags.groups.${group}.title`)}
+                          {t(`settings.featureFlags.groups.${group}.title` as any)}
                         </TypographySmall>
                         <Badge variant="outline" className="text-xs">
                           {enabledInGroup}/{features.length}
@@ -221,11 +221,11 @@ export default function FeatureFlagsSettings() {
                           <div className="space-y-1 flex-1">
                             <div className="flex items-center gap-2">
                               <TypographySmall className="font-medium">
-                                {t(`settings.featureFlags.features.${feature.feature_name}.title`)}
+                                {t(`settings.featureFlags.features.${feature.feature_name}.title` as any)}
                               </TypographySmall>
                             </div>
                             <TypographyMuted className="text-sm">
-                              {t(`settings.featureFlags.features.${feature.feature_name}.description`)}
+                              {t(`settings.featureFlags.features.${feature.feature_name}.description` as any)}
                             </TypographyMuted>
                           </div>
                           <RBACGuard resource="feature-flags" action="update">

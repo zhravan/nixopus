@@ -11,6 +11,7 @@ import Actions from './components/actions/Actions';
 import { FileItem } from './components/file-list/FileItem';
 import useFileManager from './hooks/ui/useFileManager';
 import { useTranslation } from '@/hooks/use-translation';
+import type { translationKey } from '@/hooks/use-translation';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { FileData } from '@/redux/types/files';
 import { FileContextMenu } from './components/context-menu/FileContextMenu';
@@ -166,7 +167,7 @@ interface FileListProps {
   handleDelete: (path: string) => void;
   handleCopy: (fromPath: string, toPath: string) => void;
   startRenaming: (file: FileData) => void;
-  t: (key: string, params?: any) => string;
+  t: (key: translationKey, params?: Record<string, string>) => string;
 }
 
 const FileList = ({
@@ -239,7 +240,7 @@ interface FileDeleteDialogProps {
   fileToDelete: FileData | null;
   setFileToDelete: (file: FileData | null) => void;
   handleDelete: (path: string) => void;
-  t: (key: string, params?: any) => string;
+  t: (key: translationKey, params?: Record<string, string>) => string;
 }
 
 const FileDeleteDialog = ({

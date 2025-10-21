@@ -135,10 +135,10 @@ export function AppSidebar({
         })
         .map((item) => ({
           ...item,
-          title: t(item.title),
+          title: t(item.title as any),
           items: item.items?.map((subItem) => ({
             ...subItem,
-            title: t(subItem.title)
+            title: t(subItem.title as any)
           }))
         })),
     [data.navMain, hasAnyPermission, t]

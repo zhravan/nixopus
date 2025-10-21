@@ -12,7 +12,7 @@ type DeepKeyOf<T> = {
 
 // This will help us to make sure whatever keys that are entered in the t(``) string are correct, 
 // and enable autocompletion in editors
-type translationKey = DeepKeyOf<typeof en>
+export type translationKey = DeepKeyOf<typeof en>
 
 export function useTranslation() {
   const [translations, setTranslations] = useState<Record<string, any>>({});

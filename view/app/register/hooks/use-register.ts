@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation } from '@/hooks/use-translation';
+import { useTranslation, type translationKey } from '@/hooks/use-translation';
 import { useRouter } from 'next/navigation';
 import { signUp } from 'supertokens-auth-react/recipe/emailpassword';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useIsAdminRegisteredQuery } from '@/redux/services/users/authApi';
 
-const registerSchema = (t: (key: string) => string) =>
+const registerSchema = (t: (key: translationKey, params?: Record<string, string>) => string) =>
   z
     .object({
       email: z.string().email(t('auth.register.errors.invalidEmail')),

@@ -56,12 +56,21 @@ function useContainerDetails() {
                     await stopContainer(containerId).unwrap();
                     toast.success(t(`containers.${action}_success`));
                     break;
+                case 'restart':
+                    await stopContainer(containerId).unwrap();
+                    await startContainer(containerId).unwrap();
+                    toast.success(t('containers.restart_success'));
+                    break;
                 case 'remove':
                     setIsDeleteDialogOpen(true);
                     break;
             }
         } catch (error) {
-            toast.error(t(`containers.${action}_error`));
+            if (action === 'restart') {
+                toast.error(t('containers.restart_error'));
+            } else {
+                toast.error(t(`containers.${action}_error`));
+            }
         }
     };
 

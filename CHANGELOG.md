@@ -1,3 +1,12 @@
+# [0.1.0-alpha.49](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.48...v0.1.0-alpha.49) (2025-10-22)
+
+
+### Bug Fixes
+
+* borders not visible in light themes ([#525](https://github.com/raghavyuva/nixopus/issues/525)) ([8756ff7](https://github.com/raghavyuva/nixopus/commit/8756ff7e1b81672df98670e2f592ca73b4adab98))
+
+
+
 # [0.1.0-alpha.48](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.47...v0.1.0-alpha.48) (2025-10-22)
 
 

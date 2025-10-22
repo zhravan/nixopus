@@ -1,3 +1,12 @@
+# [0.1.0-alpha.47](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.46...v0.1.0-alpha.47) (2025-10-22)
+
+
+### Features
+
+* **cli:** live reloading dockerized dev setup ([#522](https://github.com/raghavyuva/nixopus/issues/522)) ([a05a0d6](https://github.com/raghavyuva/nixopus/commit/a05a0d658ba42284404e0e72d930630abd5a74d1))
+
+
+
 # [0.1.0-alpha.46](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.45...v0.1.0-alpha.46) (2025-10-22)
 
 

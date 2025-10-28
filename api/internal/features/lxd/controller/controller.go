@@ -6,27 +6,11 @@ import (
 	"time"
 
 	"github.com/go-fuego/fuego"
-	"github.com/raghavyuva/nixopus-api/internal/features/lxd/service"
+	"github.com/raghavyuva/nixopus-api/internal/features/lxd/types"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-type Controller struct {
-	svc *service.ClientService
-}
-
-func NewController(svc *service.ClientService) *Controller {
-	return &Controller{svc: svc}
-}
-
-type createRequest struct {
-	Name     string                       `json:"name"`
-	Image    string                       `json:"image"`
-	Profiles []string                     `json:"profiles"`
-	Config   map[string]string            `json:"config"`
-	Devices  map[string]map[string]string `json:"devices"`
-}
-
-func (c *Controller) Create(ctx fuego.ContextWithBody[createRequest]) (*shared_types.Response, error) {
+func (c *Controller) Create(ctx fuego.ContextWithBody[types.CreateRequest]) (*shared_types.Response, error) {
 	body, err := ctx.Body()
 	if err != nil {
 		return nil, fuego.HTTPError{Err: err, Status: http.StatusBadRequest}

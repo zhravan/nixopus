@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	lxdclient "github.com/canonical/lxd/client"
 	lxdapi "github.com/canonical/lxd/shared/api"
+	"github.com/raghavyuva/nixopus-api/internal/features/lxd/types"
 )
 
 // LXD operations supported by the API
@@ -53,10 +53,10 @@ func New(socketPath string, project string, opTimeoutSec int) (*ClientService, e
 
 func (s *ClientService) Create(ctx context.Context, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error) {
 	if name == "" {
-		return nil, errors.New("name is required")
+		return nil, types.ErrMissingName
 	}
 	if imageAlias == "" {
-		return nil, errors.New("image alias is required")
+		return nil, types.ErrMissingImageAlias
 	}
 
 	req := lxdapi.InstancesPost{

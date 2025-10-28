@@ -44,7 +44,6 @@ import (
 	lxdService "github.com/raghavyuva/nixopus-api/internal/features/lxd/service"
 )
 
-// late imports to avoid unused in cases where LXD is not enabled
 var (
 	lxdServiceNew = func() (*lxdService.ClientService, error) {
 		return lxdService.New(config.AppConfig.LXD.SocketPath, config.AppConfig.LXD.Project, config.AppConfig.LXD.OperationTimeoutSeconds)

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/storage"
 	"github.com/raghavyuva/nixopus-api/internal/types"
 	"github.com/spf13/viper"
@@ -22,9 +23,11 @@ var (
 // environment variables, and defaults. It then creates a new PostgreSQL client using
 // the loaded configuration and initializes the storage.Store.
 func Init() *storage.Store {
+	l := logger.NewLogger()
+
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+		l.Log(logger.Warning, ".env file not found, using environment variables", "")
 	}
 
 	initViper()
@@ -34,16 +37,16 @@ func Init() *storage.Store {
 		log.Fatalf("Failed to unmarshal config: %v", err)
 	}
 
-	log.Printf("Configuration loaded successfully for environment: %s", AppConfig.App.Environment)
+	l.Log(logger.Info, fmt.Sprintf("Configuration loaded successfully for environment: %s", AppConfig.App.Environment), "")
 
 	if err := validateConfig(AppConfig); err != nil {
 		log.Fatalf("Configuration validation failed: %v", err)
 	}
 
 	// Log key configuration values (without sensitive data)
-	log.Printf("Server will start on port: %s", AppConfig.Server.Port)
-	log.Printf("Database host: %s:%s", AppConfig.Database.Host, AppConfig.Database.Port)
-	log.Printf("Redis URL configured: %t", AppConfig.Redis.URL != "")
+	l.Log(logger.Info, fmt.Sprintf("Server will start on port: %s", AppConfig.Server.Port), "")
+	l.Log(logger.Info, fmt.Sprintf("Database host: %s:%s", AppConfig.Database.Host, AppConfig.Database.Port), "")
+	l.Log(logger.Info, fmt.Sprintf("Redis URL configured: %t", AppConfig.Redis.URL != ""), "")
 
 	storage_config := storage.Config{
 		Host:           AppConfig.Database.Host,
@@ -67,7 +70,7 @@ func Init() *storage.Store {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	log.Println("Migrations completed successfully")
+	l.Log(logger.Info, "Migrations completed successfully", "")
 	if AppConfig.Server.Port == "" {
 		AppConfig.Server.Port = "8080"
 	}
@@ -87,6 +90,7 @@ func Init() *storage.Store {
 }
 
 func initViper() {
+	l := logger.NewLogger()
 	configName := getConfigFileName()
 	viper.SetConfigName(configName)
 	viper.SetConfigType("yaml")
@@ -95,7 +99,7 @@ func initViper() {
 	configPaths := []string{}
 	if customConfigPath := os.Getenv("NIXOPUS_CONFIG_PATH"); customConfigPath != "" {
 		configPaths = append(configPaths, customConfigPath)
-		log.Printf("Using custom config path from NIXOPUS_CONFIG_PATH: %s", customConfigPath)
+		l.Log(logger.Debug, fmt.Sprintf("Using custom config path from NIXOPUS_CONFIG_PATH: %s", customConfigPath), "")
 	}
 
 	// default fallback paths
@@ -119,13 +123,13 @@ func initViper() {
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundError) {
-			log.Printf("Info: Config file '%s' not found, using environment variables", configName)
+			l.Log(logger.Info, fmt.Sprintf("Config file '%s' not found, using environment variables", configName), "")
 		} else {
-			log.Printf("Warning: Error reading config file: %v", err)
+			l.Log(logger.Warning, fmt.Sprintf("Error reading config file: %v", err), "")
 		}
-		log.Println("Using environment variables and defaults")
+		l.Log(logger.Info, "Using environment variables and defaults", "")
 	} else {
-		log.Printf("Successfully loaded config file: %s", viper.ConfigFileUsed())
+		l.Log(logger.Info, fmt.Sprintf("Successfully loaded config file: %s", viper.ConfigFileUsed()), "")
 	}
 }
 
@@ -257,13 +261,14 @@ func validateConfig(config types.Config) error {
 		errors = append(errors, "SuperTokens connection URI is required")
 	}
 
-	// TODO: @zhravan Remove once LXD is mandated
+	// LXD configuration is optional and only validated when explicitly enabled
 	if config.LXD.Enabled {
+		l := logger.NewLogger()
 		if config.LXD.SocketPath == "" {
-			log.Printf("Warning: LXD is enabled but socket_path is not set; default will be used if available")
+			l.Log(logger.Debug, "LXD is enabled but socket_path is not set; default will be used if available", "")
 		}
 		if config.LXD.OperationTimeoutSeconds <= 0 {
-			log.Printf("Info: LXD operation_timeout_seconds not set; will use default 60 seconds")
+			l.Log(logger.Debug, "LXD operation_timeout_seconds not set; will use default 60 seconds", "")
 		}
 	}
 

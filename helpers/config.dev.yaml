@@ -31,7 +31,7 @@ services:
       # TODO: LXD - include for ccli installation
       LXD_ENABLED: ${LXD_ENABLED:-false}
       LXD_SOCKET_PATH: ${LXD_SOCKET_PATH:-/var/snap/lxd/common/lxd/unix.socket}
-      LXD_PROJECT: ${LXD_PROJECT:-default}
+      LXD_PROJECT: ${LXD_PROJECT:-nixopus_lxd}
       LXD_OPERATION_TIMEOUT_SECONDS: ${LXD_OPERATION_TIMEOUT_SECONDS:-60}
 
   view:
@@ -83,7 +83,7 @@ services:
           "--config",
           "/etc/caddy/Caddyfile",
           "--adapter",
-          "caddyfile",
+          "caddyfile"
         ]
 
 networks:

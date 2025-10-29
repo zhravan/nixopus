@@ -36,8 +36,8 @@ variables:
 
   workspace_path:
     type: "string"
-    description: "Host path for workspace directory"
-    default: "./siyuan/workspace"
+    description: "Docker volume name for workspace directory"
+    default: "siyuan_workspace"
     is_required: true
 
   access_auth_code:

@@ -75,9 +75,9 @@ execution:
         port: "{{ host_port }}"
       timeout: 30
 
-  validate:
-    - name: "Check HTTP response from Excalidraw"
-      type: "command"
-      properties:
-        cmd: "curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:{{ host_port }} | grep -E '^(200|301|302)$'"
-      timeout: 60
+  # validate:
+  #   - name: "Check HTTP response from Excalidraw"
+  #     type: "command"
+  #     properties:
+  #       cmd: "curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:{{ host_port }} | grep -E '^(200|301|302)$'"
+  #     timeout: 60

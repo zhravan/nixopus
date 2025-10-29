@@ -54,14 +54,14 @@ variables:
 
   data_volume:
     type: "string"
-    description: "Volume to persist ClickHouse data"
-    default: "./clickhouse-data:/var/lib/clickhouse"
+    description: "Docker volume name for ClickHouse data"
+    default: "clickhouse_data"
     is_required: true
 
   log_volume:
     type: "string"
-    description: "Volume to persist ClickHouse logs"
-    default: "./clickhouse-logs:/var/log/clickhouse-server"
+    description: "Docker volume name for ClickHouse logs"
+    default: "clickhouse_logs"
     is_required: true
 
   timezone:
@@ -70,9 +70,15 @@ variables:
     default: "UTC"
     is_required: true
 
+  clickhouse_user:
+    type: "string"
+    description: "ClickHouse username"
+    default: "default"
+    is_required: true
+
   clickhouse_password:
     type: "string"
-    description: "Password for default user"
+    description: "Password for ClickHouse user"
     default: "changeme"
     is_required: true
 
@@ -97,9 +103,10 @@ execution:
           - "{{ host_http_port }}:{{ container_http_port }}"
           - "{{ host_native_port }}:{{ container_native_port }}"
         volumes:
-          - "{{ data_volume }}"
-          - "{{ log_volume }}"
+          - "{{ data_volume }}:/var/lib/clickhouse"
+          - "{{ log_volume }}:/var/log/clickhouse-server"
         environment:
+          - "CLICKHOUSE_USER={{ clickhouse_user }}"
           - "CLICKHOUSE_PASSWORD={{ clickhouse_password }}"
           - "TZ={{ timezone }}"
         restart: "unless-stopped"

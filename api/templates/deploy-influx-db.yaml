@@ -43,7 +43,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume to persist InfluxDB data"
-    default: "./influxdb_data:/var/lib/influxdb2"
+    default: "influxdb_data_var/lib/influxdb2"
     is_required: true
 
   init_username:

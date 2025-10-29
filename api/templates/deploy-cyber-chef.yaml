@@ -37,8 +37,8 @@ variables:
     is_required: true
   data_volume:
     type: "string"
-    description: "Host path to mount for persistent data (optional, e.g., custom recipes)"
-    default: "./cyberchef_data"
+    description: "Docker volume name for persistent data (optional, e.g., custom recipes)"
+    default: "cyberchef_data"
     is_required: false
 
 execution:

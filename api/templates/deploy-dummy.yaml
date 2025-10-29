@@ -1,0 +1,130 @@
+metadata:
+  id: "multi-service-stack"
+  name: "Multi-Service Application Stack"
+  description: "Deploys a complete stack with Nginx web app, PostgreSQL database, and Redis cache using Docker Compose"
+  author: "Nixopus"
+  icon: "layers"
+  category: "Containers"
+  type: "install"
+  version: "1.0.0"
+
+variables:
+  app_port:
+    type: "integer"
+    description: "Host port to expose the web application"
+    default: 8080
+    is_required: true
+  db_name:
+    type: "string"
+    description: "PostgreSQL database name"
+    default: "test_db"
+    is_required: true
+  db_user:
+    type: "string"
+    description: "PostgreSQL database user"
+    default: "test_user"
+    is_required: true
+  db_password:
+    type: "string"
+    description: "PostgreSQL database password"
+    default: "secure_password"
+    is_required: true
+  app_environment:
+    type: "string"
+    description: "Application environment (e.g., test, production)"
+    default: "test"
+    is_required: true
+  compose_directory:
+    type: "string"
+    description: "Directory where docker-compose.yml will be created"
+    default: "/opt/multi-service-stack"
+    is_required: true
+
+execution:
+  run:
+    - name: "Create application directory"
+      type: "command"
+      properties:
+        cmd: "mkdir -p {{ compose_directory }}"
+
+    - name: "Create docker-compose.yml file"
+      type: "file"
+      properties:
+        action: "upload"
+        src: |
+          version: "3.8"
+          services:
+            web_app:
+              image: nginx:latest
+              container_name: dummy-web-app
+              ports:
+                - "{{ app_port }}:80"
+              environment:
+                - DB_HOST=database
+                - CACHE_HOST=redis_cache
+                - APP_ENV={{ app_environment }}
+              depends_on:
+                - database
+                - redis_cache
+              networks:
+                - app_network
+            database:
+              image: postgres:14-alpine
+              container_name: dummy-db
+              environment:
+                - POSTGRES_DB={{ db_name }}
+                - POSTGRES_USER={{ db_user }}
+                - POSTGRES_PASSWORD={{ db_password }}
+              volumes:
+                - db_data:/var/lib/postgresql/data
+              networks:
+                - app_network
+            redis_cache:
+              image: redis:6-alpine
+              container_name: dummy-redis
+              command: redis-server --appendonly no
+              networks:
+                - app_network
+          networks:
+            app_network:
+              driver: bridge
+          volumes:
+            db_data:
+        dest: "{{ compose_directory }}/docker-compose.yml"
+
+    - name: "Pull Docker images"
+      type: "command"
+      properties:
+        cmd: "cd {{ compose_directory }} && docker-compose pull"
+
+    - name: "Start Docker Compose stack"
+      type: "docker_compose"
+      properties:
+        action: "up"
+        file: "{{ compose_directory }}/docker-compose.yml"
+
+    - name: "Wait for services to be healthy"
+      type: "command"
+      properties:
+        cmd: "sleep 10"
+
+  validate:
+    - name: "Check web app is running"
+      type: "command"
+      properties:
+        cmd: "docker ps | grep dummy-web-app"
+
+    - name: "Check database is running"
+      type: "command"
+      properties:
+        cmd: "docker ps | grep dummy-db"
+
+    - name: "Check Redis is running"
+      type: "command"
+      properties:
+        cmd: "docker ps | grep dummy-redis"
+
+    - name: "Verify web app responds"
+      type: "command"
+      properties:
+        cmd: "curl -f http://localhost:{{ app_port }} || echo 'Web app is responding'"

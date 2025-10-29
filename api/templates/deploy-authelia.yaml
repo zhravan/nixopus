@@ -36,14 +36,14 @@ variables:
 
   config_path:
     type: "string"
-    description: "Host path for Authelia configuration directory"
-    default: "./authelia/config"
+    description: "Docker volume name for Authelia configuration"
+    default: "authelia_config"
     is_required: true
 
   secrets_path:
     type: "string"
-    description: "Host path for Authelia secrets directory"
-    default: "./authelia/secrets"
+    description: "Docker volume name for Authelia secrets"
+    default: "authelia_secrets"
     is_required: true
 
 execution:

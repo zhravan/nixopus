@@ -32,8 +32,8 @@ variables:
     is_required: true
   data_volume:
     type: "string"
-    description: "Host path to mount for persistent data"
-    default: "./pb_data"
+    description: "Docker volume name for persistent data"
+    default: "pb_data"
     is_required: true
 
 execution:

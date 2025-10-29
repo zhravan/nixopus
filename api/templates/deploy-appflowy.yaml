@@ -12,14 +12,14 @@ metadata:
 variables:
   image:
     type: "string"
-    description: "Docker image for AppFlowy"
-    default: "appflowyio/appflowy_client"
+    description: "Docker image for AppFlowy Web"
+    default: "appflowyinc/appflowy_web"
     is_required: true
 
   tag:
     type: "string"
     description: "Docker image tag"
-    default: "main"
+    default: "latest"
     is_required: true
 
   container_name:
@@ -28,16 +28,22 @@ variables:
     default: "appflowy"
     is_required: true
 
-  display:
-    type: "string"
-    description: "X11 display environment variable"
-    default: ":0"
+  host_port:
+    type: "integer"
+    description: "Host port to expose AppFlowy"
+    default: 3001
+    is_required: true
+
+  container_port:
+    type: "integer"
+    description: "Container port AppFlowy listens on"
+    default: 80
     is_required: true
 
   data_volume:
     type: "string"
-    description: "Volume or host path to persist AppFlowy data"
-    default: "appflowy-data:/home/appflowy"
+    description: "Docker volume name for AppFlowy data"
+    default: "appflowy_data"
     is_required: true
 
 execution:
@@ -50,21 +56,16 @@ execution:
         tag: "{{ tag }}"
       timeout: 300
 
-    - name: "Run AppFlowy container"
+    - name: "Run AppFlowy Web container"
       type: "docker"
       properties:
         action: "run"
         name: "{{ container_name }}"
         image: "{{ image }}"
         tag: "{{ tag }}"
-        ports: "3000:3000"
+        ports: "{{ host_port }}:{{ container_port }}"
         volumes:
-          - "{{ data_volume }}"
-          - "/tmp/.X11-unix:/tmp/.X11-unix"
-          - "/dev/dri:/dev/dri"
-          - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
-        environment:
-          - "DISPLAY={{ display }}"
+          - "{{ data_volume }}:/app/data"
         restart: "unless-stopped"
       timeout: 120
 

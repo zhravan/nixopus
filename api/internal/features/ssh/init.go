@@ -3,7 +3,10 @@ package ssh
 import (
 	"fmt"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/melbahja/goph"
 	"github.com/raghavyuva/nixopus-api/internal/config"
@@ -89,7 +92,10 @@ func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {
 		return nil, fmt.Errorf("private key is required for SSH connection")
 	}
 
-	auth, err := goph.Key(s.PrivateKey, "")
+	// Expand tilde (~) to home directory
+	privateKeyPath := expandPath(s.PrivateKey)
+
+	auth, err := goph.Key(privateKeyPath, "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create SSH auth from private key: %w", err)
 	}
@@ -142,6 +148,36 @@ func (s *SSH) RunCommand(cmd string) (string, error) {
 	}
 
 	return string(output), nil
+}
+
+// expandPath expands ~ to home directory and resolves relative paths
+func expandPath(path string) string {
+	if path == "" {
+		return path
+	}
+
+	// Expand tilde to home directory
+	if strings.HasPrefix(path, "~/") {
+		currentUser, err := user.Current()
+		if err == nil {
+			path = filepath.Join(currentUser.HomeDir, path[2:])
+		}
+	} else if path == "~" {
+		currentUser, err := user.Current()
+		if err == nil {
+			path = currentUser.HomeDir
+		}
+	}
+
+	// Convert to absolute path if relative
+	if !filepath.IsAbs(path) {
+		absPath, err := filepath.Abs(path)
+		if err == nil {
+			path = absPath
+		}
+	}
+
+	return path
 }
 
 func (s *SSH) Terminal() {

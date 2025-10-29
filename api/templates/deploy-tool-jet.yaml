@@ -48,8 +48,8 @@ variables:
 
   data_volume_path:
     type: "string"
-    description: "Host path for persistent data storage"
-    default: "./data"
+    description: "Docker volume name for persistent data storage"
+    default: "tooljet_data"
     is_required: true
 
 execution:

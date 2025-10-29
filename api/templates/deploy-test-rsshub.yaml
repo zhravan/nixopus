@@ -1,0 +1,92 @@
+metadata:
+  id: "testrsshub-stack"
+  name: "testRSSHub Stack"
+  description: "Deploys RSSHub with Redis cache and Browserless Chrome for web scraping"
+  author: "Nixopus"
+  icon: "rss"
+  category: "Containers"
+  type: "install"
+  version: "1.0.0"
+
+variables:
+  compose_directory:
+    type: "string"
+    description: "Directory where docker-compose.yml will be created"
+    default: "/opt/rsshub"
+    is_required: true
+  rsshub_port:
+    type: "integer"
+    description: "Host port to expose RSSHub"
+    default: 1200
+    is_required: true
+
+execution:
+  run:
+
+    - name: "Create docker-compose.yml file"
+      type: "command"
+      properties:
+        cmd: |
+          cat > {{ compose_directory }}/docker-compose.yml << 'EOF'
+          services:
+            rsshub:
+              image: diygod/rsshub
+              restart: always
+              ports:
+                - "{{ rsshub_port }}:1200"
+              environment:
+                NODE_ENV: production
+                CACHE_TYPE: redis
+                REDIS_URL: "redis://redis:6379/"
+                PUPPETEER_WS_ENDPOINT: "ws://browserless:3000"
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:1200/healthz"]
+                interval: 30s
+                timeout: 10s
+                retries: 3
+              depends_on:
+                - redis
+                - browserless
+            browserless:
+              image: browserless/chrome
+              restart: always
+              ulimits:
+                core:
+                  hard: 0
+                  soft: 0
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:3000/pressure"]
+                interval: 30s
+                timeout: 10s
+                retries: 3
+            redis:
+              image: redis:alpine
+              restart: always
+              volumes:
+                - redis-data:/data
+              healthcheck:
+                test: ["CMD", "redis-cli", "ping"]
+                interval: 30s
+                timeout: 10s
+                retries: 5
+                start_period: 5s
+          volumes:
+            redis-data:
+          EOF
+
+    - name: "Pull images and build containers"
+      type: "command"
+      properties:
+        cmd: "cd {{ compose_directory }} && docker-compose up -d --build"
+
+  validate:
+    - name: "Verify containers are running"
+      type: "command"
+      properties:
+        cmd: "cd {{ compose_directory }} && docker-compose ps"
+
+    - name: "Check RSSHub health"
+      type: "command"
+      properties:
+        cmd: "sleep 15 && curl -f http://localhost:{{ rsshub_port }}/healthz"
+      ignore_errors: true

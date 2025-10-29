@@ -28,22 +28,27 @@ variables:
   host_port:
     type: "integer"
     description: "Host port to expose AdGuard Home web interface"
-    default: 3000
+    default: 3004
     is_required: true
   container_port:
     type: "integer"
     description: "Container port AdGuard Home listens on"
-    default: 3000
+    default: 3004
     is_required: true
   dns_port:
     type: "integer"
     description: "DNS port to expose"
     default: 53
     is_required: true
-  data_volume:
+  work_volume:
     type: "string"
-    description: "Host path to mount for persistent data"
-    default: "./adguard_data"
+    description: "Docker volume name for AdGuard Home work data"
+    default: "adguard_work"
+    is_required: true
+  conf_volume:
+    type: "string"
+    description: "Docker volume name for AdGuard Home configuration"
+    default: "adguard_conf"
     is_required: true
 
 execution:
@@ -65,10 +70,11 @@ execution:
         tag: "{{ tag }}"
         ports:
           - "{{ host_port }}:{{ container_port }}"
-          - "{{ dns_port }}:{{ dns_port }}"
+          - "{{ dns_port }}:53/tcp"
+          - "{{ dns_port }}:53/udp"
         volumes:
-          - "{{ data_volume }}:/opt/adguardhome/work"
-          - "{{ data_volume }}:/opt/adguardhome/conf"
+          - "{{ work_volume }}:/opt/adguardhome/work"
+          - "{{ conf_volume }}:/opt/adguardhome/conf"
         restart: "unless-stopped"
       timeout: 180
 

@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory where StashApp docker-compose.yml and data will be stored"
-    default: "./stashapp"
+    default: "stashapp"
     is_required: true
 
   host_port:

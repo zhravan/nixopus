@@ -37,7 +37,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume or host path to persist Meilisearch data"
-    default: "./meili_data:/meili_data"
+    default: "meili_data_meili_data"
     is_required: true
 
   master_key:

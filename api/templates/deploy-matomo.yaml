@@ -37,7 +37,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume or host path to persist Matomo data (/var/www/html)"
-    default: "./matomo:/var/www/html"
+    default: "matomo_var/www/html"
     is_required: true
 
   database_host:

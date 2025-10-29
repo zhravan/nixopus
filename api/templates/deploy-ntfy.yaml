@@ -43,7 +43,7 @@ variables:
   data_dir:
     type: "string"
     description: "Directory on host to store ntfy data and configuration files"
-    default: "./ntfy_data"
+    default: "ntfy_data"
     is_required: true
 
 execution:

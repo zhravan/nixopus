@@ -19,7 +19,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory to install Ente"
-    default: "./my-ente"
+    default: "my-ente"
     is_required: true
 
   host_port:

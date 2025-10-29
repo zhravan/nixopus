@@ -13,7 +13,7 @@ variables:
   compose_file:
     type: "string"
     description: "Path to the Docker Compose file"
-    default: "./docker-compose.yml"
+    default: "docker-compose.yml"
     is_required: true
   container_name:
     type: "string"
@@ -32,8 +32,8 @@ variables:
     is_required: true
   data_volume:
     type: "string"
-    description: "Host path to mount for persistent data"
-    default: "./logseq_data"
+    description: "Docker volume name for persistent data"
+    default: "logseq_data"
     is_required: true
   custom_user:
     type: "string"

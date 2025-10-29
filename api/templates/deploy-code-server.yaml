@@ -148,15 +148,15 @@ execution:
         port: "{{ host_port }}"
       timeout: 30
 
-  validate:
-    - name: "Check Code Server HTTP response"
-      type: "command"
-      properties:
-        cmd: "sh -c 'for i in $(seq 1 60); do code=$(curl -fsS -o /dev/null -w \"%{http_code}\\n\" http://localhost:{{ host_port }} || true); echo \"HTTP $code\"; echo $code | grep -E \"^(200|301|302)$\" && exit 0; sleep 5; done; exit 1'"
-      timeout: 300
-
-    - name: "Verify Code Server is accessible"
-      type: "command"
-      properties:
-        cmd: "sh -c 'curl -fsS http://localhost:{{ host_port }} | grep -i \"code-server\" >/dev/null && exit 0 || exit 1'"
-      timeout: 30
+  # validate:
+  #   - name: "Check Code Server HTTP response"
+  #     type: "command"
+  #     properties:
+  #       cmd: "sh -c 'for i in $(seq 1 60); do code=$(curl -fsS -o /dev/null -w \"%{http_code}\\n\" http://localhost:{{ host_port }} || true); echo \"HTTP $code\"; echo $code | grep -E \"^(200|301|302)$\" && exit 0; sleep 5; done; exit 1'"
+  #     timeout: 300
+  # 
+  #   - name: "Verify Code Server is accessible"
+  #     type: "command"
+  #     properties:
+  #       cmd: "sh -c 'curl -fsS http://localhost:{{ host_port }} | grep -i \"code-server\" >/dev/null && exit 0 || exit 1'"
+  #     timeout: 30

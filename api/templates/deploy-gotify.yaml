@@ -43,7 +43,7 @@ variables:
   data_path:
     type: "string"
     description: "Local path to store Gotify data (database, images, certificates)"
-    default: "./gotify_data"
+    default: "gotify_data"
     is_required: true
 
   timezone:

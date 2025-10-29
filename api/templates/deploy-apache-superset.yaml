@@ -40,6 +40,42 @@ variables:
     default: 8088
     is_required: true
 
+  secret_key:
+    type: "string"
+    description: "Secret key for Superset security (generate with: openssl rand -base64 42)"
+    default: "CHANGE_ME_TO_A_SECURE_RANDOM_SECRET_KEY"
+    is_required: true
+
+  admin_username:
+    type: "string"
+    description: "Admin username for Superset"
+    default: "admin"
+    is_required: true
+
+  admin_password:
+    type: "string"
+    description: "Admin password for Superset"
+    default: "admin"
+    is_required: true
+
+  admin_email:
+    type: "string"
+    description: "Admin email for Superset"
+    default: "admin@superset.com"
+    is_required: true
+
+  database_uri:
+    type: "string"
+    description: "Database connection URI for Superset (defaults to SQLite)"
+    default: "sqlite:////app/superset_home/superset.db"
+    is_required: true
+
+  data_volume:
+    type: "string"
+    description: "Docker volume name for Superset data"
+    default: "superset_data"
+    is_required: true
+
 execution:
   run:
     - name: "Pull Apache Superset image"
@@ -50,6 +86,53 @@ execution:
         tag: "{{ tag }}"
       timeout: 300
 
+    - name: "Initialize Superset database"
+      type: "docker"
+      properties:
+        action: "run"
+        name: "{{ container_name }}-init"
+        image: "{{ image }}"
+        tag: "{{ tag }}"
+        volumes:
+          - "{{ data_volume }}:/app/superset_home"
+        environment:
+          - "SECRET_KEY={{ secret_key }}"
+          - "SUPERSET_SECRET_KEY={{ secret_key }}"
+          - "DATABASE_DB={{ database_uri }}"
+        cmd: "superset db upgrade"
+      timeout: 180
+
+    - name: "Create Superset admin user"
+      type: "docker"
+      properties:
+        action: "run"
+        name: "{{ container_name }}-admin"
+        image: "{{ image }}"
+        tag: "{{ tag }}"
+        volumes:
+          - "{{ data_volume }}:/app/superset_home"
+        environment:
+          - "SECRET_KEY={{ secret_key }}"
+          - "SUPERSET_SECRET_KEY={{ secret_key }}"
+        cmd: "superset fab create-admin --username {{ admin_username }} --firstname Admin --lastname User --email {{ admin_email }} --password {{ admin_password }}"
+      timeout: 120
+      ignore_errors: true
+
+    - name: "Initialize Superset"
+      type: "docker"
+      properties:
+        action: "run"
+        name: "{{ container_name }}-setup"
+        image: "{{ image }}"
+        tag: "{{ tag }}"
+        volumes:
+          - "{{ data_volume }}:/app/superset_home"
+        environment:
+          - "SECRET_KEY={{ secret_key }}"
+          - "SUPERSET_SECRET_KEY={{ secret_key }}"
+        cmd: "superset init"
+      timeout: 120
+
     - name: "Run Apache Superset container"
       type: "docker"
       properties:
@@ -58,6 +141,12 @@ execution:
         image: "{{ image }}"
         tag: "{{ tag }}"
         ports: "{{ host_port }}:{{ container_port }}"
+        volumes:
+          - "{{ data_volume }}:/app/superset_home"
+        environment:
+          - "SECRET_KEY={{ secret_key }}"
+          - "SUPERSET_SECRET_KEY={{ secret_key }}"
+          - "DATABASE_DB={{ database_uri }}"
         restart: "unless-stopped"
       timeout: 180
 

@@ -43,7 +43,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume to persist Etherpad data"
-    default: "./etherpad-data:/opt/etherpad-lite/var"
+    default: "etherpad-data_opt/etherpad-lite/var"
     is_required: true
 
   admin_password:

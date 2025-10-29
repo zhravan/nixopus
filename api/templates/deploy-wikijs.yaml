@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory where Wiki.js will be cloned and Docker setup stored"
-    default: "./wikijs"
+    default: "wikijs"
     is_required: true
 
   host_port:

@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory to install and run Immich"
-    default: "./immich-app"
+    default: "immich-app"
     is_required: true
 
   compose_file_url:
@@ -31,13 +31,13 @@ variables:
   upload_location:
     type: "string"
     description: "Directory to store uploaded photo and video files"
-    default: "./library"
+    default: "library"
     is_required: true
 
   db_data_location:
     type: "string"
     description: "Directory to store PostgreSQL database files"
-    default: "./postgres"
+    default: "postgres"
     is_required: true
 
   timezone:

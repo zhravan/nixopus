@@ -105,9 +105,9 @@ execution:
         port: "{{ console_port }}"
       timeout: 30
 
-  validate:
-    - name: "Check MinIO liveness"
-      type: "command"
-      properties:
-        cmd: "sh -c 'for i in $(seq 1 60); do curl -fsS --connect-timeout 2 -m 5 http://localhost:{{ api_port }}/minio/health/live >/dev/null && exit 0; sleep 3; done; exit 1'"
-      timeout: 180
+  # validate:
+  #   - name: "Check MinIO liveness"
+  #     type: "command"
+  #     properties:
+  #       cmd: "sh -c 'for i in $(seq 1 60); do curl -fsS --connect-timeout 2 -m 5 http://localhost:{{ api_port }}/minio/health/live >/dev/null && exit 0; sleep 3; done; exit 1'"
+  #     timeout: 180

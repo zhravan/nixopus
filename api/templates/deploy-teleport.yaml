@@ -13,7 +13,7 @@ variables:
   compose_file:
     type: "string"
     description: "Path to the Docker Compose file"
-    default: "./docker-compose.yml"
+    default: "docker-compose.yml"
     is_required: true
   container_name:
     type: "string"
@@ -32,13 +32,13 @@ variables:
     is_required: true
   data_volume:
     type: "string"
-    description: "Host path to mount for persistent data"
-    default: "./teleport_data"
+    description: "Docker volume name for persistent data"
+    default: "teleport_data"
     is_required: true
   config_volume:
     type: "string"
-    description: "Host path to mount for Teleport configuration"
-    default: "./teleport_config"
+    description: "Docker volume name for Teleport configuration"
+    default: "teleport_config"
     is_required: true
   timezone:
     type: "string"

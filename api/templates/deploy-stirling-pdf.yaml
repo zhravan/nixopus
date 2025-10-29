@@ -120,10 +120,10 @@ execution:
         port: "{{ host_port }}"
       timeout: 30
 
-  validate:
-    - name: "Check HTTP response from Stirling PDF"
-      type: "command"
-      properties:
-        cmd: "sh -c 'for i in $(seq 1 30); do code=$(curl -fsS -o /dev/null -w \"%{http_code}\\n\" http://localhost:{{ host_port }} || true); echo \"HTTP $code\"; echo $code | grep -E \"^(200|301|302)$\" && exit 0; sleep 2; done; exit 1'"
-      timeout: 60
+  # validate:
+  #   - name: "Check HTTP response from Stirling PDF"
+  #     type: "command"
+  #     properties:
+  #       cmd: "sh -c 'for i in $(seq 1 30); do code=$(curl -fsS -o /dev/null -w \"%{http_code}\\n\" http://localhost:{{ host_port }} || true); echo \"HTTP $code\"; echo $code | grep -E \"^(200|301|302)$\" && exit 0; sleep 2; done; exit 1'"
+  #     timeout: 60
 

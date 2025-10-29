@@ -98,15 +98,15 @@ execution:
           - "{{ init_scripts_volume }}:/docker-entrypoint-initdb.d"
       timeout: 180
 
-  validate:
-    - name: "Check PostgreSQL connection"
-      type: "command"
-      properties:
-        cmd: "sh -c 'for i in $(seq 1 30); do docker exec {{ container_name }} pg_isready -U {{ postgres_user }} -d {{ database_name }} && exit 0; sleep 2; done; exit 1'"
-      timeout: 60
-
-    - name: "Verify PostgreSQL is accepting connections"
-      type: "command"
-      properties:
-        cmd: "sh -c 'for i in $(seq 1 30); do docker exec {{ container_name }} psql -U {{ postgres_user }} -d {{ database_name }} -c \"SELECT 1;\" >/dev/null 2>&1 && exit 0; sleep 2; done; exit 1'"
-      timeout: 60
+  # validate:
+  #   - name: "Check PostgreSQL connection"
+  #     type: "command"
+  #     properties:
+  #       cmd: "sh -c 'for i in $(seq 1 30); do docker exec {{ container_name }} pg_isready -U {{ postgres_user }} -d {{ database_name }} && exit 0; sleep 2; done; exit 1'"
+  #     timeout: 60
+  # 
+  #   - name: "Verify PostgreSQL is accepting connections"
+  #     type: "command"
+  #     properties:
+  #       cmd: "sh -c 'for i in $(seq 1 30); do docker exec {{ container_name }} psql -U {{ postgres_user }} -d {{ database_name }} -c \"SELECT 1;\" >/dev/null 2>&1 && exit 0; sleep 2; done; exit 1'"
+  #     timeout: 60

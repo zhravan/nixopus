@@ -37,13 +37,13 @@ variables:
   data_volume:
     type: "string"
     description: "Volume or host path to persist Glances data"
-    default: "./glances:/glances"
+    default: "glances_glances"
     is_required: true
 
   glances_conf:
     type: "string"
     description: "Path to custom glances.conf file"
-    default: "./glances.conf:/etc/glances/glances.conf"
+    default: "glances.conf_etc/glances/glances.conf"
     is_required: false
 
   os_release:

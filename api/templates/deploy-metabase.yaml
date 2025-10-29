@@ -43,7 +43,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume or host path to persist Metabase data"
-    default: "./metabase:/metabase-data"
+    default: "metabase_metabase-data"
     is_required: true
 
   timezone:

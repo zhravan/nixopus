@@ -43,7 +43,7 @@ variables:
   volume_path:
     type: "string"
     description: "Path on host for persistent data (stacks directory)"
-    default: "./stacks"
+    default: "stacks"
     is_required: true
 
 execution:

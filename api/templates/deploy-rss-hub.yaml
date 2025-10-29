@@ -42,8 +42,8 @@ variables:
     is_required: false
   data_volume:
     type: "string"
-    description: "Host path to mount for RSSHub persistent data (e.g., Redis, caches)"
-    default: "./rsshub_data"
+    description: "Docker volume name for RSSHub persistent data (e.g., Redis, caches)"
+    default: "rsshub_data"
     is_required: false
 
 execution:

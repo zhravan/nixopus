@@ -55,13 +55,13 @@ variables:
   data_volume_pihole:
     type: "string"
     description: "Volume for Pi-hole data"
-    default: "./pihole-data:/etc/pihole"
+    default: "pihole-data_etc/pihole"
     is_required: true
 
   data_volume_dnsmasq:
     type: "string"
     description: "Volume for dnsmasq configuration"
-    default: "./dnsmasq.d:/etc/dnsmasq.d"
+    default: "dnsmasq.d_etc/dnsmasq.d"
     is_required: true
 
   timezone:

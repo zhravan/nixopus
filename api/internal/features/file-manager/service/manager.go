@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	// "syscall"
+	"syscall"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -91,15 +91,15 @@ func (f *FileManagerService) ListFiles(path string) ([]FileData, error) {
 				}
 			}
 
-			// sysInfo := info.Sys()
+			sysInfo := info.Sys()
 			var ownerId, groupId int64
 			var permissions int64
 
-			// if statInfo, ok := sysInfo.(*syscall.Stat_t); ok {
-			// 	ownerId = int64(statInfo.Uid)
-			// 	groupId = int64(statInfo.Gid)
-			// 	permissions = int64(statInfo.Mode & 0777)
-			// }
+			if statInfo, ok := sysInfo.(*syscall.Stat_t); ok {
+				ownerId = int64(statInfo.Uid)
+				groupId = int64(statInfo.Gid)
+				permissions = int64(statInfo.Mode & 0777)
+			}
 
 			fullPath := filepath.Join(path, info.Name())
 

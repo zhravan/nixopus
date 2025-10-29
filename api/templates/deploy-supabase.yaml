@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory where Supabase project and Docker setup will be created"
-    default: "./supabase-project"
+    default: "supabase-project"
     is_required: true
 
 execution:

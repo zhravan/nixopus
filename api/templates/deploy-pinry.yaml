@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory where Pinry data and configuration will be stored"
-    default: "./pinry-data"
+    default: "pinry-data"
     is_required: true
 
   use_latest_source:

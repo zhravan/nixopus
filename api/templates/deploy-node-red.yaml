@@ -38,7 +38,7 @@ variables:
   data_volume:
     type: "string"
     description: "Host path or volume to persist Node-RED data (/data in container)"
-    default: "./node-red_data"
+    default: "node-red_data"
     is_required: true
   timezone:
     type: "string"

@@ -48,14 +48,14 @@ variables:
 
   data_volume_path:
     type: "string"
-    description: "Host path for persistent data directory"
-    default: "./data"
+    description: "Docker volume name for persistent data directory"
+    default: "data"
     is_required: true
 
   letsencrypt_volume_path:
     type: "string"
-    description: "Host path for Let's Encrypt certificates directory"
-    default: "./letsencrypt"
+    description: "Docker volume name for Let's Encrypt certificates directory"
+    default: "letsencrypt"
     is_required: true
 
 execution:

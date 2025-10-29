@@ -43,7 +43,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume or host path to persist Gitea data"
-    default: "./gitea:/data"
+    default: "gitea_data"
     is_required: true
 
   timezone:

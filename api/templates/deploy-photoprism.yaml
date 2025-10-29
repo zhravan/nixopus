@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory where PhotoPrism will be installed and compose.yaml stored"
-    default: "./photoprism"
+    default: "photoprism"
     is_required: true
 
   compose_url:

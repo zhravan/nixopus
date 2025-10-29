@@ -1,0 +1,50 @@
+version: "3.8" # Specify the Compose file format version
+
+services:
+  # 1. Web Application (e.g., a backend API or web server)
+  web_app:
+    image: nginx:latest # Use a simple NGINX image for a quick test/placeholder
+    container_name: dummy-web-app
+    ports:
+      - "8080:80" # Map host port 8080 to container port 80
+    environment:
+      # Dummy environment variables for the application
+      - DB_HOST=database
+      - CACHE_HOST=redis_cache
+      - APP_ENV=test
+    depends_on:
+      - database # Ensures the database starts before the web_app
+      - redis_cache # Ensures the cache starts before the web_app
+    networks:
+      - app_network # Connect to the custom network
+
+  # 2. Database Service (e.g., PostgreSQL or MySQL)
+  database:
+    image: postgres:14-alpine # Use a lightweight PostgreSQL image
+    container_name: dummy-db
+    environment:
+      # Essential environment variables for PostgreSQL setup
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=secure_password
+    volumes:
+      # Use a named volume to persist data, which is useful for debugging
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  # 3. Caching Service (e.g., Redis)
+  redis_cache:
+    image: redis:6-alpine # Use a lightweight Redis image
+    container_name: dummy-redis
+    command: redis-server --appendonly no # A simple command for testing
+    networks:
+      - app_network
+
+# Define the custom network and volume
+networks:
+  app_network:
+    driver: bridge # Standard network driver
+
+volumes:
+  db_data: # The named volume for the database

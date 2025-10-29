@@ -43,7 +43,7 @@ variables:
   data_volume:
     type: "string"
     description: "Volume to persist Keycloak data"
-    default: "./keycloak-data:/opt/keycloak/data"
+    default: "keycloak-data_opt/keycloak/data"
     is_required: true
 
   admin_user:

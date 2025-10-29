@@ -13,7 +13,7 @@ variables:
   install_dir:
     type: "string"
     description: "Directory where Penpot will be installed and docker-compose.yml will be stored"
-    default: "./penpot"
+    default: "penpot"
     is_required: true
 
   docker_compose_url:

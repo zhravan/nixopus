@@ -36,8 +36,8 @@ variables:
 
   data_volume_path:
     type: "string"
-    description: "Host path for persistent data directory"
-    default: "./data"
+    description: "Docker volume name for persistent data directory"
+    default: "data"
     is_required: true
 
   postgres_password:

@@ -201,6 +201,11 @@ func setupEnvVarMappings() {
 	viper.BindEnv("lxd.socket_path", "LXD_SOCKET_PATH")
 	viper.BindEnv("lxd.project", "LXD_PROJECT")
 	viper.BindEnv("lxd.operation_timeout_seconds", "LXD_OPERATION_TIMEOUT_SECONDS")
+	// TODO: revert this later, store in DB
+	viper.BindEnv("lxd.remote_address", "LXD_REMOTE_ADDRESS")
+	viper.BindEnv("lxd.protocol", "LXD_PROTOCOL")
+	viper.BindEnv("lxd.trust_password", "LXD_TRUST_PASSWORD")
+	viper.BindEnv("lxd.insecure_skip_verify", "LXD_INSECURE_SKIP_VERIFY")
 }
 
 func validateConfig(config types.Config) error {

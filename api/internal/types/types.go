@@ -79,6 +79,11 @@ type LXDConfig struct {
 	SocketPath              string `mapstructure:"socket_path"`
 	Project                 string `mapstructure:"project"`
 	OperationTimeoutSeconds int    `mapstructure:"operation_timeout_seconds"`
+	// Remote configuration
+	RemoteAddress           string `mapstructure:"remote_address"`
+	Protocol                string `mapstructure:"protocol"` // unix or https
+	TrustPassword           string `mapstructure:"trust_password"`
+	InsecureSkipVerify      bool   `mapstructure:"insecure_skip_verify"`
 }
 
 type ClientContext string

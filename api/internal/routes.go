@@ -46,7 +46,7 @@ import (
 
 var (
 	lxdServiceNew = func() (*lxdService.ClientService, error) {
-		return lxdService.New(config.AppConfig.LXD.SocketPath, config.AppConfig.LXD.Project, config.AppConfig.LXD.OperationTimeoutSeconds)
+		return lxdService.New(config.AppConfig.LXD)
 	}
 	lxdControllerNew = func(svc *lxdService.ClientService) *lxdController.Controller { return lxdController.NewController(svc) }
 )

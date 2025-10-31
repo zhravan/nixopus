@@ -33,6 +33,11 @@ services:
       LXD_SOCKET_PATH: ${LXD_SOCKET_PATH:-/var/snap/lxd/common/lxd/unix.socket}
       LXD_PROJECT: ${LXD_PROJECT:-nixopus_lxd}
       LXD_OPERATION_TIMEOUT_SECONDS: ${LXD_OPERATION_TIMEOUT_SECONDS:-60}
+      # LXD Remote Configuration (optional)
+      LXD_REMOTE_ADDRESS: ${LXD_REMOTE_ADDRESS:-}
+      LXD_PROTOCOL: ${LXD_PROTOCOL:-unix}
+      LXD_TRUST_PASSWORD: ${LXD_TRUST_PASSWORD:-}
+      LXD_INSECURE_SKIP_VERIFY: ${LXD_INSECURE_SKIP_VERIFY:-false}
 
   view:
     env:

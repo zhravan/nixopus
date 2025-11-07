@@ -56,6 +56,14 @@ def install_callback(
         "--include-lxd",
         help="Install and initialize LXD on the host (Linux-only). Uses local unix socket; no TCP listener.",
     ),
+    host_ip: str = typer.Option(
+        None,
+        "--host-ip",
+        "-ip",
+        help="The IP address of the server to use when no domains are provided (e.g. 10.0.0.154 or 192.168.1.100). If not provided, the public IP will be automatically detected.",
+    ),
+    repo: str = typer.Option(None, "--repo", "-r", help="GitHub repository URL to clone (defaults to config value)"),
+    branch: str = typer.Option(None, "--branch", "-b", help="Git branch to clone (defaults to config value)"),
 ):
     """Install Nixopus for production"""
     if ctx.invoked_subcommand is None:
@@ -87,6 +95,7 @@ def install_callback(
                 config_file=config_file,
                 api_domain=api_domain,
                 view_domain=view_domain,
+                host_ip=host_ip,
                 repo=repo,
                 branch=branch,
                 include_lxd=include_lxd,

@@ -45,17 +45,6 @@ def install_callback(
         "-vd",
         help="The domain where the nixopus view will be accessible (e.g. nixopus.com), if not provided you can use the ip address of the server and the port (e.g. 192.168.1.100:80)",
     ),
-    repo: str = typer.Option(
-        None, "--repo", "-r", help="GitHub repository URL to clone (defaults to config value)"
-    ),
-    branch: str = typer.Option(
-        None, "--branch", "-b", help="Git branch to clone (defaults to config value)"
-    ),
-     include_lxd: bool = typer.Option(
-        False,
-        "--include-lxd",
-        help="Install and initialize LXD on the host (Linux-only). Uses local unix socket; no TCP listener.",
-    ),
     host_ip: str = typer.Option(
         None,
         "--host-ip",
@@ -68,7 +57,6 @@ def install_callback(
     """Install Nixopus for production"""
     if ctx.invoked_subcommand is None:
         logger = Logger(verbose=verbose)
-
         if development:
             # Warn when incompatible production-only options are provided alongside --development
             if api_domain or view_domain:
@@ -98,7 +86,6 @@ def install_callback(
                 host_ip=host_ip,
                 repo=repo,
                 branch=branch,
-                include_lxd=include_lxd,
             )
             install.run()
 

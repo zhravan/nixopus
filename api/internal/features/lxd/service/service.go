@@ -6,12 +6,14 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	lxdclient "github.com/canonical/lxd/client"
 	lxdapi "github.com/canonical/lxd/shared/api"
 	"github.com/raghavyuva/nixopus-api/internal/features/lxd/types"
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	configTypes "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
@@ -41,12 +43,12 @@ type ClientService struct {
 	client  lxdclient.InstanceServer
 	project string
 	timeout time.Duration
+	logger  logger.Logger
 }
 
 // New creates a new LXD client service from the provided configuration
 // Supports both local unix socket and remote HTTPS connections with trust password authentication
-func New(cfg configTypes.LXDConfig) (*ClientService, error) {
-	// Set default timeout
+func New(cfg configTypes.LXDConfig, l logger.Logger) (*ClientService, error) {
 	opTimeoutSec := cfg.OperationTimeoutSeconds
 	if opTimeoutSec <= 0 {
 		opTimeoutSec = 60
@@ -55,20 +57,17 @@ func New(cfg configTypes.LXDConfig) (*ClientService, error) {
 	var c lxdclient.InstanceServer
 	var err error
 
-	// Determine connection type based on protocol and remote address
 	if cfg.Protocol == "https" && cfg.RemoteAddress != "" {
-		// Remote connection with trust password
-		c, err = connectRemote(cfg)
+		c, err = connectRemote(cfg, l)
 	} else {
-		// Local unix socket connection (default)
-		c, err = connectLocal(cfg)
+		c, err = connectLocal(cfg, l)
 	}
 
 	if err != nil {
+		l.Log(logger.Error, fmt.Sprintf("failed to connect to LXD: %v", err), "")
 		return nil, fmt.Errorf("failed to connect to LXD: %w", err)
 	}
 
-	// Set project if specified
 	if cfg.Project != "" {
 		c = c.UseProject(cfg.Project)
 	}
@@ -77,49 +76,68 @@ func New(cfg configTypes.LXDConfig) (*ClientService, error) {
 		client:  c,
 		project: cfg.Project,
 		timeout: time.Duration(opTimeoutSec) * time.Second,
+		logger:  l,
 	}, nil
 }
 
-// connectLocal connects to LXD via local unix socket
-func connectLocal(cfg configTypes.LXDConfig) (lxdclient.InstanceServer, error) {
+func connectLocal(cfg configTypes.LXDConfig, l logger.Logger) (lxdclient.InstanceServer, error) {
 	socketPath := cfg.SocketPath
 	if socketPath == "" {
-		// common default for snap installations
-		socketPath = "/var/snap/lxd/common/lxd/unix.socket"
+		var err error
+		socketPath, err = detectSocketPath(l)
+		if err != nil {
+			return nil, fmt.Errorf("failed to detect LXD socket path: %w", err)
+		}
 	}
 
 	c, err := lxdclient.ConnectLXDUnix(socketPath, nil)
 	if err != nil {
+		l.Log(logger.Error, fmt.Sprintf("failed to connect to unix socket %s: %v", socketPath, err), "")
 		return nil, fmt.Errorf("failed to connect to unix socket %s: %w", socketPath, err)
 	}
 
 	return c, nil
 }
 
-// connectRemote connects to a remote LXD server using HTTPS with trust password authentication
-func connectRemote(cfg configTypes.LXDConfig) (lxdclient.InstanceServer, error) {
+// checks in all the common paths for unix socket for lxd
+func detectSocketPath(l logger.Logger) (string, error) {
+	commonPaths := []string{
+		"/var/snap/lxd/common/lxd/unix.socket",
+		"/var/lib/lxd/unix.socket",
+		"/run/lxd.socket",
+		"/var/run/lxd.socket",
+	}
+
+	for _, path := range commonPaths {
+		if _, err := os.Stat(path); err == nil {
+			l.Log(logger.Info, fmt.Sprintf("detected LXD socket at %s", path), "")
+			return path, nil
+		}
+	}
+
+	return "", fmt.Errorf("LXD socket not found in common locations: %v. Please configure socket_path explicitly", commonPaths)
+}
+
+func connectRemote(cfg configTypes.LXDConfig, l logger.Logger) (lxdclient.InstanceServer, error) {
 	if cfg.RemoteAddress == "" {
+		l.Log(logger.Error, "remote address is required for remote connections", "")
 		return nil, fmt.Errorf("remote address is required for remote connections")
 	}
 
-	// Load system root CA certificates
 	rootCAs, err := x509.SystemCertPool()
 	if err != nil {
 		rootCAs = x509.NewCertPool()
 	}
 
-	// Configure TLS
 	tlsConfig := &tls.Config{
 		RootCAs:            rootCAs,
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
 	}
 
-	// Create custom HTTP transport with TLS config
 	transport := &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
 
-	// Prepare connection arguments with custom HTTP client
 	args := &lxdclient.ConnectionArgs{
 		HTTPClient: &http.Client{
 			Transport: transport,
@@ -127,19 +145,17 @@ func connectRemote(cfg configTypes.LXDConfig) (lxdclient.InstanceServer, error) 
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
 	}
 
-	// Construct the URL (LXD uses HTTPS on port 8443 by default)
 	url := cfg.RemoteAddress
 	if !strings.HasPrefix(url, "https://") {
 		url = "https://" + url
 	}
 
-	// Try to connect to the remote LXD server
 	c, err := lxdclient.ConnectLXD(url, args)
 	if err != nil {
+		l.Log(logger.Error, fmt.Sprintf("failed to connect to remote LXD at %s: %v", url, err), "")
 		return nil, fmt.Errorf("failed to connect to remote LXD at %s: %w", url, err)
 	}
 
-	// If trust password is provided, authenticate by adding our certificate
 	if cfg.TrustPassword != "" {
 		req := lxdapi.CertificatesPost{
 			Password: cfg.TrustPassword,
@@ -148,14 +164,39 @@ func connectRemote(cfg configTypes.LXDConfig) (lxdclient.InstanceServer, error) 
 
 		err = c.CreateCertificate(req)
 		if err != nil {
-			// If certificate already exists, that's okay
-			if !strings.Contains(err.Error(), "already exists") && !strings.Contains(err.Error(), "already trusted") {
+			if isCertificateAlreadyExistsError(err) {
+				l.Log(logger.Info, "certificate already exists or is already trusted, continuing", "")
+			} else {
+				l.Log(logger.Error, fmt.Sprintf("failed to authenticate with remote LXD server using trust password: %v", err), "")
 				return nil, fmt.Errorf("failed to authenticate with remote LXD server using trust password: %w", err)
 			}
 		}
 	}
 
 	return c, nil
+}
+
+func isCertificateAlreadyExistsError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errStr := strings.ToLower(err.Error())
+	patterns := []string{
+		"already exists",
+		"already trusted",
+		"certificate already",
+		"already present",
+		"duplicate certificate",
+	}
+
+	for _, pattern := range patterns {
+		if strings.Contains(errStr, pattern) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (s *ClientService) Create(ctx context.Context, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error) {
@@ -181,13 +222,16 @@ func (s *ClientService) Create(ctx context.Context, name string, imageAlias stri
 
 	op, err := s.client.CreateInstance(req)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create instance %s: %v", name, err), "")
 		return nil, err
 	}
 	if err := waitOp(ctx, op, s.timeout); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to wait for instance creation %s: %v", name, err), "")
 		return nil, err
 	}
 	inst, _, err := s.client.GetInstance(name)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to get instance %s after creation: %v", name, err), "")
 		return nil, err
 	}
 	return inst, nil
@@ -196,6 +240,7 @@ func (s *ClientService) Create(ctx context.Context, name string, imageAlias stri
 func (s *ClientService) List(ctx context.Context) ([]lxdapi.Instance, error) {
 	instances, err := s.client.GetInstances(lxdapi.InstanceTypeAny)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to list instances: %v", err), "")
 		return nil, err
 	}
 	return instances, nil
@@ -204,6 +249,7 @@ func (s *ClientService) List(ctx context.Context) ([]lxdapi.Instance, error) {
 func (s *ClientService) Get(ctx context.Context, name string) (*lxdapi.Instance, error) {
 	inst, _, err := s.client.GetInstance(name)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to get instance %s: %v", name, err), "")
 		return nil, err
 	}
 	return inst, nil
@@ -213,18 +259,28 @@ func (s *ClientService) Start(ctx context.Context, name string) error {
 	req := lxdapi.InstanceStatePut{Action: "start", Timeout: int(s.timeout.Seconds()), Force: false, Stateful: false}
 	op, err := s.client.UpdateInstanceState(name, req, "")
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to start instance %s: %v", name, err), "")
 		return err
 	}
-	return waitOp(ctx, op, s.timeout)
+	if err := waitOp(ctx, op, s.timeout); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to wait for instance start %s: %v", name, err), "")
+		return err
+	}
+	return nil
 }
 
 func (s *ClientService) Stop(ctx context.Context, name string, force bool) error {
 	req := lxdapi.InstanceStatePut{Action: "stop", Timeout: int(s.timeout.Seconds()), Force: force}
 	op, err := s.client.UpdateInstanceState(name, req, "")
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to stop instance %s: %v", name, err), "")
 		return err
 	}
-	return waitOp(ctx, op, s.timeout)
+	if err := waitOp(ctx, op, s.timeout); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to wait for instance stop %s: %v", name, err), "")
+		return err
+	}
+	return nil
 }
 
 func (s *ClientService) Restart(ctx context.Context, name string, timeout time.Duration) error {
@@ -235,24 +291,38 @@ func (s *ClientService) Restart(ctx context.Context, name string, timeout time.D
 	req := lxdapi.InstanceStatePut{Action: "restart", Timeout: to, Force: true}
 	op, err := s.client.UpdateInstanceState(name, req, "")
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to restart instance %s: %v", name, err), "")
 		return err
 	}
-	return waitOp(ctx, op, time.Duration(to)*time.Second)
+	if err := waitOp(ctx, op, time.Duration(to)*time.Second); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to wait for instance restart %s: %v", name, err), "")
+		return err
+	}
+	return nil
 }
 
 func (s *ClientService) Delete(ctx context.Context, name string) error {
-	// Ensure stopped
-	_ = s.Stop(ctx, name, true)
+	stopErr := s.Stop(ctx, name, true)
+	if stopErr != nil {
+		s.logger.Log(logger.Warning, fmt.Sprintf("failed to stop instance %s before deletion (attempting deletion anyway): %v", name, stopErr), "")
+	}
+
 	op, err := s.client.DeleteInstance(name)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to delete instance %s: %v", name, err), "")
 		return err
 	}
-	return waitOp(ctx, op, s.timeout)
+	if err := waitOp(ctx, op, s.timeout); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to wait for instance deletion %s: %v", name, err), "")
+		return err
+	}
+	return nil
 }
 
 func (s *ClientService) DeleteAll(ctx context.Context) error {
 	instances, err := s.client.GetInstances(lxdapi.InstanceTypeAny)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to list instances for deletion: %v", err), "")
 		return err
 	}
 	var errs []string
@@ -262,7 +332,9 @@ func (s *ClientService) DeleteAll(ctx context.Context) error {
 		}
 	}
 	if len(errs) > 0 {
-		return fmt.Errorf("failed to delete some instances: %s", strings.Join(errs, ", "))
+		errMsg := fmt.Sprintf("failed to delete some instances: %s", strings.Join(errs, ", "))
+		s.logger.Log(logger.Error, errMsg, "")
+		return fmt.Errorf(errMsg)
 	}
 	return nil
 }
@@ -293,64 +365,72 @@ func waitOp(ctx context.Context, op lxdclient.Operation, timeout time.Duration) 
 // Methods that accept custom server config in the request
 
 func (s *ClientService) CreateWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error) {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return nil, fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.Create(ctx, name, imageAlias, profiles, config, devices)
 }
 
 func (s *ClientService) ListWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig) ([]lxdapi.Instance, error) {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return nil, fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.List(ctx)
 }
 
 func (s *ClientService) GetWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) (*lxdapi.Instance, error) {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return nil, fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.Get(ctx, name)
 }
 
 func (s *ClientService) StartWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) error {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.Start(ctx, name)
 }
 
 func (s *ClientService) StopWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, force bool) error {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.Stop(ctx, name, force)
 }
 
 func (s *ClientService) RestartWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, timeout time.Duration) error {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.Restart(ctx, name, timeout)
 }
 
 func (s *ClientService) DeleteWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) error {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.Delete(ctx, name)
 }
 
 func (s *ClientService) DeleteAllWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig) error {
-	tempSvc, err := New(*serverCfg)
+	tempSvc, err := New(*serverCfg, s.logger)
 	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
 		return fmt.Errorf("failed to create temporary LXD client: %w", err)
 	}
 	return tempSvc.DeleteAll(ctx)

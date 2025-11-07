@@ -74,7 +74,6 @@ class Install:
         host_ip: str = None,
         repo: str = None,
         branch: str = None,
-        include_lxd: bool = False,
     ):
         self.logger = logger
         self.verbose = verbose
@@ -87,8 +86,7 @@ class Install:
         self.host_ip = host_ip
         self.repo = repo
         self.branch = branch
-        self.include_lxd = include_lxd
-        self._user_config = _config.load_user_config(self.config_file)
+        _config.load_user_config(self.config_file)
         self.progress = None
         self.main_task = None
         self._validate_domains()
@@ -172,7 +170,6 @@ class Install:
             ("Setting up proxy config", self._setup_proxy_config),
             ("Creating environment files", self._create_env_files),
             ("Generating SSH keys", self._setup_ssh),
-            ("Installing LXD (optional)", self._install_lxd_if_enabled),
             ("Starting services", self._start_services),
         ]
 
@@ -474,11 +471,6 @@ class Install:
             if key in updated_env:
                 updated_env[key] = value
 
-        # If user requested LXD during install, enable it in API env
-        if getattr(self, "include_lxd", False):
-            if "LXD_ENABLED" in updated_env:
-                updated_env["LXD_ENABLED"] = "true"
-
         return updated_env
 
     def _copy_caddyfile_to_target(self, full_source_path: str):
@@ -506,45 +498,3 @@ class Install:
             view_port = self._get_config(VIEW_PORT)
             host_ip = self._get_host_ip()
             return f"http://{host_ip}:{view_port}"
-
-    def _install_lxd_if_enabled(self):
-        if not self.include_lxd:
-            return
-        os_name = HostInformation.get_os_name()
-        if os_name.lower() != "linux":
-            self.logger.warning("--include-lxd is supported only on Linux hosts; skipping")
-            return
-        # best-effort installation via snap
-        cmds = [
-            "sudo snap install lxd",
-            "sudo usermod -aG lxd $USER",
-        ]
-        preseed = {
-            "config": {},
-            "networks": [{"name": "lxdbr0", "type": "bridge", "config": {"ipv4.address": "auto", "ipv6.address": "none"}}],
-            "storage_pools": [{"name": "default", "driver": "zfs", "config": {"size": "10GB"}}],
-            "profiles": [
-                {
-                    "name": "default",
-                    "config": {},
-                    "devices": {"root": {"path": "/", "pool": "default", "type": "disk"}},
-                }
-            ],
-            "cluster": {"server_name": "nixopus-host"},
-        }
-        if self.dry_run:
-            for c in cmds:
-                self.logger.info(f"[dry-run] Would run: {c}")
-            self.logger.info("[dry-run] Would run: lxd init --preseed <config>")
-            return
-        for c in cmds:
-            try:
-                subprocess.check_call(c, shell=True)
-            except Exception as e:
-                self.logger.warning(f"Failed command '{c}': {e}")
-        try:
-            p = subprocess.Popen(["lxd", "init", "--preseed"], stdin=subprocess.PIPE)
-            p.communicate(input=yaml.safe_dump(preseed).encode())
-        except Exception as e:
-            self.logger.warning(f"Failed to preseed LXD: {e}")
-        self.logger.info("LXD installation attempted. You may need to log out/in for group changes to apply.")

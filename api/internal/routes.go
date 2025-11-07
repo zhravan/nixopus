@@ -44,13 +44,6 @@ import (
 	lxdService "github.com/raghavyuva/nixopus-api/internal/features/lxd/service"
 )
 
-var (
-	lxdServiceNew = func() (*lxdService.ClientService, error) {
-		return lxdService.New(config.AppConfig.LXD)
-	}
-	lxdControllerNew = func(svc *lxdService.ClientService) *lxdController.Controller { return lxdController.NewController(svc) }
-)
-
 type Router struct {
 	app   *storage.App
 	cache *cache.Cache
@@ -277,22 +270,19 @@ func (router *Router) Routes() {
 	})
 	router.ContainerRoutes(containerGroup, containerController)
 
-	//TODO: Keeping LXD routes optional for now
-	if config.AppConfig.LXD.Enabled {
-		if svc, err := lxdServiceNew(); err != nil {
-			log.Printf("LXD is enabled but unavailable: %v (socket: %s)", err, config.AppConfig.LXD.SocketPath)
-		} else {
-			lxdCtrl := lxdControllerNew(svc)
-			lxdGroup := fuego.Group(server, apiV1.Path+"/lxd")
-			fuego.Use(lxdGroup, func(next http.Handler) http.Handler {
-				return middleware.RBACMiddleware(next, router.app, "lxd")
-			})
-			fuego.Use(lxdGroup, func(next http.Handler) http.Handler {
-				return middleware.AuditMiddleware(next, router.app, l, "lxd")
-			})
-			router.LXDRoutes(lxdGroup, lxdCtrl)
-		}
+	lxdSvc, err := lxdService.New(config.AppConfig.LXD, l)
+	if err != nil {
+		log.Fatalf("Failed to initialize LXD service: %v (socket: %s)", err, config.AppConfig.LXD.SocketPath)
 	}
+	lxdCtrl := lxdController.NewController(lxdSvc, config.AppConfig.LXD)
+	lxdGroup := fuego.Group(server, apiV1.Path+"/lxd")
+	fuego.Use(lxdGroup, func(next http.Handler) http.Handler {
+		return middleware.RBACMiddleware(next, router.app, "lxd")
+	})
+	fuego.Use(lxdGroup, func(next http.Handler) http.Handler {
+		return middleware.AuditMiddleware(next, router.app, l, "lxd")
+	})
+	router.LXDRoutes(lxdGroup, lxdCtrl)
 
 	extensionController := extension.NewExtensionsController(router.app.Store, router.app.Ctx, l)
 	extensionGroup := fuego.Group(server, apiV1.Path+"/extensions")
@@ -454,20 +444,14 @@ func (router *Router) ContainerRoutes(s *fuego.Server, containerController *cont
 	fuego.Post(s, "/images", containerController.ListImages)
 }
 
-// LXD lifecycle endpoints
 func (router *Router) LXDRoutes(s *fuego.Server, lxdCtrl *lxdController.Controller) {
-	// List and create instances
 	fuego.Get(s, "", lxdCtrl.List)
 	fuego.Post(s, "", lxdCtrl.Create)
-
-	// Instance-specific operations
 	fuego.Get(s, "/{name}", lxdCtrl.Get)
 	fuego.Post(s, "/{name}/start", lxdCtrl.Start)
 	fuego.Post(s, "/{name}/stop", lxdCtrl.Stop)
 	fuego.Post(s, "/{name}/restart", lxdCtrl.Restart)
 	fuego.Delete(s, "/{name}", lxdCtrl.Delete)
-
-	// Bulk delete
 	fuego.Delete(s, "/all", lxdCtrl.DeleteAll)
 }
 

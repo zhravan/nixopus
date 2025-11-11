@@ -63,6 +63,22 @@ func (c *Controller) Get(ctx fuego.ContextNoBody) (*shared_types.Response, error
 	return c.successResponse(inst, ""), nil
 }
 
+func (c *Controller) Update(ctx fuego.ContextWithBody[types.UpdateRequest]) (*shared_types.Response, error) {
+	name := ctx.PathParam("name")
+	body, err := ctx.Body()
+	if err != nil {
+		return nil, fuego.HTTPError{Err: err, Status: http.StatusBadRequest}
+	}
+	reqCtx, cancel := c.withTimeout(ctx.Request().Context(), 60*time.Second)
+	defer cancel()
+
+	inst, err := c.svc.Update(reqCtx, name, body.Profiles, body.Config, body.Devices)
+	if err != nil {
+		return nil, fuego.HTTPError{Err: err, Status: http.StatusInternalServerError}
+	}
+	return c.successResponse(inst, "updated"), nil
+}
+
 func (c *Controller) Start(ctx fuego.ContextNoBody) (*shared_types.Response, error) {
 	name := ctx.PathParam("name")
 	reqCtx, cancel := c.withTimeout(ctx.Request().Context(), 60*time.Second)

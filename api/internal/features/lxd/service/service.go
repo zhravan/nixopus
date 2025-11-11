@@ -21,6 +21,7 @@ type Service interface {
 	Create(ctx context.Context, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error)
 	List(ctx context.Context) ([]lxdapi.Instance, error)
 	Get(ctx context.Context, name string) (*lxdapi.Instance, error)
+	Update(ctx context.Context, name string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error)
 	Start(ctx context.Context, name string) error
 	Stop(ctx context.Context, name string, force bool) error
 	Restart(ctx context.Context, name string, timeout time.Duration) error
@@ -266,6 +267,52 @@ func (s *ClientService) Get(ctx context.Context, name string) (*lxdapi.Instance,
 		return nil, err
 	}
 	return inst, nil
+}
+
+func (s *ClientService) Update(ctx context.Context, name string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error) {
+	inst, etag, err := s.client.GetInstance(name)
+	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to get instance %s: %v", name, err), "")
+		return nil, err
+	}
+
+	updateReq := inst.Writable()
+
+	if profiles != nil {
+		updateReq.Profiles = profiles
+	}
+
+	if config != nil {
+		if updateReq.Config == nil {
+			updateReq.Config = make(map[string]string)
+		}
+		for key, value := range config {
+			updateReq.Config[key] = value
+		}
+	}
+
+	if devices != nil {
+		updateReq.Devices = mapToDevices(devices)
+	}
+
+	op, err := s.client.UpdateInstance(name, updateReq, etag)
+	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to update instance %s: %v", name, err), "")
+		return nil, err
+	}
+
+	if err := waitOp(ctx, op, s.timeout); err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to wait for instance update %s: %v", name, err), "")
+		return nil, err
+	}
+
+	updatedInst, _, err := s.client.GetInstance(name)
+	if err != nil {
+		s.logger.Log(logger.Error, fmt.Sprintf("failed to get instance %s after update: %v", name, err), "")
+		return nil, err
+	}
+
+	return updatedInst, nil
 }
 
 func (s *ClientService) Start(ctx context.Context, name string) error {

@@ -442,6 +442,7 @@ func (router *Router) LXDRoutes(s *fuego.Server, lxdCtrl *lxdController.Controll
 	fuego.Get(s, "", lxdCtrl.List)
 	fuego.Post(s, "", lxdCtrl.Create)
 	fuego.Get(s, "/{name}", lxdCtrl.Get)
+	fuego.Put(s, "/{name}", lxdCtrl.Update)
 	fuego.Post(s, "/{name}/start", lxdCtrl.Start)
 	fuego.Post(s, "/{name}/stop", lxdCtrl.Stop)
 	fuego.Post(s, "/{name}/restart", lxdCtrl.Restart)

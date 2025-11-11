@@ -12,31 +12,20 @@ import (
 
 	lxdclient "github.com/canonical/lxd/client"
 	lxdapi "github.com/canonical/lxd/shared/api"
-	"github.com/raghavyuva/nixopus-api/internal/features/lxd/types"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	"github.com/raghavyuva/nixopus-api/internal/features/lxd/types"
 	configTypes "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-// LXD operations supported by the API
-
-// TODO: refactor/cleanup apis exposure via single interface method for both local and remote connections; temp keeping it separate
 type Service interface {
 	Create(ctx context.Context, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error)
-	CreateWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error)
 	List(ctx context.Context) ([]lxdapi.Instance, error)
-	ListWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig) ([]lxdapi.Instance, error)
 	Get(ctx context.Context, name string) (*lxdapi.Instance, error)
-	GetWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) (*lxdapi.Instance, error)
 	Start(ctx context.Context, name string) error
-	StartWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) error
 	Stop(ctx context.Context, name string, force bool) error
-	StopWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, force bool) error
 	Restart(ctx context.Context, name string, timeout time.Duration) error
-	RestartWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, timeout time.Duration) error
 	Delete(ctx context.Context, name string) error
-	DeleteWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) error
 	DeleteAll(ctx context.Context) error
-	DeleteAllWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig) error
 }
 
 type ClientService struct {
@@ -199,12 +188,39 @@ func isCertificateAlreadyExistsError(err error) bool {
 	return false
 }
 
+func (s *ClientService) isImageCached(alias string) bool {
+	images, err := s.client.GetImages()
+	if err != nil {
+		return false
+	}
+
+	for _, img := range images {
+		for _, a := range img.Aliases {
+			if a.Name == alias {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (s *ClientService) Create(ctx context.Context, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error) {
 	if name == "" {
 		return nil, types.ErrMissingName
 	}
 	if imageAlias == "" {
 		return nil, types.ErrMissingImageAlias
+	}
+
+	source := lxdapi.InstanceSource{
+		Type:  "image",
+		Alias: imageAlias,
+	}
+
+	if !s.isImageCached(imageAlias) {
+		source.Server = "https://images.lxd.canonical.com"
+		source.Protocol = "simplestreams"
+		source.Mode = "pull"
 	}
 
 	req := lxdapi.InstancesPost{
@@ -214,10 +230,7 @@ func (s *ClientService) Create(ctx context.Context, name string, imageAlias stri
 			Devices:  mapToDevices(devices),
 			Profiles: profiles,
 		},
-		Source: lxdapi.InstanceSource{
-			Type:  "image",
-			Alias: imageAlias,
-		},
+		Source: source,
 	}
 
 	op, err := s.client.CreateInstance(req)
@@ -360,78 +373,4 @@ func waitOp(ctx context.Context, op lxdclient.Operation, timeout time.Duration) 
 	case <-ctx.Done():
 		return ctx.Err()
 	}
-}
-
-// Methods that accept custom server config in the request
-
-func (s *ClientService) CreateWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, imageAlias string, profiles []string, config map[string]string, devices map[string]map[string]string) (*lxdapi.Instance, error) {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return nil, fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.Create(ctx, name, imageAlias, profiles, config, devices)
-}
-
-func (s *ClientService) ListWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig) ([]lxdapi.Instance, error) {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return nil, fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.List(ctx)
-}
-
-func (s *ClientService) GetWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) (*lxdapi.Instance, error) {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return nil, fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.Get(ctx, name)
-}
-
-func (s *ClientService) StartWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) error {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.Start(ctx, name)
-}
-
-func (s *ClientService) StopWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, force bool) error {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.Stop(ctx, name, force)
-}
-
-func (s *ClientService) RestartWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string, timeout time.Duration) error {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.Restart(ctx, name, timeout)
-}
-
-func (s *ClientService) DeleteWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig, name string) error {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.Delete(ctx, name)
-}
-
-func (s *ClientService) DeleteAllWithServer(ctx context.Context, serverCfg *configTypes.LXDConfig) error {
-	tempSvc, err := New(*serverCfg, s.logger)
-	if err != nil {
-		s.logger.Log(logger.Error, fmt.Sprintf("failed to create temporary LXD client: %v", err), "")
-		return fmt.Errorf("failed to create temporary LXD client: %w", err)
-	}
-	return tempSvc.DeleteAll(ctx)
 }

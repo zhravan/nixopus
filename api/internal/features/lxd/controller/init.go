@@ -2,17 +2,14 @@ package controller
 
 import (
 	"github.com/raghavyuva/nixopus-api/internal/features/lxd/service"
-	configTypes "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
 type Controller struct {
-	svc         *service.ClientService
-	defaultCfg  configTypes.LXDConfig
+	svc *service.ClientService
 }
 
-func NewController(svc *service.ClientService, defaultCfg configTypes.LXDConfig) *Controller {
+func NewController(svc *service.ClientService) *Controller {
 	return &Controller{
-		svc:        svc,
-		defaultCfg: defaultCfg,
+		svc: svc,
 	}
 }

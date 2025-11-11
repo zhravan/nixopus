@@ -112,6 +112,14 @@ func (router *Router) Routes() {
 
 	router.WebSocketServer(server, deployController)
 
+	lxdSvc, err := lxdService.New(config.AppConfig.LXD, l)
+	if err != nil {
+		log.Fatalf("Failed to initialize LXD service: %v (socket: %s)", err, config.AppConfig.LXD.SocketPath)
+	}
+	lxdCtrl := lxdController.NewController(lxdSvc)
+	lxdGroup := fuego.Group(server, apiV1.Path+"/lxd")
+	router.LXDRoutes(lxdGroup, lxdCtrl)
+
 	userStorage := &user_storage.UserStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
 	orgStorage := &organization_storage.OrganizationStore{DB: router.app.Store.DB, Ctx: router.app.Ctx}
 	orgService := organization_service.NewOrganizationService(router.app.Store, router.app.Ctx, l, orgStorage, router.cache)
@@ -269,20 +277,6 @@ func (router *Router) Routes() {
 		return middleware.AuditMiddleware(next, router.app, l, "container")
 	})
 	router.ContainerRoutes(containerGroup, containerController)
-
-	lxdSvc, err := lxdService.New(config.AppConfig.LXD, l)
-	if err != nil {
-		log.Fatalf("Failed to initialize LXD service: %v (socket: %s)", err, config.AppConfig.LXD.SocketPath)
-	}
-	lxdCtrl := lxdController.NewController(lxdSvc, config.AppConfig.LXD)
-	lxdGroup := fuego.Group(server, apiV1.Path+"/lxd")
-	fuego.Use(lxdGroup, func(next http.Handler) http.Handler {
-		return middleware.RBACMiddleware(next, router.app, "lxd")
-	})
-	fuego.Use(lxdGroup, func(next http.Handler) http.Handler {
-		return middleware.AuditMiddleware(next, router.app, l, "lxd")
-	})
-	router.LXDRoutes(lxdGroup, lxdCtrl)
 
 	extensionController := extension.NewExtensionsController(router.app.Store, router.app.Ctx, l)
 	extensionGroup := fuego.Group(server, apiV1.Path+"/extensions")

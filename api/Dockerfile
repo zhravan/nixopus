@@ -2,7 +2,7 @@ FROM golang:1.25-alpine AS builder
 ARG API_PORT
 ARG TARGETOS
 ARG TARGETARCH
-RUN apk add --no-cache make git
+RUN apk add --no-cache --no-scripts make git
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 FROM alpine:3.18
 ARG API_PORT
-RUN apk add --no-cache ca-certificates bash docker-cli
+RUN apk add --no-cache --no-scripts ca-certificates bash docker-cli
 
 WORKDIR /app
 

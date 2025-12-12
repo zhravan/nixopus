@@ -1,3 +1,12 @@
+# [0.1.0-alpha.88](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.87...v0.1.0-alpha.88) (2025-12-12)
+
+
+### Bug Fixes
+
+* split locales into multiple chunks based on domain ([#702](https://github.com/raghavyuva/nixopus/issues/702)) ([42ae8e4](https://github.com/raghavyuva/nixopus/commit/42ae8e4938582a2366dc49de8dbb80858c151e36))
+
+
+
 # [0.1.0-alpha.87](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.86...v0.1.0-alpha.87) (2025-12-11)
 
 

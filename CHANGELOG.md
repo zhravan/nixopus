@@ -1,3 +1,12 @@
+# [0.1.0-alpha.95](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.94...v0.1.0-alpha.95) (2025-12-15)
+
+
+### Features
+
+* support for split terminal ui ([#652](https://github.com/raghavyuva/nixopus/issues/652)) ([a6042f5](https://github.com/raghavyuva/nixopus/commit/a6042f56d8788bd960d8f3ef50bf923bd5920514))
+
+
+
 # [0.1.0-alpha.94](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.93...v0.1.0-alpha.94) (2025-12-15)
 
 

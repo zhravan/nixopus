@@ -1,3 +1,12 @@
+# [0.1.0-alpha.96](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.95...v0.1.0-alpha.96) (2025-12-15)
+
+
+### Bug Fixes
+
+* supertokens port bindings ([153f23d](https://github.com/raghavyuva/nixopus/commit/153f23de60d6dd12ef5d1e85d3aa0cfe7fc95897))
+
+
+
 # [0.1.0-alpha.95](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.94...v0.1.0-alpha.95) (2025-12-15)
 
 

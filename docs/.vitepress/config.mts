@@ -82,6 +82,7 @@ export default withMermaid(
           items: [
             { text: 'Overview', link: '/cli/index.md' },
             { text: 'Installation', link: '/cli/installation.md' },
+            { text: 'Install Generator', link: '/cli/install-generator.md' },
             { text: 'Configuration', link: '/cli/config.md' },
             { text: 'Reference', link: '/cli/cli-reference.md' }
           ]

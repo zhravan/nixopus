@@ -1,10 +1,10 @@
 import typer
 
-from app.utils.logger import create_logger, log_error, log_success, log_warning
+from app.utils.logger import create_logger, log_error, log_success
 from app.utils.timeout import timeout_wrapper
 
 from .deps import install_all_deps
-from .run import Install
+from .run import InstallParams, run_installation
 from .ssh import SSHConfig, format_ssh_output, generate_ssh_key_with_config
 
 install_app = typer.Typer(help="Install Nixopus", invoke_without_command=True)
@@ -54,7 +54,7 @@ def install_callback(
     """Install Nixopus for production"""
     if ctx.invoked_subcommand is None:
         logger = create_logger(verbose=verbose)
-        install = Install(
+        params = InstallParams(
             logger=logger,
             verbose=verbose,
             timeout=timeout,
@@ -77,21 +77,14 @@ def install_callback(
             external_db_url=external_db_url,
             staging=staging,
         )
-        install.run()
+        run_installation(params)
 
 
 def main_install_callback(value: bool):
     if value:
         logger = create_logger(verbose=False)
-        install = Install(
-            logger=logger,
-            verbose=False,
-            timeout=300,
-            force=False,
-            dry_run=False,
-            config_file=None,
-        )
-        install.run()
+        params = InstallParams(logger=logger)
+        run_installation(params)
         raise typer.Exit()
 
 

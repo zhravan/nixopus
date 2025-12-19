@@ -4,8 +4,9 @@ from app.utils.logger import create_logger, log_error, log_success
 from app.utils.timeout import timeout_wrapper
 
 from .deps import install_all_deps
-from .run import InstallParams, run_installation
+from .run import run_installation
 from .ssh import SSHConfig, format_ssh_output, generate_ssh_key_with_config
+from .types import InstallParams
 
 install_app = typer.Typer(help="Install Nixopus", invoke_without_command=True)
 

@@ -14,7 +14,7 @@ from app.utils.protocols import LoggerProtocol
 
 from .config_utils import get_host_ip_or_default
 from .environment import ConfigResolver
-from .run import InstallParams
+from .types import InstallParams
 
 
 SPECIAL_CHARS = "!@#$%^&*()_+-=[]{};':\"\\|,.<>/?"

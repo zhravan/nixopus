@@ -152,6 +152,7 @@ def create_service_env_files(
             str(config_resolver.get(SUPERTOKENS_API_PORT) or 3567),
             config_resolver.get("ssh_key_path"),
             external_db_url=external_db_url,
+            staging=config_resolver.staging,
         )
         success, error = create_env_file_with_permissions(env_file, updated_env_values, logger)
         if not success:
@@ -173,6 +174,7 @@ def create_service_env_files(
         str(config_resolver.get(SUPERTOKENS_API_PORT) or 3567),
         config_resolver.get("ssh_key_path"),
         external_db_url=external_db_url,
+        staging=config_resolver.staging,
     ))
     combined_env_values.update(update_environment_variables(
         view_env_values,
@@ -184,6 +186,7 @@ def create_service_env_files(
         str(config_resolver.get(SUPERTOKENS_API_PORT) or 3567),
         config_resolver.get("ssh_key_path"),
         external_db_url=external_db_url,
+        staging=config_resolver.staging,
     ))
     success, error = create_env_file_with_permissions(combined_env_file, combined_env_values, logger)
     if not success:

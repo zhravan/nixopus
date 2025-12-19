@@ -206,11 +206,17 @@ def update_environment_variables(
             updated_env[key] = value
     
     # Apply staging overrides AFTER env_map to ensure they're final
-    if staging and not external_db_url:
-        # Override container names for staging mode
-        # Always set these for staging, even if they don't exist in config
-        updated_env["HOST_NAME"] = "nixopus-staging-db"
+    # When staging mode is enabled, override container names to use staging-specific containers
+    if staging:
+        if external_db_url:
+            # External DB URL takes precedence - don't override HOST_NAME
+            pass
+        else:
+            # Override container names for staging mode
+            # Always set these for staging, even if they don't exist in config
+            updated_env["HOST_NAME"] = "nixopus-staging-db"
         
+        # Always override Redis and Caddy endpoints for staging (they're always local)
         # Extract password from existing REDIS_URL if present, otherwise use default
         redis_password = "changeme"
         redis_url = updated_env.get("REDIS_URL", "")

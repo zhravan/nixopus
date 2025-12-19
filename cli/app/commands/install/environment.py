@@ -154,6 +154,10 @@ def create_service_env_files(
             external_db_url=external_db_url,
             staging=config_resolver.staging,
         )
+        # TODO: Log staging values before writing (remove after debugging)
+        if logger and config_resolver.staging:
+            logger.debug(f"Staging mode: HOST_NAME={updated_env_values.get('HOST_NAME')}, REDIS_URL={updated_env_values.get('REDIS_URL')}, CADDY_ENDPOINT={updated_env_values.get('CADDY_ENDPOINT')}")
+        
         success, error = create_env_file_with_permissions(env_file, updated_env_values, logger)
         if not success:
             return False, f"Failed to create {service_name} env file: {error}"

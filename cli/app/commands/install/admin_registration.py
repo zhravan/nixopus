@@ -67,7 +67,7 @@ def get_api_base_url(api_domain: Optional[str], host_ip: str, api_port: str) -> 
     secure = api_domain is not None
     api_host = api_domain if secure else f"{host_ip}:{api_port}"
     protocol = "https" if secure else "http"
-    return f"{protocol}://{api_host}/api/v1"
+    return f"{protocol}://{api_host}"
 
 
 def convert_port_to_string(port) -> str:
@@ -81,7 +81,7 @@ def is_retryable_error(status_code: Optional[int], error: Optional[str]) -> bool
         return True
     if status_code >= 500:
         return True
-    if status_code == 400:
+    if status_code == 400 or status_code == 200:
         return False
     return False
 
@@ -99,17 +99,28 @@ def parse_error_response(response: requests.Response) -> str:
 
 
 def make_registration_request(api_base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True) -> Tuple[bool, Optional[str], Optional[int]]:
-    url = f"{api_base_url}/auth/register"
+    url = f"{api_base_url}/auth/signup"
     payload = {
-        "email": email,
-        "password": password,
-        "username": username,
-        "type": "admin",
-        "organization": "",
+        "formFields": [
+            {"id": "email", "value": email},
+            {"id": "password", "value": password},
+        ]
     }
     try:
         response = requests.post(url, json=payload, timeout=timeout, verify=verify_ssl)
         if response.status_code == 200:
+            try:
+                data = response.json()
+                if data.get("status") == "OK":
+                    return True, None, response.status_code
+                if data.get("status") == "FIELD_ERROR":
+                    errors = data.get("formFields", [])
+                    error_msgs = [f.get("error", "") for f in errors if f.get("error")]
+                    return False, "; ".join(error_msgs) if error_msgs else "Field validation failed", response.status_code
+                if data.get("status") == "GENERAL_ERROR":
+                    return False, data.get("message", "Registration failed"), response.status_code
+            except (json.JSONDecodeError, ValueError):
+                pass
             return True, None, response.status_code
         error_msg = parse_error_response(response)
         return False, error_msg, response.status_code
@@ -148,12 +159,16 @@ def handle_admin_exists(logger: Optional[LoggerProtocol]) -> Tuple[bool, Optiona
     return True, None, None
 
 def is_admin_already_registered(status_code: int, error: Optional[str]) -> bool:
-    if status_code != 400:
-        return False
     if not error:
         return False
     error_lower = error.lower()
-    patterns = ["admin already registered", "admin exists", "user already exists", "already registered"]
+    patterns = [
+        "admin already registered", 
+        "admin exists", 
+        "user already exists", 
+        "already registered",
+        "sign up is disabled",
+    ]
     return any(pattern in error_lower for pattern in patterns)
 
 def calculate_next_wait_time(wait_time: int) -> int:
@@ -169,7 +184,7 @@ def handle_retry_attempt(attempt: int, max_attempts: int, wait_time: int, logger
 
 
 def check_api_readiness(api_base_url: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True) -> bool:
-    health_url = f"{api_base_url}/health"
+    health_url = f"{api_base_url}/api/v1/health"
     for attempt in range(1, HEALTH_CHECK_RETRIES + 1):
         try:
             response = requests.get(health_url, timeout=timeout, verify=verify_ssl)

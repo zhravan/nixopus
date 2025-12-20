@@ -246,7 +246,12 @@ def build_installation_steps(
     if params.force:
         steps.insert(2, ("Cleaning up Docker resources", lambda: cleanup_docker_step(config_resolver, params)))
 
-    if (params.admin_email or params.admin_password) and params.verify_health:
+    # Check if admin registration should be added
+    has_admin_email = params.admin_email and params.admin_email.strip()
+    has_admin_password = params.admin_password and params.admin_password.strip()
+    should_register_admin = (has_admin_email or has_admin_password) and params.verify_health
+
+    if should_register_admin:
         steps.append(("Registering admin user", lambda: register_admin_user_step(config_resolver, params)))
 
     return steps

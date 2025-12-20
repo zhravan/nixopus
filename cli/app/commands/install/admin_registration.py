@@ -27,6 +27,7 @@ HEALTH_CHECK_RETRIES = 3
 HEALTH_CHECK_WAIT = 2
 MAX_EMAIL_PROMPT_ATTEMPTS = 5
 
+
 def generate_secure_password(length: int = 16) -> str:
     if length < 8:
         length = 16
@@ -98,7 +99,9 @@ def parse_error_response(response: requests.Response) -> str:
     return response.text or f"HTTP {response.status_code}"
 
 
-def make_registration_request(api_base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True) -> Tuple[bool, Optional[str], Optional[int]]:
+def make_registration_request(
+    api_base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True
+) -> Tuple[bool, Optional[str], Optional[int]]:
     url = f"{api_base_url}/auth/register"
     payload = {
         "email": email,
@@ -147,6 +150,7 @@ def handle_admin_exists(logger: Optional[LoggerProtocol]) -> Tuple[bool, Optiona
         logger.info("Admin user already exists, skipping registration")
     return True, None, None
 
+
 def is_admin_already_registered(status_code: int, error: Optional[str]) -> bool:
     if status_code != 400:
         return False
@@ -155,6 +159,7 @@ def is_admin_already_registered(status_code: int, error: Optional[str]) -> bool:
     error_lower = error.lower()
     patterns = ["admin already registered", "admin exists", "user already exists", "already registered"]
     return any(pattern in error_lower for pattern in patterns)
+
 
 def calculate_next_wait_time(wait_time: int) -> int:
     next_wait = wait_time * 2
@@ -168,8 +173,15 @@ def handle_retry_attempt(attempt: int, max_attempts: int, wait_time: int, logger
     return calculate_next_wait_time(wait_time)
 
 
-def check_api_readiness(api_base_url: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True) -> bool:
+def check_api_readiness(
+    api_base_url: str,
+    timeout: int = REQUEST_TIMEOUT,
+    verify_ssl: bool = True,
+    logger: Optional[LoggerProtocol] = None,
+    verbose: bool = False,
+) -> bool:
     health_url = f"{api_base_url}/health"
+
     for attempt in range(1, HEALTH_CHECK_RETRIES + 1):
         try:
             response = requests.get(health_url, timeout=timeout, verify=verify_ssl)
@@ -179,6 +191,9 @@ def check_api_readiness(api_base_url: str, timeout: int = REQUEST_TIMEOUT, verif
             pass
         if attempt < HEALTH_CHECK_RETRIES:
             time.sleep(HEALTH_CHECK_WAIT)
+
+    if logger:
+        logger.warning(f"API is not ready after {HEALTH_CHECK_RETRIES} attempts")
     return False
 
 
@@ -197,12 +212,13 @@ def register_admin_user(
     timeout: Optional[int] = None,
     verify_ssl: bool = True,
     is_generated: bool = False,
+    verbose: bool = False,
 ) -> Tuple[bool, Optional[str], Optional[bool]]:
     if dry_run:
         success, error, _ = handle_dry_run(email, logger)
         return success, error, None
     effective_timeout = get_effective_timeout(timeout)
-    if not check_api_readiness(api_base_url, effective_timeout, verify_ssl):
+    if not check_api_readiness(api_base_url, effective_timeout, verify_ssl, logger, verbose):
         error_msg = "API is not ready after health checks"
         if logger:
             logger.warning(f"Registration skipped: {error_msg}")
@@ -211,7 +227,9 @@ def register_admin_user(
     wait_time = INITIAL_RETRY_WAIT
     error = None
     for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
-        success, error, status_code = make_registration_request(api_base_url, email, password, username, effective_timeout, verify_ssl)
+        success, error, status_code = make_registration_request(
+            api_base_url, email, password, username, effective_timeout, verify_ssl
+        )
         if success:
             handle_success(email, logger)
             return True, None, is_generated
@@ -242,11 +260,13 @@ def validate_password_strength(password: str) -> Tuple[bool, Optional[str]]:
 
 
 def get_registration_password(params: InstallParams) -> Tuple[str, bool]:
-    if params.admin_password:
-        is_valid, error = validate_password_strength(params.admin_password)
+    has_password = params.admin_password and params.admin_password.strip()
+    if has_password:
+        password = params.admin_password.strip()
+        is_valid, error = validate_password_strength(password)
         if not is_valid:
             raise ValueError(f"Invalid password: {error}")
-        return params.admin_password, False
+        return password, False
     return generate_secure_password(), True
 
 
@@ -277,21 +297,26 @@ def prompt_for_email(logger: Optional[LoggerProtocol]) -> Optional[str]:
 
 
 def can_get_email(params: InstallParams) -> bool:
-    if params.admin_email:
+    has_email = params.admin_email and params.admin_email.strip()
+    has_password = params.admin_password and params.admin_password.strip()
+    if has_email:
         return True
-    if params.admin_password and is_interactive():
+    if has_password and is_interactive():
         return True
     return False
 
 
 def get_email_with_prompt(params: InstallParams) -> Optional[str]:
-    if params.admin_email:
-        if validate_email_format(params.admin_email):
-            return params.admin_email
+    has_email = params.admin_email and params.admin_email.strip()
+    has_password = params.admin_password and params.admin_password.strip()
+    if has_email:
+        email = params.admin_email.strip()
+        if validate_email_format(email):
+            return email
         if params.logger:
             params.logger.warning("Invalid email format in provided email")
         return None
-    if params.admin_password and is_interactive():
+    if has_password and is_interactive():
         return prompt_for_email(params.logger)
     return None
 
@@ -299,8 +324,10 @@ def get_email_with_prompt(params: InstallParams) -> Optional[str]:
 def skip_registration_reason(params: InstallParams) -> Optional[str]:
     if not params.verify_health:
         return "health verification disabled"
+    has_email = params.admin_email and params.admin_email.strip()
+    has_password = params.admin_password and params.admin_password.strip()
     if not can_get_email(params):
-        if params.admin_password and not is_interactive():
+        if has_password and not is_interactive():
             return "email required (non-interactive mode)"
         return "no email provided"
     return None
@@ -329,27 +356,30 @@ def should_verify_ssl(params: InstallParams) -> bool:
 def register_admin_user_step(config_resolver: ConfigResolver, params: InstallParams) -> None:
     skip_reason = skip_registration_reason(params)
     if skip_reason:
-        if params.logger:
-            params.logger.info(f"Skipping admin user registration ({skip_reason})")
         return
+
     email = get_email_with_prompt(params)
     if not email:
         if params.logger:
             params.logger.warning("Cannot proceed without email address")
         return
+
     if not validate_email_format(email):
         if params.logger:
             params.logger.warning("Invalid email format")
         return
+
     try:
         password, is_generated = get_registration_password(params)
     except ValueError as e:
         if params.logger:
             params.logger.error(str(e))
         return
+
     api_base_url = build_api_base_url(config_resolver, params)
     timeout = get_effective_timeout(params.timeout)
     verify_ssl = should_verify_ssl(params)
+
     success, error, returned_is_generated = register_admin_user(
         api_base_url,
         email,
@@ -359,9 +389,10 @@ def register_admin_user_step(config_resolver: ConfigResolver, params: InstallPar
         timeout,
         verify_ssl,
         is_generated,
+        params.verbose,
     )
+
     if success and returned_is_generated is not None:
         show_registration_summary(email, password, returned_is_generated, params.logger)
     if not success and error and params.logger:
         params.logger.warning(f"Admin registration failed: {error}")
-

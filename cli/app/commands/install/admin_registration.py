@@ -78,6 +78,9 @@ def convert_port_to_string(port) -> str:
 def is_retryable_error(status_code: Optional[int], error: Optional[str]) -> bool:
     if status_code is None:
         return True
+    if status_code == 404:
+        # 404 might mean routes aren't registered yet, retry
+        return True
     if status_code == 429:
         return True
     if status_code >= 500:
@@ -100,7 +103,7 @@ def parse_error_response(response: requests.Response) -> str:
 
 
 def make_registration_request(
-    api_base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True
+    api_base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True, logger: Optional[LoggerProtocol] = None
 ) -> Tuple[bool, Optional[str], Optional[int]]:
     url = f"{api_base_url}/auth/register"
     payload = {
@@ -115,8 +118,12 @@ def make_registration_request(
         if response.status_code == 200:
             return True, None, response.status_code
         error_msg = parse_error_response(response)
+        if logger and response.status_code == 404:
+            logger.warning(f"Registration endpoint not found at {url}. API routes may still be initializing.")
         return False, error_msg, response.status_code
     except requests.exceptions.RequestException as e:
+        if logger:
+            logger.warning(f"Registration request failed to {url}: {str(e)}")
         return False, str(e), None
 
 
@@ -186,6 +193,8 @@ def check_api_readiness(
         try:
             response = requests.get(health_url, timeout=timeout, verify=verify_ssl)
             if response.status_code == 200:
+                # Give API a moment for all routes to be registered
+                time.sleep(2)
                 return True
         except requests.exceptions.RequestException:
             pass
@@ -228,7 +237,7 @@ def register_admin_user(
     error = None
     for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
         success, error, status_code = make_registration_request(
-            api_base_url, email, password, username, effective_timeout, verify_ssl
+            api_base_url, email, password, username, effective_timeout, verify_ssl, logger
         )
         if success:
             handle_success(email, logger)

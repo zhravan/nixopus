@@ -30,12 +30,22 @@ const features = ref<FeatureOption[]>([
   { id: 'viewPort', label: 'Dashboard Port', description: 'Default: 7443', enabled: false, inputType: 'number', value: '', placeholder: '7443', category: 'ports', tooltip: 'Custom dashboard port. Must differ from API port.' },
   { id: 'dbPort', label: 'Database Port', description: 'Default: 5432', enabled: false, inputType: 'number', value: '', placeholder: '5432', category: 'ports', tooltip: 'Local PostgreSQL port. Ignored when using external database.' },
   { id: 'redisPort', label: 'Redis Port', description: 'Default: 6379', enabled: false, inputType: 'number', value: '', placeholder: '6379', category: 'ports', tooltip: 'Local Redis port. Ignored when using external database.' },
+  { id: 'caddyAdminPort', label: 'Caddy Admin Port', description: 'Default: 2019', enabled: false, inputType: 'number', value: '', placeholder: '2019', category: 'ports', tooltip: 'Port for Caddy admin API. Used for proxy configuration management.' },
+  { id: 'caddyHttpPort', label: 'Caddy HTTP Port', description: 'Default: 80', enabled: false, inputType: 'number', value: '', placeholder: '80', category: 'ports', tooltip: 'Port for Caddy HTTP traffic. Ports < 1024 need root/sudo privileges.' },
+  { id: 'caddyHttpsPort', label: 'Caddy HTTPS Port', description: 'Default: 443', enabled: false, inputType: 'number', value: '', placeholder: '443', category: 'ports', tooltip: 'Port for Caddy HTTPS traffic. Ports < 1024 need root/sudo privileges.' },
+  { id: 'supertokensPort', label: 'SuperTokens Port', description: 'Default: 3567', enabled: false, inputType: 'number', value: '', placeholder: '3567', category: 'ports', tooltip: 'Port for SuperTokens authentication service.' },
 
   // Options
   { id: 'verbose', label: 'Verbose', description: 'Show detailed logs', enabled: false, inputType: 'toggle', category: 'options', tooltip: 'Show detailed installation logs for debugging.' },
   { id: 'dryRun', label: 'Dry Run', description: 'Preview without changes', enabled: false, inputType: 'toggle', category: 'options', tooltip: 'Preview installation without making actual changes.' },
   { id: 'force', label: 'Force', description: 'Overwrite existing files', enabled: false, inputType: 'toggle', category: 'options', tooltip: 'Overwrite existing config files. Use with caution.' },
   { id: 'timeout', label: 'Timeout', description: 'Default: 300 seconds', enabled: false, inputType: 'number', value: '', placeholder: '300', category: 'options', tooltip: 'Max wait time in seconds. Default: 300s (5 min).' },
+  { id: 'configFile', label: 'Config File', description: 'Custom config file path', enabled: false, inputType: 'text', value: '', placeholder: '/path/to/config.yaml', category: 'options', tooltip: 'Path to custom config file. Defaults to built-in config if not provided.' },
+  { id: 'noRollback', label: 'No Rollback', description: 'Disable automatic rollback', enabled: false, inputType: 'toggle', category: 'options', tooltip: 'Disable automatic rollback on installation failure. Not recommended for production.' },
+  { id: 'verifyHealth', label: 'Verify Health', description: 'Verify services are healthy', enabled: true, inputType: 'toggle', category: 'options', tooltip: 'Verify that all services are healthy after starting. Recommended for production.' },
+  { id: 'healthCheckTimeout', label: 'Health Check Timeout', description: 'Default: 120 seconds', enabled: false, inputType: 'number', value: '', placeholder: '120', category: 'options', tooltip: 'Maximum time to wait for services to become healthy (in seconds).' },
+  { id: 'adminEmail', label: 'Admin Email', description: 'Email for admin user', enabled: false, inputType: 'text', value: '', placeholder: 'admin@example.com', category: 'options', tooltip: 'Email for admin user registration. Requires verify-health to be enabled.' },
+  { id: 'adminPassword', label: 'Admin Password', description: 'Password for admin user', enabled: false, inputType: 'text', value: '', placeholder: 'secure-password', category: 'options', tooltip: 'Password for admin user registration. Requires verify-health to be enabled.' },
 
   // Developer
   { id: 'repo', label: 'Custom Repo', description: 'Fork repository URL', enabled: false, inputType: 'text', value: '', placeholder: 'https://github.com/user/fork', category: 'developer', tooltip: 'Install from custom fork instead of official repo.' },
@@ -80,6 +90,30 @@ const isRedisPortDisabled = computed(() => {
   return !!externalDb?.enabled
 })
 
+const isHealthCheckTimeoutDisabled = computed(() => {
+  const verifyHealth = features.value.find(f => f.id === 'verifyHealth')
+  // Disabled if Verify Health is disabled
+  return !verifyHealth?.enabled
+})
+
+const isAdminEmailDisabled = computed(() => {
+  const verifyHealth = features.value.find(f => f.id === 'verifyHealth')
+  // Disabled if Verify Health is disabled
+  return !verifyHealth?.enabled
+})
+
+const isAdminPasswordDisabled = computed(() => {
+  const verifyHealth = features.value.find(f => f.id === 'verifyHealth')
+  // Disabled if Verify Health is disabled
+  return !verifyHealth?.enabled
+})
+
+const isForceDisabled = computed(() => {
+  const dryRun = features.value.find(f => f.id === 'dryRun')
+  // Disabled if Dry Run is enabled
+  return !!dryRun?.enabled
+})
+
 // Check if a specific feature is disabled
 const isFeatureDisabled = (feature: FeatureOption): boolean => {
   switch (feature.id) {
@@ -92,6 +126,14 @@ const isFeatureDisabled = (feature: FeatureOption): boolean => {
       return isDbPortDisabled.value || false
     case 'redisPort':
       return isRedisPortDisabled.value || false
+    case 'healthCheckTimeout':
+      return isHealthCheckTimeoutDisabled.value || false
+    case 'adminEmail':
+      return isAdminEmailDisabled.value || false
+    case 'adminPassword':
+      return isAdminPasswordDisabled.value || false
+    case 'force':
+      return isForceDisabled.value || false
     default:
       return false
   }
@@ -114,10 +156,20 @@ const validationErrors = computed<ValidationError[]>(() => {
   const viewPort = features.value.find(f => f.id === 'viewPort')
   const dbPort = features.value.find(f => f.id === 'dbPort')
   const redisPort = features.value.find(f => f.id === 'redisPort')
+  const caddyAdminPort = features.value.find(f => f.id === 'caddyAdminPort')
+  const caddyHttpPort = features.value.find(f => f.id === 'caddyHttpPort')
+  const caddyHttpsPort = features.value.find(f => f.id === 'caddyHttpsPort')
+  const supertokensPort = features.value.find(f => f.id === 'supertokensPort')
   const verbose = features.value.find(f => f.id === 'verbose')
   const dryRun = features.value.find(f => f.id === 'dryRun')
   const force = features.value.find(f => f.id === 'force')
   const timeout = features.value.find(f => f.id === 'timeout')
+  const configFile = features.value.find(f => f.id === 'configFile')
+  const noRollback = features.value.find(f => f.id === 'noRollback')
+  const verifyHealth = features.value.find(f => f.id === 'verifyHealth')
+  const healthCheckTimeout = features.value.find(f => f.id === 'healthCheckTimeout')
+  const adminEmail = features.value.find(f => f.id === 'adminEmail')
+  const adminPassword = features.value.find(f => f.id === 'adminPassword')
   const repo = features.value.find(f => f.id === 'repo')
   const branch = features.value.find(f => f.id === 'branch')
   const staging = features.value.find(f => f.id === 'staging')
@@ -316,7 +368,11 @@ const validationErrors = computed<ValidationError[]>(() => {
     { field: apiPort, name: 'API Port', default: 8443, id: 'api' },
     { field: viewPort, name: 'Dashboard Port', default: 7443, id: 'view' },
     { field: dbPort, name: 'Database Port', default: 5432, id: 'db' },
-    { field: redisPort, name: 'Redis Port', default: 6379, id: 'redis' }
+    { field: redisPort, name: 'Redis Port', default: 6379, id: 'redis' },
+    { field: caddyAdminPort, name: 'Caddy Admin Port', default: 2019, id: 'caddy-admin' },
+    { field: caddyHttpPort, name: 'Caddy HTTP Port', default: 80, id: 'caddy-http' },
+    { field: caddyHttpsPort, name: 'Caddy HTTPS Port', default: 443, id: 'caddy-https' },
+    { field: supertokensPort, name: 'SuperTokens Port', default: 3567, id: 'supertokens' }
   ]
   
   const enabledPorts: Array<{ name: string; value: number; id: string }> = []
@@ -437,6 +493,89 @@ const validationErrors = computed<ValidationError[]>(() => {
     }
   }
   
+  // Health check timeout validation
+  if (healthCheckTimeout?.enabled && healthCheckTimeout?.value) {
+    const healthTimeoutVal = parseInt(healthCheckTimeout.value)
+    
+    if (isNaN(healthTimeoutVal) || healthTimeoutVal < 1) {
+      errors.push({
+        message: 'Health Check Timeout must be a positive number (seconds)',
+        type: 'error'
+      })
+    } else if (healthTimeoutVal < 30) {
+      errors.push({
+        message: 'Health Check Timeout < 30s may cause false failures. Recommended: 120s (2 minutes)',
+        type: 'warning'
+      })
+    } else if (healthTimeoutVal > 600) {
+      errors.push({
+        message: 'Health Check Timeout > 600s (10 minutes) is unusually long',
+        type: 'warning'
+      })
+    }
+  }
+  
+  // Admin registration validation
+  if ((adminEmail?.enabled && adminEmail?.value) || (adminPassword?.enabled && adminPassword?.value)) {
+    if (!verifyHealth?.enabled) {
+      errors.push({
+        message: 'Admin user registration requires verify-health to be enabled. Enable Verify Health option.',
+        type: 'error'
+      })
+    }
+    
+    if (adminEmail?.enabled && adminEmail?.value && !adminPassword?.enabled) {
+      errors.push({
+        message: 'Admin email provided but password is missing. Both are required for registration.',
+        type: 'warning'
+      })
+    }
+    
+    if (adminPassword?.enabled && adminPassword?.value && !adminEmail?.enabled) {
+      errors.push({
+        message: 'Admin password provided but email is missing. Both are required for registration.',
+        type: 'warning'
+      })
+    }
+    
+    if (adminEmail?.enabled && adminEmail?.value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(adminEmail.value)) {
+        errors.push({
+          message: 'Admin email must be a valid email address',
+          type: 'error'
+        })
+      }
+    }
+    
+    if (adminPassword?.enabled && adminPassword?.value) {
+      if (adminPassword.value.length < 8) {
+        errors.push({
+          message: 'Admin password should be at least 8 characters long',
+          type: 'warning'
+        })
+      }
+    }
+  }
+  
+  // Config file validation
+  if (configFile?.enabled && configFile?.value) {
+    if (!configFile.value.trim()) {
+      errors.push({
+        message: 'Config file path cannot be empty',
+        type: 'error'
+      })
+    }
+  }
+  
+  // No rollback warning
+  if (noRollback?.enabled) {
+    errors.push({
+      message: 'Rollback disabled. Failed installations will not be automatically cleaned up.',
+      type: 'warning'
+    })
+  }
+  
   // ============================================
   // Developer Options Validation
   // ============================================
@@ -544,6 +683,34 @@ const validationErrors = computed<ValidationError[]>(() => {
     })
   }
   
+  if (configFile?.enabled && !configFile?.value) {
+    errors.push({
+      message: 'Config File is enabled but path is empty',
+      type: 'warning'
+    })
+  }
+  
+  if (healthCheckTimeout?.enabled && !healthCheckTimeout?.value) {
+    errors.push({
+      message: 'Health Check Timeout is enabled but value is empty',
+      type: 'warning'
+    })
+  }
+  
+  if (adminEmail?.enabled && !adminEmail?.value) {
+    errors.push({
+      message: 'Admin Email is enabled but email is empty',
+      type: 'warning'
+    })
+  }
+  
+  if (adminPassword?.enabled && !adminPassword?.value) {
+    errors.push({
+      message: 'Admin Password is enabled but password is empty',
+      type: 'warning'
+    })
+  }
+  
   // ============================================
   // Helpful Info Messages
   // ============================================
@@ -607,11 +774,57 @@ const toggleFeature = (feature: FeatureOption) => {
       const externalDb = features.value.find(f => f.id === 'externalDb')
       if (externalDb?.enabled) return
     }
+    
+    // Prevent enabling Health Check Timeout if Verify Health is disabled
+    if (feature.id === 'healthCheckTimeout') {
+      const verifyHealth = features.value.find(f => f.id === 'verifyHealth')
+      if (!verifyHealth?.enabled) return
+    }
+    
+    // Prevent enabling Admin Email/Password if Verify Health is disabled
+    if (feature.id === 'adminEmail' || feature.id === 'adminPassword') {
+      const verifyHealth = features.value.find(f => f.id === 'verifyHealth')
+      if (!verifyHealth?.enabled) return
+    }
+    
+    // Prevent enabling Force if Dry Run is enabled
+    if (feature.id === 'force') {
+      const dryRun = features.value.find(f => f.id === 'dryRun')
+      if (dryRun?.enabled) return
+    }
   }
   
   feature.enabled = !feature.enabled
   if (!feature.enabled) {
     feature.value = ''
+    
+    // Auto-disable dependent features when parent is disabled
+    if (feature.id === 'verifyHealth') {
+      // Disable health check timeout, admin email, and admin password when verify health is disabled
+      const healthCheckTimeout = features.value.find(f => f.id === 'healthCheckTimeout')
+      const adminEmail = features.value.find(f => f.id === 'adminEmail')
+      const adminPassword = features.value.find(f => f.id === 'adminPassword')
+      if (healthCheckTimeout?.enabled) {
+        healthCheckTimeout.enabled = false
+        healthCheckTimeout.value = ''
+      }
+      if (adminEmail?.enabled) {
+        adminEmail.enabled = false
+        adminEmail.value = ''
+      }
+      if (adminPassword?.enabled) {
+        adminPassword.enabled = false
+        adminPassword.value = ''
+      }
+    }
+    
+    if (feature.id === 'dryRun') {
+      // Disable force when dry run is enabled
+      const force = features.value.find(f => f.id === 'force')
+      if (force?.enabled) {
+        force.enabled = false
+      }
+    }
   }
 }
 
@@ -654,6 +867,18 @@ const runCommand = computed(() => {
       case 'redisPort':
         if (f.value) flags.push(`--redis-port ${f.value}`)
         break
+      case 'caddyAdminPort':
+        if (f.value) flags.push(`--caddy-admin-port ${f.value}`)
+        break
+      case 'caddyHttpPort':
+        if (f.value) flags.push(`--caddy-http-port ${f.value}`)
+        break
+      case 'caddyHttpsPort':
+        if (f.value) flags.push(`--caddy-https-port ${f.value}`)
+        break
+      case 'supertokensPort':
+        if (f.value) flags.push(`--supertokens-port ${f.value}`)
+        break
       case 'verbose':
         flags.push('--verbose')
         break
@@ -665,6 +890,26 @@ const runCommand = computed(() => {
         break
       case 'timeout':
         if (f.value) flags.push(`--timeout ${f.value}`)
+        break
+      case 'configFile':
+        if (f.value) flags.push(`--config-file "${f.value}"`)
+        break
+      case 'noRollback':
+        flags.push('--no-rollback')
+        break
+      case 'verifyHealth':
+        // verify-health defaults to True, so we only add the flag if explicitly enabled
+        // Since it's enabled by default in the generator, we don't need to add it
+        // (the CLI will use the default True value)
+        break
+      case 'healthCheckTimeout':
+        if (f.value) flags.push(`--health-check-timeout ${f.value}`)
+        break
+      case 'adminEmail':
+        if (f.value) flags.push(`--admin-email "${f.value}"`)
+        break
+      case 'adminPassword':
+        if (f.value) flags.push(`--admin-password "${f.value}"`)
         break
       case 'repo':
         if (f.value) flags.push(`--repo ${f.value}`)
@@ -1034,7 +1279,7 @@ const resetAll = () => {
       </div>
 
       <!-- Options -->
-      <div class="config-category">
+      <div class="config-category options-full-width">
         <div class="category-header">
           <h3>{{ categories.options.title }}</h3>
           <span class="category-desc">{{ categories.options.description }}</span>
@@ -1046,6 +1291,7 @@ const resetAll = () => {
             class="feature-chip"
             :class="{
               active: feature.enabled,
+              disabled: isFeatureDisabled(feature),
               dragging: draggedId === feature.id,
               'drag-over': dragOverId === feature.id
             }"
@@ -1085,6 +1331,41 @@ const resetAll = () => {
             type="number" 
             v-model="getFeaturesByCategory('options').find(f => f.id === 'timeout')!.value"
             placeholder="300"
+          />
+        </div>
+        <div class="timeout-input" v-if="getFeaturesByCategory('options').find(f => f.id === 'healthCheckTimeout')?.enabled">
+          <label>Health Check Timeout (seconds)</label>
+          <input 
+            type="number" 
+            v-model="getFeaturesByCategory('options').find(f => f.id === 'healthCheckTimeout')!.value"
+            placeholder="120"
+            :disabled="isHealthCheckTimeoutDisabled"
+          />
+        </div>
+        <div v-if="getFeaturesByCategory('options').find(f => f.id === 'configFile')?.enabled" class="feature-item" style="margin-top: 0.75rem;">
+          <input
+            type="text"
+            v-model="getFeaturesByCategory('options').find(f => f.id === 'configFile')!.value"
+            placeholder="/path/to/config.yaml"
+            class="feature-input"
+          />
+        </div>
+        <div v-if="getFeaturesByCategory('options').find(f => f.id === 'adminEmail')?.enabled" class="feature-item" :class="{ disabled: isAdminEmailDisabled }" style="margin-top: 0.75rem;">
+          <input
+            type="text"
+            v-model="getFeaturesByCategory('options').find(f => f.id === 'adminEmail')!.value"
+            placeholder="admin@example.com"
+            class="feature-input"
+            :disabled="isAdminEmailDisabled"
+          />
+        </div>
+        <div v-if="getFeaturesByCategory('options').find(f => f.id === 'adminPassword')?.enabled" class="feature-item" :class="{ disabled: isAdminPasswordDisabled }" style="margin-top: 0.75rem;">
+          <input
+            type="password"
+            v-model="getFeaturesByCategory('options').find(f => f.id === 'adminPassword')!.value"
+            placeholder="secure-password"
+            class="feature-input"
+            :disabled="isAdminPasswordDisabled"
           />
         </div>
       </div>
@@ -1360,6 +1641,10 @@ const resetAll = () => {
   padding: 1rem;
 }
 
+.config-category.options-full-width {
+  grid-column: 1 / -1;
+}
+
 .category-header {
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
@@ -1550,6 +1835,26 @@ const resetAll = () => {
   background: var(--vp-c-default-2);
   border-color: var(--vp-c-default-2);
   color: white;
+}
+
+.feature-chip.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--vp-c-bg-soft);
+}
+
+.feature-chip.disabled:hover {
+  border-color: var(--vp-c-divider);
+}
+
+.feature-chip.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--vp-c-bg-soft);
+}
+
+.feature-chip.disabled:hover {
+  border-color: var(--vp-c-divider);
 }
 
 .timeout-input {

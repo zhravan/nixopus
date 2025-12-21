@@ -40,6 +40,8 @@
 
 This section will help you set up Nixopus on your VPS quickly.
 
+> 💡 **Quick Tip**: Use our [**Install Command Generator**](https://docs.nixopus.com/cli/install-generator) to customize your installation command with a visual interface!
+
 ### Install Nixopus
 
 **To get started without domain names, and to try out over ip:port deployment:**

@@ -103,15 +103,17 @@ def parse_error_response(response: requests.Response) -> str:
 
 
 def make_registration_request(
-    api_base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True, logger: Optional[LoggerProtocol] = None
+    base_url: str, email: str, password: str, username: str, timeout: int = REQUEST_TIMEOUT, verify_ssl: bool = True, logger: Optional[LoggerProtocol] = None
 ) -> Tuple[bool, Optional[str], Optional[int]]:
-    url = f"{api_base_url}/auth/register"
+    # Use SuperTokens signup endpoint (emailpassword recipe provides /auth/signup)
+    # SuperTokens endpoints are at /auth/* (not /api/v1/auth/*)
+    url = f"{base_url}/auth/signup"
+    # SuperTokens emailpassword signup expects formFields format
     payload = {
-        "email": email,
-        "password": password,
-        "username": username,
-        "type": "admin",
-        "organization": "",
+        "formFields": [
+            {"id": "email", "value": email},
+            {"id": "password", "value": password}
+        ]
     }
     try:
         response = requests.post(url, json=payload, timeout=timeout, verify=verify_ssl)
@@ -213,7 +215,7 @@ def get_effective_timeout(timeout: Optional[int]) -> int:
 
 
 def register_admin_user(
-    api_base_url: str,
+    base_url: str,
     email: str,
     password: str,
     logger: Optional[LoggerProtocol] = None,
@@ -227,6 +229,8 @@ def register_admin_user(
         success, error, _ = handle_dry_run(email, logger)
         return success, error, None
     effective_timeout = get_effective_timeout(timeout)
+    # Check API readiness using /api/v1/health endpoint
+    api_base_url = f"{base_url}/api/v1"
     if not check_api_readiness(api_base_url, effective_timeout, verify_ssl, logger, verbose):
         error_msg = "API is not ready after health checks"
         if logger:
@@ -237,7 +241,7 @@ def register_admin_user(
     error = None
     for attempt in range(1, MAX_RETRY_ATTEMPTS + 1):
         success, error, status_code = make_registration_request(
-            api_base_url, email, password, username, effective_timeout, verify_ssl, logger
+            base_url, email, password, username, effective_timeout, verify_ssl, logger
         )
         if success:
             handle_success(email, logger)
@@ -349,6 +353,17 @@ def build_api_base_url(config_resolver: ConfigResolver, params: InstallParams) -
     return get_api_base_url(params.api_domain, host_ip, api_port_str)
 
 
+def build_supertokens_base_url(config_resolver: ConfigResolver, params: InstallParams) -> str:
+    """Build base URL for SuperTokens endpoints (without /api/v1 prefix)"""
+    host_ip = get_host_ip_or_default(params.host_ip)
+    api_port = config_resolver.get(API_PORT)
+    api_port_str = convert_port_to_string(api_port)
+    secure = params.api_domain is not None
+    api_host = params.api_domain if secure else f"{host_ip}:{api_port_str}"
+    protocol = "https" if secure else "http"
+    return f"{protocol}://{api_host}"
+
+
 def log_generated_password(password: str, logger: Optional[LoggerProtocol]) -> None:
     if logger:
         logger.info("Generated secure password for admin user")
@@ -385,12 +400,13 @@ def register_admin_user_step(config_resolver: ConfigResolver, params: InstallPar
             params.logger.error(str(e))
         return
 
-    api_base_url = build_api_base_url(config_resolver, params)
+    # Use SuperTokens base URL (without /api/v1) for signup endpoint
+    supertokens_base_url = build_supertokens_base_url(config_resolver, params)
     timeout = get_effective_timeout(params.timeout)
     verify_ssl = should_verify_ssl(params)
 
     success, error, returned_is_generated = register_admin_user(
-        api_base_url,
+        supertokens_base_url,
         email,
         password,
         params.logger,

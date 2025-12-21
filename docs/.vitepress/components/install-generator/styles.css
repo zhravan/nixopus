@@ -157,10 +157,6 @@
   overflow: hidden;
 }
 
-.feature-item.active {
-  border-color: var(--vp-c-brand);
-}
-
 .feature-item.disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -358,10 +354,6 @@
   border-radius: 4px;
   overflow: hidden;
   transition: border-color 0.2s ease;
-}
-
-.port-feature-item.active {
-  border-color: var(--vp-c-default-2);
 }
 
 .port-feature-item.disabled {

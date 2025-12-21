@@ -797,6 +797,133 @@
 				},
 				"type": "object"
 			},
+			"GetContainerResponse": {
+				"description": "GetContainerResponse schema",
+				"properties": {
+					"data": {
+						"properties": {
+							"command": {
+								"type": "string"
+							},
+							"created": {
+								"type": "string"
+							},
+							"host_config": {
+								"properties": {
+									"cpu_shares": {
+										"format": "int64",
+										"type": "integer"
+									},
+									"memory": {
+										"format": "int64",
+										"type": "integer"
+									},
+									"memory_swap": {
+										"format": "int64",
+										"type": "integer"
+									}
+								},
+								"type": "object"
+							},
+							"id": {
+								"type": "string"
+							},
+							"image": {
+								"type": "string"
+							},
+							"ip_address": {
+								"type": "string"
+							},
+							"labels": {
+								"additionalProperties": {
+									"type": "string"
+								},
+								"type": "object"
+							},
+							"mounts": {
+								"items": {
+									"properties": {
+										"destination": {
+											"type": "string"
+										},
+										"mode": {
+											"type": "string"
+										},
+										"source": {
+											"type": "string"
+										},
+										"type": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"name": {
+								"type": "string"
+							},
+							"networks": {
+								"items": {
+									"properties": {
+										"aliases": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"gateway": {
+											"type": "string"
+										},
+										"ip_address": {
+											"type": "string"
+										},
+										"mac_address": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"ports": {
+								"items": {
+									"properties": {
+										"private_port": {
+											"type": "integer"
+										},
+										"public_port": {
+											"type": "integer"
+										},
+										"type": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"state": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"GetGithubRepositoryBranchesRequest": {
 				"description": "GetGithubRepositoryBranchesRequest schema",
 				"properties": {
@@ -893,6 +1020,168 @@
 						"type": "string"
 					},
 					"role": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"ListContainersResponse": {
+				"description": "ListContainersResponse schema",
+				"properties": {
+					"data": {
+						"properties": {
+							"containers": {
+								"items": {
+									"properties": {
+										"command": {
+											"type": "string"
+										},
+										"created": {
+											"type": "string"
+										},
+										"host_config": {
+											"properties": {
+												"cpu_shares": {
+													"format": "int64",
+													"type": "integer"
+												},
+												"memory": {
+													"format": "int64",
+													"type": "integer"
+												},
+												"memory_swap": {
+													"format": "int64",
+													"type": "integer"
+												}
+											},
+											"type": "object"
+										},
+										"id": {
+											"type": "string"
+										},
+										"image": {
+											"type": "string"
+										},
+										"ip_address": {
+											"type": "string"
+										},
+										"labels": {
+											"additionalProperties": {
+												"type": "string"
+											},
+											"type": "object"
+										},
+										"mounts": {
+											"items": {
+												"properties": {
+													"destination": {
+														"type": "string"
+													},
+													"mode": {
+														"type": "string"
+													},
+													"source": {
+														"type": "string"
+													},
+													"type": {
+														"type": "string"
+													}
+												},
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"name": {
+											"type": "string"
+										},
+										"networks": {
+											"items": {
+												"properties": {
+													"aliases": {
+														"items": {
+															"type": "string"
+														},
+														"type": "array"
+													},
+													"gateway": {
+														"type": "string"
+													},
+													"ip_address": {
+														"type": "string"
+													},
+													"mac_address": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"ports": {
+											"items": {
+												"properties": {
+													"private_port": {
+														"type": "integer"
+													},
+													"public_port": {
+														"type": "integer"
+													},
+													"type": {
+														"type": "string"
+													}
+												},
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"state": {
+											"type": "string"
+										},
+										"status": {
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"image": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"page": {
+								"type": "integer"
+							},
+							"page_size": {
+								"type": "integer"
+							},
+							"search": {
+								"type": "string"
+							},
+							"sort_by": {
+								"type": "string"
+							},
+							"sort_order": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							},
+							"total_count": {
+								"type": "integer"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
 						"type": "string"
 					}
 				},
@@ -2722,12 +3011,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/ListContainersResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/ListContainersResponse"
 								}
 							}
 						},
@@ -3114,12 +3403,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/GetContainerResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/GetContainerResponse"
 								}
 							}
 						},

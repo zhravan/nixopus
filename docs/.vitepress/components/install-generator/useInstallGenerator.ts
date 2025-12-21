@@ -45,15 +45,15 @@ export function useInstallGenerator() {
   )
 
   const isHealthCheckTimeoutDisabled = computed(() =>
-    !isFeatureEnabled('verifyHealth')
+    false
   )
 
   const isAdminEmailDisabled = computed(() =>
-    !isFeatureEnabled('verifyHealth')
+    false
   )
 
   const isAdminPasswordDisabled = computed(() =>
-    !isFeatureEnabled('verifyHealth')
+    false
   )
 
   const isForceDisabled = computed(() =>
@@ -115,18 +115,6 @@ export function useInstallGenerator() {
         if (externalDb?.enabled) return
       }
       
-      // Prevent enabling Health Check Timeout if Verify Health is disabled
-      if (feature.id === 'healthCheckTimeout') {
-        const verifyHealth = findFeature('verifyHealth')
-        if (!verifyHealth?.enabled) return
-      }
-      
-      // Prevent enabling Admin Email/Password if Verify Health is disabled
-      if (feature.id === 'adminEmail' || feature.id === 'adminPassword') {
-        const verifyHealth = findFeature('verifyHealth')
-        if (!verifyHealth?.enabled) return
-      }
-      
       // Prevent enabling Force if Dry Run is enabled
       if (feature.id === 'force') {
         const dryRun = findFeature('dryRun')
@@ -137,26 +125,8 @@ export function useInstallGenerator() {
     feature.enabled = !feature.enabled
     if (!feature.enabled) {
       feature.value = ''
-      
+
       // Auto-disable dependent features when parent is disabled
-      if (feature.id === 'verifyHealth') {
-        const healthCheckTimeout = findFeature('healthCheckTimeout')
-        const adminEmail = findFeature('adminEmail')
-        const adminPassword = findFeature('adminPassword')
-        if (healthCheckTimeout?.enabled) {
-          healthCheckTimeout.enabled = false
-          healthCheckTimeout.value = ''
-        }
-        if (adminEmail?.enabled) {
-          adminEmail.enabled = false
-          adminEmail.value = ''
-        }
-        if (adminPassword?.enabled) {
-          adminPassword.enabled = false
-          adminPassword.value = ''
-        }
-      }
-      
       if (feature.id === 'dryRun') {
         const force = findFeature('force')
         if (force?.enabled) {

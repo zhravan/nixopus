@@ -249,7 +249,6 @@ export const validateOptions = (features: FeatureOption[], errors: ValidationErr
   const timeout = getFeature(features, 'timeout')
   const configFile = getFeature(features, 'configFile')
   const noRollback = getFeature(features, 'noRollback')
-  const verifyHealth = getFeature(features, 'verifyHealth')
   const healthCheckTimeout = getFeature(features, 'healthCheckTimeout')
   const adminEmail = getFeature(features, 'adminEmail')
   const adminPassword = getFeature(features, 'adminPassword')
@@ -294,13 +293,6 @@ export const validateOptions = (features: FeatureOption[], errors: ValidationErr
 
   // Admin registration validation
   if ((adminEmail?.enabled && adminEmail?.value) || (adminPassword?.enabled && adminPassword?.value)) {
-    if (!verifyHealth?.enabled) {
-      errors.push(createError(
-        'Admin user registration requires verify-health to be enabled. Enable Verify Health option.',
-        'error'
-      ))
-    }
-    
     if (adminEmail?.enabled && adminEmail?.value && !adminPassword?.enabled) {
       errors.push(createError(
         'Admin email provided but password is missing. Both are required for registration.',

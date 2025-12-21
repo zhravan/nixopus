@@ -153,11 +153,6 @@ export const DEFAULT_FEATURES: FeatureOption[] = [
     inputType: 'toggle',
     tooltip: 'Disable automatic rollback on installation failure. Not recommended for production.',
   }),
-  createFeature('verifyHealth', 'Verify Health', 'Verify services are healthy', 'options', {
-    inputType: 'toggle',
-    enabled: true,
-    tooltip: 'Verify that all services are healthy after starting. Recommended for production.',
-  }),
   createFeature('healthCheckTimeout', 'Health Check Timeout', 'Default: 120 seconds', 'options', {
     inputType: 'number',
     placeholder: '120',
@@ -166,12 +161,12 @@ export const DEFAULT_FEATURES: FeatureOption[] = [
   createFeature('adminEmail', 'Admin Email', 'Email for admin user', 'options', {
     inputType: 'text',
     placeholder: 'admin@example.com',
-    tooltip: 'Email for admin user registration. Requires verify-health to be enabled.',
+    tooltip: 'Email for admin user registration. Automatically registered after installation.',
   }),
   createFeature('adminPassword', 'Admin Password', 'Password for admin user', 'options', {
     inputType: 'text',
     placeholder: 'secure-password',
-    tooltip: 'Password for admin user registration. Requires verify-health to be enabled.',
+    tooltip: 'Password for admin user registration. Automatically registered after installation.',
   }),
 
   // Developer

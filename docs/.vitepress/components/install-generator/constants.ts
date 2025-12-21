@@ -40,7 +40,8 @@ export const BOOLEAN_FLAGS: Record<string, string> = {
   dryRun: "--dry-run",
   force: "--force",
   noRollback: "--no-rollback",
-  staging: "--staging"
+  staging: "--staging",
+  skipNixopusInstall: "--skip-nixopus-install"
 };
 
 const createFeature = (
@@ -244,6 +245,17 @@ export const DEFAULT_FEATURES: FeatureOption[] = [
       placeholder: "secure-password",
       tooltip:
         "Password for admin user registration. Automatically registered after installation."
+    }
+  ),
+  createFeature(
+    "skipNixopusInstall",
+    "Skip Nixopus Install",
+    "Install CLI only",
+    "options",
+    {
+      inputType: "toggle",
+      tooltip:
+        "Install only the Nixopus CLI tool without running the installation process. Useful if you want to run 'nixopus install' manually later."
     }
   ),
 

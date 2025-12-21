@@ -32,9 +32,9 @@ This single command will:
 3. **Automatically run** `nixopus install` to set up Nixopus on your server
 :::
 
-## Install Command Generator
+## Generate your installation command
 
-Generate a customized Nixopus installation command.
+Customize your installation with optional flags and configurations provided below and ensure there are not validation errors previewed before copying.
 
 <InstallGenerator />
 

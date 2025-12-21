@@ -77,91 +77,6 @@ const {
       </div>
     </div>
 
-    <!-- Command Output -->
-    <div class="command-section">
-      <div class="section-header">
-        <div class="header-left">
-          <h3>Your Install Command</h3>
-          <span v-if="activeCount > 0" class="config-count">
-            {{ activeCount }} option{{ activeCount > 1 ? 's' : '' }}
-          </span>
-        </div>
-        <button class="reset-btn" @click="resetAll" v-if="hasCustomizations">
-          Reset
-        </button>
-      </div>
-      
-      <div class="command-notice">
-        <div class="command-content">
-          <code>{{ runCommand }}</code>
-        </div>
-        <button 
-          class="copy-mini"
-          :class="{ copied: copied === 'run' }"
-          @click="copyToClipboard(runCommand, 'run')"
-          :title="copied === 'run' ? 'Copied!' : 'Copy command'"
-        >
-          <svg v-if="copied === 'run'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="whats-included">
-        <span class="included-label">Installs:</span>
-        <div class="included-list">
-          <span class="included-item">Nixopus API</span>
-          <span class="included-item">Dashboard</span>
-          <span class="included-item">PostgreSQL</span>
-          <span class="included-item">Redis</span>
-          <span class="included-item">Caddy</span>
-          <span class="included-item">Docker</span>
-        </div>
-      </div>
-      
-      <!-- Validation Messages -->
-      <div v-if="validationErrors.length > 0" class="validation-messages">
-        <div 
-          v-for="(error, index) in validationErrors" 
-          :key="index"
-          class="validation-item"
-          :class="error.type"
-        >
-          <svg v-if="error.type === 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <svg v-else-if="error.type === 'warning'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="12" x2="12" y2="16"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <span>{{ error.message }}</span>
-          <button
-            v-if="error.type === 'info'"
-            class="dismiss-btn"
-            @click="dismissInfoMessage(error.message)"
-            title="Dismiss this message"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Main Grid -->
     <div class="config-grid">
       
@@ -519,6 +434,91 @@ const {
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Command Output -->
+    <div class="command-section">
+      <div class="section-header">
+        <div class="header-left">
+          <h3>Your Install Command</h3>
+          <span v-if="activeCount > 0" class="config-count">
+            {{ activeCount }} option{{ activeCount > 1 ? 's' : '' }}
+          </span>
+        </div>
+        <button class="reset-btn" @click="resetAll" v-if="hasCustomizations">
+          Reset
+        </button>
+      </div>
+
+      <div class="command-notice">
+        <div class="command-content">
+          <code>{{ runCommand }}</code>
+        </div>
+        <button
+          class="copy-mini"
+          :class="{ copied: copied === 'run' }"
+          @click="copyToClipboard(runCommand, 'run')"
+          :title="copied === 'run' ? 'Copied!' : 'Copy command'"
+        >
+          <svg v-if="copied === 'run'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="whats-included">
+        <span class="included-label">Installs:</span>
+        <div class="included-list">
+          <span class="included-item">Nixopus API</span>
+          <span class="included-item">Dashboard</span>
+          <span class="included-item">PostgreSQL</span>
+          <span class="included-item">Redis</span>
+          <span class="included-item">Caddy</span>
+          <span class="included-item">Docker</span>
+        </div>
+      </div>
+
+      <!-- Validation Messages -->
+      <div v-if="validationErrors.length > 0" class="validation-messages">
+        <div
+          v-for="(error, index) in validationErrors"
+          :key="index"
+          class="validation-item"
+          :class="error.type"
+        >
+          <svg v-if="error.type === 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <svg v-else-if="error.type === 'warning'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="12" x2="12" y2="16"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>{{ error.message }}</span>
+          <button
+            v-if="error.type === 'info'"
+            class="dismiss-btn"
+            @click="dismissInfoMessage(error.message)"
+            title="Dismiss this message"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 

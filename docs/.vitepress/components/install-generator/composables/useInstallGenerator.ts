@@ -4,9 +4,6 @@ import { DEFAULT_FEATURES, CATEGORIES, COMMANDS, FLAG_MAPPINGS, BOOLEAN_FLAGS } 
 import { validateAll, hasValue } from '../utils/validation'
 
 export function useInstallGenerator() {
-  // ============================================
-  // State
-  // ============================================
   const features = ref<FeatureOption[]>([...DEFAULT_FEATURES])
   const copied = ref<'download' | 'run' | null>(null)
   const showAdvanced = ref(false)
@@ -15,18 +12,12 @@ export function useInstallGenerator() {
   const draggedId = ref<string | null>(null)
   const dragOverId = ref<string | null>(null)
 
-  // ============================================
-  // Helper Functions
-  // ============================================
   const findFeature = (id: string): FeatureOption | undefined =>
     features.value.find(f => f.id === id)
 
   const isFeatureEnabled = (id: string): boolean =>
     findFeature(id)?.enabled ?? false
 
-  // ============================================
-  // Computed Disabled States
-  // ============================================
   const isHostIpDisabled = computed(() =>
     isFeatureEnabled('apiDomain') || isFeatureEnabled('viewDomain')
   )
@@ -59,9 +50,6 @@ export function useInstallGenerator() {
     isFeatureEnabled('dryRun')
   )
 
-  // ============================================
-  // Feature Disabled Check
-  // ============================================
   const isFeatureDisabled = (feature: FeatureOption): boolean => {
     switch (feature.id) {
       case 'hostIp':
@@ -86,46 +74,36 @@ export function useInstallGenerator() {
     }
   }
 
-  // ============================================
-  // Feature Toggle Logic
-  // ============================================
   const toggleFeature = (feature: FeatureOption) => {
-    // Check if feature is disabled - prevent enabling
     if (isFeatureDisabled(feature)) return
-    
-    // If trying to enable, check for conflicts first
+
     if (!feature.enabled) {
-      // Prevent enabling Host IP if any domain is enabled
       if (feature.id === 'hostIp') {
         const apiDomain = findFeature('apiDomain')
         const viewDomain = findFeature('viewDomain')
         if (apiDomain?.enabled || viewDomain?.enabled) return
       }
-      
-      // Prevent enabling domains if Host IP is enabled
+
       if (feature.id === 'apiDomain' || feature.id === 'viewDomain') {
         const hostIp = findFeature('hostIp')
         if (hostIp?.enabled) return
       }
-      
-      // Prevent enabling DB port if External DB is enabled
+
       if (feature.id === 'dbPort') {
         const externalDb = findFeature('externalDb')
         if (externalDb?.enabled) return
       }
-      
-      // Prevent enabling Force if Dry Run is enabled
+
       if (feature.id === 'force') {
         const dryRun = findFeature('dryRun')
         if (dryRun?.enabled) return
       }
     }
-    
+
     feature.enabled = !feature.enabled
     if (!feature.enabled) {
       feature.value = ''
 
-      // Auto-disable dependent features when parent is disabled
       if (feature.id === 'dryRun') {
         const force = findFeature('force')
         if (force?.enabled) {
@@ -135,14 +113,11 @@ export function useInstallGenerator() {
     }
   }
 
-  // ============================================
-  // Computed Properties
-  // ============================================
-  const hasCustomizations = computed(() => 
+  const hasCustomizations = computed(() =>
     features.value.some(f => f.enabled)
   )
 
-  const activeCount = computed(() => 
+  const activeCount = computed(() =>
     features.value.filter(f => f.enabled).length
   )
 
@@ -154,13 +129,11 @@ export function useInstallGenerator() {
     features.value.forEach(f => {
       if (!f.enabled) return
 
-      // Handle boolean flags
       if (BOOLEAN_FLAGS[f.id]) {
         flags.push(BOOLEAN_FLAGS[f.id])
         return
       }
 
-      // Handle value-based flags
       if (FLAG_MAPPINGS[f.id] && f.value) {
         flags.push(FLAG_MAPPINGS[f.id](f.value))
       }
@@ -181,27 +154,23 @@ export function useInstallGenerator() {
     validationErrors.value.some(e => e.type === 'error')
   )
 
-  const hasWarnings = computed(() => 
+  const hasWarnings = computed(() =>
     validationErrors.value.some(e => e.type === 'warning')
   )
 
-  const hasInfo = computed(() => 
+  const hasInfo = computed(() =>
     validationErrors.value.some(e => e.type === 'info')
   )
 
-  const getFeaturesByCategory = (category: string) => 
+  const getFeaturesByCategory = (category: string) =>
     features.value.filter(f => f.category === category)
 
-  // ============================================
-  // Actions
-  // ============================================
   const copyToClipboard = async (text: string, type: 'download' | 'run') => {
     try {
       await navigator.clipboard.writeText(text)
       copied.value = type
       setTimeout(() => { copied.value = null }, 2000)
     } catch {
-      // Fallback
       const el = document.createElement('textarea')
       el.value = text
       document.body.appendChild(el)

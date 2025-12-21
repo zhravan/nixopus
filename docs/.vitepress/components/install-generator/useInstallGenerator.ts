@@ -10,7 +10,6 @@ export function useInstallGenerator() {
   const features = ref<FeatureOption[]>([...DEFAULT_FEATURES])
   const copied = ref<'download' | 'run' | null>(null)
   const showAdvanced = ref(false)
-  const installMode = ref<'curl' | 'nixopus'>('curl')
   const activeTooltip = ref<string | null>(null)
   const dismissedInfoMessages = ref<Set<string>>(new Set())
   const draggedId = ref<string | null>(null)
@@ -147,37 +146,31 @@ export function useInstallGenerator() {
     features.value.filter(f => f.enabled).length
   )
 
-  const baseCommand = computed(() => 
-    installMode.value === 'curl' ? COMMANDS.curl : COMMANDS.nixopus
-  )
+  const baseCommand = computed(() => COMMANDS.curl)
 
   const runCommand = computed(() => {
     const flags: string[] = []
-    
+
     features.value.forEach(f => {
       if (!f.enabled) return
-      
+
       // Handle boolean flags
       if (BOOLEAN_FLAGS[f.id]) {
         flags.push(BOOLEAN_FLAGS[f.id])
         return
       }
-      
+
       // Handle value-based flags
       if (FLAG_MAPPINGS[f.id] && f.value) {
         flags.push(FLAG_MAPPINGS[f.id](f.value))
       }
     })
-    
+
     if (flags.length === 0) {
       return baseCommand.value
     }
-    
-    if (installMode.value === 'curl') {
-      return `${COMMANDS.curl} -s -- ${flags.join(' ')}`
-    } else {
-      return `${COMMANDS.nixopus} ${flags.join(' ')}`
-    }
+
+    return `${COMMANDS.curl} -s -- ${flags.join(' ')}`
   })
 
   const validationErrors = computed<ValidationError[]>(() => {
@@ -289,7 +282,6 @@ export function useInstallGenerator() {
     features,
     copied,
     showAdvanced,
-    installMode,
     activeTooltip,
     dismissedInfoMessages,
     draggedId,

@@ -50,6 +50,7 @@ export default withMermaid(
       },
       nav: [
         { text: 'Get Started', link: '/install/index.md' },
+        { text: 'Install', link: '/cli/install-generator.md' },
         { text: "CLI", link: '/cli/index.md' },
         { text: 'Blog', link: '/blog/' },
       ],

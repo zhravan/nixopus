@@ -41,7 +41,7 @@ export function useInstallGenerator() {
   )
 
   const isRedisPortDisabled = computed(() =>
-    isFeatureEnabled('externalDb')
+    false
   )
 
   const isHealthCheckTimeoutDisabled = computed(() =>
@@ -109,8 +109,8 @@ export function useInstallGenerator() {
         if (hostIp?.enabled) return
       }
       
-      // Prevent enabling DB/Redis ports if External DB is enabled
-      if (feature.id === 'dbPort' || feature.id === 'redisPort') {
+      // Prevent enabling DB port if External DB is enabled
+      if (feature.id === 'dbPort') {
         const externalDb = findFeature('externalDb')
         if (externalDb?.enabled) return
       }

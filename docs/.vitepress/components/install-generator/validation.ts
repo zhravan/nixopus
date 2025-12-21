@@ -119,7 +119,6 @@ export const validateNetwork = (features: FeatureOption[], errors: ValidationErr
 export const validateDatabase = (features: FeatureOption[], errors: ValidationError[]): void => {
   const externalDb = getFeature(features, 'externalDb')
   const dbPort = getFeature(features, 'dbPort')
-  const redisPort = getFeature(features, 'redisPort')
   const hasExternalDb = hasValue(features, 'externalDb')
 
   if (hasExternalDb) {
@@ -143,13 +142,6 @@ export const validateDatabase = (features: FeatureOption[], errors: ValidationEr
       errors.push(createError(
         'Database Port is ignored when using External Database. Remove Database Port or disable External Database.',
         'error'
-      ))
-    }
-    
-    if (redisPort?.enabled && redisPort?.value) {
-      errors.push(createError(
-        'Redis Port is ignored when using External Database. External DB manages all data storage.',
-        'warning'
       ))
     }
   }

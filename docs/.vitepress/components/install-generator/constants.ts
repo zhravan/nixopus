@@ -103,7 +103,7 @@ export const DEFAULT_FEATURES: FeatureOption[] = [
   createFeature('redisPort', 'Redis Port', 'Default: 6379', 'ports', {
     inputType: 'number',
     placeholder: '6379',
-    tooltip: 'Local Redis port. Ignored when using external database.',
+    tooltip: 'Port for local Redis service. Redis runs independently from the database.',
   }),
   createFeature('caddyAdminPort', 'Caddy Admin Port', 'Default: 2019', 'ports', {
     inputType: 'number',

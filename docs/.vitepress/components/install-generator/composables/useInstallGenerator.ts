@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
-import type { FeatureOption, ValidationError } from './types'
-import { DEFAULT_FEATURES, CATEGORIES, COMMANDS, FLAG_MAPPINGS, BOOLEAN_FLAGS } from './constants'
-import { validateAll, hasValue } from './validation'
+import type { FeatureOption, ValidationError } from '../utils/types'
+import { DEFAULT_FEATURES, CATEGORIES, COMMANDS, FLAG_MAPPINGS, BOOLEAN_FLAGS } from '../utils/constants'
+import { validateAll, hasValue } from '../utils/validation'
 
 export function useInstallGenerator() {
   // ============================================

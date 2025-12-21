@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useInstallGenerator } from './install-generator/useInstallGenerator'
-import { CATEGORIES } from './install-generator/constants'
+import { useInstallGenerator } from './install-generator/composables'
+import { CATEGORIES } from './install-generator/utils'
 import './install-generator/styles.css'
 
 // Use the composable for all logic

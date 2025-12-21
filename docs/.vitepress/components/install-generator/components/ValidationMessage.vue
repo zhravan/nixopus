@@ -27,7 +27,7 @@ defineEmits<{
       <line x1="12" y1="16" x2="12" y2="12"></line>
       <line x1="12" y1="8" x2="12.01" y2="8"></line>
     </svg>
-    <span class="validation-text">{{ error.message }}</span>
+    <span>{{ error.message }}</span>
     <button
       v-if="error.type === 'info'"
       class="dismiss-btn"

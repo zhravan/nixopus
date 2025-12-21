@@ -522,27 +522,5 @@ const {
       </div>
     </div>
 
-    <!-- Help -->
-    <details class="help-section">
-      <summary>Examples & Help</summary>
-      <div class="examples">
-        <div class="example">
-          <h5>Quick Install</h5>
-          <code>curl -sSL https://install.nixopus.com | bash</code>
-          <p>Auto-detects IP, uses all defaults</p>
-        </div>
-        <div class="example">
-          <h5>Production with HTTPS</h5>
-          <code>curl -sSL https://install.nixopus.com | bash -s -- --api-domain api.example.com --view-domain app.example.com</code>
-          <p>Requires both domains, auto SSL via Let's Encrypt</p>
-        </div>
-        <div class="example">
-          <h5>Preview Only</h5>
-          <code>curl -sSL https://install.nixopus.com | bash -s -- --dry-run --verbose</code>
-          <p>See what would happen without making changes</p>
-        </div>
-      </div>
-    </details>
-
   </div>
 </template>

@@ -1,6 +1,26 @@
 {
 	"components": {
 		"schemas": {
+			"AdminRegisteredResponse": {
+				"description": "AdminRegisteredResponse schema",
+				"properties": {
+					"data": {
+						"properties": {
+							"admin_registered": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"ContainerLogsRequest": {
 				"description": "ContainerLogsRequest schema",
 				"properties": {
@@ -947,10 +967,189 @@
 				},
 				"type": "object"
 			},
+			"LoginResponse": {
+				"description": "LoginResponse schema",
+				"properties": {
+					"data": {
+						"properties": {
+							"access_token": {
+								"type": "string"
+							},
+							"expires_in": {
+								"format": "int64",
+								"type": "integer"
+							},
+							"refresh_token": {
+								"type": "string"
+							},
+							"user": {
+								"properties": {
+									"avatar": {
+										"type": "string"
+									},
+									"created_at": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"deleted_at": {
+										"format": "date-time",
+										"nullable": true,
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"id": {},
+									"is_verified": {
+										"type": "boolean"
+									},
+									"organization_users": {
+										"items": {
+											"nullable": true,
+											"properties": {
+												"created_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"deleted_at": {
+													"format": "date-time",
+													"nullable": true,
+													"type": "string"
+												},
+												"id": {},
+												"organization": {
+													"nullable": true,
+													"properties": {
+														"created_at": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"deleted_at": {
+															"format": "date-time",
+															"nullable": true,
+															"type": "string"
+														},
+														"description": {
+															"type": "string"
+														},
+														"id": {},
+														"name": {
+															"type": "string"
+														},
+														"updated_at": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"users": {
+															"items": {
+																"$ref": "#/components/schemas/User"
+															},
+															"type": "array"
+														}
+													},
+													"type": "object"
+												},
+												"organization_id": {},
+												"updated_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"user": {
+													"$ref": "#/components/schemas/User"
+												},
+												"user_id": {}
+											},
+											"type": "object"
+										},
+										"nullable": true,
+										"type": "array"
+									},
+									"organizations": {
+										"items": {
+											"nullable": true,
+											"properties": {
+												"created_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"deleted_at": {
+													"format": "date-time",
+													"nullable": true,
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												},
+												"id": {},
+												"name": {
+													"type": "string"
+												},
+												"updated_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"users": {
+													"items": {
+														"$ref": "#/components/schemas/User"
+													},
+													"type": "array"
+												}
+											},
+											"type": "object"
+										},
+										"nullable": true,
+										"type": "array"
+									},
+									"supertokens_user_id": {
+										"type": "string"
+									},
+									"two_factor_enabled": {
+										"type": "boolean"
+									},
+									"two_factor_secret": {
+										"type": "string"
+									},
+									"type": {
+										"type": "string"
+									},
+									"updated_at": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"username": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"LogoutRequest": {
 				"description": "LogoutRequest schema",
 				"properties": {
 					"refresh_token": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"MessageResponse": {
+				"description": "MessageResponse schema",
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"status": {
 						"type": "string"
 					}
 				},
@@ -1034,6 +1233,173 @@
 				},
 				"type": "object"
 			},
+			"RegisterResponse": {
+				"description": "RegisterResponse schema",
+				"properties": {
+					"data": {
+						"properties": {
+							"access_token": {
+								"type": "string"
+							},
+							"expires_in": {
+								"format": "int64",
+								"type": "integer"
+							},
+							"refresh_token": {
+								"type": "string"
+							},
+							"user": {
+								"properties": {
+									"avatar": {
+										"type": "string"
+									},
+									"created_at": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"deleted_at": {
+										"format": "date-time",
+										"nullable": true,
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"id": {},
+									"is_verified": {
+										"type": "boolean"
+									},
+									"organization_users": {
+										"items": {
+											"nullable": true,
+											"properties": {
+												"created_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"deleted_at": {
+													"format": "date-time",
+													"nullable": true,
+													"type": "string"
+												},
+												"id": {},
+												"organization": {
+													"nullable": true,
+													"properties": {
+														"created_at": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"deleted_at": {
+															"format": "date-time",
+															"nullable": true,
+															"type": "string"
+														},
+														"description": {
+															"type": "string"
+														},
+														"id": {},
+														"name": {
+															"type": "string"
+														},
+														"updated_at": {
+															"format": "date-time",
+															"type": "string"
+														},
+														"users": {
+															"items": {
+																"$ref": "#/components/schemas/User"
+															},
+															"type": "array"
+														}
+													},
+													"type": "object"
+												},
+												"organization_id": {},
+												"updated_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"user": {
+													"$ref": "#/components/schemas/User"
+												},
+												"user_id": {}
+											},
+											"type": "object"
+										},
+										"nullable": true,
+										"type": "array"
+									},
+									"organizations": {
+										"items": {
+											"nullable": true,
+											"properties": {
+												"created_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"deleted_at": {
+													"format": "date-time",
+													"nullable": true,
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												},
+												"id": {},
+												"name": {
+													"type": "string"
+												},
+												"updated_at": {
+													"format": "date-time",
+													"type": "string"
+												},
+												"users": {
+													"items": {
+														"$ref": "#/components/schemas/User"
+													},
+													"type": "array"
+												}
+											},
+											"type": "object"
+										},
+										"nullable": true,
+										"type": "array"
+									},
+									"supertokens_user_id": {
+										"type": "string"
+									},
+									"two_factor_enabled": {
+										"type": "boolean"
+									},
+									"two_factor_secret": {
+										"type": "string"
+									},
+									"type": {
+										"type": "string"
+									},
+									"updated_at": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"username": {
+										"type": "string"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"RemoveUserFromOrganizationRequest": {
 				"description": "RemoveUserFromOrganizationRequest schema",
 				"properties": {
@@ -1100,6 +1466,29 @@
 						"type": "string"
 					},
 					"password": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"TwoFactorSetupResponseWrapper": {
+				"description": "TwoFactorSetupResponseWrapper schema",
+				"properties": {
+					"data": {
+						"properties": {
+							"qr_code": {
+								"type": "string"
+							},
+							"secret": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
 						"type": "string"
 					}
 				},
@@ -1421,6 +1810,146 @@
 				],
 				"type": "object"
 			},
+			"User": {
+				"properties": {
+					"avatar": {
+						"type": "string"
+					},
+					"created_at": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"deleted_at": {
+						"format": "date-time",
+						"nullable": true,
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"id": {},
+					"is_verified": {
+						"type": "boolean"
+					},
+					"organization_users": {
+						"items": {
+							"nullable": true,
+							"properties": {
+								"created_at": {
+									"format": "date-time",
+									"type": "string"
+								},
+								"deleted_at": {
+									"format": "date-time",
+									"nullable": true,
+									"type": "string"
+								},
+								"id": {},
+								"organization": {
+									"nullable": true,
+									"properties": {
+										"created_at": {
+											"format": "date-time",
+											"type": "string"
+										},
+										"deleted_at": {
+											"format": "date-time",
+											"nullable": true,
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										},
+										"id": {},
+										"name": {
+											"type": "string"
+										},
+										"updated_at": {
+											"format": "date-time",
+											"type": "string"
+										},
+										"users": {
+											"items": {
+												"$ref": "#/components/schemas/User"
+											},
+											"type": "array"
+										}
+									},
+									"type": "object"
+								},
+								"organization_id": {},
+								"updated_at": {
+									"format": "date-time",
+									"type": "string"
+								},
+								"user": {
+									"$ref": "#/components/schemas/User"
+								},
+								"user_id": {}
+							},
+							"type": "object"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"organizations": {
+						"items": {
+							"nullable": true,
+							"properties": {
+								"created_at": {
+									"format": "date-time",
+									"type": "string"
+								},
+								"deleted_at": {
+									"format": "date-time",
+									"nullable": true,
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"id": {},
+								"name": {
+									"type": "string"
+								},
+								"updated_at": {
+									"format": "date-time",
+									"type": "string"
+								},
+								"users": {
+									"items": {
+										"$ref": "#/components/schemas/User"
+									},
+									"type": "array"
+								}
+							},
+							"type": "object"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"supertokens_user_id": {
+						"type": "string"
+					},
+					"two_factor_enabled": {
+						"type": "boolean"
+					},
+					"two_factor_secret": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"updated_at": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"unknown-interface": {
 				"description": "unknown-interface schema"
 			}
@@ -1539,12 +2068,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/LoginResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/LoginResponse"
 								}
 							}
 						},
@@ -1619,12 +2148,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/RegisterResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/RegisterResponse"
 								}
 							}
 						},
@@ -1688,12 +2217,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							}
 						},
@@ -1757,12 +2286,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/AdminRegisteredResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/AdminRegisteredResponse"
 								}
 							}
 						},
@@ -1837,12 +2366,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							}
 						},
@@ -1906,12 +2435,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							}
 						},
@@ -1975,12 +2504,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/TwoFactorSetupResponseWrapper"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/TwoFactorSetupResponseWrapper"
 								}
 							}
 						},
@@ -2055,12 +2584,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							}
 						},
@@ -2124,12 +2653,12 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							},
 							"application/xml": {
 								"schema": {
-									"$ref": "#/components/schemas/Response"
+									"$ref": "#/components/schemas/MessageResponse"
 								}
 							}
 						},

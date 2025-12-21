@@ -258,14 +258,6 @@ export function useInstallGenerator() {
     dragOverId.value = null
   }
 
-  const toggleTooltip = (featureId: string) => {
-    activeTooltip.value = activeTooltip.value === featureId ? null : featureId
-  }
-
-  const closeTooltip = () => {
-    activeTooltip.value = null
-  }
-
   const dismissInfoMessage = (message: string) => {
     dismissedInfoMessages.value.add(message)
   }
@@ -315,8 +307,6 @@ export function useInstallGenerator() {
     handleDragLeave,
     handleDrop,
     handleDragEnd,
-    toggleTooltip,
-    closeTooltip,
     dismissInfoMessage,
     resetAll,
   }

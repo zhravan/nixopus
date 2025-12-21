@@ -36,8 +36,6 @@ const {
   handleDragLeave,
   handleDrop,
   handleDragEnd,
-  toggleTooltip,
-  closeTooltip,
   dismissInfoMessage,
   resetAll,
 } = useInstallGenerator()
@@ -166,8 +164,9 @@ const {
                   <button
                     v-if="feature.tooltip"
                     class="tooltip-icon"
-                    @click.stop="toggleTooltip(feature.id)"
-                    :title="feature.tooltip"
+                    @mouseenter="activeTooltip = feature.id"
+                    @mouseleave="activeTooltip = null"
+                    @click.stop
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
@@ -227,8 +226,9 @@ const {
                   <button
                     v-if="feature.tooltip"
                     class="tooltip-icon"
-                    @click.stop="toggleTooltip(feature.id)"
-                    :title="feature.tooltip"
+                    @mouseenter="activeTooltip = feature.id"
+                    @mouseleave="activeTooltip = null"
+                    @click.stop
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="12" cy="12" r="10"></circle>
@@ -291,7 +291,9 @@ const {
             <button
               v-if="feature.tooltip"
               class="tooltip-icon-chip"
-              @click.stop="toggleTooltip(feature.id)"
+              @mouseenter="activeTooltip = feature.id"
+              @mouseleave="activeTooltip = null"
+              @click.stop
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -398,8 +400,9 @@ const {
                     <button
                       v-if="feature.tooltip"
                       class="tooltip-icon"
-                      @click.stop="toggleTooltip(feature.id)"
-                      :title="feature.tooltip"
+                      @mouseenter="activeTooltip = feature.id"
+                      @mouseleave="activeTooltip = null"
+                      @click.stop
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -458,8 +461,9 @@ const {
                     <button
                       v-if="feature.tooltip"
                       class="tooltip-icon"
-                      @click.stop="toggleTooltip(feature.id)"
-                      :title="feature.tooltip"
+                      @mouseenter="activeTooltip = feature.id"
+                      @mouseleave="activeTooltip = null"
+                      @click.stop
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>

@@ -2,7 +2,7 @@ import type { FeatureOption } from "./types";
 
 export const CATEGORIES = {
   network: { title: "Network", description: "Domain & IP configuration" },
-  database: { title: "Database", description: "PostgreSQL configuration" },
+  database: { title: "Database", description: "Database configuration" },
   ports: { title: "Ports", description: "Service ports (all optional)" },
   options: { title: "Options", description: "Installation behavior" },
   developer: { title: "Developer", description: "For contributors & forks" }
@@ -102,13 +102,13 @@ export const DEFAULT_FEATURES: FeatureOption[] = [
   createFeature(
     "externalDb",
     "External Database",
-    "Use external PostgreSQL",
+    "If disabled, use local PostgreSQL",
     "database",
     {
       inputType: "text",
       placeholder: "postgresql://user:pass@host:5432/db",
       tooltip:
-        "Use existing PostgreSQL instead of local DB. Ignores DB/Redis port settings."
+        "Use existing PostgreSQL instead of local DB. Ignores DB port settings."
     }
   ),
 

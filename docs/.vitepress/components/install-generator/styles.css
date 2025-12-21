@@ -312,7 +312,7 @@
 
 .timeout-input {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
@@ -326,14 +326,17 @@
 }
 
 .timeout-input input {
-  width: 80px;
+  width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--vp-c-divider);
   border-radius: 4px;
   font-size: 0.875rem;
   font-family: var(--vp-font-family-mono);
-  text-align: center;
   background: var(--vp-c-bg);
+}
+
+.timeout-input input[type="number"] {
+  text-align: left;
 }
 
 .timeout-input input:focus {

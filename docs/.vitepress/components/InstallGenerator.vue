@@ -8,7 +8,6 @@ const {
   features,
   copied,
   showAdvanced,
-  installMode,
   activeTooltip,
   dismissedInfoMessages,
   draggedId,
@@ -326,29 +325,29 @@ const {
             :disabled="isHealthCheckTimeoutDisabled"
           />
         </div>
-        <div v-if="getFeaturesByCategory('options').find(f => f.id === 'configFile')?.enabled" class="feature-item" style="margin-top: 0.75rem;">
+        <div class="timeout-input" v-if="getFeaturesByCategory('options').find(f => f.id === 'configFile')?.enabled">
+          <label>Config File Path</label>
           <input
             type="text"
             v-model="getFeaturesByCategory('options').find(f => f.id === 'configFile')!.value"
             placeholder="/path/to/config.yaml"
-            class="feature-input"
           />
         </div>
-        <div v-if="getFeaturesByCategory('options').find(f => f.id === 'adminEmail')?.enabled" class="feature-item" :class="{ disabled: isAdminEmailDisabled }" style="margin-top: 0.75rem;">
+        <div class="timeout-input" v-if="getFeaturesByCategory('options').find(f => f.id === 'adminEmail')?.enabled" :class="{ disabled: isAdminEmailDisabled }">
+          <label>Admin Email</label>
           <input
             type="text"
             v-model="getFeaturesByCategory('options').find(f => f.id === 'adminEmail')!.value"
             placeholder="admin@example.com"
-            class="feature-input"
             :disabled="isAdminEmailDisabled"
           />
         </div>
-        <div v-if="getFeaturesByCategory('options').find(f => f.id === 'adminPassword')?.enabled" class="feature-item" :class="{ disabled: isAdminPasswordDisabled }" style="margin-top: 0.75rem;">
+        <div class="timeout-input" v-if="getFeaturesByCategory('options').find(f => f.id === 'adminPassword')?.enabled" :class="{ disabled: isAdminPasswordDisabled }">
+          <label>Admin Password</label>
           <input
             type="password"
             v-model="getFeaturesByCategory('options').find(f => f.id === 'adminPassword')!.value"
             placeholder="secure-password"
-            class="feature-input"
             :disabled="isAdminPasswordDisabled"
           />
         </div>

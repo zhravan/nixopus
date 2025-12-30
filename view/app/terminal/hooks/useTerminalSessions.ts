@@ -1,18 +1,6 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { SessionStatus } from '../components/TerminalSession';
-
-export type SplitPane = {
-  id: string;
-  label: string;
-  terminalId: string;
-};
-
-export type Session = {
-  id: string;
-  label: string;
-  splitPanes: SplitPane[];
-};
+import type { SessionStatus, SplitPane, Session } from '../types';
 
 const SESSION_LIMIT = 5;
 const MAX_SPLITS = 4;
@@ -41,10 +29,12 @@ export const useTerminalSessions = () => {
   // Compute session-level statuses from pane statuses
   const sessionStatuses = useMemo(() => {
     const statuses: Record<string, SessionStatus> = {};
-    
+
     sessions.forEach((session) => {
-      const paneStatusList = session.splitPanes.map((pane) => paneStatuses[pane.terminalId] || 'idle');
-      
+      const paneStatusList = session.splitPanes.map(
+        (pane) => paneStatuses[pane.terminalId] || 'idle'
+      );
+
       // Session is 'loading' if any pane is loading
       if (paneStatusList.includes('loading')) {
         statuses[session.id] = 'loading';
@@ -58,9 +48,27 @@ export const useTerminalSessions = () => {
         statuses[session.id] = 'idle';
       }
     });
-    
+
     return statuses;
   }, [sessions, paneStatuses]);
+
+  useEffect(() => {
+    if (sessions.length === 0) {
+      const newSessionId = uuidv4();
+      const newPaneId = uuidv4();
+      const newTerminalId = uuidv4();
+      const newSession: Session = {
+        id: newSessionId,
+        label: 'Terminal 1',
+        splitPanes: [{ id: newPaneId, label: 'Pane 1', terminalId: newTerminalId }]
+      };
+      setSessions([newSession]);
+      setActiveSessionId(newSessionId);
+      setActivePaneId(newPaneId);
+      setActivePaneBySession({ [newSessionId]: newPaneId });
+      setPaneStatuses({ [newTerminalId]: 'loading' });
+    }
+  }, [sessions.length]);
 
   const addSession = useCallback(() => {
     if (sessions.length >= SESSION_LIMIT) {
@@ -85,12 +93,17 @@ export const useTerminalSessions = () => {
   }, [sessions.length]);
 
   const closeSession = useCallback(
-    (id: string) => {
+    (id: string, force: boolean = false) => {
       setSessions((prev) => {
+        // Prevent closing last session unless forced
+        if (!force && prev.length <= 1) {
+          return prev;
+        }
+
         const idx = prev.findIndex((s) => s.id === id);
         const closedSession = prev.find((s) => s.id === id);
         const newSessions = prev.filter((s) => s.id !== id);
-        
+
         // Clean up pane statuses for closed session
         if (closedSession) {
           setPaneStatuses((prevStatuses) => {
@@ -102,12 +115,18 @@ export const useTerminalSessions = () => {
             return updated;
           });
         }
-        
-        if (id === activeSessionId && newSessions.length > 0) {
-          const newActiveSession = newSessions[Math.max(0, idx - 1)];
-          const newActivePaneId = activePaneBySession[newActiveSession.id] || newActiveSession.splitPanes[0]?.id || '';
-          setActiveSessionId(newActiveSession.id);
-          setActivePaneId(newActivePaneId);
+
+        if (id === activeSessionId) {
+          if (newSessions.length > 0) {
+            const newActiveSession = newSessions[Math.max(0, idx - 1)];
+            const newActivePaneId =
+              activePaneBySession[newActiveSession.id] || newActiveSession.splitPanes[0]?.id || '';
+            setActiveSessionId(newActiveSession.id);
+            setActivePaneId(newActivePaneId);
+          } else {
+            setActiveSessionId('');
+            setActivePaneId('');
+          }
         }
         return newSessions;
       });
@@ -175,7 +194,7 @@ export const useTerminalSessions = () => {
             const idx = session.splitPanes.findIndex((p) => p.id === paneId);
             const paneToClose = session.splitPanes.find((p) => p.id === paneId);
             const newPanes = session.splitPanes.filter((p) => p.id !== paneId);
-            
+
             // Clean up pane status
             if (paneToClose) {
               setPaneStatuses((prevStatuses) => {
@@ -185,7 +204,7 @@ export const useTerminalSessions = () => {
                 return updated;
               });
             }
-            
+
             if (paneId === activePaneId && newPanes.length > 0) {
               const newActivePaneId = newPanes[Math.max(0, idx - 1)].id;
               setActivePaneId(newActivePaneId);

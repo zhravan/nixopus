@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import '@xterm/xterm/css/xterm.css';
 import { useTranslation } from '@/hooks/use-translation';
 import { useFeatureFlags } from '@/hooks/features_provider';
@@ -12,7 +12,12 @@ import { useRBAC } from '@/lib/rbac';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 import { TerminalHeader, TerminalPane, SplitPaneHeader } from './components';
-import { useTerminalSessions, useTerminalDimensions, useTerminalStyles } from './hooks';
+import {
+  useTerminalSessions,
+  useTerminalDimensions,
+  useTerminalStyles,
+  useTerminalKeyboardShortcuts
+} from './hooks';
 
 type TerminalProps = {
   isOpen: boolean;
@@ -56,6 +61,31 @@ export const Terminal: React.FC<TerminalProps> = ({
 
   useTerminalStyles();
 
+  // handle closing last session: close session + terminal panel
+  const handleCloseSession = useCallback(
+    (sessionId: string) => {
+      const isLastSession = sessions.length === 1;
+      closeSession(sessionId, isLastSession);
+
+      // close last session + close the terminal panel
+      if (isLastSession) {
+        toggleTerminal();
+      }
+    },
+    [sessions.length, closeSession, toggleTerminal]
+  );
+
+  useTerminalKeyboardShortcuts({
+    isTerminalOpen,
+    activeSessionId,
+    activePaneId,
+    splitPanesCount: splitPanes.length,
+    sessionsCount: sessions.length,
+    onCloseSplitPane: closeSplitPane,
+    onCloseSession: handleCloseSession,
+    onToggleTerminal: toggleTerminal
+  });
+
   if (isFeatureFlagsLoading) {
     return <Skeleton />;
   }
@@ -88,7 +118,7 @@ export const Terminal: React.FC<TerminalProps> = ({
           maxSplits={maxSplits}
           splitPanesCount={splitPanes.length}
           onAddSession={addSession}
-          onCloseSession={closeSession}
+          onCloseSession={handleCloseSession}
           onSwitchSession={switchSession}
           onToggleTerminal={toggleTerminal}
           onAddSplitPane={addSplitPane}
@@ -153,8 +183,8 @@ export const Terminal: React.FC<TerminalProps> = ({
                             closeLabel={t('terminal.close')}
                           />
                         )}
-                        <div 
-                          className="flex-1 relative" 
+                        <div
+                          className="flex-1 relative"
                           style={{ height: hasMultiplePanes ? 'calc(100% - 24px)' : '100%' }}
                         >
                           <TerminalPane
@@ -172,6 +202,15 @@ export const Terminal: React.FC<TerminalProps> = ({
                               focusPane(pane.id);
                             }}
                             onStatusChange={getStatusChangeHandler(pane.terminalId)}
+                            exitHandler={{
+                              splitPanesCount: splitPanes.length,
+                              sessionsCount: sessions.length,
+                              activePaneId,
+                              activeSessionId,
+                              onCloseSplitPane: closeSplitPane,
+                              onCloseSession: handleCloseSession,
+                              onToggleTerminal: toggleTerminal
+                            }}
                           />
                         </div>
                       </ResizablePanel>

@@ -1,0 +1,74 @@
+package tools
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/raghavyuva/nixopus-api/internal/features/container/service"
+	"github.com/raghavyuva/nixopus-api/internal/features/deploy/docker"
+	"github.com/raghavyuva/nixopus-api/internal/features/logger"
+	shared_storage "github.com/raghavyuva/nixopus-api/internal/storage"
+)
+
+// GetContainerLogsHandler returns the handler function for getting container logs
+// Auth middleware is applied automatically during registration, so this handler
+// only contains the business logic
+func GetContainerLogsHandler(
+	store *shared_storage.Store,
+	ctx context.Context,
+	l logger.Logger,
+) func(context.Context, *mcp.CallToolRequest, GetContainerLogsInput) (*mcp.CallToolResult, GetContainerLogsOutput, error) {
+	return func(
+		toolCtx context.Context,
+		req *mcp.CallToolRequest,
+		input GetContainerLogsInput,
+	) (*mcp.CallToolResult, GetContainerLogsOutput, error) {
+		dockerService, err := docker.GetDockerManager().GetDefaultService()
+		if err != nil {
+			l.Log(logger.Error, fmt.Sprintf("failed to get docker service: %v", err), "")
+			return nil, GetContainerLogsOutput{}, fmt.Errorf("failed to get docker service: %w", err)
+		}
+		if dockerService == nil {
+			l.Log(logger.Error, "docker service is nil", "")
+			return nil, GetContainerLogsOutput{}, fmt.Errorf("docker service is nil")
+		}
+
+		// Handle optional pointer fields
+		tail := 0
+		if input.Tail != nil {
+			tail = *input.Tail
+		}
+		var since, until string
+		if input.Since != nil {
+			since = *input.Since
+		}
+		if input.Until != nil {
+			until = *input.Until
+		}
+
+		decodedLogs, err := service.GetContainerLogs(
+			toolCtx,
+			store,
+			dockerService,
+			l,
+			service.ContainerLogsOptions{
+				ContainerID:    input.ID,
+				OrganizationID: input.OrganizationID,
+				Follow:         input.Follow,
+				Tail:           tail,
+				Since:          since,
+				Until:          until,
+				Stdout:         input.Stdout,
+				Stderr:         input.Stderr,
+			},
+		)
+		if err != nil {
+			return nil, GetContainerLogsOutput{}, err
+		}
+
+		return nil, GetContainerLogsOutput{
+			Logs: decodedLogs,
+		}, nil
+	}
+}

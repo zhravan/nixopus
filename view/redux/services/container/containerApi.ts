@@ -11,6 +11,7 @@ export interface Container {
   created: string;
   command: string;
   ip_address: string;
+  labels?: { [key: string]: string };
   ports: {
     private_port: number;
     public_port: number;

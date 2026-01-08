@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Box } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Container } from '@/redux/services/container/containerApi';
-import { groupContainersByApplication } from '../utils/group-containers';
 import { ContainerCard } from './card';
 import ContainersTable from './table';
 
 interface GroupedContainerViewProps {
-  containers: Container[];
+  groups: Array<{ application_id: string; application_name: string; containers: Container[] }>;
+  ungrouped?: Container[];
   viewMode: 'table' | 'card';
   onContainerClick: (container: Container) => void;
   onContainerAction: (id: string, action: 'start' | 'stop' | 'remove') => void;
@@ -20,7 +20,8 @@ interface GroupedContainerViewProps {
 }
 
 export function GroupedContainerView({
-  containers,
+  groups,
+  ungrouped = [],
   viewMode,
   onContainerClick,
   onContainerAction,
@@ -29,9 +30,8 @@ export function GroupedContainerView({
   sortOrder,
   onSort
 }: GroupedContainerViewProps) {
-  const { groups, ungrouped } = groupContainersByApplication(containers);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(groups.map((g) => g.applicationId))
+    new Set(groups.map((g) => g.application_id))
   );
 
   const toggleGroup = (applicationId: string) => {
@@ -53,14 +53,14 @@ export function GroupedContainerView({
   return (
     <div className="space-y-6">
       {groups.map((group) => {
-        const isExpanded = expandedGroups.has(group.applicationId);
+        const isExpanded = expandedGroups.has(group.application_id);
         const runningCount = group.containers.filter((c) => c.status === 'running').length;
         const totalCount = group.containers.length;
 
         return (
-          <div key={group.applicationId} className="border rounded-lg overflow-hidden">
+          <div key={group.application_id} className="border rounded-lg overflow-hidden">
             <button
-              onClick={() => toggleGroup(group.applicationId)}
+              onClick={() => toggleGroup(group.application_id)}
               className={cn(
                 'w-full flex items-center justify-between p-4 text-left',
                 'hover:bg-muted/50 transition-colors',
@@ -75,7 +75,7 @@ export function GroupedContainerView({
                 )}
                 <Box className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold truncate">{group.applicationName}</h3>
+                  <h3 className="font-semibold truncate">{group.application_name}</h3>
                   <p className="text-sm text-muted-foreground">
                     {totalCount} container{totalCount !== 1 ? 's' : ''} • {runningCount} running
                   </p>

@@ -30,6 +30,8 @@ export default function ContainersPage() {
 
   const {
     containers,
+    groups,
+    ungrouped,
     isLoading,
     isFetching,
     initialized,
@@ -193,7 +195,8 @@ export default function ContainersPage() {
           </div>
         ) : (
           <GroupedContainerView
-            containers={containers}
+            groups={groups}
+            ungrouped={ungrouped}
             viewMode={viewMode}
             onContainerClick={(container) => router.push(`/containers/${container.id}`)}
             onContainerAction={handleContainerAction}

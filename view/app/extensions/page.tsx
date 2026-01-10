@@ -8,7 +8,7 @@ import CategoryBadges from '@/app/extensions/components/category-badges';
 import { useExtensions } from '../../packages/hooks/use-extensions';
 import PaginationWrapper from '@/components/ui/pagination';
 import ExtensionInput from '@/app/extensions/components/extension-input';
-import PageHeader from '@/components/ui/page-header';
+import MainPageHeader from '@/components/ui/main-page-header';
 import { SearchBar } from '@/components/ui/search-bar';
 import { SelectWrapper } from '@/components/ui/select-wrapper';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,7 +46,7 @@ export default function ExtensionsPage() {
 
   return (
     <PageLayout maxWidth="full" padding="md" spacing="lg">
-      <PageHeader
+      <MainPageHeader
         label={t('extensions.title')}
         actions={
           <>

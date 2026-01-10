@@ -18,7 +18,7 @@ import PaginationWrapper from '@/components/ui/pagination';
 import { SelectWrapper } from '@/components/ui/select-wrapper';
 import { ContainerCard } from './components/card';
 import { cn } from '@/lib/utils';
-import PageHeader from '@/components/ui/page-header';
+import MainPageHeader from '@/components/ui/main-page-header';
 import { translationKey } from '@/hooks/use-translation';
 
 export default function ContainersPage() {
@@ -77,10 +77,9 @@ export default function ContainersPage() {
   return (
     <ResourceGuard resource="container" action="read" loadingFallback={<ContainersLoading />}>
       <PageLayout maxWidth="full" padding="md" spacing="lg" className="relative z-10">
-        <PageHeader
+        <MainPageHeader
           label={t('containers.title')}
           description={t('containers.description')}
-          className="mb-8"
           actions={getActionHeader(
             handleRefresh,
             isRefreshing,

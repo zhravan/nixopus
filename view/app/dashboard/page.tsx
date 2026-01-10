@@ -19,7 +19,7 @@ import { ContainersWidgetSkeleton } from '@/packages/components/container';
 import PageLayout from '@/components/layout/page-layout';
 import { DraggableGrid } from '@/components/ui/draggable-grid';
 import { WidgetSelector } from './components/widget-selector';
-import { DashboardItem } from '@/packages/components/types';
+import { DashboardItem } from '@/packages/types/layout';
 import { ContainerData, SystemStatsType } from '@/redux/types/monitor';
 import PageHeader from '@/components/ui/page-header';
 

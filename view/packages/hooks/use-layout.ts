@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { TERMINAL_POSITION } from '../components/types';
+import { TERMINAL_POSITION } from '../types/layout';
 import { useTour } from '@/hooks/useTour';
 import { useAppSidebar } from '@/hooks/use-app-sidebar';
 import { useTerminalState } from '@/app/terminal/utils/useTerminalState';

@@ -16,7 +16,7 @@ import {
 import { SidebarHoverMenu } from '@/components/ui/sidebar-hover-menu';
 import Link from 'next/link';
 import { useCollapsibleState } from '@/hooks/use-collapsible-state';
-import { TopNavMainProps } from '@/packages/components/types';
+import { TopNavMainProps } from '@/packages/types/layout';
 
 export function NavMain({ items, onItemClick }: TopNavMainProps) {
   const router = useRouter();

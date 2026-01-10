@@ -4,7 +4,7 @@ import { useFeatureFlags } from '@/hooks/features_provider';
 import useMonitor from '@/app/dashboard/hooks/use-monitor';
 import { useGetSMTPConfigurationsQuery } from '@/redux/services/settings/notificationApi';
 import { useCheckForUpdatesQuery } from '@/redux/services/users/userApi';
-import { FeatureNames } from '@/types/feature-flags';
+import { FeatureNames } from '@/packages/types/feature-flags';
 import { useTranslation } from '@/hooks/use-translation';
 import SystemInfoCard from '@/app/dashboard/components/system/system-info';
 import ClockWidget from '@/app/dashboard/components/system/clock';
@@ -14,7 +14,7 @@ import CPUUsageCard from '@/app/dashboard/components/system/cpu-usage';
 import MemoryUsageCard from '@/app/dashboard/components/system/memory-usage';
 import DiskUsageCard from '@/app/dashboard/components/system/disk-usage';
 import ContainersWidget from '@/packages/components/container';
-import { DashboardItem } from '@/packages/components/types';
+import { DashboardItem } from '@/packages/types/layout';
 import { useContainer } from '@/packages/hooks/container/use-container';
 
 export const useDashboard = () => {

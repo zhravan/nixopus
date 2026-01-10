@@ -39,7 +39,7 @@ import {
   AppTopBarProps,
   BreadCrumbsProps,
   TERMINAL_POSITION
-} from '@/packages/components/types';
+} from '@/packages/types/layout';
 import { cn } from '@/lib/utils';
 import { useLayout } from '@/packages/hooks/use-layout';
 

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { CreateTeam } from '@/components/features/create-team';
 import useTeamSwitcher from '@/hooks/use-team-switcher';
 import useBreadCrumbs from '@/hooks/use-bread-crumbs';
@@ -20,7 +20,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { Tour } from '@/components/Tour';
 import { useTour } from '@/hooks/useTour';
 import { Button } from '@/components/ui/button';
-import { HelpCircle, Terminal as TerminalIcon, Sparkles } from 'lucide-react';
+import { HelpCircle, Terminal as TerminalIcon } from 'lucide-react';
 import { AnyPermissionGuard } from '@/components/rbac/PermissionGuard';
 import { ModeToggler } from '@/components/ui/theme-toggler';
 import { RBACGuard } from '@/components/rbac/RBACGuard';
@@ -28,6 +28,8 @@ import { TopbarWidgets } from './topbar-widgets';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { AISheet } from '@/components/ai';
+import Image from 'next/image';
+import nixopusLogo from '@/public/nixopus_logo_transparent.png';
 
 enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
@@ -36,6 +38,7 @@ enum TERMINAL_POSITION {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const {
     addTeamModalOpen,
     setAddTeamModalOpen,
@@ -62,6 +65,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { startTour } = useTour();
   const { t } = useTranslation();
   const [isAISheetOpen, setIsAISheetOpen] = React.useState(false);
+
+  const isChatPage = pathname === '/chat';
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -114,18 +119,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div className="flex items-center gap-4">
               <TopbarWidgets />
-              <Button
-                variant={isAISheetOpen ? 'secondary' : 'outline'}
-                size="icon"
-                onClick={() => setIsAISheetOpen(true)}
-                title="Terminal for AI"
-                className={cn(
-                  'shrink-0 transition-all duration-200',
-                  isAISheetOpen && 'bg-primary/10 text-primary hover:bg-primary/20'
-                )}
-              >
-                <Sparkles className="h-5 w-5" />
-              </Button>
               <AnyPermissionGuard
                 permissions={['terminal:create', 'terminal:read', 'terminal:update']}
                 loadingFallback={null}
@@ -222,7 +215,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </Tour>
         </div>
-        <AISheet open={isAISheetOpen} onOpenChange={setIsAISheetOpen} />
+        {!isChatPage && (
+          <>
+            <AISheet open={isAISheetOpen} onOpenChange={setIsAISheetOpen} />
+            <Button
+              variant={isAISheetOpen ? 'secondary' : 'outline'}
+              size="icon"
+              onClick={() => setIsAISheetOpen(true)}
+              className={cn(
+                'fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 transition-all duration-200',
+                'hover:scale-110 hover:shadow-xl',
+                isAISheetOpen && 'bg-primary text-primary-foreground hover:bg-primary/90'
+              )}
+            >
+              <Image
+                src={nixopusLogo}
+                alt="Nixopus AI"
+                width={24}
+                height={24}
+                className="object-contain scale-200"
+              />
+            </Button>
+          </>
+        )}
       </SidebarInset>
     </SidebarProvider>
   );

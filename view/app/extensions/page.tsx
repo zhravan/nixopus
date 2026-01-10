@@ -67,7 +67,7 @@ export default function ExtensionsPage() {
       <MainPageHeader
         label={t('extensions.title')}
         actions={
-          <>
+          <div className="flex items-center gap-12">
             <SearchBar
               searchTerm={searchTerm}
               handleSearchChange={(e) => handleSearchChange(e.target.value)}
@@ -84,7 +84,7 @@ export default function ExtensionsPage() {
               placeholder={t('extensions.sortBy')}
               className="w-full sm:w-[180px]"
             />
-          </>
+          </div>
         }
       />
       <div className="space-y-6">

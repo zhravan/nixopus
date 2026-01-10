@@ -1,3 +1,4 @@
+import React from 'react';
 import { Sidebar } from '@/components/ui/sidebar';
 import { User } from '@/redux/types/user';
 import { Organization } from '@/redux/types/orgs';
@@ -69,4 +70,12 @@ interface TopNavItem {
 export enum TERMINAL_POSITION {
   BOTTOM = 'bottom',
   RIGHT = 'right'
+}
+
+// Dashboard
+export interface DashboardItem {
+  id: string;
+  component: React.JSX.Element;
+  className?: string;
+  isDefault: boolean;
 }

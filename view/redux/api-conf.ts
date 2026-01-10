@@ -151,3 +151,7 @@ export enum EXTENSIONURLS {
   LIST_EXECUTIONS = 'v1/extensions/by-extension-id/{extension_id}/executions',
   GET_EXECUTION_LOGS = 'v1/extensions/execution/{execution_id}/logs'
 }
+
+export enum AGENTSURLS {
+  CHAT = 'v1/agents/chat'
+}

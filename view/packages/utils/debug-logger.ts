@@ -1,4 +1,4 @@
-import { getAdvancedSettings } from '@/lib/advanced-settings';
+import { getAdvancedSettings } from '@/packages/utils/advanced-settings';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 

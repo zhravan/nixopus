@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { getAccessToken } from 'supertokens-auth-react/recipe/session';
 import { useAppSelector } from '@/redux/hooks';
-import { getAdvancedSettings } from '@/lib/advanced-settings';
+import { getAdvancedSettings } from '@/packages/utils/advanced-settings';
 
 type WebSocketContextValue = {
   isReady: boolean;

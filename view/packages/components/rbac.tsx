@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
 import { AlertTriangle } from 'lucide-react';
-import { Action, Permission, Resource } from '@/lib/rbac';
-import { useRBAC } from '@/lib/rbac';
+import { Action, Permission, Resource } from '@/packages/utils/rbac';
+import { useRBAC } from '@/packages/utils/rbac';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

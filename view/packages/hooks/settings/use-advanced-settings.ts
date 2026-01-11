@@ -15,7 +15,7 @@ import {
   DEFAULT_SETTINGS,
   saveSettingsToStorage,
   getAdvancedSettings
-} from '@/lib/advanced-settings';
+} from '@/packages/utils/advanced-settings';
 
 // Re-export for backward compatibility
 export type { AdvancedSettings };

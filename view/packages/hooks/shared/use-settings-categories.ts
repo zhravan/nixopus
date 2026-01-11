@@ -12,7 +12,7 @@ import {
   Terminal,
   Container
 } from 'lucide-react';
-import { useRBAC } from '@/lib/rbac';
+import { useRBAC } from '@/packages/utils/rbac';
 import { useFeatureFlags } from '@/packages/hooks/shared/features_provider';
 import { FeatureNames } from '@/packages/types/feature-flags';
 import { useAppSelector } from '@/redux/hooks';

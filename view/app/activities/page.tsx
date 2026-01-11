@@ -6,7 +6,7 @@ import { SelectWrapper } from '@/components/ui/select-wrapper';
 import { formatDistanceToNow } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { TypographySmall, TypographyMuted } from '@/components/ui/typography';
-import { DahboardUtilityHeader } from '@/components/layout/dashboard-page-header';
+import { DahboardUtilityHeader } from '@/packages/components/utility-header';
 import PaginationWrapper from '@/components/ui/pagination';
 import { DataTable, TableColumn } from '@/components/ui/data-table';
 import { ActivityMessage } from '@/redux/types/audit';

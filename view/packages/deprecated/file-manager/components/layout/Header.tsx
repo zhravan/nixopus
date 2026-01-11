@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
-import DashboardPageHeader from '@/components/layout/dashboard-page-header';
+import DashboardPageHeader from '@/packages/components/utility-header';
 
 function FileManagerHeader() {
   const { t } = useTranslation();

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRBAC } from '@/lib/rbac';
+import { useRBAC } from '@/packages/utils/rbac';
 import { useAppSelector } from '@/redux/hooks';
 import { User } from '@/redux/types/user';
 import { UserTypes } from '@/redux/types/orgs';

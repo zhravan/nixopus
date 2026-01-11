@@ -18,7 +18,7 @@ import { useFeatureFlags } from '@/packages/hooks/shared/features_provider';
 import DisabledFeature from '@/packages/components/rbac';
 import { FeatureNames } from '@/packages/types/feature-flags';
 import { AnyPermissionGuard } from '@/packages/components/rbac';
-import { useRBAC } from '@/lib/rbac';
+import { useRBAC } from '@/packages/utils/rbac';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useTerminalSessions } from '@/packages/hooks/terminal/use-terminal-sessions';
 import { useTerminalStyles } from '@/packages/hooks/terminal/use-terminal-styles';

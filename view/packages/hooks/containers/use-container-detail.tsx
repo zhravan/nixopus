@@ -12,7 +12,7 @@ import {
 } from '@/redux/services/container/containerApi';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { getAdvancedSettings } from '@/lib/advanced-settings';
+import { getAdvancedSettings } from '@/packages/utils/advanced-settings';
 
 export function useContainerDetail() {
   const { t } = useTranslation();

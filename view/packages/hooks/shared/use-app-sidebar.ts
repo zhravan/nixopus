@@ -4,7 +4,7 @@ import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
 import { useNavigationState } from '@/packages/hooks/shared/use_navigation_state';
 import { setActiveOrganization } from '@/redux/features/users/userSlice';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
-import { useRBAC } from '@/lib/rbac';
+import { useRBAC } from '@/packages/utils/rbac';
 import { logout, logoutUser } from '@/redux/features/users/authSlice';
 import { authApi } from '@/redux/services/users/authApi';
 import { userApi } from '@/redux/services/users/userApi';

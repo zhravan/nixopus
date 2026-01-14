@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { streamAIChat, getThreadMessages } from '@/redux/services/agents/agentsApi';
-import type { Message } from '@/packages/components/ai/types';
+import type { Message } from '@/packages/types/ai';
 
 interface UseAIChatOptions {
   open: boolean;

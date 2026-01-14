@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Bot } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
+import { useTranslation } from '@/packages/hooks/shared/use-translation';
 import { SuggestionChip } from './suggestion-chip';
 
 interface EmptyStateProps {

@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useTranslation } from '@/hooks/use-translation';
+import { useTranslation } from '@/packages/hooks/shared/use-translation';
 import { Sparkles, Send, Loader2 } from 'lucide-react';
 import { EmptyState } from './empty-state';
 import { MessageBubble } from './message-bubble';

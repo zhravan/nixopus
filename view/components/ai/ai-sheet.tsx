@@ -2,9 +2,15 @@
 
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useTranslation } from '@/hooks/use-translation';
-import { Sparkles } from 'lucide-react';
-import { AIContent } from './ai-content';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from '@/packages/hooks/shared/use-translation';
+import { Sparkles, Send, Loader2 } from 'lucide-react';
+import { EmptyState } from './empty-state';
+import { MessageBubble } from './message-bubble';
+import { StreamingIndicator } from './streaming-indicator';
+import { useAIChat } from './use-ai-chat';
 
 interface AISheetProps {
   open: boolean;

@@ -1,3 +1,58 @@
+# [0.1.0-alpha.115](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.114...v0.1.0-alpha.115) (2026-01-17)
+
+
+### Features
+
+* add shared packages to pkg ([#973](https://github.com/raghavyuva/nixopus/issues/973)) ([397d2fb](https://github.com/raghavyuva/nixopus/commit/397d2fb8cd3d34cd96fe777e693483148b0d84b7))
+
+
+
+# [0.1.0-alpha.114](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.113...v0.1.0-alpha.114) (2026-01-15)
+
+
+### Bug Fixes
+
+* extension input not rendering for install input ([#960](https://github.com/raghavyuva/nixopus/issues/960)) ([47745fb](https://github.com/raghavyuva/nixopus/commit/47745fbe1416be6836c2b6457947b1befefc7cdf))
+
+
+### Features
+
+* add deployment widgets ([#970](https://github.com/raghavyuva/nixopus/issues/970)) ([9c002aa](https://github.com/raghavyuva/nixopus/commit/9c002aad419a2f214572bb85cd47d044afd8c465))
+* add migration fiels for multi domains per app ([a82090c](https://github.com/raghavyuva/nixopus/commit/a82090cf8f96aab845a3f2b5688851e8afb31c4b))
+* add support for multiple domain api changes ([#967](https://github.com/raghavyuva/nixopus/issues/967)) ([1ec25e8](https://github.com/raghavyuva/nixopus/commit/1ec25e85de54a2f91eebd120471f3759986494fb))
+* allow deployments without requiring domain ([6a7563e](https://github.com/raghavyuva/nixopus/commit/6a7563e5d18a7bd15a37fa19193131ab2a068014))
+* **queue:** support consumer lifecycle mgmt for queue & set retry to 1 ([#931](https://github.com/raghavyuva/nixopus/issues/931)) ([de833f7](https://github.com/raghavyuva/nixopus/commit/de833f7395f9a90cf82f0d1526373fcd815cfff8))
+* support for featured extensions ([#962](https://github.com/raghavyuva/nixopus/issues/962)) ([71190e8](https://github.com/raghavyuva/nixopus/commit/71190e8c9c7e55f44f0c8d6a111d99161d29255f))
+
+
+
+# [0.1.0-alpha.113](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.112...v0.1.0-alpha.113) (2026-01-12)
+
+
+### Bug Fixes
+
+* healthcheck card usage in application ([be3c983](https://github.com/raghavyuva/nixopus/commit/be3c98304d361efd590fbabd4601324db0cb4774))
+* pagination aware container grouping ([f9e192e](https://github.com/raghavyuva/nixopus/commit/f9e192ea6009f74a7ff9894c1eb6e37c2db8932e))
+* status column position in container listing table ([c57d51c](https://github.com/raghavyuva/nixopus/commit/c57d51c2330ca108f5fe52bb6f7a8d733664c622))
+
+
+### Features
+
+* add database migrations for healthcheck feature ([d77498d](https://github.com/raghavyuva/nixopus/commit/d77498d1f276c7b6f5be63806304c420a705db21))
+* add gap between searchbar and filter action ([4d35eff](https://github.com/raghavyuva/nixopus/commit/4d35eff3da1888891c92e0fb6a3e95ac1481ba6b))
+* add healthcheck types, storage layer, and validation ([#829](https://github.com/raghavyuva/nixopus/issues/829)) ([f4370bd](https://github.com/raghavyuva/nixopus/commit/f4370bd6ec892c85bc897458d7e7cbca4fa9916e))
+* add support for container grouping by project ([8c3b91c](https://github.com/raghavyuva/nixopus/commit/8c3b91c9e55ba24944aa6b5fec11288b086706ba))
+* add support for healthcheck chart ([#916](https://github.com/raghavyuva/nixopus/issues/916)) ([9b32605](https://github.com/raghavyuva/nixopus/commit/9b32605207a4c00c39616a4da770d8a995275ed3)), closes [#836](https://github.com/raghavyuva/nixopus/issues/836)
+* add title for repository/self hosting page ([fb03df1](https://github.com/raghavyuva/nixopus/commit/fb03df139d196d8a6a91dfac4e0b8b1d7935323a))
+* add title for repository/self hosting page ([883d7da](https://github.com/raghavyuva/nixopus/commit/883d7da0d01ccf9f40a8f1d70ed8fb28e6fc3c9b))
+* container page refactored ([9d2949b](https://github.com/raghavyuva/nixopus/commit/9d2949bf69c899fd48e119d0975f6710667629f4))
+* draggable deployment monitoring section ([532f219](https://github.com/raghavyuva/nixopus/commit/532f219554066f0f7288359377688196b6730d6a))
+* move container related to dashboard to dashboard/containers ([3f3e83e](https://github.com/raghavyuva/nixopus/commit/3f3e83e527947c27e929c5edff765168d0df05e9))
+* move types to packages ([cb0c660](https://github.com/raghavyuva/nixopus/commit/cb0c6609941c99343ff33a0784d1194399ebe30c))
+* refactor MainPageHeader/SubPageHeader ([750cbb2](https://github.com/raghavyuva/nixopus/commit/750cbb210d861d4e0bb5d15170cf2f878ce7f1df))
+
+
+
 # [0.1.0-alpha.112](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.111...v0.1.0-alpha.112) (2026-01-07)
 
 

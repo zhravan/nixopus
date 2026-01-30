@@ -438,29 +438,72 @@ func (s *SSH) ConnectWithRetry() (*goph.Client, error) {
 		return nil, fmt.Errorf("user and host are required for SSH connection")
 	}
 
-	// Try private key first
-	client, err := s.ConnectWithPrivateKey()
-	if err == nil {
-		return client, nil
-	}
+	var privateKeyErr error
+	var passwordErr error
 
-	// If private key fails, try password with exponential backoff
-	maxRetries := 3
-	baseDelay := 100 * time.Millisecond
-
-	for attempt := 0; attempt < maxRetries; attempt++ {
-		if attempt > 0 {
-			delay := time.Duration(attempt) * baseDelay
-			time.Sleep(delay)
-		}
-
-		client, err = s.ConnectWithPassword()
+	// Try private key first if available
+	if s.PrivateKey != "" {
+		client, err := s.ConnectWithPrivateKey()
 		if err == nil {
 			return client, nil
 		}
+		privateKeyErr = err
 	}
 
-	return nil, fmt.Errorf("failed to connect with both private key and password after %d attempts: %w", maxRetries, err)
+	// If private key fails or is not available, try password if configured
+	if s.Password != "" {
+		maxRetries := 3
+		baseDelay := 100 * time.Millisecond
+
+		for attempt := 0; attempt < maxRetries; attempt++ {
+			if attempt > 0 {
+				delay := time.Duration(attempt) * baseDelay
+				time.Sleep(delay)
+			}
+
+			client, err := s.ConnectWithPassword()
+			if err == nil {
+				return client, nil
+			}
+			passwordErr = err
+		}
+	}
+
+	// Build comprehensive error message
+	var attemptedMethods []string
+	var errors []string
+
+	if s.PrivateKey != "" {
+		attemptedMethods = append(attemptedMethods, "private key")
+		if privateKeyErr != nil {
+			errors = append(errors, fmt.Sprintf("private key: %v", privateKeyErr))
+		}
+	}
+
+	if s.Password != "" {
+		attemptedMethods = append(attemptedMethods, "password")
+		if passwordErr != nil {
+			errors = append(errors, fmt.Sprintf("password: %v", passwordErr))
+		}
+	}
+
+	if len(attemptedMethods) == 0 {
+		return nil, fmt.Errorf("no authentication method configured: both private key and password are empty")
+	}
+
+	errorMsg := fmt.Sprintf("failed to connect using %s", attemptedMethods[0])
+	if len(attemptedMethods) > 1 {
+		errorMsg = fmt.Sprintf("failed to connect using %s and %s", attemptedMethods[0], attemptedMethods[1])
+	}
+
+	if len(errors) > 0 {
+		errorMsg += fmt.Sprintf(": %s", errors[0])
+		if len(errors) > 1 {
+			errorMsg += fmt.Sprintf("; %s", errors[1])
+		}
+	}
+
+	return nil, fmt.Errorf(errorMsg)
 }
 
 func (s *SSH) ConnectWithPrivateKey() (*goph.Client, error) {

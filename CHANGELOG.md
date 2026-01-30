@@ -1,3 +1,12 @@
+# [0.1.0-alpha.120](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.119...v0.1.0-alpha.120) (2026-01-30)
+
+
+### Bug Fixes
+
+* ssh connection attempt for password and private key ([dd5e1db](https://github.com/raghavyuva/nixopus/commit/dd5e1db29a57c769594aa975d41419046bfdf7b7))
+
+
+
 # [0.1.0-alpha.119](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.118...v0.1.0-alpha.119) (2026-01-30)
 
 

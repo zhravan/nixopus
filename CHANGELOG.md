@@ -1,3 +1,17 @@
+# [0.1.0-alpha.118](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.117...v0.1.0-alpha.118) (2026-01-30)
+
+
+### Bug Fixes
+
+* update device authorization flow and cors for multi origin requests ([be35799](https://github.com/raghavyuva/nixopus/commit/be35799622acb1d1c46f03ac8433c1d4967ffbea))
+
+
+### Features
+
+* add device authorization flow for login ([5ab4094](https://github.com/raghavyuva/nixopus/commit/5ab409430abe4cd36861df3ed3db64f4066cc538))
+
+
+
 # [0.1.0-alpha.117](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.116...v0.1.0-alpha.117) (2026-01-30)
 
 

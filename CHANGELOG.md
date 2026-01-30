@@ -1,3 +1,12 @@
+# [0.1.0-alpha.119](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.118...v0.1.0-alpha.119) (2026-01-30)
+
+
+### Bug Fixes
+
+* add raw ssh key for pem parsing of ssh ([9567cd9](https://github.com/raghavyuva/nixopus/commit/9567cd9f7015f582d9e229351b0548c821f51ca7))
+
+
+
 # [0.1.0-alpha.118](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.117...v0.1.0-alpha.118) (2026-01-30)
 
 

@@ -1,3 +1,12 @@
+# [0.1.0-alpha.122](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.121...v0.1.0-alpha.122) (2026-02-04)
+
+
+### Bug Fixes
+
+* syntax error in ssh init ([d440cfe](https://github.com/raghavyuva/nixopus/commit/d440cfe280384d5871503c90348c90d2d596c35c))
+
+
+
 # [0.1.0-alpha.121](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.120...v0.1.0-alpha.121) (2026-02-04)
 
 

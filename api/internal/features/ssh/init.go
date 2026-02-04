@@ -518,7 +518,6 @@ func (s *SSH) ConnectWithRetry() (*goph.Client, error) {
 			delay := time.Duration(attempt) * baseDelay
 			time.Sleep(delay)
 		}
-	}
 
 		client, err := s.ConnectWithPassword()
 		if err == nil {

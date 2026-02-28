@@ -98,6 +98,9 @@ func validateUpdateDeploymentRequest(req *types.UpdateDeploymentRequest) error {
 			req.BasePath = "/" + req.BasePath
 		}
 	}
+	if req.Domains != nil && len(req.Domains) > 5 {
+		return errors.New("maximum 5 domains allowed per application")
+	}
 	return nil
 }
 

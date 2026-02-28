@@ -129,6 +129,7 @@ export interface UpdateDeploymentRequest {
   force?: boolean;
   dockerfile_path?: string;
   base_path?: string;
+  domains?: string[];
 }
 
 export interface ReDeployApplicationRequest {

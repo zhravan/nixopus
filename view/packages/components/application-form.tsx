@@ -129,7 +129,8 @@ export const DeployConfigureForm = ({
     force: true,
     id: application_id,
     DockerfilePath: dockerFilePath,
-    base_path
+    base_path,
+    domains: applicationDomains
   });
 
   const {
@@ -143,7 +144,8 @@ export const DeployConfigureForm = ({
     domains: applicationDomains,
     build_pack,
     env_variables,
-    build_variables
+    build_variables,
+    domainsEditable: true
   });
 
   const renderReadOnlyField = (
@@ -253,6 +255,16 @@ export const DeployConfigureForm = ({
                     validator={(value) => parsePort(value) !== null}
                   />
                 )}
+              </div>
+              <div className="mt-4">
+                <MultipleDomainInput
+                  form={form}
+                  label={t('selfHost.configuration.fields.domain.label')}
+                  name="domains"
+                  placeholder="example.com"
+                  required={false}
+                  maxDomains={5}
+                />
               </div>
             </CollapsibleSection>
 

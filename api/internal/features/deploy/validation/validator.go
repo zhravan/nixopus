@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/types"
+	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
 type Validator struct {
@@ -59,6 +60,9 @@ func validateDeploymentRequest(req *types.CreateDeploymentRequest) error {
 	if req.Environment == "" {
 		return errors.New("environment is required")
 	}
+	if !shared_types.IsValidEnvironment(string(req.Environment)) {
+		return types.ErrInvalidEnvironment
+	}
 	if req.BuildPack == "" {
 		return errors.New("build_pack is required")
 	}
@@ -87,6 +91,9 @@ func validateUpdateDeploymentRequest(req *types.UpdateDeploymentRequest) error {
 		if len(req.Name) < 3 {
 			return errors.New("name must be at least 3 characters")
 		}
+	}
+	if req.Environment != "" && !shared_types.IsValidEnvironment(string(req.Environment)) {
+		return types.ErrInvalidEnvironment
 	}
 	if req.Port != 0 {
 		if req.Port < 1 || req.Port > 65535 {
@@ -149,6 +156,9 @@ func validateCreateProjectRequest(req *types.CreateProjectRequest) error {
 	if req.Environment == "" {
 		req.Environment = "production"
 	}
+	if !shared_types.IsValidEnvironment(string(req.Environment)) {
+		return types.ErrInvalidEnvironment
+	}
 	if req.BuildPack == "" {
 		req.BuildPack = "dockerfile"
 	}
@@ -188,11 +198,7 @@ func validateDuplicateProjectRequest(req types.DuplicateProjectRequest) error {
 	if req.Environment == "" {
 		return types.ErrInvalidEnvironment
 	}
-	// Validate environment value
-	switch req.Environment {
-	case "development", "staging", "production":
-		// Valid environment
-	default:
+	if !shared_types.IsValidEnvironment(string(req.Environment)) {
 		return types.ErrInvalidEnvironment
 	}
 	return nil
@@ -220,6 +226,9 @@ func validateAddApplicationToFamilyRequest(req *types.AddApplicationToFamilyRequ
 	// Set defaults for optional fields
 	if req.Environment == "" {
 		req.Environment = "development"
+	}
+	if !shared_types.IsValidEnvironment(string(req.Environment)) {
+		return types.ErrInvalidEnvironment
 	}
 	if req.BuildPack == "" {
 		req.BuildPack = "dockerfile"

@@ -97,7 +97,7 @@ export type Status =
   | 'running'
   | 'stopped';
 
-export type Environment = 'development' | 'staging' | 'production';
+export type Environment = string;
 
 export type BuildPack = 'dockerfile' | 'dockerCompose' | 'static';
 

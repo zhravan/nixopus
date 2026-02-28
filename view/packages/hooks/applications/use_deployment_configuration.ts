@@ -20,21 +20,6 @@ export function useDeploymentConfiguration({
 }: UseDeploymentConfigurationProps) {
   const { t } = useTranslation();
 
-  const environmentOptions = [
-    {
-      label: t('selfHost.deployForm.fields.environment.options.staging'),
-      value: 'staging'
-    },
-    {
-      label: t('selfHost.deployForm.fields.environment.options.production'),
-      value: 'production'
-    },
-    {
-      label: t('selfHost.deployForm.fields.environment.options.development'),
-      value: 'development'
-    }
-  ];
-
   const dockerConfigFields = [
     {
       label: t('selfHost.configuration.fields.basePath.label'),
@@ -99,7 +84,6 @@ export function useDeploymentConfiguration({
   ];
 
   return {
-    environmentOptions,
     dockerConfigFields,
     envVariableEditors,
     commandFields,

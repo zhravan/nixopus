@@ -56,7 +56,12 @@ function useUpdateDeployment({
         message: t('selfHost.deployForm.validation.applicationName.invalidFormat')
       })
       .optional(),
-    environment: z.string().optional(),
+    environment: z
+      .string()
+      .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
+        message: t('selfHost.deployForm.validation.environment.invalidValue')
+      })
+      .optional(),
     pre_run_command: z.string().optional(),
     post_run_command: z.string().optional(),
     build_variables: z.record(z.string(), z.string()).optional().default({}),

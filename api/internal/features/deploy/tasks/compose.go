@@ -6,35 +6,31 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/raghavyuva/caddygo"
-	"github.com/raghavyuva/nixopus-api/internal/config"
+	"github.com/raghavyuva/nixopus-api/internal/features/deploy/caddy"
 	"github.com/raghavyuva/nixopus-api/internal/features/deploy/docker"
 	shared_types "github.com/raghavyuva/nixopus-api/internal/types"
 )
 
-// deployDockerCompose handles the common logic for docker compose deployment
 func (t *TaskService) deployDockerCompose(ctx context.Context, TaskPayload shared_types.TaskPayload, deploymentType string) error {
 	taskCtx := t.NewTaskContext(TaskPayload)
 
-	// Clone repository
-	repoPath, err := t.cloneRepositoryForCompose(TaskPayload, deploymentType, taskCtx)
+	repoPath, err := t.cloneRepositoryForCompose(ctx, TaskPayload, deploymentType, taskCtx)
 	if err != nil {
 		return err
 	}
 
-	// Build compose file path
+	orgCtx := context.WithValue(ctx, shared_types.OrganizationIDKey, TaskPayload.Application.OrganizationID.String())
+
 	composeFilePath := t.buildComposeFilePath(TaskPayload, repoPath, taskCtx)
 	envVars := GetMapFromString(TaskPayload.Application.EnvironmentVariables)
 	outputCallback := t.createOutputCallback(taskCtx)
 
-	// Execute deployment based on type
 	deploymentTypeEnum := shared_types.DeploymentType(deploymentType)
-	if err := t.executeComposeDeployment(deploymentTypeEnum, composeFilePath, envVars, outputCallback, taskCtx); err != nil {
+	if err := t.executeComposeDeployment(orgCtx, deploymentTypeEnum, composeFilePath, envVars, outputCallback, taskCtx); err != nil {
 		return err
 	}
 
-	// Add domain if specified
-	if err := t.addDomainForCompose(TaskPayload, taskCtx); err != nil {
+	if err := t.addDomainsForCompose(orgCtx, TaskPayload, taskCtx); err != nil {
 		return err
 	}
 
@@ -42,11 +38,10 @@ func (t *TaskService) deployDockerCompose(ctx context.Context, TaskPayload share
 	return nil
 }
 
-// cloneRepositoryForCompose clones the repository for compose deployment
-func (t *TaskService) cloneRepositoryForCompose(TaskPayload shared_types.TaskPayload, deploymentType string, taskCtx *TaskContext) (string, error) {
+func (t *TaskService) cloneRepositoryForCompose(ctx context.Context, TaskPayload shared_types.TaskPayload, deploymentType string, taskCtx *TaskContext) (string, error) {
 	taskCtx.LogAndUpdateStatus("Starting deployment process", shared_types.Cloning)
 
-	repoPath, err := t.Clone(CloneConfig{
+	repoPath, err := t.Clone(ctx, CloneConfig{
 		TaskPayload:    TaskPayload,
 		DeploymentType: deploymentType,
 		TaskContext:    taskCtx,
@@ -61,7 +56,6 @@ func (t *TaskService) cloneRepositoryForCompose(TaskPayload shared_types.TaskPay
 	return repoPath, nil
 }
 
-// buildComposeFilePath builds the path to the docker-compose file
 func (t *TaskService) buildComposeFilePath(TaskPayload shared_types.TaskPayload, repoPath string, taskCtx *TaskContext) string {
 	basePath := TaskPayload.Application.BasePath
 	if basePath == "" || basePath == "/" {
@@ -78,7 +72,6 @@ func (t *TaskService) buildComposeFilePath(TaskPayload shared_types.TaskPayload,
 	return composeFilePath
 }
 
-// createOutputCallback creates a callback function for streaming output
 func (t *TaskService) createOutputCallback(taskCtx *TaskContext) func(string) {
 	return func(line string) {
 		if strings.TrimSpace(line) != "" {
@@ -87,21 +80,20 @@ func (t *TaskService) createOutputCallback(taskCtx *TaskContext) func(string) {
 	}
 }
 
-// executeComposeDeployment executes the appropriate compose command based on deployment type
-func (t *TaskService) executeComposeDeployment(deploymentType shared_types.DeploymentType, composeFilePath string, envVars map[string]string, outputCallback func(string), taskCtx *TaskContext) error {
+func (t *TaskService) executeComposeDeployment(ctx context.Context, deploymentType shared_types.DeploymentType, composeFilePath string, envVars map[string]string, outputCallback func(string), taskCtx *TaskContext) error {
 	switch deploymentType {
 	case shared_types.DeploymentTypeCreate:
-		return t.composeUp(composeFilePath, envVars, outputCallback, taskCtx, "Starting Docker Compose services", "Docker Compose services started successfully")
+		return t.composeUp(ctx, composeFilePath, envVars, outputCallback, taskCtx, "Starting Docker Compose services", "Docker Compose services started successfully")
 
 	case shared_types.DeploymentTypeReDeploy, shared_types.DeploymentTypeUpdate, shared_types.DeploymentTypeRollback:
-		if err := t.composeDown(composeFilePath, outputCallback, taskCtx); err != nil {
+		if err := t.composeDown(ctx, composeFilePath, outputCallback, taskCtx); err != nil {
 			return err
 		}
 		taskCtx.AddLog("Existing services stopped, starting with new code")
-		return t.composeUp(composeFilePath, envVars, outputCallback, taskCtx, "Starting Docker Compose services", "Docker Compose services restarted successfully")
+		return t.composeUp(ctx, composeFilePath, envVars, outputCallback, taskCtx, "Starting Docker Compose services", "Docker Compose services restarted successfully")
 
 	case shared_types.DeploymentTypeRestart:
-		return t.composeRestart(composeFilePath, envVars, outputCallback, taskCtx)
+		return t.composeRestart(ctx, composeFilePath, envVars, outputCallback, taskCtx)
 
 	default:
 		taskCtx.LogAndUpdateStatus("Unknown deployment type: "+string(deploymentType), shared_types.Failed)
@@ -109,18 +101,23 @@ func (t *TaskService) executeComposeDeployment(deploymentType shared_types.Deplo
 	}
 }
 
-// composeUp starts docker compose services
-func (t *TaskService) composeUp(composeFilePath string, envVars map[string]string, outputCallback func(string), taskCtx *TaskContext, startMsg, successMsg string) error {
+func (t *TaskService) composeUp(ctx context.Context, composeFilePath string, envVars map[string]string, outputCallback func(string), taskCtx *TaskContext, startMsg, successMsg string) error {
 	taskCtx.AddLog(startMsg)
 
-	if dockerSvc, ok := t.DockerRepo.(*docker.DockerService); ok {
-		_, err := dockerSvc.ComposeUpWithCallback(composeFilePath, envVars, outputCallback)
+	dockerSvc, err := t.getDockerService(ctx)
+	if err != nil {
+		taskCtx.LogAndUpdateStatus("Failed to get docker service: "+err.Error(), shared_types.Failed)
+		return err
+	}
+
+	if ds, ok := dockerSvc.(*docker.DockerService); ok {
+		_, err := ds.ComposeUpWithCallback(composeFilePath, envVars, outputCallback)
 		if err != nil {
 			taskCtx.LogAndUpdateStatus("Failed to start docker compose services: "+err.Error(), shared_types.Failed)
 			return err
 		}
 	} else {
-		output, err := t.DockerRepo.ComposeUp(composeFilePath, envVars)
+		output, err := dockerSvc.ComposeUp(composeFilePath, envVars)
 		if err != nil {
 			taskCtx.LogAndUpdateStatus("Failed to start docker compose services: "+err.Error(), shared_types.Failed)
 			return err
@@ -134,18 +131,23 @@ func (t *TaskService) composeUp(composeFilePath string, envVars map[string]strin
 	return nil
 }
 
-// composeDown stops docker compose services
-func (t *TaskService) composeDown(composeFilePath string, outputCallback func(string), taskCtx *TaskContext) error {
+func (t *TaskService) composeDown(ctx context.Context, composeFilePath string, outputCallback func(string), taskCtx *TaskContext) error {
 	taskCtx.AddLog("Stopping existing Docker Compose services")
 
-	if dockerSvc, ok := t.DockerRepo.(*docker.DockerService); ok {
-		err := dockerSvc.ComposeDownWithCallback(composeFilePath, outputCallback)
+	dockerSvc, err := t.getDockerService(ctx)
+	if err != nil {
+		taskCtx.LogAndUpdateStatus("Failed to get docker service: "+err.Error(), shared_types.Failed)
+		return err
+	}
+
+	if ds, ok := dockerSvc.(*docker.DockerService); ok {
+		err := ds.ComposeDownWithCallback(composeFilePath, outputCallback)
 		if err != nil {
 			taskCtx.LogAndUpdateStatus("Failed to stop docker compose services: "+err.Error(), shared_types.Failed)
 			return err
 		}
 	} else {
-		err := t.DockerRepo.ComposeDown(composeFilePath)
+		err := dockerSvc.ComposeDown(composeFilePath)
 		if err != nil {
 			taskCtx.LogAndUpdateStatus("Failed to stop docker compose services: "+err.Error(), shared_types.Failed)
 			return err
@@ -155,22 +157,26 @@ func (t *TaskService) composeDown(composeFilePath string, outputCallback func(st
 	return nil
 }
 
-// composeRestart restarts docker compose services
-func (t *TaskService) composeRestart(composeFilePath string, envVars map[string]string, outputCallback func(string), taskCtx *TaskContext) error {
+func (t *TaskService) composeRestart(ctx context.Context, composeFilePath string, envVars map[string]string, outputCallback func(string), taskCtx *TaskContext) error {
 	taskCtx.AddLog("Restarting Docker Compose services")
 
-	if dockerSvc, ok := t.DockerRepo.(*docker.DockerService); ok {
-		err := dockerSvc.ComposeRestart(composeFilePath, envVars, outputCallback)
+	dockerSvc, err := t.getDockerService(ctx)
+	if err != nil {
+		taskCtx.LogAndUpdateStatus("Failed to get docker service: "+err.Error(), shared_types.Failed)
+		return err
+	}
+
+	if ds, ok := dockerSvc.(*docker.DockerService); ok {
+		err := ds.ComposeRestart(composeFilePath, envVars, outputCallback)
 		if err != nil {
 			taskCtx.LogAndUpdateStatus("Failed to restart docker compose services: "+err.Error(), shared_types.Failed)
 			return err
 		}
 	} else {
-		// Fallback: use down + up for restart
-		if err := t.composeDown(composeFilePath, outputCallback, taskCtx); err != nil {
+		if err := t.composeDown(ctx, composeFilePath, outputCallback, taskCtx); err != nil {
 			return err
 		}
-		output, err := t.DockerRepo.ComposeUp(composeFilePath, envVars)
+		output, err := dockerSvc.ComposeUp(composeFilePath, envVars)
 		if err != nil {
 			taskCtx.LogAndUpdateStatus("Failed to start docker compose services: "+err.Error(), shared_types.Failed)
 			return err
@@ -184,25 +190,40 @@ func (t *TaskService) composeRestart(composeFilePath string, envVars map[string]
 	return nil
 }
 
-// addDomainForCompose adds domain configuration if specified
-func (t *TaskService) addDomainForCompose(TaskPayload shared_types.TaskPayload, taskCtx *TaskContext) error {
-	if TaskPayload.Application.Domain == "" {
+func (t *TaskService) addDomainsForCompose(ctx context.Context, TaskPayload shared_types.TaskPayload, taskCtx *TaskContext) error {
+	if len(TaskPayload.Application.Domains) == 0 {
 		return nil
 	}
 
-	client := GetCaddyClient()
 	port := TaskPayload.Application.Port
-	upstreamHost := config.AppConfig.SSH.Host
-
-	taskCtx.AddLog(fmt.Sprintf("Adding domain %s pointing to %s:%d", TaskPayload.Application.Domain, upstreamHost, port))
-
-	err := client.AddDomainWithAutoTLS(TaskPayload.Application.Domain, upstreamHost, port, caddygo.DomainOptions{})
+	upstreamHost, err := GetSSHHostForOrganization(ctx, TaskPayload.Application.OrganizationID)
 	if err != nil {
-		taskCtx.LogAndUpdateStatus("Failed to add domain: "+err.Error(), shared_types.Failed)
+		taskCtx.LogAndUpdateStatus("Failed to get SSH host: "+err.Error(), shared_types.Failed)
 		return err
 	}
 
-	client.Reload()
-	taskCtx.AddLog("Domain added successfully: " + TaskPayload.Application.Domain)
+	var routes []caddy.DomainRoute
+	for _, appDomain := range TaskPayload.Application.Domains {
+		if appDomain.Domain == "" {
+			continue
+		}
+		routes = append(routes, caddy.DomainRoute{
+			Domain:       appDomain.Domain,
+			UpstreamDial: caddy.FormatDial(upstreamHost, port),
+		})
+	}
+
+	if len(routes) == 0 {
+		return nil
+	}
+
+	if err := caddy.AddDomainsAtomic(ctx, nil, &t.Logger, routes); err != nil {
+		taskCtx.LogAndUpdateStatus("Failed to configure proxy: "+err.Error(), shared_types.Failed)
+		return err
+	}
+
+	for _, r := range routes {
+		taskCtx.AddLog("Domain " + r.Domain + " added successfully with TLS")
+	}
 	return nil
 }

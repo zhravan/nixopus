@@ -93,16 +93,10 @@ function useCreateDeployment({
         message: t('selfHost.deployForm.validation.repository.invalidFormat')
       }),
     build_pack: z
-      .enum([BuildPack.Dockerfile /* , BuildPack.DockerCompose */ /* BuildPack.Static */])
-      .refine(
-        (value) => value === BuildPack.Dockerfile /* || value === BuildPack.DockerCompose */,
-        // DockerCompose build pack option commented out for deployment
-        // Static build pack option commented out for deployment
-        // value === BuildPack.Static,
-        {
-          message: t('selfHost.deployForm.validation.buildPack.invalidValue')
-        }
-      ),
+      .enum([BuildPack.Dockerfile, BuildPack.DockerCompose /* BuildPack.Static */])
+      .refine((value) => value === BuildPack.Dockerfile || value === BuildPack.DockerCompose, {
+        message: t('selfHost.deployForm.validation.buildPack.invalidValue')
+      }),
     env_variables: z.record(z.string(), z.string()).optional().default({}),
     build_variables: z.record(z.string(), z.string()).optional().default({}),
     pre_run_commands: z.string().optional(),
@@ -111,9 +105,8 @@ function useCreateDeployment({
     base_path: z.string().optional().default(base_path)
   });
 
-  // Static and DockerCompose build pack options commented out for deployment - default to Dockerfile
-  // Since schema only accepts Dockerfile, ensure we always use Dockerfile
-  const validBuildPack = BuildPack.Dockerfile;
+  const validBuildPack =
+    build_pack === BuildPack.DockerCompose ? BuildPack.DockerCompose : BuildPack.Dockerfile;
 
   const form = useForm<z.infer<typeof deploymentFormSchema>>({
     resolver: zodResolver(deploymentFormSchema),
@@ -138,14 +131,11 @@ function useCreateDeployment({
     if (application_name) form.setValue('application_name', application_name);
     if (environment) form.setValue('environment', environment);
     if (branch) form.setValue('branch', branch);
-    const isDockerCompose =
-      build_pack === BuildPack.DockerCompose ||
-      (build_pack as string) === 'docker-compose' ||
-      (build_pack as string) === 'dockerCompose';
+    const isDockerCompose = build_pack === BuildPack.DockerCompose;
     if (port && !isDockerCompose) form.setValue('port', port);
     if (domains && domains.length > 0) form.setValue('domains', domains);
     if (repository) form.setValue('repository', repository);
-    form.setValue('build_pack', BuildPack.Dockerfile);
+    form.setValue('build_pack', validBuildPack);
     if (env_variables && Object.keys(env_variables).length > 0)
       form.setValue('env_variables', env_variables);
     if (build_variables && Object.keys(build_variables).length > 0)

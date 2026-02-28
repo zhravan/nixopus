@@ -114,9 +114,12 @@ export const DeployConfigureForm = ({
   pre_run_commands = '',
   post_run_commands = '',
   application_id = '',
-  dockerFilePath = '/Dockerfile',
+  dockerFilePath,
   base_path = '/'
 }: DeployConfigureProps) => {
+  const resolvedDockerFilePath =
+    dockerFilePath ||
+    (build_pack === BuildPack.DockerCompose ? '/docker-compose.yml' : '/Dockerfile');
   const { t } = useTranslation();
 
   const { validateEnvVar, form, onSubmit, isLoading } = useUpdateDeployment({
@@ -129,7 +132,7 @@ export const DeployConfigureForm = ({
     port: parsePort(port) || 3000,
     force: true,
     id: application_id,
-    DockerfilePath: dockerFilePath,
+    DockerfilePath: resolvedDockerFilePath,
     base_path,
     domains: applicationDomains
   });
@@ -144,10 +147,7 @@ export const DeployConfigureForm = ({
       domainsEditable: true
     });
 
-  const isDockerCompose =
-    build_pack === BuildPack.DockerCompose ||
-    (build_pack as string) === 'docker-compose' ||
-    (build_pack as string) === 'dockerCompose';
+  const isDockerCompose = build_pack === BuildPack.DockerCompose;
 
   const renderReadOnlyField = (
     label: string,

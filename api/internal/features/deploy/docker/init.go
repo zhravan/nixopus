@@ -133,9 +133,10 @@ func NewDockerServiceWithServer(db *bun.DB, ctx context.Context, organizationID 
 		return nil
 	}
 
+	orgCtx := context.WithValue(context.Background(), shared_types.OrganizationIDKey, organizationID.String())
 	svc := &DockerService{
 		Cli:       cli,
-		Ctx:       context.Background(),
+		Ctx:       orgCtx,
 		logger:    lgr,
 		sshTunnel: tunnel,
 	}

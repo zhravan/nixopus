@@ -20,10 +20,7 @@ export function useDeploymentConfiguration({
 }: UseDeploymentConfigurationProps) {
   const { t } = useTranslation();
 
-  const isDockerCompose =
-    build_pack === BuildPack.DockerCompose ||
-    (build_pack as string) === 'docker-compose' ||
-    (build_pack as string) === 'dockerCompose';
+  const isDockerCompose = build_pack === BuildPack.DockerCompose;
 
   const dockerConfigFields = [
     {

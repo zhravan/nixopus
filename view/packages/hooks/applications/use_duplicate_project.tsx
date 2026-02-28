@@ -3,17 +3,15 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Copy } from 'lucide-react';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
-import { Application, Environment } from '@/redux/types/applications';
+import { Application } from '@/redux/types/applications';
 import {
   useDuplicateProjectMutation,
   useGetFamilyEnvironmentsQuery
 } from '@/redux/services/deploy/applicationsApi';
 import { useGetGithubRepositoryBranchesMutation } from '@/redux/services/connector/githubConnectorApi';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { DialogAction } from '@/components/ui/dialog-wrapper';
-
-const ENVIRONMENTS: Environment[] = ['development', 'staging', 'production'];
+import { DropdownMenuItem } from '@nixopus/ui';
+import { DialogAction } from '@nixopus/ui';
+import { formatEnvironmentName, isValidEnvironmentName } from '@/packages/utils/environment';
 
 interface UseDuplicateProjectProps {
   application: Application;
@@ -24,8 +22,9 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [domain, setDomain] = useState('');
-  const [environment, setEnvironment] = useState<Environment | ''>('');
+  const [environment, setEnvironment] = useState('');
   const [branch, setBranch] = useState('');
+  const [environmentError, setEnvironmentError] = useState('');
   const [availableBranches, setAvailableBranches] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -38,17 +37,6 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
     { familyId: application.family_id || '' },
     { skip: !application.family_id }
   );
-
-  const availableEnvironments = ENVIRONMENTS.filter(
-    (env) => env !== application.environment && !existingEnvironments.includes(env)
-  );
-
-  const isDisabled = availableEnvironments.length === 0;
-
-  const environmentOptions = availableEnvironments.map((env) => ({
-    value: env,
-    label: env.charAt(0).toUpperCase() + env.slice(1)
-  }));
 
   const fetchRepositoryBranches = useCallback(async () => {
     if (!application.repository) {
@@ -83,23 +71,44 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
   }, [open, application.repository, fetchRepositoryBranches]);
 
   const handleDuplicate = async () => {
-    if (!domain || !environment || !branch) {
+    const formatted = formatEnvironmentName(environment);
+    if (!formatted || !branch) {
       toast.error(t('selfHost.applicationDetails.header.duplicate.validation'));
       return;
     }
 
+    if (!isValidEnvironmentName(formatted)) {
+      setEnvironmentError('Invalid environment name. Use lowercase letters, numbers, and hyphens.');
+      return;
+    }
+
+    if (formatted === application.environment) {
+      setEnvironmentError('Cannot duplicate with the same environment.');
+      return;
+    }
+
+    if (existingEnvironments.includes(formatted)) {
+      setEnvironmentError('This environment already exists in the project family.');
+      return;
+    }
+
     try {
-      const result = await duplicateProject({
+      const duplicateData: any = {
         source_project_id: application.id,
-        domain,
-        environment,
+        environment: formatted,
         branch
-      }).unwrap();
+      };
+
+      if (domain && domain.trim() !== '') {
+        duplicateData.domains = [domain.trim()];
+      }
+
+      const result = await duplicateProject(duplicateData).unwrap();
 
       toast.success(t('selfHost.applicationDetails.header.duplicate.success'));
       setOpen(false);
       resetForm();
-      router.push(`/self-host/application/${result.id}`);
+      router.push(`/apps/application/${result.id}`);
     } catch (error) {
       toast.error(t('selfHost.applicationDetails.header.duplicate.error'));
     }
@@ -109,6 +118,7 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
     setDomain('');
     setEnvironment('');
     setBranch('');
+    setEnvironmentError('');
   };
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -118,19 +128,21 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
     }
   };
 
-  const isFormValid = domain && environment && branch;
+  const isFormValid = environment && branch; // Domain is now optional
 
   const formFields = useMemo(
     () => [
       {
         id: 'environment',
         label: t('selfHost.applicationDetails.header.duplicate.dialog.environment'),
-        type: 'select' as const,
+        type: 'input' as const,
         value: environment,
-        onChange: (value: string) => setEnvironment(value as Environment),
-        options: environmentOptions,
-        placeholder: t('selfHost.applicationDetails.header.duplicate.dialog.selectEnvironment'),
-        hint: t('selfHost.applicationDetails.header.duplicate.dialog.environmentHint')
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+          setEnvironmentError('');
+          setEnvironment(formatEnvironmentName(e.target.value));
+        },
+        placeholder: 'e.g. staging, qa, preview',
+        hint: environmentError || 'Lowercase letters, numbers, and hyphens only'
       },
       {
         id: 'branch',
@@ -158,7 +170,7 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
       t,
       environment,
       setEnvironment,
-      environmentOptions,
+      environmentError,
       branch,
       setBranch,
       availableBranches,
@@ -188,32 +200,15 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
     [t, isLoading, isFormValid, handleDuplicate, handleOpenChange]
   );
 
-  const trigger = useMemo(() => {
-    if (isDisabled) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <DropdownMenuItem disabled className="gap-2">
-                <Copy className="h-4 w-4" />
-                {t('selfHost.applicationDetails.header.duplicate.button')}
-              </DropdownMenuItem>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            All available environments have been created. Environment creation limit reached.
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return (
+  const trigger = useMemo(
+    () => (
       <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="gap-2">
         <Copy className="h-4 w-4" />
         {t('selfHost.applicationDetails.header.duplicate.button')}
       </DropdownMenuItem>
-    );
-  }, [isDisabled, t]);
+    ),
+    [t]
+  );
 
   const dialogTitle = t('selfHost.applicationDetails.header.duplicate.dialog.title');
   const dialogDescription = t('selfHost.applicationDetails.header.duplicate.dialog.description');
@@ -227,7 +222,6 @@ export function useDuplicateProject({ application }: UseDuplicateProjectProps) {
     dialogTitle,
     dialogDescription,
     isLoading,
-    isDisabled,
     isFormValid
   };
 }

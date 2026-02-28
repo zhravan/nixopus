@@ -18,21 +18,24 @@ import { LoadAverageCard } from '@/packages/components/dashboard';
 import { CPUUsageCard } from '@/packages/components/dashboard';
 import { MemoryUsageCard } from '@/packages/components/dashboard';
 import { DiskUsageCard } from '@/packages/components/dashboard';
+import { DeploymentsWidget } from '@/packages/components/deployments-widget';
+import { DeploymentStatsWidget } from '@/packages/components/deployments-widget';
 
 export const useDashboard = () => {
   const { isFeatureEnabled, isLoading: isFeatureFlagsLoading } = useFeatureFlags();
-  const { containersData, systemStats } = useMonitor();
+  const { containersData, systemStats, deploymentsData } = useMonitor();
   const activeOrganization = useAppSelector((state) => state.user.activeOrganization);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const { t } = useTranslation();
   const columns = useContainer();
-  const { data: smtpConfig } = useGetSMTPConfigurationsQuery(activeOrganization?.id, {
+  const { data: smtpConfig } = useGetSMTPConfigurationsQuery(activeOrganization?.id ?? '', {
     skip: !activeOrganization
   });
 
-  // Check for updates on dashboard load and auto update if user has auto_update enabled
+  // Defer update check - cache for 5 min to avoid refetch on every dashboard visit
   useCheckForUpdatesQuery(undefined, {
-    skip: !isAuthenticated
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: 300
   });
 
   const [showDragHint, setShowDragHint] = React.useState(false);
@@ -73,7 +76,7 @@ export const useDashboard = () => {
     return isFeatureEnabled(FeatureNames.FeatureMonitoring);
   }, [isFeatureEnabled]);
 
-  const defaultHiddenWidgets = ['clock', 'network'];
+  const defaultHiddenWidgets = ['clock', 'network', 'disk-usage'];
 
   const [hiddenWidgets, setHiddenWidgets] = React.useState<string[]>(defaultHiddenWidgets);
 
@@ -110,6 +113,14 @@ export const useDashboard = () => {
       label: 'System Information'
     },
     {
+      id: 'deployments',
+      label: 'Latest Deployments'
+    },
+    {
+      id: 'deployment-stats',
+      label: 'Deployment Stats'
+    },
+    {
       id: 'clock',
       label: 'Clock'
     },
@@ -143,9 +154,45 @@ export const useDashboard = () => {
 
   const allWidgetDefinitions: DashboardItem[] = [
     {
+      id: 'deployments',
+      component: <DeploymentsWidget deploymentsData={deploymentsData || []} />,
+      className: 'md:col-span-2',
+      isDefault: true
+    },
+    {
+      id: 'deployment-stats',
+      component: <DeploymentStatsWidget deploymentsData={deploymentsData || []} />,
+      isDefault: true
+    },
+    {
+      id: 'cpu-usage',
+      component: <CPUUsageCard systemStats={systemStats} />,
+      isDefault: true
+    },
+    {
       id: 'system-info',
       component: <SystemInfoCard systemStats={systemStats} />,
+      isDefault: true
+    },
+    {
+      id: 'load-average',
+      component: <LoadAverageCard systemStats={systemStats} />,
+      isDefault: true
+    },
+    {
+      id: 'memory-usage',
+      component: <MemoryUsageCard systemStats={systemStats} />,
+      isDefault: true
+    },
+    {
+      id: 'containers',
+      component: <ContainersWidget containersData={containersData} columns={columns} />,
       className: 'md:col-span-2',
+      isDefault: true
+    },
+    {
+      id: 'disk-usage',
+      component: <DiskUsageCard systemStats={systemStats} />,
       isDefault: true
     },
     {
@@ -157,32 +204,6 @@ export const useDashboard = () => {
       id: 'network',
       component: <NetworkWidget systemStats={systemStats} />,
       isDefault: false
-    },
-    {
-      id: 'load-average',
-      component: <LoadAverageCard systemStats={systemStats} />,
-      isDefault: true
-    },
-    {
-      id: 'cpu-usage',
-      component: <CPUUsageCard systemStats={systemStats} />,
-      isDefault: true
-    },
-    {
-      id: 'memory-usage',
-      component: <MemoryUsageCard systemStats={systemStats} />,
-      isDefault: true
-    },
-    {
-      id: 'disk-usage',
-      component: <DiskUsageCard systemStats={systemStats} />,
-      isDefault: true
-    },
-    {
-      id: 'containers',
-      component: <ContainersWidget containersData={containersData} columns={columns} />,
-      className: 'md:col-span-2',
-      isDefault: true
     }
   ];
 
@@ -209,6 +230,7 @@ export const useDashboard = () => {
     isDashboardEnabled,
     containersData,
     systemStats,
+    deploymentsData,
     smtpConfig,
     showDragHint,
     mounted,

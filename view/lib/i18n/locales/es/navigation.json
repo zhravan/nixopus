@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "dashboard": "Panel de Control",
-    "selfHost": "Autoalojado",
+    "dashboard": "Gráficos",
+    "selfHost": "Apps",
     "fileManager": "Gestor de Archivos",
     "extensions": "Extensiones",
     "settings": "Configuración",
@@ -10,11 +10,12 @@
     "team": "Equipo",
     "domains": "Dominios",
     "containers": "Contenedores",
+    "chats": "Chats",
     "layout": {
       "breadcrumbs": {
         "home": "Inicio",
-        "dashboard": "Panel de Control",
-        "selfHost": "Autoalojado",
+        "dashboard": "Gráficos",
+        "selfHost": "Apps",
         "fileManager": "Gestor de Archivos",
         "settings": "Configuración",
         "general": "General",

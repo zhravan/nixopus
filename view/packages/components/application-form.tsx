@@ -1,18 +1,20 @@
 'use client';
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import FormInputField from '@/components/ui/form-input-field';
+import { Button } from '@nixopus/ui';
+import { Form } from '@nixopus/ui';
+import { FormInputField } from '@nixopus/ui';
 import FormSelectField from '@/components/ui/form-select-field';
+import { MultipleDomainInput } from '@/packages/components/multi-domains';
 import { EnvVariablesEditor } from '@/components/ui/env-variables-editor';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { BuildPack, Environment } from '@/redux/types/deploy-form';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@nixopus/ui';
+import { BuildPack } from '@/redux/types/deploy-form';
+import { EnvironmentInputField } from '@/packages/components/environment-input-field';
 import useUpdateDeployment from '@/packages/hooks/applications/use_update_deployment';
 import { useDeploymentConfiguration } from '@/packages/hooks/applications/use_deployment_configuration';
 import { parsePort } from '@/packages/utils/util';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
 import { ResourceGuard, AnyPermissionGuard } from '@/packages/components/rbac';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@nixopus/ui';
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -23,15 +25,15 @@ import {
   Terminal
 } from 'lucide-react';
 import { useQuickDeployForm } from '@/packages/hooks/applications/use_quick_deploy_form';
-import { CardWrapper } from '@/components/ui/card-wrapper';
+import { CardWrapper } from '@nixopus/ui';
 import { Plus } from 'lucide-react';
 
 interface DeployConfigureProps {
   application_name?: string;
-  environment?: Environment;
+  environment?: string;
   branch?: string;
   port?: string;
-  domain?: string;
+  domains?: string[];
   repository?: string;
   build_pack?: BuildPack;
   env_variables?: Record<string, string>;
@@ -63,7 +65,7 @@ const CollapsibleSection = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors group">
           <div className="flex items-center gap-3">
@@ -91,7 +93,7 @@ const CollapsibleSection = ({
             <ChevronRightIcon className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
           )}
         </CollapsibleTrigger>
-        <CollapsibleContent className="border-t bg-muted/20">
+        <CollapsibleContent className="border-t border-border bg-muted/20">
           <div className="p-4 space-y-4">{children}</div>
         </CollapsibleContent>
       </Collapsible>
@@ -101,10 +103,10 @@ const CollapsibleSection = ({
 
 export const DeployConfigureForm = ({
   application_name = '',
-  environment = Environment.Production,
+  environment = 'production',
   branch = '',
   port = '3000',
-  domain = '',
+  domains: applicationDomains = [],
   repository = '',
   build_pack = BuildPack.Dockerfile,
   env_variables = {},
@@ -117,7 +119,7 @@ export const DeployConfigureForm = ({
 }: DeployConfigureProps) => {
   const { t } = useTranslation();
 
-  const { validateEnvVar, form, onSubmit, isLoading, domains } = useUpdateDeployment({
+  const { validateEnvVar, form, onSubmit, isLoading } = useUpdateDeployment({
     name: application_name,
     environment: environment,
     pre_run_command: pre_run_commands,
@@ -128,38 +130,69 @@ export const DeployConfigureForm = ({
     force: true,
     id: application_id,
     DockerfilePath: dockerFilePath,
-    base_path
+    base_path,
+    domains: applicationDomains
   });
 
-  const {
-    environmentOptions,
-    dockerConfigFields,
-    envVariableEditors,
-    commandFields,
-    readOnlyFields
-  } = useDeploymentConfiguration({
-    branch,
-    domain,
-    build_pack,
-    env_variables,
-    build_variables
-  });
+  const { dockerConfigFields, envVariableEditors, commandFields, readOnlyFields } =
+    useDeploymentConfiguration({
+      branch,
+      domains: applicationDomains,
+      build_pack,
+      env_variables,
+      build_variables,
+      domainsEditable: true
+    });
 
-  // Check if build_pack is DockerCompose (handle both enum value 'dockerCompose' and API value 'docker-compose')
   const isDockerCompose =
     build_pack === BuildPack.DockerCompose ||
     (build_pack as string) === 'docker-compose' ||
     (build_pack as string) === 'dockerCompose';
 
-  const renderReadOnlyField = (label: string, value: string | undefined, description: string) => {
+  const renderReadOnlyField = (
+    label: string,
+    value: string | undefined,
+    description: string,
+    isDomains = false
+  ) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const displayValue = value || '-';
     const shouldShowMore = displayValue.length > 50;
 
+    // For domains, render as a list
+    if (isDomains && value && value !== '-') {
+      const domainList = value.split(', ').filter((d) => d.trim() !== '');
+      return (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">{label}</label>
+          <div className="px-3 py-2 border border-border rounded-md bg-muted text-muted-foreground">
+            {domainList.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {domainList.map((domain, index) => (
+                  <a
+                    key={index}
+                    href={`https://${domain.trim()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-mono text-primary hover:underline"
+                  >
+                    {domain.trim()}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <span>-</span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-2">
         <label className="text-sm font-medium">{label}</label>
-        <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground overflow-hidden">
+        <div className="px-3 py-2 border border-border rounded-md bg-muted text-muted-foreground overflow-hidden">
           <div className={`${!isExpanded ? 'truncate' : ''}`}>{displayValue}</div>
           {shouldShowMore && (
             <button
@@ -179,7 +212,7 @@ export const DeployConfigureForm = ({
     <span>
       {descriptionText}{' '}
       <a
-        href="https://docs.nixopus.com/self-host/#docker-configuration"
+        href="https://docs.nixopus.com/apps/#docker-configuration"
         target="_blank"
         rel="noopener noreferrer"
         className="text-primary hover:underline"
@@ -197,8 +230,6 @@ export const DeployConfigureForm = ({
             <CollapsibleSection
               title={t('selfHost.configuration.sections.basicConfiguration')}
               icon={SettingsIcon}
-              badge="Required"
-              description="Essential settings for your application"
               defaultOpen={true}
             >
               <div className="grid sm:grid-cols-2 gap-4">
@@ -208,12 +239,10 @@ export const DeployConfigureForm = ({
                   name="name"
                   placeholder={t('selfHost.configuration.fields.applicationName.label')}
                 />
-                <FormSelectField
+                <EnvironmentInputField
                   form={form}
-                  label={t('selfHost.configuration.fields.environment.label')}
                   name="environment"
-                  placeholder={t('selfHost.deployForm.fields.environment.placeholder')}
-                  selectOptions={environmentOptions}
+                  label={t('selfHost.configuration.fields.environment.label')}
                   required={false}
                 />
                 {build_pack !== BuildPack.Static && !isDockerCompose && (
@@ -226,6 +255,16 @@ export const DeployConfigureForm = ({
                   />
                 )}
               </div>
+              <div className="mt-4">
+                <MultipleDomainInput
+                  form={form}
+                  label={t('selfHost.configuration.fields.domain.label')}
+                  name="domains"
+                  placeholder="example.com"
+                  required={false}
+                  maxDomains={5}
+                />
+              </div>
             </CollapsibleSection>
 
             {build_pack !== BuildPack.Static && (
@@ -233,8 +272,6 @@ export const DeployConfigureForm = ({
                 <CollapsibleSection
                   title={t('selfHost.configuration.sections.dockerConfiguration')}
                   icon={ServerIcon}
-                  badge="Optional"
-                  description="Container and deployment configuration"
                   defaultOpen={false}
                 >
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -255,8 +292,6 @@ export const DeployConfigureForm = ({
                 <CollapsibleSection
                   title={t('selfHost.configuration.sections.environmentVariables')}
                   icon={CodeIcon}
-                  badge="Optional"
-                  description="Runtime and build-time variables"
                   defaultOpen={false}
                 >
                   <div className="space-y-6">
@@ -277,8 +312,6 @@ export const DeployConfigureForm = ({
                 <CollapsibleSection
                   title={t('selfHost.configuration.sections.commands')}
                   icon={Terminal}
-                  badge="Optional"
-                  description="Pre and post deployment scripts"
                   defaultOpen={false}
                 >
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -300,21 +333,29 @@ export const DeployConfigureForm = ({
             <CollapsibleSection
               title={t('selfHost.configuration.sections.deploymentInformation')}
               icon={InfoIcon}
-              badge="Read-only"
-              description="Current deployment settings and metadata"
               defaultOpen={false}
             >
               <div className="grid sm:grid-cols-2 gap-4">
                 {readOnlyFields.slice(0, 2).map((field, index) => (
                   <React.Fragment key={index}>
-                    {renderReadOnlyField(field.label, field.value, field.description)}
+                    {renderReadOnlyField(
+                      field.label,
+                      field.value,
+                      field.description,
+                      field.label.toLowerCase().includes('domain')
+                    )}
                   </React.Fragment>
                 ))}
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 {readOnlyFields.slice(2).map((field, index) => (
                   <React.Fragment key={index + 2}>
-                    {renderReadOnlyField(field.label, field.value, field.description)}
+                    {renderReadOnlyField(
+                      field.label,
+                      field.value,
+                      field.description,
+                      field.label.toLowerCase().includes('domain')
+                    )}
                   </React.Fragment>
                 ))}
               </div>
@@ -389,6 +430,20 @@ export const QuickDeployForm = ({
                       placeholder={field.placeholder}
                       selectOptions={field.selectOptions}
                       required={field.required}
+                    />
+                  );
+                }
+
+                if (field.type === 'multi-domains') {
+                  return (
+                    <MultipleDomainInput
+                      key={field.key}
+                      form={form}
+                      label={field.label}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      maxDomains={5}
                     />
                   );
                 }

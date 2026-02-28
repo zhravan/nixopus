@@ -9,9 +9,9 @@ import {
   ReactNode,
   useCallback
 } from 'react';
-import { getAccessToken } from 'supertokens-auth-react/recipe/session';
 import { useAppSelector } from '@/redux/hooks';
 import { getAdvancedSettings } from '@/packages/utils/advanced-settings';
+import { authClient } from '@/packages/lib/auth-client';
 
 type WebSocketContextValue = {
   isReady: boolean;
@@ -54,9 +54,24 @@ export const WebSocketProvider = ({
   const isConnectingRef = useRef(false);
   const messageQueueRef = useRef<string[]>([]);
   const listenersRef = useRef(new Set<(data: string) => void>());
-  const { isAuthenticated, isInitialized } = useAppSelector((state) => state.auth);
+  const {
+    isAuthenticated,
+    isInitialized,
+    token: reduxToken
+  } = useAppSelector((state) => state.auth);
+  const organizationId = useAppSelector((state) => state.user.activeOrganization?.id) || '';
 
   const connectWebSocket = async () => {
+    // Use Redux token when available to avoid getSession call
+    let token = reduxToken;
+    if (!token) {
+      const session = await authClient.getSession();
+      token = session?.data?.session?.token || '';
+    }
+    if (!token) {
+      return;
+    }
+
     if (isConnectingRef.current) {
       console.log('Connection already in progress, skipping');
       return;
@@ -90,8 +105,8 @@ export const WebSocketProvider = ({
     console.log('Initiating WebSocket connection...');
 
     try {
-      const token = await getAccessToken();
-      const wsUrl = url || (await getWebsocketUrl()) + '?token=' + token;
+      const wsUrl =
+        url || (await getWebsocketUrl()) + '?token=' + token + '&organization-id=' + organizationId;
       const socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
@@ -194,7 +209,7 @@ export const WebSocketProvider = ({
         wsRef.current = null;
       }
     };
-  }, [isAuthenticated, isInitialized]);
+  }, [isAuthenticated, isInitialized, organizationId]);
 
   const sendMessage = useCallback((data: string) => {
     const ws = wsRef.current;

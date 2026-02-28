@@ -1,6 +1,7 @@
 package types
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,7 +22,6 @@ type Application struct {
 	Branch               string                   `json:"branch" bun:"branch,notnull"`
 	PreRunCommand        string                   `json:"pre_run_command" bun:"pre_run_command,notnull"`
 	PostRunCommand       string                   `json:"post_run_command" bun:"post_run_command,notnull"`
-	Domain               string                   `json:"domain" bun:"domain,notnull"`
 	DockerfilePath       string                   `json:"dockerfile_path" bun:"dockerfile_path,notnull,default:Dockerfile"`
 	BasePath             string                   `json:"base_path" bun:"base_path,notnull,default:/"`
 	UserID               uuid.UUID                `json:"user_id" bun:"user_id,notnull,type:uuid"`
@@ -35,6 +35,8 @@ type Application struct {
 	Deployments          []*ApplicationDeployment `json:"deployments,omitempty" bun:"rel:has-many,join:id=application_id"`
 	Organization         *Organization            `json:"organization,omitempty" bun:"rel:belongs-to,join:organization_id=id"`
 	Labels               []string                 `json:"labels,omitempty" bun:"labels,array"`
+	Domains              []*ApplicationDomain     `json:"domains,omitempty" bun:"rel:has-many,join:id=application_id"`
+	IsLiveDeployment     bool                     `json:"is_live_deployment" bun:"is_live_deployment,notnull,default:false"`
 }
 
 type ApplicationDeployment struct {
@@ -51,6 +53,8 @@ type ApplicationDeployment struct {
 	ContainerName   string                       `json:"container_name" bun:"container_name"`
 	ContainerImage  string                       `json:"container_image" bun:"container_image"`
 	ContainerStatus string                       `json:"container_status" bun:"container_status"`
+	ImageS3Key      string                       `json:"image_s3_key" bun:"image_s3_key,default:''"`
+	ImageSize       int64                        `json:"image_size" bun:"image_size,default:0"`
 }
 
 type ApplicationStatus struct {
@@ -88,6 +92,16 @@ type ApplicationLogs struct {
 	Application           *Application           `json:"application,omitempty" bun:"rel:belongs-to,join:application_id=id"`
 }
 
+type ApplicationDomain struct {
+	bun.BaseModel `bun:"table:application_domains,alias:ad" swaggerignore:"true"`
+	ID            uuid.UUID `json:"id" bun:"id,pk,type:uuid"`
+	ApplicationID uuid.UUID `json:"application_id" bun:"application_id,notnull,type:uuid"`
+	Domain        string    `json:"domain" bun:"domain,notnull"`
+	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
+
+	Application *Application `json:"application,omitempty" bun:"rel:belongs-to,join:application_id=id"`
+}
+
 type Status string
 
 const (
@@ -104,11 +118,11 @@ const (
 
 type Environment string
 
-const (
-	Development Environment = "development"
-	Staging     Environment = "staging"
-	Production  Environment = "production"
-)
+var validEnvironmentRegex = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
+
+func IsValidEnvironment(env string) bool {
+	return len(env) >= 1 && len(env) <= 50 && validEnvironmentRegex.MatchString(env)
+}
 
 type ProxyServer string
 

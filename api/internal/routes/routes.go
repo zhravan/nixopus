@@ -13,7 +13,6 @@ import (
 	audit "github.com/raghavyuva/nixopus-api/internal/features/audit/controller"
 	auth "github.com/raghavyuva/nixopus-api/internal/features/auth/controller"
 	auth_service "github.com/raghavyuva/nixopus-api/internal/features/auth/service"
-	auth_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	user_storage "github.com/raghavyuva/nixopus-api/internal/features/auth/storage"
 	container "github.com/raghavyuva/nixopus-api/internal/features/container/controller"
 	deploy "github.com/raghavyuva/nixopus-api/internal/features/deploy/controller"
@@ -28,10 +27,11 @@ import (
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
 	"github.com/raghavyuva/nixopus-api/internal/features/notification"
 	notificationController "github.com/raghavyuva/nixopus-api/internal/features/notification/controller"
-	organization "github.com/raghavyuva/nixopus-api/internal/features/organization/controller"
-	organization_service "github.com/raghavyuva/nixopus-api/internal/features/organization/service"
-	organization_storage "github.com/raghavyuva/nixopus-api/internal/features/organization/storage"
-	"github.com/raghavyuva/nixopus-api/internal/features/supertokens"
+	server_controller "github.com/raghavyuva/nixopus-api/internal/features/server/controller"
+	trail "github.com/raghavyuva/nixopus-api/internal/features/trail/controller"
+	"github.com/raghavyuva/nixopus-api/internal/openapi"
+
+	// Organization packages removed - migrated to Better Auth
 	update "github.com/raghavyuva/nixopus-api/internal/features/update/controller"
 	update_service "github.com/raghavyuva/nixopus-api/internal/features/update/service"
 	user "github.com/raghavyuva/nixopus-api/internal/features/user/controller"
@@ -105,9 +105,9 @@ func (router *Router) createServer(port string) *fuego.Server {
 				SpecURL:          "/swagger/openapi.json",
 				JSONFilePath:     "doc/openapi.json",
 			}),
+			fuego.WithOpenAPIGeneratorSchemaCustomizer(openapi.SchemaCustomizer),
 		),
 		fuego.WithGlobalMiddlewares(
-			middleware.SupertokensCorsMiddleware,
 			middleware.RecoveryMiddleware,
 			middleware.CorsMiddleware,
 			middleware.LoggingMiddleware,
@@ -131,7 +131,13 @@ func (router *Router) createServer(port string) *fuego.Server {
 func (router *Router) setupAuthentication(server *fuego.Server) {
 	fuego.Use(server, func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Skip auth for public routes
 			if config.AppConfig.App.Environment == "development" && strings.HasPrefix(r.URL.Path, "/swagger") {
+				next.ServeHTTP(w, r)
+				return
+			}
+			// Skip auth for live deploy routes
+			if strings.HasPrefix(r.URL.Path, "/api/v1/live") || strings.HasPrefix(r.URL.Path, "/ws/live") {
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -147,10 +153,10 @@ func (router *Router) SetSchedulers(schedulers *scheduler.Schedulers) {
 
 // SetupRoutes initializes and configures all application routes
 func (router *Router) SetupRoutes() {
-	// Initialize SuperTokens and load environment
-	supertokens.Init(router.app)
+	// Load .env file if it exists (optional when using secret manager)
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		// .env file is optional when using secret manager
+		log.Println("Info: .env file not found, using environment variables and secret manager")
 	}
 
 	// Save version documentation
@@ -200,6 +206,8 @@ func (router *Router) registerPublicRoutes(server *fuego.Server, apiV1 api.Versi
 	// WebSocket routes
 	router.RegisterWebSocketRoutes(server, deployController, router.schedulers.HealthCheck)
 
+	router.RegisterLiveDeployRoutes(server, apiV1)
+
 	// Public auth routes
 	authController := router.createAuthController(notificationManager)
 	authGroup := fuego.Group(server, apiV1.Path+"/auth")
@@ -208,15 +216,16 @@ func (router *Router) registerPublicRoutes(server *fuego.Server, apiV1 api.Versi
 
 // registerProtectedRoutes registers routes that require authentication
 func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Version, notificationManager *notification.NotificationManager) {
-	// Protected auth routes
+	// Authenticated auth routes (CLI init requires authentication)
 	authController := router.createAuthController(notificationManager)
 	authProtectedGroup := fuego.Group(server, apiV1.Path+"/auth")
-	router.RegisterAuthenticatedAuthRoutes(authProtectedGroup, authController)
+	router.applyMiddleware(authProtectedGroup, MiddlewareConfig{RBAC: false, Audit: false, ResourceName: "auth"})
+	router.RegisterAuthProtectedRoutes(authProtectedGroup, authController)
 
 	// User routes
 	userController := user.NewUserController(router.app.Store, router.app.Ctx, router.logger, router.cache)
 	userGroup := fuego.Group(server, apiV1.Path+"/user")
-	router.applyMiddleware(userGroup, MiddlewareConfig{Audit: true, ResourceName: "user"})
+	router.applyMiddleware(userGroup, MiddlewareConfig{RBAC: false, Audit: false, ResourceName: "user"})
 	router.RegisterUserRoutes(userGroup, userController)
 
 	// Domain routes
@@ -250,14 +259,11 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 	})
 	router.RegisterNotificationRoutes(notificationGroup, notifController)
 
-	// Organization routes
-	organizationController := organization.NewOrganizationsController(router.app.Store, router.app.Ctx, router.logger, notificationManager, router.cache)
-	organizationGroup := fuego.Group(server, apiV1.Path+"/organizations")
-	router.applyMiddleware(organizationGroup, MiddlewareConfig{RBAC: true, Audit: true, ResourceName: "organization"})
-	router.RegisterOrganizationRoutes(organizationGroup, organizationController)
+	// Organization routes - migrated to Better Auth
+	// Organization management is now handled by Better Auth
 
 	// File manager routes
-	fileManagerController := file_manager.NewFileManagerController(router.app.Ctx, router.logger, notificationManager)
+	fileManagerController := file_manager.NewFileManagerController(router.app.Store, router.app.Ctx, router.logger, notificationManager)
 	fileManagerGroup := fuego.Group(server, apiV1.Path+"/file-manager")
 	router.applyMiddleware(fileManagerGroup, MiddlewareConfig{
 		RBAC:         true,
@@ -284,7 +290,7 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 	// Audit routes
 	auditController := audit.NewAuditController(router.app.Store.DB, router.app.Ctx, router.logger)
 	auditGroup := fuego.Group(server, apiV1.Path+"/audit")
-	router.applyMiddleware(auditGroup, MiddlewareConfig{RBAC: true, FeatureFlag: "audit", ResourceName: "audit"})
+	router.applyMiddleware(auditGroup, MiddlewareConfig{RBAC: true, FeatureFlag: "audit", Audit: true, ResourceName: "audit"})
 	router.RegisterAuditRoutes(auditGroup, auditController)
 
 	// Update routes
@@ -297,7 +303,9 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 	featureFlagController := router.createFeatureFlagController()
 	featureFlagReadGroup := fuego.Group(server, apiV1.Path+"/feature-flags")
 	featureFlagWriteGroup := fuego.Group(server, apiV1.Path+"/feature-flags")
-	router.applyMiddleware(featureFlagWriteGroup, MiddlewareConfig{RBAC: true, ResourceName: "feature_flags"})
+	featureFlagMiddleware := MiddlewareConfig{RBAC: true, Audit: true, ResourceName: "feature_flags"}
+	router.applyMiddleware(featureFlagReadGroup, featureFlagMiddleware)
+	router.applyMiddleware(featureFlagWriteGroup, featureFlagMiddleware)
 	router.RegisterFeatureFlagRoutes(featureFlagReadGroup, featureFlagWriteGroup, featureFlagController)
 
 	// Container routes
@@ -314,12 +322,6 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 	})
 	router.RegisterContainerRoutes(containerGroup, containerController)
 
-	// Extension routes
-	extensionController := extension.NewExtensionsController(router.app.Store, router.app.Ctx, router.logger)
-	extensionGroup := fuego.Group(server, apiV1.Path+"/extensions")
-	router.applyMiddleware(extensionGroup, MiddlewareConfig{RBAC: true, Audit: true, ResourceName: "extension"})
-	router.RegisterExtensionRoutes(extensionGroup, extensionController)
-
 	// Health check routes
 	healthCheckController := healthcheck.NewHealthCheckController(router.app.Store, router.app.Ctx, router.logger)
 	healthCheckGroup := fuego.Group(server, apiV1.Path+"/healthcheck")
@@ -330,20 +332,46 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 		ResourceName: "healthcheck",
 	})
 	router.RegisterHealthCheckRoutes(healthCheckGroup, healthCheckController)
+
+	// Extension routes
+	extensionController := extension.NewExtensionsController(router.app.Store, router.app.Ctx, router.logger, config.AppConfig.Redis.URL)
+	extensionGroup := fuego.Group(server, apiV1.Path+"/extensions")
+	router.applyMiddleware(extensionGroup, MiddlewareConfig{
+		RBAC:         true,
+		FeatureFlag:  "extension",
+		Audit:        true,
+		ResourceName: "extension",
+	})
+	router.RegisterExtensionRoutes(extensionGroup, extensionController)
+
+	// Server routes
+	serverController := server_controller.NewServerController(router.app.Store, router.app.Ctx, router.logger, notificationManager)
+	serverGroup := fuego.Group(server, apiV1.Path+"/servers")
+	router.applyMiddleware(serverGroup, MiddlewareConfig{
+		RBAC:         true,
+		Audit:        true,
+		ResourceName: "server",
+	})
+	router.RegisterServerRoutes(serverGroup, serverController)
+
+	// Trail routes
+	trailController := trail.NewTrailController(router.app.Store, router.app.Ctx, router.logger, router.cache)
+	trailGroup := fuego.Group(server, apiV1.Path+"/trail")
+	router.applyMiddleware(trailGroup, MiddlewareConfig{
+		RBAC:         true,
+		FeatureFlag:  "trail",
+		Audit:        true,
+		ResourceName: "trail",
+	})
+	router.RegisterTrailRoutes(trailGroup, trailController)
 }
 
 // createAuthController creates and returns an auth controller
+// Better Auth handles authentication
 func (router *Router) createAuthController(notificationManager *notification.NotificationManager) *auth.AuthController {
 	userStorage := &user_storage.UserStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
-	orgStorage := &organization_storage.OrganizationStore{DB: router.app.Store.DB, Ctx: router.app.Ctx}
-	orgService := organization_service.NewOrganizationService(router.app.Store, router.app.Ctx, router.logger, orgStorage, router.cache)
-	authService := auth_service.NewAuthService(userStorage, router.logger, orgService, router.app.Ctx)
-
-	// Create API key service
-	apiKeyStorage := auth_storage.APIKeyStorage{DB: router.app.Store.DB, Ctx: router.app.Ctx}
-	apiKeyService := auth_service.NewAPIKeyService(apiKeyStorage, router.logger)
-
-	return auth.NewAuthController(router.app.Ctx, router.logger, notificationManager, *authService, apiKeyService)
+	authService := auth_service.NewAuthService(userStorage, router.logger, router.app.Ctx, config.AppConfig.Redis.URL)
+	return auth.NewAuthController(router.app.Ctx, router.logger, notificationManager, *authService, router.app.Store)
 }
 
 // createFeatureFlagController creates and returns a feature flag controller

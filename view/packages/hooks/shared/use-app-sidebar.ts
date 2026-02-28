@@ -1,6 +1,6 @@
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/redux/hooks';
-import { useGetUserOrganizationsQuery } from '@/redux/services/users/userApi';
+import { useUserOrganizations } from '@/packages/hooks/auth/use-better-auth-orgs';
 import { useNavigationState } from '@/packages/hooks/shared/use_navigation_state';
 import { setActiveOrganization } from '@/redux/features/users/userSlice';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
@@ -16,34 +16,28 @@ import { fileManagersApi } from '@/redux/services/file-manager/fileManagersApi';
 import { auditApi } from '@/redux/services/audit';
 import { FeatureFlagsApi } from '@/redux/services/feature-flags/featureFlagsApi';
 import { useState, useMemo, useEffect } from 'react';
-import { Folder, Home, Package, Container, Puzzle } from 'lucide-react';
+import { Layers, ChartColumnDecreasing, MessageSquare } from 'lucide-react';
 import { useSettingsModal } from '@/packages/hooks/shared/use-settings-modal';
 
 const data = {
   navMain: [
     {
-      title: 'navigation.dashboard',
-      url: '/dashboard',
-      icon: Home,
-      resource: 'dashboard'
-    },
-    {
       title: 'navigation.selfHost',
-      url: '/self-host',
-      icon: Package,
+      url: '/apps',
+      icon: Layers,
       resource: 'deploy'
     },
     {
-      title: 'navigation.containers',
-      url: '/containers',
-      icon: Container,
-      resource: 'container'
+      title: 'navigation.dashboard',
+      url: '/charts',
+      icon: ChartColumnDecreasing,
+      resource: 'dashboard'
     },
     {
-      title: 'navigation.extensions',
-      url: '/extensions',
-      icon: Puzzle,
-      resource: 'extensions'
+      title: 'navigation.chats',
+      url: '/chats',
+      icon: MessageSquare,
+      resource: 'ai'
     }
   ]
 };
@@ -51,18 +45,18 @@ const data = {
 export function useAppSidebar() {
   const { t } = useTranslation();
   const user = useAppSelector((state) => state.auth.user);
-  const { isLoading, refetch } = useGetUserOrganizationsQuery();
-  const organizations = useAppSelector((state) => state.user.organizations);
+  const { data: organizations, isLoading, refetch } = useUserOrganizations();
   const { activeNav, setActiveNav } = useNavigationState();
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
   const dispatch = useAppDispatch();
   const { canAccessResource } = useRBAC();
   const router = useRouter();
+  const pathname = usePathname();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { closeSettings } = useSettingsModal();
 
   const hasAnyPermission = useMemo(() => {
-    const allowedResources = ['dashboard', 'settings', 'extensions'];
+    const allowedResources = ['dashboard', 'settings', 'extensions', 'ai'];
 
     return (resource: string) => {
       if (!user || !activeOrg) return false;
@@ -261,6 +255,21 @@ Add any other context about the problem here.`;
       refetch();
     }
   }, [activeOrg?.id, refetch]);
+
+  // Sync activeNav with current pathname to prevent multiple active menu items
+  useEffect(() => {
+    if (pathname) {
+      // Find the matching navigation item URL for the current pathname
+      const matchingNavItem = data.navMain.find(
+        (item) => pathname === item.url || pathname.startsWith(item.url + '/')
+      );
+
+      // Only update activeNav if we found a match and it's different from current activeNav
+      if (matchingNavItem && matchingNavItem.url !== activeNav) {
+        setActiveNav(matchingNavItem.url);
+      }
+    }
+  }, [pathname, activeNav, setActiveNav]);
 
   return {
     user,

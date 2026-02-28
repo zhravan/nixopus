@@ -17,14 +17,14 @@ import {
   useDeleteExtensionMutation,
   useForkExtensionMutation
 } from '@/redux/services/extensions/extensionsApi';
-import { SelectOption } from '@/components/ui/select-wrapper';
+import { SelectOption } from '@nixopus/ui';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
 import { toast } from 'sonner';
 import YAML from 'yaml';
-import { TableColumn } from '@/components/ui/data-table';
+import { TableColumn } from '@nixopus/ui';
 import { VariableData } from '@/packages/types/extension';
 import { useExtensionInput } from './use-extension-input';
-import { DialogAction } from '@/components/ui/dialog-wrapper';
+import { DialogAction } from '@nixopus/ui';
 
 export function useExtensions() {
   const router = useRouter();
@@ -167,10 +167,27 @@ export function useExtensions() {
   useEffect(() => {
     if (forkOpen && selectedExtension) {
       setForkYaml(selectedExtension.yaml_content || '');
-    } else if (!forkOpen) {
-      setSelectedExtension(null);
     }
   }, [forkOpen, selectedExtension]);
+
+  useEffect(() => {
+    if (selectedExtension?.id && runModalOpen && extensions.length > 0) {
+      const currentExtension = extensions.find((e) => e.id === selectedExtension.id);
+      if (currentExtension) {
+        const currentVars = JSON.stringify(currentExtension.variables || []);
+        const selectedVars = JSON.stringify(selectedExtension.variables || []);
+        if (currentVars !== selectedVars) {
+          setSelectedExtension(currentExtension);
+        }
+      }
+    }
+  }, [extensions, runModalOpen, selectedExtension?.id]);
+
+  useEffect(() => {
+    if (!runModalOpen && !forkOpen) {
+      setSelectedExtension(null);
+    }
+  }, [runModalOpen, forkOpen]);
 
   const doFork = async () => {
     try {

@@ -3,41 +3,27 @@ import { useTranslation } from '@/packages/hooks/shared/use-translation';
 
 interface UseDeploymentConfigurationProps {
   branch?: string;
-  domain?: string;
+  domains?: string[];
   build_pack?: BuildPack;
   env_variables?: Record<string, string>;
   build_variables?: Record<string, string>;
+  domainsEditable?: boolean;
 }
 
 export function useDeploymentConfiguration({
   branch = '',
-  domain = '',
+  domains = [],
   build_pack = BuildPack.Dockerfile,
   env_variables = {},
-  build_variables = {}
+  build_variables = {},
+  domainsEditable = false
 }: UseDeploymentConfigurationProps) {
   const { t } = useTranslation();
 
-  // Check if build_pack is DockerCompose (handle both enum value 'dockerCompose' and API value 'docker-compose')
   const isDockerCompose =
     build_pack === BuildPack.DockerCompose ||
     (build_pack as string) === 'docker-compose' ||
     (build_pack as string) === 'dockerCompose';
-
-  const environmentOptions = [
-    {
-      label: t('selfHost.deployForm.fields.environment.options.staging'),
-      value: 'staging'
-    },
-    {
-      label: t('selfHost.deployForm.fields.environment.options.production'),
-      value: 'production'
-    },
-    {
-      label: t('selfHost.deployForm.fields.environment.options.development'),
-      value: 'development'
-    }
-  ];
 
   const dockerConfigFields = [
     {
@@ -90,11 +76,15 @@ export function useDeploymentConfiguration({
       value: branch,
       description: t('selfHost.configuration.fields.branch.description')
     },
-    {
-      label: t('selfHost.configuration.fields.domain.label'),
-      value: domain,
-      description: t('selfHost.configuration.fields.domain.description')
-    },
+    ...(domainsEditable
+      ? []
+      : [
+          {
+            label: t('selfHost.configuration.fields.domain.label'),
+            value: domains && domains.length > 0 ? domains.join(', ') : '',
+            description: t('selfHost.configuration.fields.domain.description')
+          }
+        ]),
     {
       label: t('selfHost.configuration.fields.buildPack.label'),
       value: build_pack,
@@ -103,7 +93,6 @@ export function useDeploymentConfiguration({
   ];
 
   return {
-    environmentOptions,
     dockerConfigFields,
     envVariableEditors,
     commandFields,

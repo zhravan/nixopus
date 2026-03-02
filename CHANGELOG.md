@@ -1,3 +1,20 @@
+# [0.1.0-alpha.134](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.133...v0.1.0-alpha.134) (2026-03-02)
+
+
+### Bug Fixes
+
+* populate build and env variables on refresh ([#1097](https://github.com/raghavyuva/nixopus/issues/1097)) ([9725e8f](https://github.com/raghavyuva/nixopus/commit/9725e8f37e83d2eeddf0fce16101ab2ca082edc3))
+
+
+### Features
+
+* add compose domain input UI and deployment hooks ([0132564](https://github.com/raghavyuva/nixopus/commit/01325641e54cca81129c6440686cafe6458ee345))
+* add compose domain management and deployment pipeline ([61d06de](https://github.com/raghavyuva/nixopus/commit/61d06de7c5226a8be02ccf649ccf7758cb973644))
+* add compose file parser and deployment types ([9b82088](https://github.com/raghavyuva/nixopus/commit/9b82088803c8836af829580d054e29c59826a862))
+* add x forwarded proto header for cookie forwarding to auth service ([28bebfb](https://github.com/raghavyuva/nixopus/commit/28bebfbcc8037e6c94b0a4997ddca1fa4b934478))
+
+
+
 # [0.1.0-alpha.133](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.132...v0.1.0-alpha.133) (2026-02-28)
 
 

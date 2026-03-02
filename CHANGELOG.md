@@ -1,3 +1,12 @@
+# [0.1.0-alpha.136](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.135...v0.1.0-alpha.136) (2026-03-02)
+
+
+### Bug Fixes
+
+* make use of proxy_host instead of ssh host for proxy host ([ef0ec9c](https://github.com/raghavyuva/nixopus/commit/ef0ec9c17e2dd9c0701fd18746387e5a304cabc8))
+
+
+
 # [0.1.0-alpha.135](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.134...v0.1.0-alpha.135) (2026-03-02)
 
 

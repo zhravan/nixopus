@@ -1,3 +1,12 @@
+# [0.1.0-alpha.139](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.138...v0.1.0-alpha.139) (2026-03-03)
+
+
+### Bug Fixes
+
+* add arg for multizones in dockerfile ([3520ee0](https://github.com/raghavyuva/nixopus/commit/3520ee0987d69e4d09e1a51f30a75d40bbca22ae))
+
+
+
 # [0.1.0-alpha.138](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.137...v0.1.0-alpha.138) (2026-03-03)
 
 

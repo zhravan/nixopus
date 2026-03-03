@@ -1,3 +1,12 @@
+# [0.1.0-alpha.141](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.140...v0.1.0-alpha.141) (2026-03-03)
+
+
+### Bug Fixes
+
+* base path with view app origin url ([d1c1d91](https://github.com/raghavyuva/nixopus/commit/d1c1d91d62548b55cfd2df6df090d564b9363b09))
+
+
+
 # [0.1.0-alpha.140](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.139...v0.1.0-alpha.140) (2026-03-03)
 
 

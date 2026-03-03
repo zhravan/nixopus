@@ -1,3 +1,12 @@
+# [0.1.0-alpha.140](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.139...v0.1.0-alpha.140) (2026-03-03)
+
+
+### Bug Fixes
+
+* base path for multizone server side config api ([b5618ac](https://github.com/raghavyuva/nixopus/commit/b5618ac7f36761049599f2b3f8da963f8147803c))
+
+
+
 # [0.1.0-alpha.139](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.138...v0.1.0-alpha.139) (2026-03-03)
 
 

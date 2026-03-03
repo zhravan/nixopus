@@ -1,10 +1,14 @@
+import { getBasePath } from '@/lib/base-path';
+
 let config: any = null;
 let configPromise: Promise<any> | null = null;
 
 async function fetchConfig() {
   if (config) return config;
   if (!configPromise) {
-    configPromise = fetch('/api/config')
+    const base = getBasePath();
+    const url = base ? `${base}/api/config` : '/api/config';
+    configPromise = fetch(url)
       .then((r) => r.json())
       .then((c) => {
         config = c;

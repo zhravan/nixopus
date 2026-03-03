@@ -1,4 +1,5 @@
 import { MastraClient } from '@mastra/client-js';
+import { getBasePath } from '@/lib/base-path';
 
 const AGENT_URL = process.env.NEXT_PUBLIC_AGENT_URL || '';
 
@@ -9,8 +10,9 @@ export function isAgentConfigured(): boolean {
 }
 
 export function createAgentClient(authHeaders: Record<string, string> = {}): MastraClient {
+  const base = getBasePath();
   return new MastraClient({
-    baseUrl: '/api/agent/',
+    baseUrl: base ? `${base}/api/agent/` : '/api/agent/',
     headers: authHeaders
   });
 }

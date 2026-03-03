@@ -6,6 +6,7 @@ import { Card, CardContent } from '@nixopus/ui';
 import { PasswordInputField } from '@nixopus/ui';
 import { Alert, AlertDescription } from '@nixopus/ui';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
+import { getBasePath } from '@/lib/base-path';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -36,7 +37,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const base = getBasePath();
+      const res = await fetch(`${base || ''}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword: password, token }),

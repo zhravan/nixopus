@@ -6,6 +6,7 @@ import { Card, CardContent } from '@nixopus/ui';
 import { Input } from '@nixopus/ui';
 import { Alert, AlertDescription } from '@nixopus/ui';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
+import { getBasePath } from '@/lib/base-path';
 import Link from 'next/link';
 
 export function ForgotPasswordForm() {
@@ -25,8 +26,9 @@ export function ForgotPasswordForm() {
 
     setIsLoading(true);
     try {
-      const redirectTo = `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/reset-password`;
-      const res = await fetch('/api/auth/request-password-reset', {
+      const base = typeof window !== 'undefined' ? getBasePath() : '';
+      const redirectTo = `${typeof window !== 'undefined' ? window.location.origin : ''}${base}/auth/reset-password`;
+      const res = await fetch(`${base || ''}/api/auth/request-password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), redirectTo }),

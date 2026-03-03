@@ -9,3 +9,9 @@ export function getBasePath(): string {
   }
   return process.env.BASE_PATH || '';
 }
+
+export function getServerConfigBase(): string {
+  const origin = process.env.VIEW_APP_ORIGIN || `http://localhost:${process.env.PORT || '7443'}`;
+  const base = getBasePath();
+  return base ? `${origin}${base}` : origin;
+}

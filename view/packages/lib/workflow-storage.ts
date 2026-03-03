@@ -6,16 +6,9 @@ import type {
   WorkflowRunStatusResponse,
   ExecutionMessage
 } from '@/packages/types/workflow';
-import { getBasePath } from '@/lib/base-path';
 
-const AGENT_BASE = '/api/agent';
-const BASE_PATH = `${AGENT_BASE}/dynamic-workflows`;
-const REGISTRY_PATH = `${AGENT_BASE}/tool-registry`;
-
-function prefixPath(path: string): string {
-  const base = getBasePath();
-  return base ? `${base}${path}` : path;
-}
+const BASE_PATH = '/api/agent/dynamic-workflows';
+const REGISTRY_PATH = '/api/agent/tool-registry';
 
 export interface PlanningMessage {
   role: 'user' | 'assistant';
@@ -48,8 +41,7 @@ export async function saveWorkflow(params: SaveWorkflowParams): Promise<SaveWork
   const { headers = {}, ...body } = params;
 
   const isUpdate = body.id && body.id !== 'new';
-  const path = isUpdate ? `${BASE_PATH}/${body.id}` : BASE_PATH;
-  const url = prefixPath(path);
+  const url = isUpdate ? `${BASE_PATH}/${body.id}` : BASE_PATH;
   const method = isUpdate ? 'PUT' : 'POST';
 
   if (!isUpdate) {
@@ -79,7 +71,7 @@ export async function listDynamicWorkflows(options: {
   headers?: Record<string, string>;
 }): Promise<any[]> {
   const { applicationId, headers = {} } = options;
-  const url = prefixPath(`${BASE_PATH}?applicationId=${encodeURIComponent(applicationId)}`);
+  const url = `${BASE_PATH}?applicationId=${encodeURIComponent(applicationId)}`;
 
   const res = await fetch(url, { headers });
   if (!res.ok) return [];
@@ -97,7 +89,7 @@ export async function getDynamicWorkflow(
   }
 ): Promise<any | null> {
   const { applicationId, headers = {} } = options;
-  const url = prefixPath(`${BASE_PATH}/${id}?applicationId=${encodeURIComponent(applicationId)}`);
+  const url = `${BASE_PATH}/${id}?applicationId=${encodeURIComponent(applicationId)}`;
 
   const res = await fetch(url, { headers });
   if (!res.ok) return null;
@@ -117,7 +109,7 @@ export async function deleteDynamicWorkflow(
   }
 ): Promise<void> {
   const { applicationId, headers = {} } = options;
-  const url = prefixPath(`${BASE_PATH}/${id}?applicationId=${encodeURIComponent(applicationId)}`);
+  const url = `${BASE_PATH}/${id}?applicationId=${encodeURIComponent(applicationId)}`;
 
   await fetch(url, { method: 'DELETE', headers });
 }
@@ -131,7 +123,7 @@ export async function describeNode(
 ): Promise<NodeDescribeResult | null> {
   const { sandboxProvider, headers = {} } = options;
 
-  const res = await fetch(prefixPath(`${BASE_PATH}/describe-node`), {
+  const res = await fetch(`${BASE_PATH}/describe-node`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({ node, sandboxProvider })
@@ -156,7 +148,7 @@ export async function runWorkflow(
 ): Promise<WorkflowRunResponse> {
   const { applicationId, inputData, sandboxConfig, headers = {} } = options;
 
-  const res = await fetch(prefixPath(`${BASE_PATH}/${id}/run`), {
+  const res = await fetch(`${BASE_PATH}/${id}/run`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({ applicationId, inputData, sandboxConfig })
@@ -179,9 +171,7 @@ export async function getRunStatus(
   }
 ): Promise<WorkflowRunStatusResponse> {
   const { applicationId, headers = {} } = options;
-  const url = prefixPath(
-    `${BASE_PATH}/${id}/runs/${runId}?applicationId=${encodeURIComponent(applicationId)}`
-  );
+  const url = `${BASE_PATH}/${id}/runs/${runId}?applicationId=${encodeURIComponent(applicationId)}`;
 
   const res = await fetch(url, { headers });
 
@@ -209,7 +199,7 @@ export async function streamWorkflowRun(
 ): Promise<Response> {
   const { applicationId, inputData, sandboxConfig, headers = {}, signal } = options;
 
-  const res = await fetch(prefixPath(`${BASE_PATH}/${id}/run/stream`), {
+  const res = await fetch(`${BASE_PATH}/${id}/run/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({ applicationId, inputData, sandboxConfig }),
@@ -232,7 +222,7 @@ export async function listToolRegistry(
 ): Promise<ToolRegistryEntry[]> {
   const { category, headers = {} } = options;
   const params = category ? `?category=${encodeURIComponent(category)}` : '';
-  const url = prefixPath(`${REGISTRY_PATH}${params}`);
+  const url = `${REGISTRY_PATH}${params}`;
 
   const res = await fetch(url, { headers });
   if (!res.ok) return [];

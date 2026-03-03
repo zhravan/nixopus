@@ -1,4 +1,3 @@
-import { getBasePath } from '@/lib/base-path';
 import { USERURLS } from '@/redux/api-conf';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import {
@@ -113,10 +112,9 @@ export const userApi = createApi({
       query: ({ organizationId }) => {
         // Use list-members endpoint with organizationId
         // We'll filter by userId in transformResponse
-        const base = typeof window !== 'undefined' ? getBasePath() : '';
         const url =
           typeof window !== 'undefined'
-            ? `${window.location.origin}${base}/api/auth/organization/list-members?organizationId=${organizationId}`
+            ? `${window.location.origin}/api/auth/organization/list-members?organizationId=${organizationId}`
             : `auth/organization/list-members?organizationId=${organizationId}`;
         return {
           url,

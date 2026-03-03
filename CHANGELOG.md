@@ -1,3 +1,12 @@
+# [0.1.0-alpha.138](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.137...v0.1.0-alpha.138) (2026-03-03)
+
+
+### Bug Fixes
+
+* build container to have multizone ([4d8f467](https://github.com/raghavyuva/nixopus/commit/4d8f467a9070ca811ae4155ecf32aa652584338c))
+
+
+
 # [0.1.0-alpha.137](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.136...v0.1.0-alpha.137) (2026-03-03)
 
 

@@ -1,3 +1,12 @@
+# [0.1.0-alpha.142](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.141...v0.1.0-alpha.142) (2026-03-03)
+
+
+### Bug Fixes
+
+* revert base path resolution on server side ([3ce7eec](https://github.com/raghavyuva/nixopus/commit/3ce7eeca4f40b9394b8c10218518c55ed41931e9))
+
+
+
 # [0.1.0-alpha.141](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.140...v0.1.0-alpha.141) (2026-03-03)
 
 

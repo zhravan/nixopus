@@ -1,3 +1,12 @@
+# [0.1.0-alpha.137](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.136...v0.1.0-alpha.137) (2026-03-03)
+
+
+### Features
+
+* add multi zone support ([df79769](https://github.com/raghavyuva/nixopus/commit/df79769759be12412da6871e450c2f2a58470db3))
+
+
+
 # [0.1.0-alpha.136](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.135...v0.1.0-alpha.136) (2026-03-02)
 
 

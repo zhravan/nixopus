@@ -1,3 +1,14 @@
+# [0.1.0-alpha.144](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.143...v0.1.0-alpha.144) (2026-03-04)
+
+
+### Bug Fixes
+
+* agent configured check with runtime checks ([1ed1f61](https://github.com/raghavyuva/nixopus/commit/1ed1f61e7feac7ddc091398e97da8b156a99b09b))
+* restart container no orgID in context issue ([d3ef7d2](https://github.com/raghavyuva/nixopus/commit/d3ef7d2ed1c2fa3f92f49ce9cdce49dfd7330d92))
+* swapped booleans for force rebuild cache ([fc39ef5](https://github.com/raghavyuva/nixopus/commit/fc39ef5f79f5f2caabae25eae1cfabd5a8840f1a))
+
+
+
 # [0.1.0-alpha.143](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.142...v0.1.0-alpha.143) (2026-03-04)
 
 

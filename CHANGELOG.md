@@ -1,3 +1,12 @@
+# [0.1.0-alpha.145](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.144...v0.1.0-alpha.145) (2026-03-05)
+
+
+### Features
+
+* add support for machine name in multi zone ([c7fbb6b](https://github.com/raghavyuva/nixopus/commit/c7fbb6bb583f1e3ee46df2ea81e138b7df10c297))
+
+
+
 # [0.1.0-alpha.144](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.143...v0.1.0-alpha.144) (2026-03-04)
 
 

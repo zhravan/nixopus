@@ -317,12 +317,12 @@ export function AppSidebar({
                   router.push('/apps');
                 }
               }}
-              className="cursor-pointer"
+              className="cursor-pointer group-data-[collapsible=icon]:justify-center"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                <Image src={logoSrc} alt="Nixopus" width={32} height={32} />
+              <div className="flex aspect-square size-4 shrink-0 items-center justify-center">
+                <Image src={logoSrc} alt="Nixopus" width={16} height={16} />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-semibold">Nixopus</span>
               </div>
             </SidebarMenuButton>

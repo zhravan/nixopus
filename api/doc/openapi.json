@@ -1625,7 +1625,41 @@
 						"type": "string"
 					},
 					"compose_service": {
-						"$ref": "#/components/schemas/ComposeService"
+						"nullable": true,
+						"properties": {
+							"application": {
+								"$ref": "#/components/schemas/Application"
+							},
+							"application_id": {
+								"format": "uuid",
+								"type": "string"
+							},
+							"created_at": {
+								"format": "date-time",
+								"type": "string"
+							},
+							"domains": {
+								"items": {
+									"$ref": "#/components/schemas/ApplicationDomain"
+								},
+								"type": "array"
+							},
+							"id": {
+								"format": "uuid",
+								"type": "string"
+							},
+							"port": {
+								"type": "integer"
+							},
+							"service_name": {
+								"type": "string"
+							},
+							"updated_at": {
+								"format": "date-time",
+								"type": "string"
+							}
+						},
+						"type": "object"
 					},
 					"compose_service_id": {
 						"format": "uuid",
@@ -2511,8 +2545,41 @@
 					},
 					"domains": {
 						"items": {
-							"$ref": "#/components/schemas/ApplicationDomain"
+							"nullable": true,
+							"properties": {
+								"application": {
+									"$ref": "#/components/schemas/Application"
+								},
+								"application_id": {
+									"format": "uuid",
+									"type": "string"
+								},
+								"compose_service": {
+									"$ref": "#/components/schemas/ComposeService"
+								},
+								"compose_service_id": {
+									"format": "uuid",
+									"type": "string"
+								},
+								"created_at": {
+									"format": "date-time",
+									"type": "string"
+								},
+								"domain": {
+									"type": "string"
+								},
+								"id": {
+									"format": "uuid",
+									"type": "string"
+								},
+								"port": {
+									"nullable": true,
+									"type": "integer"
+								}
+							},
+							"type": "object"
 						},
+						"nullable": true,
 						"type": "array"
 					},
 					"id": {
@@ -8871,6 +8938,10 @@
 															"nullable": true,
 															"type": "integer"
 														},
+														"proxy_host": {
+															"nullable": true,
+															"type": "string"
+														},
 														"public_key": {
 															"nullable": true,
 															"type": "string"
@@ -9056,6 +9127,10 @@
 												}
 											},
 											"type": "object"
+										},
+										"proxy_host": {
+											"nullable": true,
+											"type": "string"
 										},
 										"public_key": {
 											"nullable": true,
@@ -11400,6 +11475,66 @@
 					},
 					"is_configured": {
 						"type": "boolean"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"SendNotificationRequest": {
+				"description": "SendNotificationRequest schema",
+				"properties": {
+					"channel": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"metadata": {
+						"additionalProperties": {
+							"nullable": true,
+							"type": "string"
+						},
+						"nullable": true,
+						"type": "object"
+					},
+					"subject": {
+						"nullable": true,
+						"type": "string"
+					},
+					"to": {
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"channel",
+					"message"
+				],
+				"type": "object"
+			},
+			"SendNotificationResponse": {
+				"description": "SendNotificationResponse schema",
+				"properties": {
+					"data": {
+						"nullable": true,
+						"properties": {
+							"channel": {
+								"type": "string"
+							},
+							"error": {
+								"nullable": true,
+								"type": "string"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
 					},
 					"message": {
 						"type": "string"
@@ -19025,6 +19160,86 @@
 				"tags": [
 					"api/v1/notification",
 					"preferences"
+				]
+			}
+		},
+		"/api/v1/notification/send": {
+			"post": {
+				"description": "#### Controller: \n\n`github.com/raghavyuva/nixopus-api/internal/features/notification/controller.(*NotificationController).SendNotification`\n\n#### Middlewares:\n\n- `github.com/go-fuego/fuego.defaultLogger.middleware`\n- `github.com/raghavyuva/nixopus-api/internal/routes.(*Router).SetupRoutes.(*Router).setupAuthentication.func2`\n- `github.com/raghavyuva/nixopus-api/internal/routes.(*Router).applyMiddleware.func1`\n- `github.com/raghavyuva/nixopus-api/internal/routes.(*Router).applyMiddleware.func2`\n- `github.com/raghavyuva/nixopus-api/internal/routes.(*Router).applyMiddleware.func3`\n\n---\n\n",
+				"operationId": "POST_/api/v1/notification/send",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"*/*": {
+							"schema": {
+								"$ref": "#/components/schemas/SendNotificationRequest"
+							}
+						}
+					},
+					"description": "Request body for notification.SendNotificationRequest",
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SendNotificationResponse"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/SendNotificationResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPError"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPError"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPError"
+								}
+							},
+							"application/xml": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPError"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "send notification",
+				"tags": [
+					"api/v1/notification"
 				]
 			}
 		},

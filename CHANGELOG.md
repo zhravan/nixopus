@@ -1,3 +1,12 @@
+# [0.1.0-alpha.154](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.153...v0.1.0-alpha.154) (2026-03-09)
+
+
+### Bug Fixes
+
+* SSH_HOST in installer and debug level log ([d0bb529](https://github.com/raghavyuva/nixopus/commit/d0bb5290953f7c617ec1b5616356b60721115135))
+
+
+
 # [0.1.0-alpha.153](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.152...v0.1.0-alpha.153) (2026-03-09)
 
 

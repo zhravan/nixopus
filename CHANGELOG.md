@@ -1,3 +1,12 @@
+# [0.1.0-alpha.152](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.151...v0.1.0-alpha.152) (2026-03-09)
+
+
+### Bug Fixes
+
+* update ipv4 preferrance over ipv6 in dual stack ([7e21b23](https://github.com/raghavyuva/nixopus/commit/7e21b234c023daed39a330d6d905e366120ad8b7))
+
+
+
 # [0.1.0-alpha.151](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.150...v0.1.0-alpha.151) (2026-03-09)
 
 

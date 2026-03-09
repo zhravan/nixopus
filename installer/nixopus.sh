@@ -126,6 +126,7 @@ cmd_config() {
     echo "Access:       ${ALLOWED_ORIGIN:-unknown}"
     echo "HTTP Port:    ${CADDY_HTTP_PORT:-80}"
     echo "HTTPS Port:   ${CADDY_HTTPS_PORT:-443}"
+    echo "SSH Host:     ${SSH_HOST:-host.docker.internal}"
     echo "SSH Port:     ${SSH_PORT:-22}"
     echo "SSH User:     ${SSH_USER:-root}"
     echo ""

@@ -18,6 +18,12 @@ services:
       NIXOPUS_API_URL: "http://nixopus-api:8443"
       SECRET_MANAGER_ENABLED: "false"
       PASSWORD_LOGIN_ENABLED: "true"
+      SSH_HOST: "${SSH_HOST:-host.docker.internal}"
+      SSH_PORT: "${SSH_PORT:-22}"
+      SSH_USER: "${SSH_USER:-root}"
+      SSH_PRIVATE_KEY: "/etc/nixopus/ssh/id_rsa"
+    volumes:
+      - ${NIXOPUS_HOME:-/opt/nixopus}:/etc/nixopus
     networks:
       - nixopus-network
     healthcheck:
@@ -44,10 +50,11 @@ services:
       ALLOWED_ORIGIN: "${ALLOWED_ORIGIN}"
       CADDY_PORT: "2019"
       CADDY_ENDPOINT: "http://nixopus-caddy:2019"
-      SSH_HOST: host.docker.internal
+      SELF_HOSTED: "true"
+      SSH_HOST: "${SSH_HOST:-host.docker.internal}"
       SSH_PORT: "${SSH_PORT:-22}"
       SSH_USER: "${SSH_USER:-root}"
-      SSH_PRIVATE_KEY: /etc/nixopus/ssh/id_rsa
+      SSH_PRIVATE_KEY: "/etc/nixopus/ssh/id_rsa"
       DOCKER_HOST: "unix:///var/run/docker.sock"
       MOUNT_PATH: /etc/nixopus/configs
       DEPLOY_DOMAIN: "${DOMAIN:-${HOST_IP}}"

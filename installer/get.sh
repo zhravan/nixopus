@@ -291,6 +291,7 @@ gather_config() {
     fi
     prompt_if_tty ADMIN_EMAIL "Admin email" ""
 
+    SSH_HOST="${SSH_HOST:-host.docker.internal}"
     SSH_PORT="${SSH_PORT:-22}"
     SSH_USER="${SSH_USER:-root}"
 
@@ -356,6 +357,7 @@ HOST_IP=${HOST_IP:-}
 CADDY_HTTP_PORT=${CADDY_HTTP_PORT}
 CADDY_HTTPS_PORT=${CADDY_HTTPS_PORT}
 
+SSH_HOST=${SSH_HOST}
 SSH_PORT=${SSH_PORT}
 SSH_USER=${SSH_USER}
 
@@ -608,6 +610,7 @@ cmd_config() {
     echo "Access:       ${ALLOWED_ORIGIN:-unknown}"
     echo "HTTP Port:    ${CADDY_HTTP_PORT:-80}"
     echo "HTTPS Port:   ${CADDY_HTTPS_PORT:-443}"
+    echo "SSH Host:     ${SSH_HOST:-host.docker.internal}"
     echo "SSH Port:     ${SSH_PORT:-22}"
     echo "SSH User:     ${SSH_USER:-root}"
     echo ""

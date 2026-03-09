@@ -31,9 +31,7 @@ services:
   view:
     env:
       PORT: ${VIEW_PORT:-3000}
-      WEBSOCKET_URL: ${WEBSOCKET_URL:-}
       API_URL: ${API_URL:-}
-      WEBHOOK_URL: ${WEBHOOK_URL:-}
       VIEW_ENV_FILE: ${VIEW_ENV_FILE:-./view/.env.local}
       NEXT_PUBLIC_PORT: ${NEXT_PUBLIC_PORT:-3000}
       LOGS_PATH: ${LOGS_PATH:-./logs}

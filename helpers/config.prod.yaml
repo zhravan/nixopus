@@ -16,7 +16,7 @@ services:
       SSH_PASSWORD: ${SSH_PASSWORD:-}
       DOCKER_HOST: ${DOCKER_HOST:-unix:///var/run/docker.sock}
       REDIS_URL: ${REDIS_URL:-redis://default:changeme@nixopus-redis:6379}
-      CADDY_ENDPOINT: ${CADDY_ENDPOINT:-http://nixopus-caddy:2019}
+      CADDY_PORT: ${CADDY_PORT:-2019}
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:3000}
       ENV: ${ENV:-production}
       LOGS_PATH: ${LOGS_PATH:-./logs}
@@ -35,10 +35,7 @@ services:
   view:
     env:
       PORT: ${VIEW_PORT:-7443}
-      WEBSOCKET_URL: ${WEBSOCKET_URL:-}
       API_URL: ${API_URL:-}
-      VIEW_DOMAIN: ${VIEW_DOMAIN:-}
-      WEBHOOK_URL: ${WEBHOOK_URL:-}
       NEXT_PUBLIC_PORT: ${NEXT_PUBLIC_PORT:-7443}
       LOGS_PATH: ${LOGS_PATH:-./logs}
       VIEW_ENV_FILE: ${VIEW_ENV_FILE:-/etc/nixopus/source/view/.env}

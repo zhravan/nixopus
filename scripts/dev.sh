@@ -216,7 +216,7 @@ DOCKER_HOST=unix:///var/run/docker.sock
 DOCKER_PORT=2376
 
 # Caddy Configuration
-CADDY_ENDPOINT=http://localhost:${CADDY_ADMIN_PORT}
+CADDY_PORT=${CADDY_ADMIN_PORT}
 
 # SuperTokens Configuration
 SUPERTOKENS_API_KEY=NixopusSuperTokensAPIKey
@@ -247,8 +247,6 @@ create_view_env() {
     echo -e "${BLUE}Creating View .env file...${NC}"
     
     local API_URL=${API_URL:-http://localhost:${API_PORT}/api}
-    local WEBSOCKET_URL=${WEBSOCKET_URL:-ws://localhost:${API_PORT}/ws}
-    local WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:${API_PORT}/api/v1/webhook}
     local LOGS_PATH=${LOGS_PATH:-./logs}
     
     cat > "$VIEW_ENV_FILE" << EOF
@@ -259,11 +257,7 @@ NEXT_PUBLIC_PORT=${VIEW_PORT}
 # API Configuration
 NEXT_PUBLIC_API_URL=${API_URL}
 API_URL=${API_URL}
-WEBSOCKET_URL=${WEBSOCKET_URL}
-WEBHOOK_URL=${WEBHOOK_URL}
 
-# Domain Configuration
-VIEW_DOMAIN=http://localhost:${VIEW_PORT}
 
 # Environment
 NODE_ENV=development

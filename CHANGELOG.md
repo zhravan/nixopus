@@ -1,3 +1,12 @@
+# [0.1.0-alpha.151](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.150...v0.1.0-alpha.151) (2026-03-09)
+
+
+### Bug Fixes
+
+* handle unset NIXOPUS_INSTALLER_DIR, use master branch ([ccbf906](https://github.com/raghavyuva/nixopus/commit/ccbf906ad3bd7e7f9f5524c9856f1da742ede3a6))
+
+
+
 # [0.1.0-alpha.150](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.149...v0.1.0-alpha.150) (2026-03-09)
 
 

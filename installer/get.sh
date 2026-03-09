@@ -291,7 +291,7 @@ gather_config() {
     fi
     prompt_if_tty ADMIN_EMAIL "Admin email" ""
 
-    SSH_HOST="${SSH_HOST:-host.docker.internal}"
+    SSH_HOST="${SSH_HOST:-${HOST_IP:-host.docker.internal}}"
     SSH_PORT="${SSH_PORT:-22}"
     SSH_USER="${SSH_USER:-root}"
 
@@ -325,17 +325,20 @@ gather_config() {
 
 setup_directories() {
     mkdir -p "$NIXOPUS_HOME"/{ssh,configs,caddy}
-    chmod 700 "$NIXOPUS_HOME"
+    chmod 755 "$NIXOPUS_HOME"
 }
 
 setup_ssh() {
     local key_path="$NIXOPUS_HOME/ssh/id_rsa"
     if [ -f "$key_path" ]; then
+        chmod 755 "$NIXOPUS_HOME/ssh"
+        chmod 644 "$key_path"
         log_ok "SSH key exists"
         return
     fi
     ssh-keygen -t rsa -b 4096 -f "$key_path" -N "" -q
-    chmod 600 "$key_path"
+    chmod 755 "$NIXOPUS_HOME/ssh"
+    chmod 644 "$key_path"
     chmod 644 "$key_path.pub"
 
     local auth_keys="${HOME}/.ssh/authorized_keys"
@@ -381,6 +384,7 @@ USE_BUNDLED_REDIS=${USE_BUNDLED_REDIS}
 ADMIN_EMAIL=${ADMIN_EMAIL:-}
 SELF_HOSTED=true
 NIXOPUS_TELEMETRY=${NIXOPUS_TELEMETRY:-on}
+LOG_LEVEL=${LOG_LEVEL:-debug}
 EOF
     chmod 600 "$NIXOPUS_HOME/.env"
 }
@@ -610,7 +614,7 @@ cmd_config() {
     echo "Access:       ${ALLOWED_ORIGIN:-unknown}"
     echo "HTTP Port:    ${CADDY_HTTP_PORT:-80}"
     echo "HTTPS Port:   ${CADDY_HTTPS_PORT:-443}"
-    echo "SSH Host:     ${SSH_HOST:-host.docker.internal}"
+    echo "SSH Host:     ${SSH_HOST:-${HOST_IP:-<unknown>}}"
     echo "SSH Port:     ${SSH_PORT:-22}"
     echo "SSH User:     ${SSH_USER:-root}"
     echo ""

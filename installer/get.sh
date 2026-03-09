@@ -140,8 +140,13 @@ format_ip_for_url() {
 detect_ip() {
     local ip=""
     for svc in "https://api64.ipify.org" "https://ifconfig.me" "https://icanhazip.com"; do
-        ip=$(curl -fsSL --connect-timeout 5 "$svc" 2>/dev/null | tr -d '[:space:]') && [ -n "$ip" ] && break
+        ip=$(curl -4 -fsSL --connect-timeout 5 "$svc" 2>/dev/null | tr -d '[:space:]') && [ -n "$ip" ] && break
     done
+    if [ -z "$ip" ]; then
+        for svc in "https://api64.ipify.org" "https://ifconfig.me" "https://icanhazip.com"; do
+            ip=$(curl -6 -fsSL --connect-timeout 5 "$svc" 2>/dev/null | tr -d '[:space:]') && [ -n "$ip" ] && break
+        done
+    fi
     if [ -z "$ip" ]; then
         ip=$(hostname -I 2>/dev/null | awk '{print $1}')
     fi
@@ -511,6 +516,14 @@ sedi() {
 
 redact() { echo "${1:0:4}****${1: -4}"; }
 
+format_ip_for_url() {
+    if [[ "$1" == *:* ]]; then
+        echo "[$1]"
+    else
+        echo "$1"
+    fi
+}
+
 cmd_status() {
     dc ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 }
@@ -679,6 +692,39 @@ cmd_port() {
     dc up -d --remove-orphans
 }
 
+cmd_ip() {
+    local action="${1:-}" new_ip="${2:-}"
+    load_env
+    if [ "$action" != "set" ] || [ -z "$new_ip" ]; then
+        echo "── IP Configuration ──"
+        echo "Host IP:  ${HOST_IP:-<unknown>}"
+        echo "Access:   ${ALLOWED_ORIGIN:-unknown}"
+        echo ""
+        echo "Usage: nixopus ip set <ip>"
+        return
+    fi
+
+    sedi "s|^HOST_IP=.*|HOST_IP=${new_ip}|" "$NIXOPUS_HOME/.env"
+    if [ -z "${DOMAIN:-}" ]; then
+        local ip_for_url
+        ip_for_url=$(format_ip_for_url "$new_ip")
+        local http_port
+        http_port=$(grep "^CADDY_HTTP_PORT=" "$NIXOPUS_HOME/.env" | cut -d= -f2)
+        local base_url
+        if [ "${http_port:-80}" = "80" ]; then
+            base_url="http://${ip_for_url}"
+        else
+            base_url="http://${ip_for_url}:${http_port}"
+        fi
+        sedi "s|^ALLOWED_ORIGIN=.*|ALLOWED_ORIGIN=${base_url}|" "$NIXOPUS_HOME/.env"
+        sedi "s|^API_URL=.*|API_URL=${base_url}/api|" "$NIXOPUS_HOME/.env"
+        sedi "s|^AUTH_PUBLIC_URL=.*|AUTH_PUBLIC_URL=${base_url}|" "$NIXOPUS_HOME/.env"
+    fi
+    echo "Set IP to $new_ip"
+    echo "Restarting services..."
+    dc up -d --remove-orphans
+}
+
 cmd_backup() {
     local backup_dir="$NIXOPUS_HOME/backups/$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$backup_dir"
@@ -721,6 +767,7 @@ cmd_help() {
     echo "  config set K=V      Update configuration value"
     echo "  domain add <domain> Switch to domain-based HTTPS"
     echo "  domain remove       Switch back to IP-based HTTP"
+    echo "  ip set <ip>         Change host IP (IP mode only)"
     echo "  port                Show port configuration"
     echo "  port set <type> <n> Change port (http, https, ssh)"
     echo "  backup              Backup database and config"
@@ -737,6 +784,7 @@ case "${1:-help}" in
     uninstall) shift; cmd_uninstall "${1:-}" ;;
     config)    shift; cmd_config "$@" ;;
     domain)    shift; cmd_domain "$@" ;;
+    ip)        shift; cmd_ip "$@" ;;
     port)      shift; cmd_port "$@" ;;
     backup)    cmd_backup ;;
     info)      cmd_info ;;

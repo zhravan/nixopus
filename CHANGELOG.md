@@ -1,3 +1,19 @@
+# [0.1.0-alpha.150](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.149...v0.1.0-alpha.150) (2026-03-09)
+
+
+### Bug Fixes
+
+* environment variables and documentation for selfhosting ([29e0b2a](https://github.com/raghavyuva/nixopus/commit/29e0b2a5a3ca529b81ef2053e09ebae0b5b1e77f))
+* environment variables and documentation for selfhosting ([ad439b4](https://github.com/raghavyuva/nixopus/commit/ad439b403fa0c2efbe1e70d7d1f52371d6c88dab))
+
+
+### Features
+
+* endpoints for resource update ([1ea17e2](https://github.com/raghavyuva/nixopus/commit/1ea17e2e8acaa092aa253aa7a7084337c8f082de))
+* update installer scripts and env var references ([279341a](https://github.com/raghavyuva/nixopus/commit/279341a3911566d2da2a7bb38acbd9d0410ba99b))
+
+
+
 # [0.1.0-alpha.149](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.148...v0.1.0-alpha.149) (2026-03-08)
 
 

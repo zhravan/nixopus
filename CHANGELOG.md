@@ -1,3 +1,12 @@
+# [0.1.0-alpha.153](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.152...v0.1.0-alpha.153) (2026-03-09)
+
+
+### Bug Fixes
+
+* update ssh env vars setting during installation ([1a68e72](https://github.com/raghavyuva/nixopus/commit/1a68e72123423d2f4a0d5eafaa2dce413a3cb292))
+
+
+
 # [0.1.0-alpha.152](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.151...v0.1.0-alpha.152) (2026-03-09)
 
 

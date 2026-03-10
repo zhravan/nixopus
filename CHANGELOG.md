@@ -1,3 +1,12 @@
+# [0.1.0-alpha.155](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.154...v0.1.0-alpha.155) (2026-03-10)
+
+
+### Bug Fixes
+
+* remove provision consumer from api ([e379d99](https://github.com/raghavyuva/nixopus/commit/e379d99592c38075cc4f9e48553b0c6562867c42))
+
+
+
 # [0.1.0-alpha.154](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.153...v0.1.0-alpha.154) (2026-03-09)
 
 

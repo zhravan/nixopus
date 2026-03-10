@@ -1,3 +1,21 @@
+# [0.1.0-alpha.157](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.156...v0.1.0-alpha.157) (2026-03-10)
+
+
+### Bug Fixes
+
+* agent streaming response ([4a5eebe](https://github.com/raghavyuva/nixopus/commit/4a5eebe8bea575a69194fb4ea06d8f9589c0b4d6))
+* handle logout in multizone ([c46614f](https://github.com/raghavyuva/nixopus/commit/c46614fe20f10b73ab77e42f074d94b53de3fe98))
+* reduce texts in github connector ([dee6eb0](https://github.com/raghavyuva/nixopus/commit/dee6eb06147957338e05f5fa61fb4ff58084f35a))
+* remove trail prefix from the provision subdomain generator ([612aea8](https://github.com/raghavyuva/nixopus/commit/612aea87da4cca3fc4f439f9edc96ceef538f13f))
+
+
+### Features
+
+* openapi spec enrichment ([7d4293d](https://github.com/raghavyuva/nixopus/commit/7d4293d5c2449d6f18a423a669c888129f52443b))
+* route to chat on repository click ([1ad8fd5](https://github.com/raghavyuva/nixopus/commit/1ad8fd586338e6f9da0d9e833b0dfc21d2b9aabc))
+
+
+
 # [0.1.0-alpha.156](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.155...v0.1.0-alpha.156) (2026-03-10)
 
 

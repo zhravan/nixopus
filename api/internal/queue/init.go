@@ -16,6 +16,7 @@ import (
 var (
 	redisClient      *redis.Client
 	factory          taskq.Factory
+	producerFactory  taskq.Factory
 	onceConsumers    sync.Once
 	consumersStarted bool
 	registeredQueues []string
@@ -26,6 +27,7 @@ var (
 func Init(client *redis.Client) {
 	redisClient = client
 	factory = redisq.NewFactory()
+	producerFactory = redisq.NewFactory()
 	registeredQueues = make([]string, 0)
 }
 
@@ -35,38 +37,6 @@ func RedisClient() *redis.Client {
 	return redisClient
 }
 
-func ensureConsumerGroupReady(ctx context.Context, queueName string) {
-	if redisClient == nil {
-		return
-	}
-	streamKey := fmt.Sprintf("taskq:{%s}", queueName)
-	groupName := "taskq"
-	groupCreateCmd := redisClient.XGroupCreateMkStream(ctx, streamKey, groupName, "0")
-	if groupCreateCmd.Err() != nil {
-		errMsg := groupCreateCmd.Err().Error()
-		if errMsg == "BUSYGROUP Consumer Group name already exists" || errMsg == "BUSYGROUP" {
-			groupInfoCmd := redisClient.XInfoGroups(ctx, streamKey)
-			if groupInfoCmd.Err() == nil {
-				groups, _ := groupInfoCmd.Result()
-				for _, group := range groups {
-					if group.Name == groupName {
-						streamLenCmd := redisClient.XLen(ctx, streamKey)
-						streamLen := int64(0)
-						if streamLenCmd.Err() == nil {
-							streamLen, _ = streamLenCmd.Result()
-						}
-						if (group.LastDeliveredID == "$" || group.LastDeliveredID == "0-0") &&
-							streamLen > 0 && group.Pending == 0 {
-							redisClient.XGroupSetID(ctx, streamKey, groupName, "0")
-						}
-						break
-					}
-				}
-			}
-		}
-	}
-}
-
 // RegisterQueue registers a new queue with the shared redis client.
 func RegisterQueue(opts *taskq.QueueOptions) taskq.Queue {
 	if opts.Redis == nil {
@@ -74,13 +44,19 @@ func RegisterQueue(opts *taskq.QueueOptions) taskq.Queue {
 	}
 	queue := factory.RegisterQueue(opts)
 
-	// Track registered queue names for cleanup
 	queuesMutex.Lock()
 	registeredQueues = append(registeredQueues, opts.Name)
 	queuesMutex.Unlock()
 
 	log.Printf("Registered queue: %s (MinNumWorker: %d, MaxNumWorker: %d)", opts.Name, opts.MinNumWorker, opts.MaxNumWorker)
 	return queue
+}
+
+func registerProducerQueue(opts *taskq.QueueOptions) taskq.Queue {
+	if opts.Redis == nil {
+		opts.Redis = redisClient
+	}
+	return producerFactory.RegisterQueue(opts)
 }
 
 // cleanupDeadConsumers removes dead consumers from Redis consumer groups.
@@ -184,5 +160,6 @@ func IsConsumersStarted() bool {
 func Close() error {
 	log.Println("Closing task queue consumers...")
 	consumersStarted = false
+	_ = producerFactory.Close()
 	return factory.Close()
 }

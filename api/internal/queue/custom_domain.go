@@ -3,9 +3,7 @@ package queue
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
-	"time"
 
 	"github.com/vmihailenco/taskq/v3"
 )
@@ -37,23 +35,14 @@ var (
 
 func SetupCustomDomainQueue() {
 	onceCustomDomainQueues.Do(func() {
-		CustomDomainQueue = RegisterQueue(&taskq.QueueOptions{
-			Name:                queueCustomDomain,
-			ConsumerIdleTimeout: 10 * time.Minute,
-			MinNumWorker:        1,
-			MaxNumWorker:        1,
-			ReservationSize:     1,
-			ReservationTimeout:  15 * time.Minute,
-			WaitTimeout:         5 * time.Second,
-			BufferSize:          16,
+		CustomDomainQueue = registerProducerQueue(&taskq.QueueOptions{
+			Name: queueCustomDomain,
 		})
 
 		TaskRegisterCustomDomain = taskq.RegisterTask(&taskq.TaskOptions{
 			Name:       taskRegisterCustomDomain,
 			RetryLimit: 1,
 			Handler: func(ctx context.Context, payload CustomDomainPayload) error {
-				fmt.Printf("[%s] task enqueued: domain_id=%s, domain=%s\n",
-					taskRegisterCustomDomain, payload.DomainID, payload.Domain)
 				return nil
 			},
 		})
@@ -62,14 +51,9 @@ func SetupCustomDomainQueue() {
 			Name:       taskRemoveCustomDomain,
 			RetryLimit: 1,
 			Handler: func(ctx context.Context, payload RemoveCustomDomainPayload) error {
-				fmt.Printf("[%s] task enqueued: domain_id=%s, domain=%s\n",
-					taskRemoveCustomDomain, payload.DomainID, payload.Domain)
 				return nil
 			},
 		})
-
-		log.Printf("Custom domain queue registered: %s", queueCustomDomain)
-		ensureConsumerGroupReady(context.Background(), queueCustomDomain)
 	})
 }
 

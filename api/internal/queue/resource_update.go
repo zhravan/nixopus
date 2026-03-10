@@ -3,9 +3,7 @@ package queue
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
-	"time"
 
 	"github.com/vmihailenco/taskq/v3"
 )
@@ -32,29 +30,17 @@ var (
 
 func SetupResourceUpdateQueue() {
 	onceResourceUpdateQueues.Do(func() {
-		ResourceUpdateQueue = RegisterQueue(&taskq.QueueOptions{
-			Name:                queueResourceUpdate,
-			ConsumerIdleTimeout: 10 * time.Minute,
-			MinNumWorker:        1,
-			MaxNumWorker:        1,
-			ReservationSize:     1,
-			ReservationTimeout:  10 * time.Minute,
-			WaitTimeout:         5 * time.Second,
-			BufferSize:          16,
+		ResourceUpdateQueue = registerProducerQueue(&taskq.QueueOptions{
+			Name: queueResourceUpdate,
 		})
 
 		TaskResourceUpdate = taskq.RegisterTask(&taskq.TaskOptions{
 			Name:       taskResourceUpdate,
 			RetryLimit: 1,
 			Handler: func(ctx context.Context, payload ResourceUpdatePayload) error {
-				fmt.Printf("[%s] task enqueued: vm_name=%s, vcpu=%d, mem=%d, disk=%d\n",
-					taskResourceUpdate, payload.VMName, payload.VcpuCount, payload.MemoryMB, payload.DiskGB)
 				return nil
 			},
 		})
-
-		log.Printf("Resource update queue registered: %s", queueResourceUpdate)
-		ensureConsumerGroupReady(context.Background(), queueResourceUpdate)
 	})
 }
 

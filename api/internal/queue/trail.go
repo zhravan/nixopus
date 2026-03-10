@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"
 
 	trail_types "github.com/raghavyuva/nixopus-api/internal/features/trail/types"
 	"github.com/vmihailenco/taskq/v3"
@@ -23,15 +22,8 @@ const (
 
 func SetupProvisionQueue() {
 	onceTrailQueues.Do(func() {
-		ProvisionQueue = RegisterQueue(&taskq.QueueOptions{
-			Name:                queueProvision,
-			ConsumerIdleTimeout: 10 * time.Minute,
-			MinNumWorker:        0,
-			MaxNumWorker:        0,
-			ReservationSize:     1,
-			ReservationTimeout:  15 * time.Minute,
-			WaitTimeout:         5 * time.Second,
-			BufferSize:          16,
+		ProvisionQueue = registerProducerQueue(&taskq.QueueOptions{
+			Name: queueProvision,
 		})
 
 		TaskProvision = taskq.RegisterTask(&taskq.TaskOptions{

@@ -35,6 +35,38 @@ func RedisClient() *redis.Client {
 	return redisClient
 }
 
+func ensureConsumerGroupReady(ctx context.Context, queueName string) {
+	if redisClient == nil {
+		return
+	}
+	streamKey := fmt.Sprintf("taskq:{%s}", queueName)
+	groupName := "taskq"
+	groupCreateCmd := redisClient.XGroupCreateMkStream(ctx, streamKey, groupName, "0")
+	if groupCreateCmd.Err() != nil {
+		errMsg := groupCreateCmd.Err().Error()
+		if errMsg == "BUSYGROUP Consumer Group name already exists" || errMsg == "BUSYGROUP" {
+			groupInfoCmd := redisClient.XInfoGroups(ctx, streamKey)
+			if groupInfoCmd.Err() == nil {
+				groups, _ := groupInfoCmd.Result()
+				for _, group := range groups {
+					if group.Name == groupName {
+						streamLenCmd := redisClient.XLen(ctx, streamKey)
+						streamLen := int64(0)
+						if streamLenCmd.Err() == nil {
+							streamLen, _ = streamLenCmd.Result()
+						}
+						if (group.LastDeliveredID == "$" || group.LastDeliveredID == "0-0") &&
+							streamLen > 0 && group.Pending == 0 {
+							redisClient.XGroupSetID(ctx, streamKey, groupName, "0")
+						}
+						break
+					}
+				}
+			}
+		}
+	}
+}
+
 // RegisterQueue registers a new queue with the shared redis client.
 func RegisterQueue(opts *taskq.QueueOptions) taskq.Queue {
 	if opts.Redis == nil {

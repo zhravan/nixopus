@@ -13,8 +13,11 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
   }
 
   const { path } = await params;
-  const targetPath = path.join('/');
-  const url = new URL(`/${targetPath}`, AGENT_URL);
+  const segments = path[0] === 'api' ? path.slice(1) : path;
+  const targetPath = segments.join('/');
+  const base = new URL(AGENT_URL);
+  const url = new URL(base.toString());
+  url.pathname = `${base.pathname.replace(/\/+$/, '')}/${targetPath}`;
   req.nextUrl.searchParams.forEach((value, key) => {
     url.searchParams.set(key, value);
   });

@@ -105,7 +105,7 @@ async function agentFetch(
 ): Promise<Response> {
   const baseUrl = await getAgentBaseUrl().catch(() => '');
   const url = baseUrl
-    ? `${baseUrl.replace(/\/$/, '')}/api${path}`
+    ? `${baseUrl.replace(/\/$/, '')}${path}`
     : `${AGENT_PROXY_BASE_PATH}/api${path}`;
   const reqHeaders: Record<string, string> = {
     'Content-Type': 'application/json'

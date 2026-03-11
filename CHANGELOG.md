@@ -1,3 +1,12 @@
+# [0.1.0-alpha.158](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.157...v0.1.0-alpha.158) (2026-03-11)
+
+
+### Bug Fixes
+
+* error display from controllers to user facing messages in all api routes ([8da1823](https://github.com/raghavyuva/nixopus/commit/8da182374d8b8ffedb5f665b771634551e49a053))
+
+
+
 # [0.1.0-alpha.157](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.156...v0.1.0-alpha.157) (2026-03-10)
 
 

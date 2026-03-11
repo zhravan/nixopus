@@ -20,6 +20,7 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   contexts?: ChatContext[];
+  kind?: 'status';
 }
 
 interface UseAgentChatOptions {
@@ -80,6 +81,55 @@ export interface PendingToolApproval {
   args: unknown;
 }
 
+function getRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object') return null;
+  return value as Record<string, unknown>;
+}
+
+function getText(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function formatToolProgress(chunk: StreamChunk): string | null {
+  let eventType: string | null = null;
+  let progressData: Record<string, unknown> | null = null;
+
+  if (chunk.type.startsWith('data-')) {
+    eventType = chunk.type;
+    progressData = getRecord(chunk.payload);
+  } else {
+    const payload = getRecord(chunk.payload);
+    const output = getRecord(payload?.output);
+    const outputType = getText(output?.type);
+    if (outputType?.startsWith('data-')) {
+      eventType = outputType;
+      progressData = getRecord(output?.payload) ?? output;
+    }
+  }
+
+  if (!eventType) return null;
+
+  const toolName =
+    getText(progressData?.toolName) ??
+    getText(progressData?.tool_name) ??
+    getText(progressData?.tool) ??
+    'Tool';
+  const stage =
+    getText(progressData?.stage) ??
+    getText(progressData?.step) ??
+    getText(progressData?.status) ??
+    eventType.replace(/^data-/, '').replace(/-/g, ' ');
+  const detail =
+    getText(progressData?.message) ??
+    getText(progressData?.detail) ??
+    getText(progressData?.text);
+
+  const base = `${toolName}: ${stage}`;
+  return detail ? `${base} - ${detail}` : base;
+}
+
 export function useAgentChat({
   threadId,
   resourceId,
@@ -97,6 +147,7 @@ export function useAgentChat({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const pendingApprovalRef = useRef(false);
+  const progressMessageIdRef = useRef<string | null>(null);
 
   const token = useAppSelector((state) => state.auth.token);
   const activeOrg = useAppSelector((state) => state.user.activeOrganization);
@@ -190,6 +241,25 @@ export function useAgentChat({
         }
       }
 
+      const progressText = formatToolProgress(chunk);
+      if (progressText) {
+        if (!progressMessageIdRef.current) {
+          const id = crypto.randomUUID();
+          progressMessageIdRef.current = id;
+          setMessages((prev) => [
+            ...prev,
+            { id, role: 'assistant', content: progressText, timestamp: new Date(), kind: 'status' }
+          ]);
+        } else {
+          const currentId = progressMessageIdRef.current;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === currentId ? { ...m, content: progressText, timestamp: new Date(), kind: 'status' } : m
+            )
+          );
+        }
+      }
+
       if (
         chunk.type === 'tool-call' ||
         chunk.type === 'tool-call-start' ||
@@ -252,6 +322,7 @@ export function useAgentChat({
       const abortController = new AbortController();
       abortRef.current = abortController;
       const runIdRef = { current: '' };
+      progressMessageIdRef.current = null;
 
       const assistantMessageId = crypto.randomUUID();
       setMessages((prev) => [
@@ -311,6 +382,7 @@ export function useAgentChat({
     const abortController = new AbortController();
     abortRef.current = abortController;
     const runIdRef = { current: '' };
+    progressMessageIdRef.current = null;
 
     try {
       const headers = await getAuthHeaders(token ?? null, organizationId ?? null);

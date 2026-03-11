@@ -16,9 +16,9 @@ func (c *FileManagerController) CreateDirectory(f fuego.ContextWithBody[CreateDi
 	request, err := f.Body()
 
 	if err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -27,6 +27,7 @@ func (c *FileManagerController) CreateDirectory(f fuego.ContextWithBody[CreateDi
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

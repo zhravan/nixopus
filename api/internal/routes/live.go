@@ -116,18 +116,12 @@ func (c *LiveDeployController) HandlePause(f fuego.ContextWithBody[PauseRequest]
 		}
 	}
 	if applicationIDStr == "" {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: "application_id is required"}
 	}
 
 	applicationID, err := uuid.Parse(applicationIDStr)
 	if err != nil {
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: err.Error(), Err: err}
 	}
 
 	token := r.URL.Query().Get("token")
@@ -137,37 +131,25 @@ func (c *LiveDeployController) HandlePause(f fuego.ContextWithBody[PauseRequest]
 		}
 	}
 	if token == "" {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	ctx := r.Context()
 	user, orgID, err := c.gateway.VerifySession(ctx, token, r)
 	if err != nil {
 		c.logger.Log(logger.Error, "pause: session verification failed", err.Error())
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: err.Error(), Err: err}
 	}
 
 	organizationID, err := uuid.Parse(orgID)
 	if err != nil {
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: err.Error(), Err: err}
 	}
 
 	deployStorage := deploy_storage.DeployStorage{DB: c.store.DB, Ctx: ctx}
 	application, err := deployStorage.GetApplicationById(applicationID.String(), organizationID)
 	if err != nil || application.UserID != user.ID || application.OrganizationID != organizationID {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusNotFound,
-		}
+		return nil, fuego.NotFoundError{Detail: "application not found"}
 	}
 
 	orgCtx := context.WithValue(ctx, types.OrganizationIDKey, orgID)
@@ -175,6 +157,7 @@ func (c *LiveDeployController) HandlePause(f fuego.ContextWithBody[PauseRequest]
 		c.logger.Log(logger.Error, "pause: failed to pause service", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

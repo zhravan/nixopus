@@ -29,6 +29,7 @@ func (c *ContainerController) RestartContainer(f fuego.ContextNoBody) (*types.Co
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -42,6 +43,7 @@ func (c *ContainerController) RestartContainer(f fuego.ContextNoBody) (*types.Co
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

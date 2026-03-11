@@ -45,14 +45,14 @@ func (ac *AuthController) HandleBootstrap(c fuego.ContextNoBody) (*BootstrapResp
 
 	user := utils.GetUser(w, r)
 	if user == nil {
-		return nil, fuego.HTTPError{Err: nil, Status: http.StatusUnauthorized}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	// Get session for activeOrganizationId
 	sessionResp, err := auth.VerifySession(r)
 	if err != nil {
 		ac.logger.Log(logger.Error, "bootstrap: verify session failed", err.Error())
-		return nil, fuego.HTTPError{Err: err, Status: http.StatusUnauthorized}
+		return nil, fuego.UnauthorizedError{Detail: err.Error(), Err: err}
 	}
 
 	provisionStatus := "NOT_STARTED"
@@ -128,7 +128,7 @@ func (ac *AuthController) HandleBootstrap(c fuego.ContextNoBody) (*BootstrapResp
 			Scan(ctx)
 		if err != nil {
 			ac.logger.Log(logger.Error, "bootstrap: failed to query user_provision_details", err.Error())
-			return nil, fuego.HTTPError{Err: err, Status: http.StatusInternalServerError}
+			return nil, fuego.HTTPError{Err: err, Detail: err.Error(), Status: http.StatusInternalServerError}
 		}
 		id := upd.ID.String()
 		provisionID = &id

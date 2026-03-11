@@ -19,9 +19,9 @@ type ListImagesRequest struct {
 func (c *ContainerController) ListImages(f fuego.ContextWithBody[ListImagesRequest]) (*container_types.ListImagesResponse, error) {
 	req, err := f.Body()
 	if err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -30,6 +30,7 @@ func (c *ContainerController) ListImages(f fuego.ContextWithBody[ListImagesReque
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -38,9 +39,9 @@ func (c *ContainerController) ListImages(f fuego.ContextWithBody[ListImagesReque
 	if req.ContainerID != "" {
 		_, err := dockerService.GetContainerById(req.ContainerID)
 		if err != nil {
-			return nil, fuego.HTTPError{
+			return nil, fuego.NotFoundError{
+				Detail: err.Error(),
 				Err:    err,
-				Status: http.StatusNotFound,
 			}
 		}
 	}

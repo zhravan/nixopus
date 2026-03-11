@@ -23,39 +23,39 @@ func (c *DeployController) IndexCodebase(f fuego.ContextNoBody) (*types.IndexCod
 
 	user := utils.GetUser(w, r)
 	if user == nil {
-		return nil, fuego.HTTPError{Status: http.StatusUnauthorized}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	organizationID := utils.GetOrganizationID(r)
 	if organizationID == uuid.Nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: "organization ID is required",
 			Err:    errors.New("organization ID is required"),
-			Status: http.StatusBadRequest,
 		}
 	}
 
 	applicationID := f.QueryParam("application_id")
 	if applicationID == "" {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: "application_id is required",
 			Err:    errors.New("application_id is required"),
-			Status: http.StatusBadRequest,
 		}
 	}
 
 	appID, err := uuid.Parse(applicationID)
 	if err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: fmt.Sprintf("invalid application_id: %s", err.Error()),
 			Err:    fmt.Errorf("invalid application_id: %w", err),
-			Status: http.StatusBadRequest,
 		}
 	}
 
 	application, err := c.storage.GetApplicationById(applicationID, organizationID)
 	if err != nil {
 		c.logger.Log(logger.Error, "index: application not found", err.Error())
-		return nil, fuego.HTTPError{
+		return nil, fuego.NotFoundError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusNotFound,
 		}
 	}
 
@@ -64,6 +64,7 @@ func (c *DeployController) IndexCodebase(f fuego.ContextNoBody) (*types.IndexCod
 		c.logger.Log(logger.Error, "index: failed to resolve staging path", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    fmt.Errorf("failed to resolve staging path: %w", err),
+			Detail: fmt.Sprintf("failed to resolve staging path: %s", err.Error()),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -74,6 +75,7 @@ func (c *DeployController) IndexCodebase(f fuego.ContextNoBody) (*types.IndexCod
 		c.logger.Log(logger.Error, "index: indexing failed", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    fmt.Errorf("indexing failed: %w", err),
+			Detail: fmt.Sprintf("indexing failed: %s", err.Error()),
 			Status: http.StatusInternalServerError,
 		}
 	}

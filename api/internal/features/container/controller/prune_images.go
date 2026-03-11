@@ -17,9 +17,9 @@ type PruneImagesRequest struct {
 func (c *ContainerController) PruneImages(f fuego.ContextWithBody[PruneImagesRequest]) (*types.PruneImagesResponse, error) {
 	req, err := f.Body()
 	if err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -28,6 +28,7 @@ func (c *ContainerController) PruneImages(f fuego.ContextWithBody[PruneImagesReq
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -42,6 +43,7 @@ func (c *ContainerController) PruneImages(f fuego.ContextWithBody[PruneImagesReq
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"net/http"
-
 	"github.com/go-fuego/fuego"
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
@@ -31,41 +28,26 @@ func (c *TrailController) ProvisionTrail(f fuego.ContextWithBody[types.Provision
 	user := utils.GetUser(w, r)
 
 	if user == nil {
-		return nil, fuego.HTTPError{
-			Err:    errors.New("authentication required"),
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	orgID := r.Header.Get("X-Organization-Id")
 	if orgID == "" {
-		return nil, fuego.HTTPError{
-			Err:    types.ErrOrganizationRequired,
-			Status: http.StatusForbidden,
-		}
+		return nil, fuego.ForbiddenError{Detail: types.ErrOrganizationRequired.Error(), Err: types.ErrOrganizationRequired}
 	}
 
 	if _, err := uuid.Parse(orgID); err != nil {
-		return nil, fuego.HTTPError{
-			Err:    types.ErrInvalidOrganizationID,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: types.ErrInvalidOrganizationID.Error(), Err: types.ErrInvalidOrganizationID}
 	}
 
 	body, err := f.Body()
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), user.ID.String())
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: err.Error(), Err: err}
 	}
 
 	if err := c.validator.ValidateRequest(&body); err != nil {
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: err.Error(), Err: err}
 	}
 
 	result, err := c.service.ProvisionTrail(user.ID.String(), orgID, body)
@@ -74,6 +56,7 @@ func (c *TrailController) ProvisionTrail(f fuego.ContextWithBody[types.Provision
 		status := mapErrorToStatus(err)
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: status,
 		}
 	}

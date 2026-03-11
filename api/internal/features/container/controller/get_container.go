@@ -17,6 +17,7 @@ func (c *ContainerController) GetContainer(f fuego.ContextNoBody) (*types.GetCon
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -26,6 +27,7 @@ func (c *ContainerController) GetContainer(f fuego.ContextNoBody) (*types.GetCon
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

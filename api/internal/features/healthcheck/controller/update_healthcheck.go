@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/go-fuego/fuego"
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/healthcheck/types"
@@ -15,18 +13,18 @@ func (c *HealthCheckController) UpdateHealthCheck(f fuego.ContextWithBody[types.
 	user := utils.GetUser(w, r)
 
 	if user == nil {
-		return nil, fuego.HTTPError{Status: http.StatusUnauthorized}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	orgID := utils.GetOrganizationID(r)
 	if orgID == (uuid.UUID{}) {
-		return nil, fuego.HTTPError{Status: http.StatusBadRequest}
+		return nil, fuego.BadRequestError{Detail: "organization ID is required"}
 	}
 
 	body, err := f.Body()
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
-		return nil, fuego.HTTPError{Err: err, Status: http.StatusBadRequest}
+		return nil, fuego.BadRequestError{Detail: err.Error(), Err: err}
 	}
 
 	if err := c.validator.ValidateRequest(&body); err != nil {
@@ -35,7 +33,7 @@ func (c *HealthCheckController) UpdateHealthCheck(f fuego.ContextWithBody[types.
 		return &types.HealthCheckResponse{
 			Status: "error",
 			Error:  mappedErr.Error(),
-		}, fuego.HTTPError{Status: statusCode}
+		}, fuego.HTTPError{Detail: mappedErr.Error(), Status: statusCode}
 	}
 
 	healthCheck, err := c.service.UpdateHealthCheck(orgID, &body)
@@ -45,7 +43,7 @@ func (c *HealthCheckController) UpdateHealthCheck(f fuego.ContextWithBody[types.
 		return &types.HealthCheckResponse{
 			Status: "error",
 			Error:  mappedErr.Error(),
-		}, fuego.HTTPError{Status: statusCode}
+		}, fuego.HTTPError{Detail: mappedErr.Error(), Status: statusCode}
 	}
 
 	return &types.HealthCheckResponse{

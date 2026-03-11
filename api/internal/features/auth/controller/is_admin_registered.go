@@ -56,6 +56,7 @@ func (ar *AuthController) IsAdminRegistered(s fuego.ContextNoBody) (*auth_types.
 		ar.logger.Log(logger.Error, "failed to check admin registration", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

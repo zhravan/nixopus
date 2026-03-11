@@ -14,27 +14,18 @@ func (c *GithubConnectorController) CreateGithubConnector(f fuego.ContextWithBod
 	githubConnectorRequest, err := f.Body()
 
 	if err != nil {
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: err.Error(), Err: err}
 	}
 
 	w, r := f.Response(), f.Request()
 	if !c.parseAndValidate(w, r, &githubConnectorRequest) {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: "invalid request"}
 	}
 
 	user := utils.GetUser(w, r)
 
 	if user == nil {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	err = c.service.CreateConnector(&githubConnectorRequest, user.ID.String())
@@ -42,6 +33,7 @@ func (c *GithubConnectorController) CreateGithubConnector(f fuego.ContextWithBod
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

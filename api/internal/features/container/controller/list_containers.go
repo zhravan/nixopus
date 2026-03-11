@@ -23,6 +23,7 @@ func (c *ContainerController) ListContainers(fuegoCtx fuego.ContextNoBody) (*con
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -36,6 +37,7 @@ func (c *ContainerController) ListContainers(fuegoCtx fuego.ContextNoBody) (*con
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

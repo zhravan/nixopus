@@ -14,9 +14,8 @@ func (u *UserController) GetIsOnboarded(s fuego.ContextNoBody) (*types.IsOnboard
 
 	user := utils.GetUser(w, r)
 	if user == nil {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+		return nil, fuego.UnauthorizedError{
+			Detail: "authentication required",
 		}
 	}
 
@@ -27,6 +26,7 @@ func (u *UserController) GetIsOnboarded(s fuego.ContextNoBody) (*types.IsOnboard
 		u.logger.Log(logger.Error, err.Error(), user.ID.String())
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

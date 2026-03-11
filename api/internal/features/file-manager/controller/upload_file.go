@@ -15,9 +15,9 @@ func (c *FileManagerController) UploadFile(f fuego.ContextNoBody) (*types.Messag
 	file, header, err := f.Request().FormFile("file")
 	if err != nil {
 		c.logger.Log(logger.Error, err.Error(), "")
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 	defer file.Close()
@@ -30,15 +30,16 @@ func (c *FileManagerController) UploadFile(f fuego.ContextNoBody) (*types.Messag
 	filename := filepath.Base(header.Filename)
 
 	if err := validateUploadPath(path); err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 	if err := validateUploadPath(filename); err != nil {
-		return nil, fuego.HTTPError{
-			Err:    fmt.Errorf("invalid filename: %w", err),
-			Status: http.StatusBadRequest,
+		filenameErr := fmt.Errorf("invalid filename: %w", err)
+		return nil, fuego.BadRequestError{
+			Detail: filenameErr.Error(),
+			Err:    filenameErr,
 		}
 	}
 
@@ -47,6 +48,7 @@ func (c *FileManagerController) UploadFile(f fuego.ContextNoBody) (*types.Messag
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

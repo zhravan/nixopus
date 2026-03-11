@@ -13,25 +13,23 @@ import (
 func (c *NotificationController) CreateWebhookConfig(f fuego.ContextWithBody[notification.CreateWebhookConfigRequest]) (*types.WebhookConfigResponse, error) {
 	req, err := f.Body()
 	if err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 
 	user := utils.GetUser(f.Response(), f.Request())
 	if user == nil {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+		return nil, fuego.UnauthorizedError{
+			Detail: "authentication required",
 		}
 	}
 
 	orgID := utils.GetOrganizationID(f.Request())
 	if orgID == uuid.Nil {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+		return nil, fuego.UnauthorizedError{
+			Detail: "authentication required",
 		}
 	}
 
@@ -39,6 +37,7 @@ func (c *NotificationController) CreateWebhookConfig(f fuego.ContextWithBody[not
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

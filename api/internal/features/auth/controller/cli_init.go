@@ -38,44 +38,29 @@ type CLIInitResponse struct {
 func (ar *AuthController) HandleCLIInit(c fuego.ContextWithBody[CLIInitRequest]) (*CLIInitResponse, error) {
 	req, err := c.Body()
 	if err != nil {
-		return nil, fuego.HTTPError{
-			Err:    err,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: err.Error(), Err: err}
 	}
 
 	if req.Name == "" {
-		return nil, fuego.HTTPError{
-			Err:    fmt.Errorf("project name is required"),
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: "project name is required", Err: fmt.Errorf("project name is required")}
 	}
 
 	if req.Repository == "" {
-		return nil, fuego.HTTPError{
-			Err:    fmt.Errorf("repository is required"),
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: "repository is required", Err: fmt.Errorf("repository is required")}
 	}
 
 	// Get user from request context
 	user := utils.GetUser(c.Response(), c.Request())
 	if user == nil {
 		ar.logger.Log(logger.Error, "user not found", "")
-		return nil, fuego.HTTPError{
-			Err:    fmt.Errorf("user not found"),
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: "user not found", Err: fmt.Errorf("user not found")}
 	}
 
 	// Get organization ID from request context
 	organizationID := utils.GetOrganizationID(c.Request())
 	if organizationID == uuid.Nil {
 		ar.logger.Log(logger.Error, "organization not found", "")
-		return nil, fuego.HTTPError{
-			Err:    fmt.Errorf("organization not found"),
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: "organization not found", Err: fmt.Errorf("organization not found")}
 	}
 
 	// Create deploy service to use CreateProject function
@@ -105,6 +90,7 @@ func (ar *AuthController) HandleCLIInit(c fuego.ContextWithBody[CLIInitRequest])
 		ar.logger.Log(logger.Error, fmt.Sprintf("Failed to create project: %v", err), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

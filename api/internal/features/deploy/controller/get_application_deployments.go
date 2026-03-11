@@ -18,9 +18,8 @@ func (c *DeployController) GetApplicationDeployments(f fuego.ContextNoBody) (*ty
 
 	if id == "" {
 		c.logger.Log(logger.Error, "application ID is required", "")
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusBadRequest,
+		return nil, fuego.BadRequestError{
+			Detail: "application ID is required",
 		}
 	}
 
@@ -35,9 +34,9 @@ func (c *DeployController) GetApplicationDeployments(f fuego.ContextNoBody) (*ty
 	applicationID, err := uuid.Parse(id)
 	if err != nil {
 		c.logger.Log(logger.Error, "Invalid application ID", err.Error())
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -56,6 +55,7 @@ func (c *DeployController) GetApplicationDeployments(f fuego.ContextNoBody) (*ty
 		c.logger.Log(logger.Error, "Failed to get application deployments", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

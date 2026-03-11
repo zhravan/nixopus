@@ -14,9 +14,8 @@ func (c *FileManagerController) ListFiles(f fuego.ContextNoBody) (*types.ListFil
 
 	if path == "" {
 		c.logger.Log(logger.Error, "path is required", "")
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusBadRequest,
+		return nil, fuego.BadRequestError{
+			Detail: "path is required",
 		}
 	}
 
@@ -25,6 +24,7 @@ func (c *FileManagerController) ListFiles(f fuego.ContextNoBody) (*types.ListFil
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

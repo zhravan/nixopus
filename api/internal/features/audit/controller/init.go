@@ -37,9 +37,9 @@ func NewAuditController(db *bun.DB, ctx context.Context, l logger.Logger) *Audit
 func (c *AuditController) GetRecentAuditLogs(f fuego.ContextNoBody) (*types.GetActivitiesResponse, error) {
 	user := utils.GetUser(f.Response(), f.Request())
 	if user == nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.UnauthorizedError{
+			Detail: ErrUnauthorized.Error(),
 			Err:    ErrUnauthorized,
-			Status: http.StatusUnauthorized,
 		}
 	}
 
@@ -55,17 +55,15 @@ func (c *AuditController) GetRecentAuditLogs(f fuego.ContextNoBody) (*types.GetA
 
 	orgIDStr := f.Request().Header.Get("X-ORGANIZATION-ID")
 	if orgIDStr == "" {
-		return nil, fuego.HTTPError{
-			Err:    errors.New("Missing organization id"),
-			Status: http.StatusBadRequest,
+		return nil, fuego.BadRequestError{
+			Detail: "missing organization ID",
 		}
 	}
 
 	orgID, err := uuid.Parse(orgIDStr)
 	if err != nil {
-		return nil, fuego.HTTPError{
-			Err:    errors.New("Invalid organization id"),
-			Status: http.StatusBadRequest,
+		return nil, fuego.BadRequestError{
+			Detail: "invalid organization ID",
 		}
 	}
 
@@ -89,6 +87,7 @@ func (c *AuditController) GetRecentAuditLogs(f fuego.ContextNoBody) (*types.GetA
 		c.logger.Log(logger.Error, "Failed to get activities", err.Error())
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

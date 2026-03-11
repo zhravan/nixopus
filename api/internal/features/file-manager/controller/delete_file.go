@@ -15,9 +15,9 @@ type DeleteDirectoryRequest struct {
 func (c *FileManagerController) DeleteDirectory(f fuego.ContextWithBody[DeleteDirectoryRequest]) (*types.MessageResponse, error) {
 	request, err := f.Body()
 	if err != nil {
-		return nil, fuego.HTTPError{
+		return nil, fuego.BadRequestError{
+			Detail: err.Error(),
 			Err:    err,
-			Status: http.StatusBadRequest,
 		}
 	}
 
@@ -26,6 +26,7 @@ func (c *FileManagerController) DeleteDirectory(f fuego.ContextWithBody[DeleteDi
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

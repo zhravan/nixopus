@@ -19,9 +19,8 @@ func (c *DeployController) GetApplications(f fuego.ContextNoBody) (*types.ListAp
 	organizationID := utils.GetOrganizationID(r)
 	if organizationID == uuid.Nil {
 		c.logger.Log(logger.Error, "organization not found", "")
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+		return nil, fuego.UnauthorizedError{
+			Detail: "organization not found",
 		}
 	}
 
@@ -37,9 +36,8 @@ func (c *DeployController) GetApplications(f fuego.ContextNoBody) (*types.ListAp
 
 	if user == nil {
 		c.logger.Log(logger.Error, "user not found", "")
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+		return nil, fuego.UnauthorizedError{
+			Detail: "authentication required",
 		}
 	}
 
@@ -48,6 +46,7 @@ func (c *DeployController) GetApplications(f fuego.ContextNoBody) (*types.ListAp
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

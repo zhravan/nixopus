@@ -15,9 +15,8 @@ func (u *UserController) MarkOnboardingComplete(s fuego.ContextNoBody) (*types.M
 
 	user := utils.GetUser(w, r)
 	if user == nil {
-		return nil, fuego.HTTPError{
-			Err:    nil,
-			Status: http.StatusUnauthorized,
+		return nil, fuego.UnauthorizedError{
+			Detail: "authentication required",
 		}
 	}
 
@@ -28,6 +27,7 @@ func (u *UserController) MarkOnboardingComplete(s fuego.ContextNoBody) (*types.M
 		u.logger.Log(logger.Error, err.Error(), user.ID.String())
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

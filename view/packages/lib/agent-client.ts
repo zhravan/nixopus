@@ -4,7 +4,15 @@ export const AGENT_ID = 'deploy-agent';
 
 let cachedAgentBaseUrl: string | null = null;
 let agentBaseUrlPromise: Promise<string> | null = null;
-const AGENT_PROXY_BASE_PATH = '/api/agent';
+const APP_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+function withBasePath(path: string): string {
+  if (!APP_BASE_PATH) return path;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${APP_BASE_PATH}${normalizedPath}`.replace(/\/{2,}/g, '/');
+}
+
+const AGENT_PROXY_BASE_PATH = withBasePath('/api/agent');
 
 async function getAgentBaseUrl(): Promise<string> {
   if (cachedAgentBaseUrl !== null) {
@@ -12,7 +20,7 @@ async function getAgentBaseUrl(): Promise<string> {
   }
 
   if (!agentBaseUrlPromise) {
-    agentBaseUrlPromise = fetch('/api/config')
+    agentBaseUrlPromise = fetch(withBasePath('/api/config'))
       .then(async (res) => {
         if (!res.ok) {
           throw new Error(`Failed to load config (${res.status})`);
@@ -36,7 +44,7 @@ async function getAgentBaseUrl(): Promise<string> {
 
 export function createAgentClient(authHeaders: Record<string, string> = {}): MastraClient {
   return new MastraClient({
-    baseUrl: '/api/agent/',
+    baseUrl: withBasePath('/api/agent/'),
     headers: authHeaders
   });
 }

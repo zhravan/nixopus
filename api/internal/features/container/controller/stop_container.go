@@ -29,6 +29,7 @@ func (c *ContainerController) StopContainer(f fuego.ContextNoBody) (*types.Conta
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}
@@ -42,6 +43,7 @@ func (c *ContainerController) StopContainer(f fuego.ContextNoBody) (*types.Conta
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

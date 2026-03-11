@@ -16,6 +16,7 @@ func (c *DeployController) GetDeploymentById(f fuego.ContextNoBody) (*types.Depl
 		c.logger.Log(logger.Error, err.Error(), "")
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: http.StatusInternalServerError,
 		}
 	}

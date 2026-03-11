@@ -705,6 +705,15 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble({ message }: MessageBubbleProps) {
+  if (message.kind === 'status') {
+    return (
+      <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+        <Loader2 className="size-3.5 animate-spin" />
+        <span>{message.content}</span>
+      </div>
+    );
+  }
+
   const isUser = message.role === 'user';
 
   return (

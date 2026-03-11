@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"net/http"
-
 	"github.com/go-fuego/fuego"
 	"github.com/google/uuid"
 	"github.com/raghavyuva/nixopus-api/internal/features/logger"
@@ -29,25 +26,16 @@ func (c *TrailController) GetStatus(f fuego.ContextNoBody) (*types.TrailStatusEn
 	user := utils.GetUser(w, r)
 
 	if user == nil {
-		return nil, fuego.HTTPError{
-			Err:    errors.New("authentication required"),
-			Status: http.StatusUnauthorized,
-		}
+		return nil, fuego.UnauthorizedError{Detail: "authentication required"}
 	}
 
 	sessionID := f.PathParam("sessionId")
 	if sessionID == "" {
-		return nil, fuego.HTTPError{
-			Err:    types.ErrInvalidSessionID,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: types.ErrInvalidSessionID.Error(), Err: types.ErrInvalidSessionID}
 	}
 
 	if _, err := uuid.Parse(sessionID); err != nil {
-		return nil, fuego.HTTPError{
-			Err:    types.ErrInvalidSessionID,
-			Status: http.StatusBadRequest,
-		}
+		return nil, fuego.BadRequestError{Detail: types.ErrInvalidSessionID.Error(), Err: types.ErrInvalidSessionID}
 	}
 
 	result, err := c.service.GetStatus(user.ID.String(), sessionID)
@@ -56,6 +44,7 @@ func (c *TrailController) GetStatus(f fuego.ContextNoBody) (*types.TrailStatusEn
 		status := mapErrorToStatus(err)
 		return nil, fuego.HTTPError{
 			Err:    err,
+			Detail: err.Error(),
 			Status: status,
 		}
 	}

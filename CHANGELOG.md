@@ -1,3 +1,12 @@
+# [0.1.0-alpha.159](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.158...v0.1.0-alpha.159) (2026-03-11)
+
+
+### Bug Fixes
+
+* agent endpoint with gateway ([9e480f0](https://github.com/raghavyuva/nixopus/commit/9e480f0fc429519838c82cd70867b86542890f25))
+
+
+
 # [0.1.0-alpha.158](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.157...v0.1.0-alpha.158) (2026-03-11)
 
 

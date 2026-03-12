@@ -1,3 +1,17 @@
+# [0.1.0-alpha.160](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.159...v0.1.0-alpha.160) (2026-03-12)
+
+
+### Bug Fixes
+
+* github agent proxy routing ([75027b7](https://github.com/raghavyuva/nixopus/commit/75027b7ba7c8576f892808929b7fa98892ce5c02))
+
+
+### Features
+
+* update component to use streamdown ([49f6d23](https://github.com/raghavyuva/nixopus/commit/49f6d23755880d6e0c51b21369f78ff9d7c4ee25))
+
+
+
 # [0.1.0-alpha.159](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.158...v0.1.0-alpha.159) (2026-03-11)
 
 

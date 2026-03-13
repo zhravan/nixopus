@@ -3,7 +3,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
-import { useAgentChat, type ChatMessage, type PendingToolApproval } from './use-agent-chat';
+import {
+  useAgentChat,
+  type ChatMessage,
+  type PendingToolApproval,
+  type OmStatus
+} from './use-agent-chat';
 import { useChatThreads, type ChatThread } from './use-chat-threads';
 import {
   type ChatContext,
@@ -45,6 +50,7 @@ export interface UseChatPageReturn {
   isThreadsInitialized: boolean;
   setActiveThreadId: (id: string) => void;
   deleteThread: (id: string) => void;
+  renameThread: (id: string, title: string) => void;
 
   messages: ChatMessage[];
   inputValue: string;
@@ -53,6 +59,7 @@ export interface UseChatPageReturn {
   scrollRef: React.RefObject<HTMLDivElement | null>;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   pendingToolApproval: PendingToolApproval | null;
+  omStatus: OmStatus | null;
   handleSubmit: (e?: React.FormEvent) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   handleSuggestionClick: (text: string) => void;
@@ -196,6 +203,7 @@ export function useChatPage(): UseChatPageReturn {
     isThreadsInitialized: threads.isInitialized,
     setActiveThreadId: threads.setActiveThreadId,
     deleteThread: threads.deleteThread,
+    renameThread: threads.updateThreadTitle,
 
     messages: chat.messages,
     inputValue: chat.inputValue,
@@ -204,6 +212,7 @@ export function useChatPage(): UseChatPageReturn {
     scrollRef: chat.scrollRef,
     textareaRef: chat.textareaRef,
     pendingToolApproval: chat.pendingToolApproval ?? null,
+    omStatus: chat.omStatus ?? null,
     handleSubmit: chat.handleSubmit,
     handleKeyDown: chat.handleKeyDown,
     handleSuggestionClick: chat.handleSuggestionClick,

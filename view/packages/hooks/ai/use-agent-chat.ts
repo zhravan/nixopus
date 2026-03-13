@@ -85,11 +85,88 @@ function extractText(content: unknown): string {
   return '';
 }
 
+function extractMessageParts(content: unknown): { text: string; parts: MessagePart[] } {
+  if (typeof content === 'string') return { text: content, parts: [] };
+  if (!content || typeof content !== 'object') return { text: '', parts: [] };
+
+  const obj = content as {
+    format?: number;
+    content?: string;
+    parts?: Array<Record<string, unknown>>;
+    toolInvocations?: Array<{
+      toolCallId?: string;
+      toolName?: string;
+      args?: unknown;
+      state?: string;
+    }>;
+  };
+
+  const parts: MessagePart[] = [];
+  let text = '';
+
+  if (Array.isArray(obj.parts)) {
+    for (const part of obj.parts) {
+      if (part.type === 'text') {
+        const t = (part.text as string) || (part.content as string) || '';
+        if (t) {
+          text += t;
+          parts.push({ type: 'text', content: t });
+        }
+      } else if (part.type === 'tool-invocation') {
+        const inv = part.toolInvocation as
+          | {
+              toolCallId?: string;
+              toolName?: string;
+              args?: unknown;
+              state?: string;
+            }
+          | undefined;
+        if (inv) {
+          parts.push({
+            type: 'tool-call',
+            toolName: inv.toolName || 'tool',
+            toolCallId: inv.toolCallId || '',
+            args: inv.args,
+            status: 'done'
+          });
+        }
+      }
+    }
+  }
+
+  if (parts.every((p) => p.type === 'tool-call') && Array.isArray(obj.toolInvocations)) {
+    for (const inv of obj.toolInvocations) {
+      if (!parts.some((p) => p.type === 'tool-call' && p.toolCallId === inv.toolCallId)) {
+        parts.push({
+          type: 'tool-call',
+          toolName: inv.toolName || 'tool',
+          toolCallId: inv.toolCallId || '',
+          args: inv.args,
+          status: 'done'
+        });
+      }
+    }
+  }
+
+  if (!text && typeof obj.content === 'string') {
+    text = obj.content;
+  }
+
+  return { text, parts };
+}
+
 export interface PendingToolApproval {
   runId: string;
   toolCallId: string;
   toolName: string;
   args: unknown;
+}
+
+export interface OmStatus {
+  messages: { tokens: number; threshold: number };
+  observations: { tokens: number; threshold: number };
+  isObserving: boolean;
+  observationsText: string | null;
 }
 
 export function useAgentChat({
@@ -105,6 +182,8 @@ export function useAgentChat({
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [pendingToolApproval, setPendingToolApproval] = useState<PendingToolApproval | null>(null);
+  const [omStatus, setOmStatus] = useState<OmStatus | null>(null);
+  const omStatusRef = useRef<OmStatus | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -160,14 +239,27 @@ export function useAgentChat({
         for (const msg of rawMessages) {
           const role = msg.role === 'user' ? 'user' : msg.role === 'assistant' ? 'assistant' : null;
           if (!role) continue;
-          const text = extractText(msg.content);
-          if (!text) continue;
-          msgs.push({
-            id: msg.id,
-            role,
-            content: text,
-            timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date()
-          });
+
+          if (role === 'assistant') {
+            const { text, parts } = extractMessageParts(msg.content);
+            if (!text && parts.length === 0) continue;
+            msgs.push({
+              id: msg.id,
+              role,
+              content: text,
+              ...(parts.length > 0 ? { parts } : {}),
+              timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date()
+            });
+          } else {
+            const text = extractText(msg.content);
+            if (!text) continue;
+            msgs.push({
+              id: msg.id,
+              role,
+              content: text,
+              timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date()
+            });
+          }
         }
         setMessages(msgs);
       } catch {
@@ -246,17 +338,7 @@ export function useAgentChat({
               id?: string;
             }
           | undefined;
-        const rid = (p?.runId as string) ?? runIdRef.current;
         const toolCallId = p?.toolCallId ?? p?.id;
-        if (rid && toolCallId) {
-          pendingApprovalRef.current = true;
-          setPendingToolApproval({
-            runId: rid,
-            toolCallId: String(toolCallId),
-            toolName: (p?.toolName as string) ?? 'tool',
-            args: p?.args ?? {}
-          });
-        }
 
         if (toolCallId) {
           needsNewTextPartRef.current = true;
@@ -320,6 +402,59 @@ export function useAgentChat({
             toolName: (suspendPayload.toolName as string) ?? 'tool',
             args: suspendPayload.args ?? {}
           });
+        }
+      }
+
+      if (chunk.type === 'data-om-status') {
+        const d = chunk.payload as
+          | {
+              windows?: {
+                active?: {
+                  messages?: { tokens?: number; threshold?: number };
+                  observations?: { tokens?: number; threshold?: number };
+                };
+              };
+            }
+          | undefined;
+        const active = d?.windows?.active;
+        if (active) {
+          const next: OmStatus = {
+            messages: {
+              tokens: active.messages?.tokens ?? 0,
+              threshold: active.messages?.threshold ?? 30000
+            },
+            observations: {
+              tokens: active.observations?.tokens ?? 0,
+              threshold: active.observations?.threshold ?? 40000
+            },
+            isObserving: omStatusRef.current?.isObserving ?? false,
+            observationsText: omStatusRef.current?.observationsText ?? null
+          };
+          omStatusRef.current = next;
+          setOmStatus(next);
+        }
+      }
+
+      if (chunk.type === 'data-om-observation-start') {
+        const prev = omStatusRef.current;
+        if (prev) {
+          const next = { ...prev, isObserving: true };
+          omStatusRef.current = next;
+          setOmStatus(next);
+        }
+      }
+
+      if (chunk.type === 'data-om-observation-end' || chunk.type === 'data-om-activation') {
+        const d = chunk.payload as { observations?: string } | undefined;
+        const prev = omStatusRef.current;
+        if (prev) {
+          const next: OmStatus = {
+            ...prev,
+            isObserving: false,
+            observationsText: d?.observations ?? prev.observationsText
+          };
+          omStatusRef.current = next;
+          setOmStatus(next);
         }
       }
     },
@@ -581,6 +716,7 @@ export function useAgentChat({
     isLoadingHistory,
     isAgentConfigured: isAgentEnabled,
     pendingToolApproval,
+    omStatus,
     scrollRef,
     textareaRef,
     handleSubmit,

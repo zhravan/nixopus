@@ -1,3 +1,18 @@
+# [0.1.0-alpha.161](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.160...v0.1.0-alpha.161) (2026-03-13)
+
+
+### Bug Fixes
+
+* dns verification when wildcard domains get added ([4bf0ede](https://github.com/raghavyuva/nixopus/commit/4bf0edeb171cf0be788c9461def97f07cc3b31a5))
+* reorder sidebar nav, handle multizone logo click, and clean up openapi refs ([14bab1b](https://github.com/raghavyuva/nixopus/commit/14bab1bfd7489ddb158b33ff22d6bfbbae677de5))
+
+
+### Features
+
+* add model selector, token usage display, and agent question support ([8444a7c](https://github.com/raghavyuva/nixopus/commit/8444a7c95173ff2b29f224fed3b8d00ef3e4d1e6))
+
+
+
 # [0.1.0-alpha.160](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.159...v0.1.0-alpha.160) (2026-03-12)
 
 

@@ -1,3 +1,12 @@
+# [0.1.0-alpha.162](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.161...v0.1.0-alpha.162) (2026-03-14)
+
+
+### Bug Fixes
+
+* add scheduler to pick resource available vm ([aa7fe0f](https://github.com/raghavyuva/nixopus/commit/aa7fe0fdc75e9ad5c964ab6bf6dd3722f5d34063))
+
+
+
 # [0.1.0-alpha.161](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.160...v0.1.0-alpha.161) (2026-03-13)
 
 

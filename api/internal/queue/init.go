@@ -21,6 +21,9 @@ var (
 	consumersStarted bool
 	registeredQueues []string
 	queuesMutex      sync.RWMutex
+
+	producerQueueCache   = make(map[string]taskq.Queue)
+	producerQueueCacheMu sync.RWMutex
 )
 
 // Init initializes the queue factory with a shared Redis v8 client.
@@ -57,6 +60,28 @@ func registerProducerQueue(opts *taskq.QueueOptions) taskq.Queue {
 		opts.Redis = redisClient
 	}
 	return producerFactory.RegisterQueue(opts)
+}
+
+// getOrCreateProducerQueue returns a cached producer queue for the given name,
+// creating and registering it on first access. Used for dynamic per-server queues.
+func getOrCreateProducerQueue(name string) taskq.Queue {
+	producerQueueCacheMu.RLock()
+	q, ok := producerQueueCache[name]
+	producerQueueCacheMu.RUnlock()
+	if ok {
+		return q
+	}
+
+	producerQueueCacheMu.Lock()
+	defer producerQueueCacheMu.Unlock()
+
+	if q, ok = producerQueueCache[name]; ok {
+		return q
+	}
+
+	q = registerProducerQueue(&taskq.QueueOptions{Name: name})
+	producerQueueCache[name] = q
+	return q
 }
 
 // cleanupDeadConsumers removes dead consumers from Redis consumer groups.

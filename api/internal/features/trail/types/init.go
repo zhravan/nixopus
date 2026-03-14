@@ -70,6 +70,7 @@ type ProvisionPayload struct {
 	UserID             string `json:"user_id"`
 	OrgID              string `json:"org_id"`
 	ProvisionDetailsID string `json:"provision_details_id"`
+	ServerID           string `json:"server_id,omitempty"`
 }
 
 // ProvisionStep represents the current step in the provisioning process.
@@ -103,6 +104,7 @@ type UserProvisionDetails struct {
 	ID               uuid.UUID      `bun:"id,pk,type:uuid,default:gen_random_uuid()" json:"id"`
 	UserID           uuid.UUID      `bun:"user_id,type:uuid,notnull" json:"user_id"`
 	OrganizationID   uuid.UUID      `bun:"organization_id,type:uuid,notnull" json:"organization_id"`
+	ServerID         *uuid.UUID     `bun:"server_id,type:uuid" json:"server_id,omitempty"`
 	LXDContainerName *string        `bun:"lxd_container_name" json:"lxd_container_name,omitempty"`
 	Subdomain        *string        `bun:"subdomain" json:"subdomain,omitempty"`
 	Domain           *string        `bun:"domain" json:"domain,omitempty"`

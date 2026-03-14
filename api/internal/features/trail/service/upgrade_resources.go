@@ -33,6 +33,10 @@ func (s *TrailService) UpgradeResources(userID, orgID string, vcpu, memoryMB int
 		OrgID:     orgID,
 	}
 
+	if provision.ServerID != nil {
+		payload.ServerID = provision.ServerID.String()
+	}
+
 	if err := queue.EnqueueResourceUpdateTask(s.ctx, payload); err != nil {
 		s.logger.Log(logger.Error, fmt.Sprintf("Failed to enqueue resource update: %v", err), userID)
 		return types.ErrFailedToEnqueueTask

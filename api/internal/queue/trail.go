@@ -37,10 +37,18 @@ func SetupProvisionQueue() {
 }
 
 // EnqueueProvisionTask enqueues a provision task to the Redis queue.
+// When payload.ServerID is set, the task is routed to a per-server queue
+// (provision-trail-{server_id}). Otherwise it falls back to the legacy
+// "provision-trail" queue for backward compatibility.
 func EnqueueProvisionTask(ctx context.Context, payload trail_types.ProvisionPayload) error {
-	if ProvisionQueue == nil {
+	if TaskProvision == nil {
 		return fmt.Errorf("provision queue not initialized - call SetupProvisionQueue first")
 	}
 
-	return ProvisionQueue.Add(TaskProvision.WithArgs(ctx, payload))
+	q := ProvisionQueue
+	if payload.ServerID != "" {
+		q = getOrCreateProducerQueue(queueProvision + "-" + payload.ServerID)
+	}
+
+	return q.Add(TaskProvision.WithArgs(ctx, payload))
 }

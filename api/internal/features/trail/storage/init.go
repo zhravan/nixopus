@@ -25,6 +25,7 @@ type TrailRepository interface {
 	GetUserByID(userID string) (*shared_types.User, error)
 	IsSubdomainTaken(subdomain string) (bool, error)
 	GetCompletedProvisionByUserID(userID string) (*types.UserProvisionDetails, error)
+	SelectBestServer(vcpus, memMB, diskGB int) (string, error)
 }
 
 // TrailStorage implements TrailRepository using Bun ORM.

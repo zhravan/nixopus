@@ -1,3 +1,12 @@
+# [0.1.0-alpha.163](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.162...v0.1.0-alpha.163) (2026-03-15)
+
+
+### Bug Fixes
+
+* token usage display and proper model provider mapping ([087f6d8](https://github.com/raghavyuva/nixopus/commit/087f6d86b740c4243b69b45d6724e6395c063cdb))
+
+
+
 # [0.1.0-alpha.162](https://github.com/raghavyuva/nixopus/compare/v0.1.0-alpha.161...v0.1.0-alpha.162) (2026-03-14)
 
 

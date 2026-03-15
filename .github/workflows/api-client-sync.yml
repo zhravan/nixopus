@@ -5,10 +5,6 @@
 name: Trigger API Client Sync
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 'api/doc/openapi.json'
   workflow_dispatch:
 
 jobs:

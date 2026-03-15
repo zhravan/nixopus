@@ -5,12 +5,6 @@
 name: Security Scan
 
 on:
-  schedule:
-    - cron: '0 0 * * 0' # Weekly
-  push:
-    branches:
-      - master
-      - feat/develop
   workflow_dispatch:
 
 jobs:

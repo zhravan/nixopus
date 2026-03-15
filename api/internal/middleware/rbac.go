@@ -190,6 +190,9 @@ func getBetterAuthOrganizationMember(ctx context.Context, originalReq *http.Requ
 		if authHeader := originalReq.Header.Get("Authorization"); authHeader != "" {
 			req.Header.Set("Authorization", authHeader)
 		}
+		if apiKey := originalReq.Header.Get("x-api-key"); apiKey != "" {
+			req.Header.Set("x-api-key", apiKey)
+		}
 		for _, cookie := range originalReq.Cookies() {
 			req.AddCookie(cookie)
 		}

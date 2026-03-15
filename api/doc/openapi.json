@@ -1779,41 +1779,8 @@
 					},
 					"domains": {
 						"items": {
-							"nullable": true,
-							"properties": {
-								"application": {
-									"$ref": "#/components/schemas/Application"
-								},
-								"application_id": {
-									"format": "uuid",
-									"type": "string"
-								},
-								"compose_service": {
-									"$ref": "#/components/schemas/ComposeService"
-								},
-								"compose_service_id": {
-									"format": "uuid",
-									"type": "string"
-								},
-								"created_at": {
-									"format": "date-time",
-									"type": "string"
-								},
-								"domain": {
-									"type": "string"
-								},
-								"id": {
-									"format": "uuid",
-									"type": "string"
-								},
-								"port": {
-									"nullable": true,
-									"type": "integer"
-								}
-							},
-							"type": "object"
+							"$ref": "#/components/schemas/ApplicationDomain"
 						},
-						"nullable": true,
 						"type": "array"
 					},
 					"id": {

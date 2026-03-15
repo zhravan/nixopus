@@ -50,9 +50,7 @@ import {
   ChevronDown,
   Copy,
   Pencil,
-  Zap,
-  Coins,
-  Timer
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/packages/hooks/shared/use-translation';
@@ -61,7 +59,6 @@ import {
   type MessagePart,
   type PendingToolApproval,
   type OmStatus,
-  type TokenUsage,
   type AgentQuestion,
   type AgentQuestionField
 } from '@/packages/hooks/ai/use-agent-chat';
@@ -727,66 +724,6 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function formatTokenCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
-}
-
-function formatCost(usd: number): string {
-  if (usd < 0.0001) return '<$0.0001';
-  if (usd < 0.01) return `$${usd.toFixed(4)}`;
-  return `$${usd.toFixed(4)}`;
-}
-
-function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`;
-  const seconds = ms / 1000;
-  if (seconds < 60) return `${seconds.toFixed(1)}s`;
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.round(seconds % 60);
-  return `${minutes}m ${remainingSeconds}s`;
-}
-
-function TokenUsageDisplay({ usage }: { usage: TokenUsage }) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="inline-flex items-center gap-3 mt-2 px-3 py-1.5 rounded-lg border border-border/40 bg-muted/30">
-      {usage.durationMs != null && (
-        <>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Timer className="size-3.5 text-emerald-500/70" />
-            <span className="font-medium tabular-nums">{formatDuration(usage.durationMs)}</span>
-          </div>
-          <div className="w-px h-3.5 bg-border/50" />
-        </>
-      )}
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Zap className="size-3.5 text-primary/70" />
-        <span className="font-medium tabular-nums">{formatTokenCount(usage.promptTokens)}</span>
-        <span className="text-muted-foreground/50">
-          {t('ai.usage.inputTokens' as Parameters<typeof t>[0])}
-        </span>
-        <span className="text-muted-foreground/30 mx-0.5">/</span>
-        <span className="font-medium tabular-nums">{formatTokenCount(usage.completionTokens)}</span>
-        <span className="text-muted-foreground/50">
-          {t('ai.usage.outputTokens' as Parameters<typeof t>[0])}
-        </span>
-      </div>
-      {usage.costUsd != null && (
-        <>
-          <div className="w-px h-3.5 bg-border/50" />
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Coins className="size-3.5 text-amber-500/70" />
-            <span className="font-medium tabular-nums">{formatCost(usage.costUsd)}</span>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
 interface MessageBubbleProps {
   message: ChatMessage;
   isStreaming?: boolean;
@@ -847,9 +784,6 @@ function MessageBubble({
             <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
             <CopyButton text={message.content} />
           </div>
-          {isLastAssistantMessage && !isStreaming && message.usage && (
-            <TokenUsageDisplay usage={message.usage} />
-          )}
         </div>
       </div>
     );
@@ -898,6 +832,21 @@ function MessageBubble({
             <p className="text-sm whitespace-pre-wrap">
               {stripContextFromMessageText(message.content)}
             </p>
+          ) : isStreaming && isLastAssistantMessage && !message.content.trim() ? (
+            <span className="text-sm text-muted-foreground">
+              Thinking
+              <span className="inline-flex">
+                <span className="animate-pulse" style={{ animationDelay: '0ms' }}>
+                  .
+                </span>
+                <span className="animate-pulse" style={{ animationDelay: '150ms' }}>
+                  .
+                </span>
+                <span className="animate-pulse" style={{ animationDelay: '300ms' }}>
+                  .
+                </span>
+              </span>
+            </span>
           ) : (
             <Streamdown
               plugins={STREAMDOWN_PLUGINS}
@@ -919,9 +868,6 @@ function MessageBubble({
           <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
           {!isUser && <CopyButton text={message.content} />}
         </div>
-        {!isUser && isLastAssistantMessage && !isStreaming && message.usage && (
-          <TokenUsageDisplay usage={message.usage} />
-        )}
       </div>
     </div>
   );
@@ -937,17 +883,20 @@ function StreamingIndicator() {
       </Avatar>
       <div className="flex-1">
         <div className="bg-muted/60 rounded-2xl rounded-tl-md px-4 py-3 inline-block">
-          <div className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-primary/60 animate-pulse" />
-            <span
-              className="size-2 rounded-full bg-primary/60 animate-pulse"
-              style={{ animationDelay: '150ms' }}
-            />
-            <span
-              className="size-2 rounded-full bg-primary/60 animate-pulse"
-              style={{ animationDelay: '300ms' }}
-            />
-          </div>
+          <span className="text-sm text-muted-foreground">
+            Thinking
+            <span className="inline-flex">
+              <span className="animate-pulse" style={{ animationDelay: '0ms' }}>
+                .
+              </span>
+              <span className="animate-pulse" style={{ animationDelay: '150ms' }}>
+                .
+              </span>
+              <span className="animate-pulse" style={{ animationDelay: '300ms' }}>
+                .
+              </span>
+            </span>
+          </span>
         </div>
       </div>
     </div>

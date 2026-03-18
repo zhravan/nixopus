@@ -446,10 +446,12 @@ export function useAgentChat({
             }
           | undefined;
         const toolCallId = p?.toolCallId ?? p?.id;
+        const toolName = (p?.toolName as string) ?? 'tool';
+
+        if (toolName === 'ask_user' || toolName === 'askUser') return;
 
         if (toolCallId) {
           needsNewTextPartRef.current = true;
-          const toolName = (p?.toolName as string) ?? 'tool';
           const tcId = String(toolCallId);
           setMessages((prev) =>
             prev.map((m) => {
@@ -479,18 +481,6 @@ export function useAgentChat({
             }
           | undefined;
         const tcId = p?.toolCallId;
-
-        if (
-          (p?.toolName === 'ask_user' || p?.toolName === 'askUser') &&
-          p?.result &&
-          Array.isArray(p.result.fields)
-        ) {
-          setActiveQuestion({
-            title: p.result.title ?? 'Input Required',
-            description: p.result.description,
-            fields: p.result.fields
-          });
-        }
 
         if (tcId) {
           needsNewTextPartRef.current = true;

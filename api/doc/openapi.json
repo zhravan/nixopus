@@ -833,41 +833,8 @@
 					},
 					"logs": {
 						"items": {
-							"nullable": true,
-							"properties": {
-								"application": {
-									"$ref": "#/components/schemas/Application"
-								},
-								"application_deployment": {
-									"$ref": "#/components/schemas/ApplicationDeployment"
-								},
-								"application_deployment_id": {
-									"format": "uuid",
-									"type": "string"
-								},
-								"application_id": {
-									"format": "uuid",
-									"type": "string"
-								},
-								"created_at": {
-									"format": "date-time",
-									"type": "string"
-								},
-								"id": {
-									"format": "uuid",
-									"type": "string"
-								},
-								"log": {
-									"type": "string"
-								},
-								"updated_at": {
-									"format": "date-time",
-									"type": "string"
-								}
-							},
-							"type": "object"
+							"$ref": "#/components/schemas/ApplicationLogs"
 						},
-						"nullable": true,
 						"type": "array"
 					},
 					"status": {
@@ -916,7 +883,41 @@
 						"type": "string"
 					},
 					"compose_service": {
-						"$ref": "#/components/schemas/ComposeService"
+						"nullable": true,
+						"properties": {
+							"application": {
+								"$ref": "#/components/schemas/Application"
+							},
+							"application_id": {
+								"format": "uuid",
+								"type": "string"
+							},
+							"created_at": {
+								"format": "date-time",
+								"type": "string"
+							},
+							"domains": {
+								"items": {
+									"$ref": "#/components/schemas/ApplicationDomain"
+								},
+								"type": "array"
+							},
+							"id": {
+								"format": "uuid",
+								"type": "string"
+							},
+							"port": {
+								"type": "integer"
+							},
+							"service_name": {
+								"type": "string"
+							},
+							"updated_at": {
+								"format": "date-time",
+								"type": "string"
+							}
+						},
+						"type": "object"
 					},
 					"compose_service_id": {
 						"format": "uuid",
@@ -3278,6 +3279,11 @@
 						"type": "string"
 					},
 					"client_secret": {
+						"type": "string"
+					},
+					"installation_id": {
+						"format": "uuid",
+						"nullable": true,
 						"type": "string"
 					},
 					"pem": {
@@ -10678,6 +10684,48 @@
 				},
 				"type": "object"
 			},
+			"ListPlansResponse": {
+				"description": "ListPlansResponse schema",
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"id": {
+									"format": "uuid",
+									"type": "string"
+								},
+								"monthly_cost_cents": {
+									"type": "integer"
+								},
+								"monthly_cost_usd": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"ram_mb": {
+									"type": "integer"
+								},
+								"storage_mb": {
+									"type": "integer"
+								},
+								"tier": {
+									"type": "string"
+								},
+								"vcpu": {
+									"type": "integer"
+								}
+							},
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"ListRepositoriesResponse": {
 				"description": "ListRepositoriesResponse schema",
 				"properties": {
@@ -11209,6 +11257,10 @@
 													"nullable": true,
 													"type": "string"
 												},
+												"guest_ip": {
+													"nullable": true,
+													"type": "string"
+												},
 												"id": {
 													"format": "uuid",
 													"type": "string"
@@ -11246,6 +11298,10 @@
 													"type": "object"
 												},
 												"organization_id": {
+													"format": "uuid",
+													"type": "string"
+												},
+												"server_id": {
 													"format": "uuid",
 													"type": "string"
 												},
@@ -12696,6 +12752,103 @@
 				},
 				"type": "object"
 			},
+			"MachineActionResponse": {
+				"description": "MachineActionResponse schema",
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"MachineBillingResponse": {
+				"description": "MachineBillingResponse schema",
+				"properties": {
+					"data": {
+						"nullable": true,
+						"properties": {
+							"billing_status": {
+								"nullable": true,
+								"type": "string"
+							},
+							"days_remaining": {
+								"nullable": true,
+								"type": "integer"
+							},
+							"grace_deadline": {
+								"nullable": true,
+								"type": "string"
+							},
+							"has_machine": {
+								"type": "boolean"
+							},
+							"message": {
+								"nullable": true,
+								"type": "string"
+							},
+							"monthly_cost_cents": {
+								"nullable": true,
+								"type": "integer"
+							},
+							"monthly_cost_usd": {
+								"nullable": true,
+								"type": "string"
+							},
+							"period_end": {
+								"nullable": true,
+								"type": "string"
+							},
+							"plan_name": {
+								"nullable": true,
+								"type": "string"
+							},
+							"plan_tier": {
+								"nullable": true,
+								"type": "string"
+							}
+						},
+						"type": "object"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"MachineStateResponse": {
+				"description": "MachineStateResponse schema",
+				"properties": {
+					"data": {
+						"nullable": true,
+						"properties": {
+							"active": {
+								"type": "boolean"
+							},
+							"pid": {
+								"type": "integer"
+							},
+							"state": {
+								"type": "string"
+							},
+							"uptime_sec": {
+								"format": "int64",
+								"type": "integer"
+							}
+						},
+						"type": "object"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
 			"MarkOnboardingCompleteResponse": {
 				"description": "MarkOnboardingCompleteResponse schema",
 				"properties": {
@@ -13941,6 +14094,77 @@
 					},
 					"message": {
 						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"SelectPlanRequest": {
+				"description": "SelectPlanRequest schema",
+				"properties": {
+					"plan_tier": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"plan_tier"
+				],
+				"type": "object"
+			},
+			"SelectPlanResponse": {
+				"description": "SelectPlanResponse schema",
+				"properties": {
+					"balance_after_cents": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"charged_cents": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"error": {
+						"nullable": true,
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"period_end": {
+						"nullable": true,
+						"type": "string"
+					},
+					"plan": {
+						"nullable": true,
+						"properties": {
+							"id": {
+								"format": "uuid",
+								"type": "string"
+							},
+							"monthly_cost_cents": {
+								"type": "integer"
+							},
+							"monthly_cost_usd": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"ram_mb": {
+								"type": "integer"
+							},
+							"storage_mb": {
+								"type": "integer"
+							},
+							"tier": {
+								"type": "string"
+							},
+							"vcpu": {
+								"type": "integer"
+							}
+						},
+						"type": "object"
 					},
 					"status": {
 						"type": "string"
@@ -23466,6 +23690,7 @@
 								"app_id": "00000000-0000-0000-0000-000000000000",
 								"client_id": "00000000-0000-0000-0000-000000000000",
 								"client_secret": "string",
+								"installation_id": "00000000-0000-0000-0000-000000000000",
 								"pem": "string",
 								"slug": "string",
 								"webhook_secret": "string"
@@ -25047,6 +25272,104 @@
 				]
 			}
 		},
+		"/api/v1/machine/billing": {
+			"get": {
+				"description": "Get machine billing status.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: Read-only operation.",
+				"operationId": "getMachineBillingStatus",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"data": {},
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineBillingResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"data": {},
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineBillingResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "Get machine billing status",
+				"tags": [
+					"billing",
+					"api/v1/machine"
+				]
+			}
+		},
 		"/api/v1/machine/exec": {
 			"post": {
 				"description": "Execute a command on the host machine.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: May mutate server state.",
@@ -25161,6 +25484,520 @@
 				]
 			}
 		},
+		"/api/v1/machine/pause": {
+			"post": {
+				"description": "Pause machine.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: May mutate server state.",
+				"operationId": "pauseMachine",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineActionResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineActionResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "Pause machine",
+				"tags": [
+					"pause",
+					"api/v1/machine"
+				]
+			}
+		},
+		"/api/v1/machine/plan/select": {
+			"post": {
+				"description": "Select a machine plan.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: May mutate server state.",
+				"operationId": "selectAMachinePlan",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"*/*": {
+							"example": {
+								"plan_tier": "string"
+							},
+							"schema": {
+								"$ref": "#/components/schemas/SelectPlanRequest"
+							}
+						}
+					},
+					"description": "Request body for types.SelectPlanRequest",
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"balance_after_cents": 1,
+									"charged_cents": 1,
+									"error": "string",
+									"message": "string",
+									"period_end": "string",
+									"plan": {},
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/SelectPlanResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"balance_after_cents": 1,
+									"charged_cents": 1,
+									"error": "string",
+									"message": "string",
+									"period_end": "string",
+									"plan": {},
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/SelectPlanResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "Select a machine plan",
+				"tags": [
+					"plan",
+					"api/v1/machine"
+				]
+			}
+		},
+		"/api/v1/machine/plans": {
+			"get": {
+				"description": "List available machine plans.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: Read-only operation.",
+				"operationId": "listAvailableMachinePlans",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"data": [],
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ListPlansResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"data": [],
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ListPlansResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "List available machine plans",
+				"tags": [
+					"plans",
+					"api/v1/machine"
+				]
+			}
+		},
+		"/api/v1/machine/restart": {
+			"post": {
+				"description": "Restart machine.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: May mutate server state.",
+				"operationId": "restartMachine",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineActionResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineActionResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "Restart machine",
+				"tags": [
+					"restart",
+					"api/v1/machine"
+				]
+			}
+		},
+		"/api/v1/machine/resume": {
+			"post": {
+				"description": "Resume machine.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: May mutate server state.",
+				"operationId": "resumeMachine",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineActionResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineActionResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "Resume machine",
+				"tags": [
+					"resume",
+					"api/v1/machine"
+				]
+			}
+		},
 		"/api/v1/machine/stats": {
 			"get": {
 				"description": "Get machine system stats.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: Read-only operation.",
@@ -25257,6 +26094,106 @@
 				"summary": "Get machine system stats",
 				"tags": [
 					"stats",
+					"api/v1/machine"
+				]
+			}
+		},
+		"/api/v1/machine/status": {
+			"get": {
+				"description": "Get machine lifecycle status.\n\nAuth: Required (bearer token).\nScope: Organization-scoped in authenticated context.\nSide effects: Read-only operation.",
+				"operationId": "getMachineLifecycleStatus",
+				"parameters": [
+					{
+						"in": "header",
+						"name": "Accept",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"example": {
+									"data": {},
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineStateResponse"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"data": {},
+									"message": "string",
+									"status": "string"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/MachineStateResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "invalid_request",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Bad Request _(validation or deserialization error)_"
+					},
+					"500": {
+						"content": {
+							"application/json": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							},
+							"application/xml": {
+								"example": {
+									"code": "internal_error",
+									"details": {},
+									"message": "Request failed"
+								},
+								"schema": {
+									"$ref": "#/components/schemas/ErrorEnvelope"
+								}
+							}
+						},
+						"description": "Internal Server Error _(panics)_"
+					},
+					"default": {
+						"description": ""
+					}
+				},
+				"summary": "Get machine lifecycle status",
+				"tags": [
+					"status",
 					"api/v1/machine"
 				]
 			}
@@ -28679,6 +29616,9 @@
 			"name": "avatar"
 		},
 		{
+			"name": "billing"
+		},
+		{
 			"name": "bootstrap"
 		},
 		{
@@ -28754,6 +29694,12 @@
 			"name": "pause"
 		},
 		{
+			"name": "plan"
+		},
+		{
+			"name": "plans"
+		},
+		{
 			"name": "preferences"
 		},
 		{
@@ -28785,6 +29731,9 @@
 		},
 		{
 			"name": "results"
+		},
+		{
+			"name": "resume"
 		},
 		{
 			"name": "rollback"

@@ -285,6 +285,7 @@ var rolePermissions = map[string][]string{
 		"server:create", "server:read", "server:update", "server:delete",
 		"trail:create", "trail:read", "trail:update", "trail:delete",
 		"execute:create", "execute:read", "execute:update", "execute:delete",
+		"machine:create", "machine:read", "machine:update", "machine:delete",
 	},
 	"admin": {
 		"user:create", "user:read", "user:update", "user:delete",
@@ -305,6 +306,7 @@ var rolePermissions = map[string][]string{
 		"server:create", "server:read", "server:update", "server:delete",
 		"trail:create", "trail:read", "trail:update", "trail:delete",
 		"execute:create", "execute:read", "execute:update", "execute:delete",
+		"machine:create", "machine:read", "machine:update", "machine:delete",
 	},
 	"member": {
 		"user:read",
@@ -324,6 +326,7 @@ var rolePermissions = map[string][]string{
 		"server:create", "server:read", "server:update", "server:delete",
 		"trail:create", "trail:read", "trail:update", "trail:delete",
 		"execute:create", "execute:read", "execute:update", "execute:delete",
+		"machine:create", "machine:read", "machine:update",
 	},
 	"viewer": {
 		"user:read", "organization:read", "role:read", "permission:read",
@@ -331,6 +334,7 @@ var rolePermissions = map[string][]string{
 		"deploy:read", "container:read", "audit:read", "terminal:read",
 		"feature_flags:read", "dashboard:read", "extension:read",
 		"healthcheck:read", "server:read", "trail:read", "execute:read",
+		"machine:read",
 	},
 }
 

@@ -30,7 +30,6 @@
 <details>
 <summary><h2>Table of Contents</h2></summary>
 
-- [About the Name](#about-the-name)
 - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
 - [Features](#features)
@@ -54,16 +53,10 @@
   - [Installation Options](#installation-options)
 - [🔗 Links](#-links)
 - [Contributing](#contributing)
+- [About the Name](#about-the-name)
 - [License](#license)
 
 </details>
-
----
-
-<a id="about-the-name"></a>
-## About the Name
-
-Nixopus is derived from the combination of "octopus" (representing flexibility and multi-tasking) and the Linux penguin mascot (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.
 
 ---
 
@@ -285,6 +278,13 @@ Thank you to all the contributors who help make Nixopus better!
 <a href="https://github.com/raghavyuva/nixopus/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=raghavyuva/nixopus" alt="Nixopus project contributors" />
 </a>
+
+---
+
+<a id="about-the-name"></a>
+## About the Name
+
+Nixopus is derived from the combination of "octopus" (representing flexibility and multi-tasking) and the Linux penguin mascot (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.
 
 ---
 

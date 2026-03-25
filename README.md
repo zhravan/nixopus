@@ -1,383 +1,341 @@
-<div align="center">
+<div align="center"><a name="readme-top"></a>
 
-<a id="readme-top"></a>
+![][image-overview]
 
-<a href="https://nixopus.com"><img width="1800" height="520" alt="Nixopus" src="https://github.com/user-attachments/assets/e103a9df-7abf-4f78-b75a-221331231247" /></a>
-
-<h5 align="center">
-  Open Source Vibe Deploy for full-stack apps under 60 seconds.
-</h5>
+An open-source, AI-powered deployment platform that deploys, monitors, and fixes your apps — autonomously.<br/>
+Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to go live in under minutes.
 
 <p align="center">
   <a href="https://nixopus.com"><b>Website</b></a> •
-  <a href="https://docs.nixopus.ai"><b>Documentation</b></a> •
+  <a href="https://docs.nixopus.com"><b>Documentation</b></a> •
   <a href="https://nixopus.com/blog"><b>Blog</b></a> •
-  <a href="https://discord.gg/skdcq39Wpv"><b>Join Discord</b></a> •
-  <a href="https://github.com/raghavyuva/nixopus/discussions/262"><b>Roadmap</b></a>
+  <a href="https://discord.gg/skdcq39Wpv"><b>Discord</b></a> •
+  <a href="https://github.com/nixopus/nixopus/discussions/262"><b>Roadmap</b></a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/raghavyuva/nixopus/stargazers"><img src="https://img.shields.io/github/stars/raghavyuva/nixopus?style=flat-square" alt="GitHub stars" /></a>
-  <a href="https://github.com/raghavyuva/nixopus/network/members"><img src="https://img.shields.io/github/forks/raghavyuva/nixopus?style=flat-square" alt="GitHub forks" /></a>
-  <a href="https://github.com/raghavyuva/nixopus/issues"><img src="https://img.shields.io/github/issues/raghavyuva/nixopus?style=flat-square" alt="GitHub issues" /></a>
-  <a href="https://github.com/raghavyuva/nixopus/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/license-FSL--1.1--ALv2-blue?style=flat-square" alt="License" /></a>
-  <br>
-  <a href="https://trendshift.io/repositories/15336" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15336" alt="Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-</p>
+<!-- SHIELD GROUP -->
+
+[![][github-stars-shield]][github-stars-link]
+[![][github-forks-shield]][github-forks-link]
+[![][github-issues-shield]][github-issues-link]
+[![][github-license-shield]][github-license-link]
+[![][discord-shield]][discord-link]
+
+[![][github-trending-shield]][github-trending-url]
 
 </div>
 
----
-
 <details>
-<summary><h2>Table of Contents</h2></summary>
+<summary><kbd>Table of contents</kbd></summary>
 
-- [Getting Started](#getting-started)
-  - [Quick Start](#quick-start)
+#### TOC
+
+- [Getting Started & Join Our Community](#getting-started--join-our-community)
 - [Features](#features)
-  - [⚡ Zero ops](#zero-ops)
-  - [⏱️ 60-second deploys](#60-second-deploys)
-  - [🧩 Framework agnostic](#framework-agnostic)
-  - [🔒 Auto HTTPS](#auto-https)
-  - [🌐 Custom domains](#custom-domains)
-  - [↩️ Instant rollbacks](#instant-rollbacks)
-  - [💻 Built-in terminal](#built-in-terminal)
-  - [🤖 AI-powered](#ai-powered)
-  - [🔓 Open source \& self-hostable](#open-source--self-hostable)
+  - [AI-Powered Deployment](#ai-powered-deployment)
+  - [Everything Through Chat](#everything-through-chat)
+  - [Editor Extension](#editor-extension)
+  - [Multi-Server Orchestration](#multi-server-orchestration)
+  - [Full Machine Access](#full-machine-access)
+  - [Framework Agnostic](#framework-agnostic)
+  - [`*` What's more](#-whats-more)
 - [Demo](#demo)
-  - [What you’ll see](#what-youll-see)
-  - [Screenshots (placeholders)](#screenshots-placeholders)
-  - [Video (placeholder)](#video-placeholder)
-  - [Live Preview (optional)](#live-preview-optional)
-- [Self-hosting](#self-hosting)
+- [Self Hosting](#self-hosting)
   - [Quick Install](#quick-install)
-  - [Custom Installation](#custom-installation)
-  - [Installation Options](#installation-options)
+  - [Configuration](#configuration)
+  - [Requirements](#requirements)
 - [Contributing](#contributing)
 - [About the Name](#about-the-name)
 - [License](#license)
 
+####
+
+<br/>
+
 </details>
 
----
+## Getting Started & Join Our Community
 
-<a id="getting-started"></a>
-## Getting Started
+Nixopus is the deployment platform where an AI agent handles your entire deploy lifecycle — from analyzing your codebase and generating configs to shipping your app and fixing failures. Connect your repo, tell the agent to deploy, and go live. Learn more in the [introduction][docs-introduction] or jump to the [quickstart][docs-quickstart].
 
-> **Important Note**: Nixopus is currently in **alpha/pre-release** stage and is not yet ready for production use. While you're welcome to try it out, we recommend waiting for the beta or stable release before using it in production environments.
+| [![][go-live-shield-badge]][dashboard-link] | No installation required! Sign up and deploy your first app on Nixopus Cloud.  |
+| :------------------------------------------ | :----------------------------------------------------------------------------- |
+| [![][discord-shield-badge]][discord-link]    | Join our Discord community! Connect with developers and other Nixopus users.   |
 
-**Vibe Deploy for full-stack apps. From code to live in under 60 seconds.**
+> \[!IMPORTANT]
+>
+> **Star Us**, You will receive all release notifications from GitHub without any delay \~ ⭐️
 
-Nixopus is the deployment platform that eliminates ops. Connect your repo, go live, and focus on building.
+### How It Works
 
-On **[docs.nixopus.ai](https://docs.nixopus.ai/)**:
-
-- **[Quickstart](https://docs.nixopus.ai/getting-started/quickstart)** — Go from code to live in under 60 seconds.
-- **[Self-hosting](https://docs.nixopus.ai/getting-started/self-hosting)** — Run Nixopus on your own infrastructure.
-- **[API reference](https://docs.nixopus.ai/api-reference/introduction)** — Interact with Nixopus programmatically.
-- **[Editor extension](https://docs.nixopus.ai/extension/overview)** — Vibe deploy from VS Code or Cursor.
-
-### Quick Start
-
-To self-host from this repo on a VPS:
-
-1. **Install Nixopus**:
-   ```bash
-   curl -sSL https://install.nixopus.com | bash
-   ```
-
-2. **Open the dashboard** at `http://your-server-ip` or your configured domain.
-
-3. **Deploy a project** by connecting a GitHub repository.
-
-See **[Self-hosting: Installation](https://docs.nixopus.ai/self-hosting/installation)** for full setup options and configuration.
-
-> [!IMPORTANT]
-> Star & Watch, you'll receive all release notifications from GitHub without any delay.
-
-
----
-
-
-<a id="features"></a>
-## ✨ Features
-
-Nixopus is a deployment platform that eliminates ops entirely. You push code, you go live—no Dockerfiles to wrangle, no CI pipelines to wire, no servers to babysit. Built for people who would rather ship than manage infrastructure.
-
-<a id="zero-ops"></a>
-
-![Zero ops](assets/nixopus_dashboard.jpeg)
-
-### [⚡ Zero ops](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
-
-**Push your code; Nixopus handles builds, deployments, SSL, and routing.**
-
-You skip standing up CI and sizing boxes just to get a live URL.
+1. **Connect your repo** — [link your GitHub account][docs-github-integration] and select a repository.
+2. **Tell the agent to deploy** — from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying], the agent analyzes your codebase, generates the right config, and deploys.
+3. **Go live** — your app gets a URL with HTTPS. Automatic SSL, routing, and domain management.
+4. **Agent keeps watching** *(in development)* — if something fails, the agent reads the logs, creates a PR with a fix, and redeploys.
 
 <div align="right">
 
-[↑ Back to top](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
 
-<a id="60-second-deploys"></a>
+## Features
 
-![60-second deploys](assets/nixopus_dashboard.jpeg)
+Nixopus is a deployment platform where an AI agent handles your entire deploy lifecycle. You push code, the agent builds, deploys, monitors, and fixes — no Dockerfiles to wrangle, no CI pipelines to wire, no servers to babysit.
 
-### [⏱️ 60-second deploys](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+![][image-feat-ai-deploy]
 
-**Pick a build pack, deploy, and go live—about a minute from connect to production.**
+### [AI-Powered Deployment][docs-introduction]
 
-Repeat the same short path on every change.
+**The agent generates configs, deploys, and fixes failures — autonomously.**
+
+Push your code. The agent analyzes your codebase, generates the right build configuration, deploys your app, and if something breaks, it reads the logs, identifies the root cause, creates a fix PR, and redeploys. No more context-switching between logs, external AI tools, and your terminal.
+
+[![][back-to-top]](#readme-top)
+
+![][image-feat-chat]
+
+### [Everything Through Chat][docs-ai-chat]
+
+**Deploy, add domains, check logs, roll back, troubleshoot — one conversational interface.**
+
+No more context-switching between dashboards, terminals, and external tools. Talk to the agent in natural language. Tag resources with `@App`, `@Container`, or `@Domain` to give it focus. From the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying] — one interface for everything.
+
+[![][back-to-top]](#readme-top)
+
+![][image-feat-editor]
+
+### [Editor Extension][docs-extension]
+
+**Deploy from VS Code or Cursor without opening a browser.**
+
+The [extension][docs-extension] brings an AI-powered agent into your sidebar. It analyzes your codebase, generates configs, and deploys — all through [chat][docs-extension-deploying], right in your editor. No context switch. No browser tab.
+
+[![][back-to-top]](#readme-top)
+
+![][image-feat-multi-server]
+
+### [Multi-Server Orchestration][docs-introduction]
+
+**One dashboard. Every server.**
+
+Connect multiple servers and manage them all from one place. Monitor CPU, RAM, and running apps across your entire fleet. Multi-machine deployments, load balancing, and automated scaling are on the roadmap.
+
+[![][back-to-top]](#readme-top)
+
+![][image-feat-terminal]
+
+### [Full Machine Access][docs-terminal]
+
+**Terminal and containers right in the dashboard.**
+
+SSH into your server, inspect running [containers][docs-containers], stream logs, and debug — all from the browser. No separate [terminal][docs-terminal] or jump host required. Full access to your infrastructure when you need it.
+
+[![][back-to-top]](#readme-top)
+
+![][image-feat-framework]
+
+### [Framework Agnostic][docs-introduction]
+
+**Next.js, Django, Rails, Go, FastAPI, Compose stacks — anything that runs in a container.**
+
+The agent detects your framework, generates the right Dockerfile or Compose configuration, and [deploys][docs-deploying-apps]. If it fits a container image, it ships on Nixopus.
 
 <div align="right">
 
-[↑ Back to top](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
 
-<a id="framework-agnostic"></a>
+### `*` What's more
 
-![Framework agnostic](assets/nixopus_dashboard.jpeg)
+Beyond these features, Nixopus also includes:
 
-### [🧩 Framework agnostic](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+- [x] **Auto HTTPS** — Every deployment gets TLS via Caddy. SSL provisioned and renewed automatically via Let's Encrypt. See [configuration][docs-configuration].
+- [x] **[Custom Domains][docs-domains]** — Point your domain at Nixopus with automatic DNS verification and SSL. Tell the agent "add domain app.mysite.com."
+- [x] **[Instant Rollbacks][docs-deployments]** — Roll back to any previous deployment. Previous images are retained, so rollbacks don't require a full rebuild.
+- [x] **[Open Source & Self-Hostable][docs-installation]** — Your code, your data, your infrastructure. Self-hosting is free forever with full feature parity. No lock-in.
 
-**Next.js, Remix, Astro, FastAPI, Go, Rails—or anything else that runs in a container.**
-
-If it fits a container image, it can ship on Nixopus.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
-
-<a id="auto-https"></a>
-
-![Auto HTTPS](assets/nixopus_dashboard.jpeg)
-
-### [🔒 Auto HTTPS](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
-
-**Every deployment gets TLS out of the box via Caddy—no cert files, no manual HTTPS toggles.**
-
-HTTPS is the default.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
-
-<a id="custom-domains"></a>
-
-![Custom domains](assets/nixopus_dashboard.jpeg)
-
-### [🌐 Custom domains](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
-
-**Point your domain at Nixopus; routing and certificates follow.**
-
-Traffic hits your app on your hostname with HTTPS.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
-
-<a id="instant-rollbacks"></a>
-
-![Instant rollbacks](assets/nixopus_dashboard.jpeg)
-
-### [↩️ Instant rollbacks](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
-
-**Roll back to any previous deployment from the Deployments tab.**
-
-When a release misbehaves, restore known-good state without redeploy guesswork.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
-
-<a id="built-in-terminal"></a>
-
-![Built-in terminal](assets/nixopus_dashboard.jpeg)
-
-### [💻 Built-in terminal](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
-
-**SSH into your server or containers from the dashboard.**
-
-Debug and operate without juggling a separate terminal or jump host.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
-
-<a id="ai-powered"></a>
-
-![AI-powered](assets/nixopus_dashboard.jpeg)
-
-### [🤖 AI-powered](https://docs.nixopus.ai/extension/overview)
-
-**The [editor extension](https://docs.nixopus.ai/extension/overview) can generate Dockerfiles, analyze your codebase, and drive deploys from VS Code or Cursor.**
-
-Stay in the editor while Nixopus ships the app.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
-
-<a id="open-source--self-hostable"></a>
-
-![Open source & self-hostable](assets/nixopus_dashboard.jpeg)
-
-### [🔓 Open source & self-hostable](https://docs.nixopus.ai/getting-started/self-hosting)
-
-**Run Nixopus on your own infrastructure or use Nixopus Cloud.**
-
-Open source and self-hostable—no lock-in, no surprises.
-
-<div align="right">
-
-[↑ Back to top](#readme-top)
-
-</div>
+> More features are being added as Nixopus evolves.
 
 ---
 
-<a id="demo"></a>
+> \[!NOTE]
+>
+> You can find our upcoming [Roadmap][github-roadmap-link] plans in the Discussions section.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
 ## Demo
 
-See Nixopus in action, from deployments to day-to-day operations on your VPS.
+See Nixopus in action — from deploying apps to day-to-day operations on your infrastructure.
 
-### What you’ll see
+<video src="https://nixopus.ai/videos/nixopus-demo-landscape.mp4" width="180"/>
 
-- **Deploy from GitHub**: connect a repo and ship updates with a streamlined flow
-- **Operate from the dashboard**: manage apps, domains, env vars, and deployments in one place
-- **Built-in tools**: use the web terminal + file manager without leaving your browser
+> \[!TIP]
+>
+> You can also deploy from VS Code or Cursor using the [editor extension][docs-extension] — open the chat and say "deploy this project."
 
-### Screenshots (placeholders)
+<div align="right">
 
-> Replace the image paths below when you’re ready (screenshots / gifs / videos will be added later).
-
-<div align="center">
-
-| Dashboard | Hosting Projects |
-| --- | --- |
-| ![Dashboard Overview](assets/nixopus_dashboard.jpeg) | ![Hosting Projects](assets/nixopus_dashboard.jpeg) |
-| *Overview of deployments, health, and activity* | *Connect a repo, deploy, and manage releases* |
-
-| Terminal | File Manager |
-| --- | --- |
-| ![Terminal](assets/nixopus_dashboard.jpeg) | ![File Manager](assets/nixopus_dashboard.jpeg) |
-| *Run commands securely from the browser* | *Upload, edit, and organize server files visually* |
+[![][back-to-top]](#readme-top)
 
 </div>
 
-### Video (placeholder)
+## Self Hosting
 
-- **Demo video**: (add YouTube link / MP4 later)
+Run the full Nixopus stack on a machine you control.
 
-### Live Preview (optional)
-
-- (add hosted demo URL later)
-
----
-
-<a id="self-hosting"></a>
-## Self-hosting
+> \[!TIP]
+>
+> Learn more in the [Self-Hosting Installation Guide][docs-installation].
 
 ### Quick Install
 
-Install Nixopus on your VPS with a single command:
-
 ```bash
-curl -sSL https://install.nixopus.com | bash
+curl -fsSL install.nixopus.com | sudo bash
 ```
 
-### Custom Installation
-
-**For custom IP setups:**
+Or with a custom domain and admin email:
 
 ```bash
-curl -sSL https://install.nixopus.com | bash -s -- --host-ip 10.0.0.154
+DOMAIN=panel.example.com ADMIN_EMAIL=admin@example.com curl -fsSL install.nixopus.com | sudo bash
 ```
 
-**To install only the CLI tool:**
+<br/>
 
-```bash
-curl -sSL https://install.nixopus.com | bash -s -- --skip-nixopus-install
-```
+### Configuration
 
-### Installation Options
+All parameters are optional. Pass them as environment variables before the install command:
 
-You can customize your installation with the following optional parameters:
+| Environment Variable | Required | Description                  | Default                |
+| -------------------- | -------- | ---------------------------- | ---------------------- |
+| `DOMAIN`             | No       | Domain for automatic HTTPS   | *(empty — IP mode)*   |
+| `HOST_IP`            | No       | Public IP of the machine     | *(auto-detected)*      |
+| `ADMIN_EMAIL`        | No       | Admin account email          | *(empty)*              |
+| `CADDY_HTTP_PORT`    | No       | HTTP port                    | `80`                   |
+| `CADDY_HTTPS_PORT`   | No       | HTTPS port                   | `443`                  |
+| `NIXOPUS_HOME`       | No       | Installation directory       | `/opt/nixopus`         |
 
-| Parameter | Short | Description | Example |
-|-----------|-------|-------------|---------|
-| `--api-domain` | `-ad` | Domain for Nixopus API | `nixopusapi.example.tld` |
-| `--view-domain` | `-vd` | Domain for Nixopus dashboard | `nixopus.example.tld` |
-| `--host-ip` | `-ip` | IP address of the server | `10.0.0.154` |
-| `--verbose` | `-v` | Show detailed installation logs | - |
-| `--timeout` | `-t` | Timeout for each step (default: 300s) | `600` |
-| `--force` | `-f` | Replace existing files | - |
-| `--dry-run` | `-d` | Preview changes without applying | - |
-| `--config-file` | `-c` | Path to custom config file | `/path/to/config.yaml` |
+> \[!NOTE]
+>
+> The complete list of environment variables can be found in the [Configuration Guide][docs-configuration].
 
-**Example with custom domains:**
+<br/>
 
-```bash
-sudo nixopus install \
-  --api-domain nixopusapi.example.tld \
-  --view-domain nixopus.example.tld \
-  --verbose \
-  --timeout 600
-```
+### Requirements
 
-> [!NOTE]
-> Running `nixopus install` requires root privileges (sudo) to install system dependencies like Docker. If you encounter permission errors, make sure to run the command with `sudo`.
+| Requirement  | Minimum                                                                       |
+| ------------ | ----------------------------------------------------------------------------- |
+| Machine      | Fresh VPS from any cloud provider (Hetzner, DigitalOcean, AWS, etc.)          |
+| Architecture | x86_64 (amd64) or aarch64 (arm64)                                            |
+| RAM          | 1 GB minimum (2 GB+ recommended)                                             |
+| Disk         | 2 GB free minimum                                                             |
+| Access       | Root (the installer must run as root)                                         |
+| Docker       | Installed automatically if not present (Docker Engine + Compose V2)           |
 
-For more detailed installation instructions, visit **[Self-hosting: Installation](https://docs.nixopus.ai/self-hosting/installation)**.
+> \[!NOTE]
+>
+> Use a fresh, dedicated VPS — not a machine already running other production services. The first user to sign up becomes the admin. After that, registration is closed — you invite users manually.
 
----
+<div align="right">
 
-<a id="contributing"></a>
+[![][back-to-top]](#readme-top)
+
+</div>
+
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**, feel free to check out our [Github Issues](https://github.com/raghavyuva/nixopus/issues)
+Contributions of all types are more than welcome; if you are interested in contributing code, feel free to check out our GitHub [Issues][github-issues-link] to get stuck in to show us what you're made of.
 
-Thank you to all the contributors who help make Nixopus better!
+> \[!TIP]
+>
+> We welcome all contributions that help make Nixopus better. Whether it's bug fixes, new features, documentation, or feedback — every contribution counts.
 
-<a href="https://github.com/raghavyuva/nixopus/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=raghavyuva/nixopus" alt="Nixopus project contributors" />
+<a href="https://github.com/raghavyuva/nixopus/graphs/contributors" target="_blank">
+  <table>
+    <tr>
+      <th colspan="2">
+        <br><img src="https://contrib.rocks/image?repo=raghavyuva/nixopus"><br><br>
+      </th>
+    </tr>
+  </table>
 </a>
 
----
+<div align="right">
 
-<a id="about-the-name"></a>
+[![][back-to-top]](#readme-top)
+
+</div>
+
 ## About the Name
 
 Nixopus is derived from the combination of "octopus" (representing flexibility and multi-tasking) and the Linux penguin mascot (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.
 
----
+<div align="right">
 
-<a id="license"></a>
-## License
-
-Distributed under the FSL-1.1-ALv2 License. Visit [LICENSE.md](./LICENSE.md) for more information.
-
----
-
-
-<div align="center">
-
-**Made with ❤️ by the Nixopus community**
-
-[Back to top](#readme-top)
+[![][back-to-top]](#readme-top)
 
 </div>
+
+---
+
+<details><summary><h4>License</h4></summary>
+
+Distributed under the FSL-1.1-ALv2 License. Visit [LICENSE.md](./LICENSE.md) or the [docs][docs-license] for more information.
+
+</details>
+
+Copyright © 2025 [Nixopus][website-link]. <br />
+This project is [FSL-1.1-ALv2](./LICENSE.md) licensed.
+
+<!-- LINK GROUP -->
+
+[back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square
+[blog-link]: https://nixopus.com/blog
+[dashboard-link]: https://dashboard.nixopus.com
+[discord-link]: https://discord.gg/skdcq39Wpv
+[discord-shield]: https://img.shields.io/badge/Discord-Join-5865F2?labelColor=black&logo=discord&logoColor=white&style=flat-square
+[discord-shield-badge]: https://img.shields.io/badge/Discord-Join-5865F2?labelColor=black&logo=discord&logoColor=white&style=for-the-badge
+[docs-ai-chat]: https://docs.nixopus.com/guides/ai-chat
+[docs-changelog]: https://docs.nixopus.com/changelog
+[docs-configuration]: https://docs.nixopus.com/self-hosting/configuration
+[docs-containers]: https://docs.nixopus.com/guides/containers
+[docs-deploying-apps]: https://docs.nixopus.com/guides/deploying-apps
+[docs-deployments]: https://docs.nixopus.com/concepts/deployments
+[docs-domains]: https://docs.nixopus.com/concepts/domains
+[docs-environment-variables]: https://docs.nixopus.com/guides/environment-variables
+[docs-extension]: https://docs.nixopus.com/extension/overview
+[docs-extension-deploying]: https://docs.nixopus.com/extension/deploying
+[docs-github-integration]: https://docs.nixopus.com/guides/github-integration
+[docs-health-checks]: https://docs.nixopus.com/guides/health-checks
+[docs-installation]: https://docs.nixopus.com/self-hosting/installation
+[docs-introduction]: https://docs.nixopus.com/getting-started/introduction
+[docs-license]: https://docs.nixopus.com/license
+[docs-link]: https://docs.nixopus.com
+[docs-quickstart]: https://docs.nixopus.com/getting-started/quickstart
+[docs-terminal]: https://docs.nixopus.com/guides/terminal
+[github-forks-link]: https://github.com/raghavyuva/nixopus/network/members
+[github-forks-shield]: https://img.shields.io/github/forks/raghavyuva/nixopus?color=8ae8ff&labelColor=black&style=flat-square
+[github-issues-link]: https://github.com/raghavyuva/nixopus/issues
+[github-issues-shield]: https://img.shields.io/github/issues/raghavyuva/nixopus?color=ff80eb&labelColor=black&style=flat-square
+[github-license-link]: https://github.com/raghavyuva/nixopus/blob/master/LICENSE.md
+[github-license-shield]: https://img.shields.io/badge/license-FSL--1.1--ALv2-white?labelColor=black&style=flat-square
+[github-roadmap-link]: https://github.com/raghavyuva/nixopus/discussions/262
+[github-stars-link]: https://github.com/raghavyuva/nixopus/stargazers
+[github-stars-shield]: https://img.shields.io/github/stars/raghavyuva/nixopus?color=ffcb47&labelColor=black&style=flat-square
+[github-trending-shield]: https://trendshift.io/api/badge/repositories/15336
+[github-trending-url]: https://trendshift.io/repositories/15336
+[go-live-shield-badge]: https://img.shields.io/badge/TRY_NIXOPUS-CLOUD-55b467?labelColor=black&style=for-the-badge
+[image-feat-ai-deploy]: assets/graphics/2.png
+[image-feat-chat]: assets/graphics/3.png
+[image-feat-editor]: assets/graphics/4.png
+[image-feat-framework]: assets/graphics/7.png
+[image-feat-multi-server]: assets/graphics/5.png
+[image-feat-terminal]: assets/graphics/6.png
+[image-overview]: assets/graphics/1.png
+[website-link]: https://nixopus.com

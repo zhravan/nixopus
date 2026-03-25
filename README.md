@@ -30,7 +30,8 @@ Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to g
 
 #### TOC
 
-- [Getting Started & Join Our Community](#getting-started--join-our-community)
+- [Getting Started \& Join Our Community](#getting-started--join-our-community)
+  - [How It Works](#how-it-works)
 - [Features](#features)
   - [AI-Powered Deployment](#ai-powered-deployment)
   - [Everything Through Chat](#everything-through-chat)
@@ -46,7 +47,6 @@ Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to g
   - [Requirements](#requirements)
 - [Contributing](#contributing)
 - [About the Name](#about-the-name)
-- [License](#license)
 
 ####
 
@@ -85,9 +85,7 @@ Nixopus is the deployment platform where an AI agent handles your entire deploy 
 
 ### [AI-Powered Deployment][docs-introduction]
 
-**The agent generates configs, deploys, and fixes failures. Autonomously.**
-
-On other platforms, a failed deployment means reading logs, copying the error to an AI tool, getting a fix, pushing, redeploying. Repeat. Nixopus closes that loop. The agent detects the failure, diagnoses it, raises a PR with the fix, and redeploys without you.
+The agent generates configs, deploys, and fixes failures, autonomously. On other platforms, a failed deployment means reading logs, copying the error to an AI tool, getting a fix, pushing, redeploying. Repeat. Nixopus closes that loop. The agent detects the failure, diagnoses it, raises a PR with the fix, and redeploys without you.
 
 [![][back-to-top]](#readme-top)
 
@@ -95,9 +93,7 @@ On other platforms, a failed deployment means reading logs, copying the error to
 
 ### [Everything Through Chat][docs-ai-chat]
 
-**Deploy, add domains, check logs, roll back, troubleshoot. One conversational interface.**
-
-Talk to the agent in natural language from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying]. Tag resources with `@App`, `@Container`, or `@Domain` to give it focus.
+Deploy, add domains, check logs, roll back, troubleshoot. One conversational interface. Talk to the agent in natural language from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying]. Tag resources with `@App`, `@Container`, or `@Domain` to give it focus.
 
 [![][back-to-top]](#readme-top)
 
@@ -105,9 +101,7 @@ Talk to the agent in natural language from the [dashboard][docs-ai-chat] or your
 
 ### [Editor Extension][docs-extension]
 
-**Deploy from VS Code or Cursor without opening a browser.**
-
-The [extension][docs-extension] puts the same agent in your sidebar. Chat, deploy, and manage your apps without leaving the editor.
+Deploy from VS Code or Cursor without opening a browser. The [extension][docs-extension] puts the same agent in your sidebar. Chat, deploy, and manage your apps without leaving the editor.
 
 [![][back-to-top]](#readme-top)
 
@@ -115,9 +109,7 @@ The [extension][docs-extension] puts the same agent in your sidebar. Chat, deplo
 
 ### [Multi-Server Orchestration][docs-introduction]
 
-**One dashboard. Every server.**
-
-Connect multiple servers and manage them all from one place. Monitor CPU, RAM, and running apps across your entire fleet. Multi-machine deployments, load balancing, and automated scaling are on the roadmap.
+One dashboard. Every server. Connect multiple servers and manage them all from one place. Monitor CPU, RAM, and running apps across your entire fleet. Multi-machine deployments, load balancing, and automated scaling are on the roadmap.
 
 [![][back-to-top]](#readme-top)
 
@@ -125,9 +117,7 @@ Connect multiple servers and manage them all from one place. Monitor CPU, RAM, a
 
 ### [Full Machine Access][docs-terminal]
 
-**Terminal and containers right in the dashboard.**
-
-SSH into your server, inspect running [containers][docs-containers], stream logs, and debug from the browser. No separate [terminal][docs-terminal] or jump host required.
+Terminal and containers right in the dashboard. SSH into your server, inspect running [containers][docs-containers], stream logs, and debug from the browser. No separate [terminal][docs-terminal] or jump host required.
 
 [![][back-to-top]](#readme-top)
 
@@ -135,9 +125,7 @@ SSH into your server, inspect running [containers][docs-containers], stream logs
 
 ### [Framework Agnostic][docs-introduction]
 
-**Next.js, Django, Rails, Go, FastAPI, Compose stacks. Anything that runs in a container.**
-
-If it fits a container image, it [ships on Nixopus][docs-deploying-apps]. The agent detects your stack and generates the right build configuration automatically.
+Next.js, Django, Rails, Go, FastAPI, Compose stacks. Anything that runs in a container. If it fits a container image, it [ships on Nixopus][docs-deploying-apps]. The agent detects your stack and generates the right build configuration automatically.
 
 <div align="right">
 
@@ -300,11 +288,9 @@ This project is [FSL-1.1-ALv2](./LICENSE.md) licensed.
 [docs-deploying-apps]: https://docs.nixopus.com/guides/deploying-apps
 [docs-deployments]: https://docs.nixopus.com/concepts/deployments
 [docs-domains]: https://docs.nixopus.com/concepts/domains
-[docs-environment-variables]: https://docs.nixopus.com/guides/environment-variables
 [docs-extension]: https://docs.nixopus.com/extension/overview
 [docs-extension-deploying]: https://docs.nixopus.com/extension/deploying
 [docs-github-integration]: https://docs.nixopus.com/guides/github-integration
-[docs-health-checks]: https://docs.nixopus.com/guides/health-checks
 [docs-installation]: https://docs.nixopus.com/self-hosting/installation
 [docs-introduction]: https://docs.nixopus.com/getting-started/introduction
 [docs-license]: https://docs.nixopus.com/license

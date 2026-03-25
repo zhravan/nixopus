@@ -3,12 +3,12 @@
 <a href="https://nixopus.com"><img width="1800" height="520" alt="Nixopus" src="https://github.com/user-attachments/assets/e103a9df-7abf-4f78-b75a-221331231247" /></a>
 
 <h5 align="center">
-  Open Source alternative to Vercel, Heroku, Netlify with Terminal integration, and Self Hosting capabilities
+  Open Source Vibe Deploy for full-stack apps under 60 seconds.
 </h5>
 
 <p align="center">
   <a href="https://nixopus.com"><b>Website</b></a> •
-  <a href="https://docs.nixopus.com"><b>Documentation</b></a> •
+  <a href="https://docs.nixopus.ai"><b>Documentation</b></a> •
   <a href="https://nixopus.com/blog"><b>Blog</b></a> •
   <a href="https://discord.gg/skdcq39Wpv"><b>Join Discord</b></a> •
   <a href="https://github.com/raghavyuva/nixopus/discussions/262"><b>Roadmap</b></a>
@@ -65,20 +65,31 @@
 
 > **Important Note**: Nixopus is currently in **alpha/pre-release** stage and is not yet ready for production use. While you're welcome to try it out, we recommend waiting for the beta or stable release before using it in production environments.
 
-Nixopus transforms your VPS into a complete application hosting environment. Deploy applications directly from GitHub, manage server files through a browser-based interface, and execute commands via an integrated terminal all without leaving the dashboard.
+**Vibe Deploy for full-stack apps. From code to live in under 60 seconds.**
+
+Nixopus is the deployment platform that eliminates ops. Connect your repo, go live, and focus on building.
+
+On **[docs.nixopus.ai](https://docs.nixopus.ai/)**:
+
+- **[Quickstart](https://docs.nixopus.ai/getting-started/quickstart)** — Go from code to live in under 60 seconds.
+- **[Self-hosting](https://docs.nixopus.ai/getting-started/self-hosting)** — Run Nixopus on your own infrastructure.
+- **[API reference](https://docs.nixopus.ai/api-reference/introduction)** — Interact with Nixopus programmatically.
+- **[Editor extension](https://docs.nixopus.ai/extension/overview)** — Vibe deploy from VS Code or Cursor.
 
 ### Quick Start
 
-1. **Install Nixopus** on your VPS:
+To self-host from this repo on a VPS:
+
+1. **Install Nixopus**:
    ```bash
    curl -sSL https://install.nixopus.com | bash
    ```
 
-2. **Access the Dashboard** at `http://your-server-ip` or your configured domain
+2. **Open the dashboard** at `http://your-server-ip` or your configured domain.
 
-3. **Deploy Your First Project** by connecting your GitHub repository
+3. **Deploy a project** by connecting a GitHub repository.
 
-For detailed installation instructions, visit our [Installation Guide](https://docs.nixopus.com/install/).
+See **[Self-hosting: Installation](https://docs.nixopus.ai/self-hosting/installation)** for full setup options and configuration.
 
 > [!IMPORTANT]
 > Star us, you’ll receive all release notifications from GitHub without any delay.
@@ -251,7 +262,7 @@ sudo nixopus install \
 > [!NOTE]
 > Running `nixopus install` requires root privileges (sudo) to install system dependencies like Docker. If you encounter permission errors, make sure to run the command with `sudo`.
 
-For more detailed installation instructions, visit our [Installation Guide](https://docs.nixopus.com/install/).
+For more detailed installation instructions, visit **[Self-hosting: Installation](https://docs.nixopus.ai/self-hosting/installation)**.
 
 ---
 
@@ -259,7 +270,7 @@ For more detailed installation instructions, visit our [Installation Guide](http
 ## 🔗 Links
 
 - **Website**: [https://nixopus.com](https://nixopus.com)
-- **Documentation**: [https://docs.nixopus.com](https://docs.nixopus.com)
+- **Documentation**: [https://docs.nixopus.ai](https://docs.nixopus.ai)
 - **Discord Community**: [https://discord.gg/skdcq39Wpv](https://discord.gg/skdcq39Wpv)
 - **Blog**: [https://nixopus.com/blog](https://nixopus.com/blog)
 - **Roadmap**: [GitHub Discussions](https://github.com/raghavyuva/nixopus/discussions/262)

@@ -172,7 +172,7 @@ Beyond these features, Nixopus also includes:
 
 See Nixopus in action, from deploying apps to day-to-day operations on your infrastructure.
 
-<video src="https://nixopus.ai/videos/nixopus-demo-landscape.mp4" width="180"></video>
+<https://github.com/user-attachments/assets/6d6f24ef-47d5-4fe2-ab63-65f0ed5f7782>
 
 <div align="right">
 

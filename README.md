@@ -33,15 +33,15 @@
 - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
 - [Features](#features)
-  - [Zero ops](#zero-ops)
-  - [60-second deploys](#60-second-deploys)
-  - [Framework agnostic](#framework-agnostic)
-  - [Auto HTTPS](#auto-https)
-  - [Custom domains](#custom-domains)
-  - [Instant rollbacks](#instant-rollbacks)
-  - [Built-in terminal](#built-in-terminal)
-  - [AI-powered](#ai-powered)
-  - [Open source \& self-hostable](#open-source--self-hostable)
+  - [❖ Zero ops](#-zero-ops)
+  - [❖ 60-second deploys](#-60-second-deploys)
+  - [❖ Framework agnostic](#-framework-agnostic)
+  - [❖ Auto HTTPS](#-auto-https)
+  - [❖ Custom domains](#-custom-domains)
+  - [❖ Instant rollbacks](#-instant-rollbacks)
+  - [❖ Built-in terminal](#-built-in-terminal)
+  - [❖ AI-powered](#-ai-powered)
+  - [❖ Open source \& self-hostable](#-open-source--self-hostable)
 - [Demo](#demo)
   - [What you’ll see](#what-youll-see)
   - [Screenshots (placeholders)](#screenshots-placeholders)
@@ -104,63 +104,63 @@ See **[Self-hosting: Installation](https://docs.nixopus.ai/self-hosting/installa
 Nixopus is a deployment platform that eliminates ops entirely. You push code, you go live no Dockerfiles to wrangle, no CI pipelines to wire, no servers to babysit. Built for people who would rather ship than manage infrastructure.
 
 <a id="zero-ops"></a>
-### [Zero ops](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [Zero ops](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 Push your code; Nixopus handles builds, deployments, SSL, and routing. You skip standing up CI and sizing boxes just to get a live URL.
 
 ![Zero ops](assets/nixopus_dashboard.jpeg)
 
 <a id="60-second-deploys"></a>
-### [60-second deploys](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [60-second deploys](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 Pick a build pack, deploy, and go live about a minute from connect to production. Repeat the same short path on every change.
 
 ![60-second deploys](assets/nixopus_dashboard.jpeg)
 
 <a id="framework-agnostic"></a>
-### [Framework agnostic](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [Framework agnostic](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 Next.js, Remix, Astro, FastAPI, Go, Rails, or anything else that runs in a container if it fits a container image, it can ship on Nixopus.
 
 ![Framework agnostic](assets/nixopus_dashboard.jpeg)
 
 <a id="auto-https"></a>
-### [Auto HTTPS](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [Auto HTTPS](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 Every deployment gets TLS out of the box via Caddy. No cert files, no manual HTTPS toggles HTTPS is the default.
 
 ![Auto HTTPS](assets/nixopus_dashboard.jpeg)
 
 <a id="custom-domains"></a>
-### [Custom domains](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [Custom domains](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 Point your domain at Nixopus; routing and certificates follow so traffic hits your app on your hostname with HTTPS.
 
 ![Custom domains](assets/nixopus_dashboard.jpeg)
 
 <a id="instant-rollbacks"></a>
-### [Instant rollbacks](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [Instant rollbacks](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 When a release misbehaves, roll back to any previous deployment from the Deployments tab restore known-good state without redeploy guesswork.
 
 ![Instant rollbacks](assets/nixopus_dashboard.jpeg)
 
 <a id="built-in-terminal"></a>
-### [Built-in terminal](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+### ❖ [Built-in terminal](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
 SSH into your server or containers from the dashboard debug and operate without juggling a separate terminal or jump host.
 
 ![Built-in terminal](assets/nixopus_dashboard.jpeg)
 
 <a id="ai-powered"></a>
-### [AI-powered](https://docs.nixopus.ai/extension/overview)
+### ❖ [AI-powered](https://docs.nixopus.ai/extension/overview)
 
 The [editor extension](https://docs.nixopus.ai/extension/overview) can generate Dockerfiles, analyze your codebase, and drive deploys from VS Code or Cursor stay in the editor while Nixopus ships the app.
 
 ![AI-powered](assets/nixopus_dashboard.jpeg)
 
 <a id="open-source--self-hostable"></a>
-### [Open source & self-hostable](https://docs.nixopus.ai/getting-started/self-hosting)
+### ❖ [Open source & self-hostable](https://docs.nixopus.ai/getting-started/self-hosting)
 
 Run Nixopus on your own infrastructure or use Nixopus Cloud. Open source and self-hostable no lock-in, no surprises.
 

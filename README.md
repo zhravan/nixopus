@@ -34,11 +34,15 @@
 - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
 - [Features](#features)
-  - [Extensions](#extensions)
-  - [Hosting Projects](#hosting-projects)
-  - [Terminal](#terminal)
-  - [File Manager](#file-manager)
-  - [Additional Features](#additional-features)
+  - [Zero ops](#zero-ops)
+  - [60-second deploys](#60-second-deploys)
+  - [Framework agnostic](#framework-agnostic)
+  - [Auto HTTPS](#auto-https)
+  - [Custom domains](#custom-domains)
+  - [Instant rollbacks](#instant-rollbacks)
+  - [Built-in terminal](#built-in-terminal)
+  - [AI-powered](#ai-powered)
+  - [Open source \& self-hostable](#open-source--self-hostable)
 - [Demo](#demo)
   - [What you’ll see](#what-youll-see)
   - [Screenshots (placeholders)](#screenshots-placeholders)
@@ -68,7 +72,7 @@ Nixopus is derived from the combination of "octopus" (representing flexibility a
 
 > **Important Note**: Nixopus is currently in **alpha/pre-release** stage and is not yet ready for production use. While you're welcome to try it out, we recommend waiting for the beta or stable release before using it in production environments.
 
-Nixopus transforms your VPS into a complete application hosting environment. Deploy applications directly from GitHub, manage server files through a browser-based interface, and execute commands via an integrated terminal—all without leaving the dashboard.
+Nixopus transforms your VPS into a complete application hosting environment. Deploy applications directly from GitHub, manage server files through a browser-based interface, and execute commands via an integrated terminal all without leaving the dashboard.
 
 ### Quick Start
 
@@ -95,74 +99,70 @@ For detailed installation instructions, visit our [Installation Guide](https://d
 <a id="features"></a>
 ## Features
 
-Nixopus transforms your VPS into a complete application hosting environment. Deploy applications directly from GitHub, manage server files through a browser based interface, and execute commands via an integrated terminal all without leaving the dashboard.
+Nixopus is a deployment platform that eliminates ops entirely. You push code, you go live no Dockerfiles to wrangle, no CI pipelines to wire, no servers to babysit. Built for people who would rather ship than manage infrastructure.
 
-<a id="extensions"></a>
-### [Extensions](https://docs.nixopus.com/extensions)
+<a id="zero-ops"></a>
+### [Zero ops](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
-Automate server tasks through a library of pre-built configurations. Extensions allow you to extend Nixopus functionality with modular components that integrate seamlessly with your workflow.
+Push your code; Nixopus handles builds, deployments, SSL, and routing. You skip standing up CI and sizing boxes just to get a live URL.
 
-**Key Capabilities:**
-- Pre-built extension library
-- Custom extension support
-- Easy integration with existing deployments
-- Automated server task management
+![Zero ops](assets/nixopus_dashboard.jpeg)
 
+<a id="60-second-deploys"></a>
+### [60-second deploys](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
-![Extensions](assets/nixopus_dashboard.jpeg)
+Pick a build pack, deploy, and go live about a minute from connect to production. Repeat the same short path on every change.
 
-<a id="hosting-projects"></a>
-### [Hosting Projects](https://docs.nixopus.com/self-host)
+![60-second deploys](assets/nixopus_dashboard.jpeg)
 
-Deploy applications directly from GitHub repositories with automatic builds and zero configuration files. Nixopus handles the entire deployment pipeline from code to production.
+<a id="framework-agnostic"></a>
+### [Framework agnostic](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
-**Key Capabilities:**
-- One-click deployments from GitHub
-- Automatic builds and zero configuration
-- CI/CD integration with automatic deployments on push
-- Docker support for Compose, Dockerfiles, and static sites
-- Automatic SSL certificate generation
-- Reverse proxy routing with built-in Caddy
-- Health checks and monitoring
-- Environment variable management
-- Custom domain configuration
+Next.js, Remix, Astro, FastAPI, Go, Rails, or anything else that runs in a container if it fits a container image, it can ship on Nixopus.
 
-![Hosting Projects](assets/nixopus_dashboard.jpeg)
+![Framework agnostic](assets/nixopus_dashboard.jpeg)
 
-<a id="terminal"></a>
-### [Terminal](https://docs.nixopus.com/terminal)
+<a id="auto-https"></a>
+### [Auto HTTPS](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
-Execute server commands through a secure, web-based terminal with SSH integration. Access your server directly from the browser without additional tools.
+Every deployment gets TLS out of the box via Caddy. No cert files, no manual HTTPS toggles HTTPS is the default.
 
-**Key Capabilities:**
-- Web-based terminal interface
-- Full SSH integration
-- Secure command execution
-- Real-time command output
-- Multi-session support
+![Auto HTTPS](assets/nixopus_dashboard.jpeg)
 
-![Terminal](assets/nixopus_dashboard.jpeg)
+<a id="custom-domains"></a>
+### [Custom domains](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
-<a id="file-manager"></a>
-### [File Manager](https://docs.nixopus.com/file-manager)
+Point your domain at Nixopus; routing and certificates follow so traffic hits your app on your hostname with HTTPS.
 
-Browse, edit, upload, and organize files using drag-and-drop operations. Manage your server files through an intuitive visual interface.
+![Custom domains](assets/nixopus_dashboard.jpeg)
 
-**Key Capabilities:**
-- Visual file browser
-- Drag-and-drop file uploads
-- In-browser file editing
-- File organization and management
-- Multi-file operations
+<a id="instant-rollbacks"></a>
+### [Instant rollbacks](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
 
-![File Manager](assets/nixopus_dashboard.jpeg)
+When a release misbehaves, roll back to any previous deployment from the Deployments tab restore known-good state without redeploy guesswork.
 
-### Additional Features
+![Instant rollbacks](assets/nixopus_dashboard.jpeg)
 
-- **Real-time Monitoring** - Track CPU, RAM, and disk usage with live system statistics
-- **Smart Notifications** - Receive deployment alerts via Slack, Discord, or email
-- **Authentication** - Built-in user management with SuperTokens integration
-- **Domain Management** - Configure custom domains with automatic SSL certificate generation
+<a id="built-in-terminal"></a>
+### [Built-in terminal](https://docs.nixopus.ai/getting-started/introduction#why-nixopus)
+
+SSH into your server or containers from the dashboard debug and operate without juggling a separate terminal or jump host.
+
+![Built-in terminal](assets/nixopus_dashboard.jpeg)
+
+<a id="ai-powered"></a>
+### [AI-powered](https://docs.nixopus.ai/extension/overview)
+
+The [editor extension](https://docs.nixopus.ai/extension/overview) can generate Dockerfiles, analyze your codebase, and drive deploys from VS Code or Cursor stay in the editor while Nixopus ships the app.
+
+![AI-powered](assets/nixopus_dashboard.jpeg)
+
+<a id="open-source--self-hostable"></a>
+### [Open source & self-hostable](https://docs.nixopus.ai/getting-started/self-hosting)
+
+Run Nixopus on your own infrastructure or use Nixopus Cloud. Open source and self-hostable no lock-in, no surprises.
+
+![Open source & self-hostable](assets/nixopus_dashboard.jpeg)
 
 ---
 

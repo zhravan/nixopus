@@ -92,9 +92,7 @@ To self-host from this repo on a VPS:
 See **[Self-hosting: Installation](https://docs.nixopus.ai/self-hosting/installation)** for full setup options and configuration.
 
 > [!IMPORTANT]
-> Star us, you’ll receive all release notifications from GitHub without any delay.
-
-[![Star](assets/star.png)](https://github.com/raghavyuva/nixopus)
+> Star & Watch, you'll receive all release notifications from GitHub without any delay.
 
 
 ---

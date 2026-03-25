@@ -62,9 +62,9 @@ Nixopus is the deployment platform where an AI agent handles your entire deploy 
 | :------------------------------------------ | :----------------------------------------------------------------------------- |
 | [![][discord-shield-badge]][discord-link]    | Join our Discord community! Connect with developers and other Nixopus users.   |
 
-> \[!IMPORTANT]
+> [!IMPORTANT]
 >
-> **Star Us**, You will receive all release notifications from GitHub without any delay \~ ⭐️
+> **Star Us**, You will receive all release notifications from GitHub without any delay ~ ⭐️
 
 ### How It Works
 
@@ -160,7 +160,7 @@ Beyond these features, Nixopus also includes:
 
 ---
 
-> \[!NOTE]
+> [!NOTE]
 >
 > You can find our upcoming [Roadmap][github-roadmap-link] plans in the Discussions section.
 
@@ -174,9 +174,9 @@ Beyond these features, Nixopus also includes:
 
 See Nixopus in action — from deploying apps to day-to-day operations on your infrastructure.
 
-<video src="https://nixopus.ai/videos/nixopus-demo-landscape.mp4" width="180"/>
+<video src="https://nixopus.ai/videos/nixopus-demo-landscape.mp4" width="180"></video>
 
-> \[!TIP]
+> [!TIP]
 >
 > You can also deploy from VS Code or Cursor using the [editor extension][docs-extension] — open the chat and say "deploy this project."
 
@@ -190,7 +190,7 @@ See Nixopus in action — from deploying apps to day-to-day operations on your i
 
 Run the full Nixopus stack on a machine you control.
 
-> \[!TIP]
+> [!TIP]
 >
 > Learn more in the [Self-Hosting Installation Guide][docs-installation].
 
@@ -221,7 +221,7 @@ All parameters are optional. Pass them as environment variables before the insta
 | `CADDY_HTTPS_PORT`   | No       | HTTPS port                   | `443`                  |
 | `NIXOPUS_HOME`       | No       | Installation directory       | `/opt/nixopus`         |
 
-> \[!NOTE]
+> [!NOTE]
 >
 > The complete list of environment variables can be found in the [Configuration Guide][docs-configuration].
 
@@ -238,7 +238,7 @@ All parameters are optional. Pass them as environment variables before the insta
 | Access       | Root (the installer must run as root)                                         |
 | Docker       | Installed automatically if not present (Docker Engine + Compose V2)           |
 
-> \[!NOTE]
+> [!NOTE]
 >
 > Use a fresh, dedicated VPS — not a machine already running other production services. The first user to sign up becomes the admin. After that, registration is closed — you invite users manually.
 
@@ -252,7 +252,7 @@ All parameters are optional. Pass them as environment variables before the insta
 
 Contributions of all types are more than welcome; if you are interested in contributing code, feel free to check out our GitHub [Issues][github-issues-link] to get stuck in to show us what you're made of.
 
-> \[!TIP]
+> [!TIP]
 >
 > We welcome all contributions that help make Nixopus better. Whether it's bug fixes, new features, documentation, or feedback — every contribution counts.
 

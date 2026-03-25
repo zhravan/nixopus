@@ -2,8 +2,8 @@
 
 ![][image-overview]
 
-An open-source, AI-powered deployment platform that deploys, monitors, and fixes your apps — autonomously.<br/>
-Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to go live in under minutes.
+An open-source, AI-powered deployment platform that deploys, monitors, and fixes your apps, autonomously.<br/>
+Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to go live in minutes.
 
 <p align="center">
   <a href="https://nixopus.com"><b>Website</b></a> •
@@ -56,7 +56,7 @@ Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to g
 
 ## Getting Started & Join Our Community
 
-Nixopus is the deployment platform where an AI agent handles your entire deploy lifecycle — from analyzing your codebase and generating configs to shipping your app and fixing failures. Connect your repo, tell the agent to deploy, and go live. Learn more in the [introduction][docs-introduction] or jump to the [quickstart][docs-quickstart].
+Nixopus is the deployment platform where an AI agent handles your entire deploy lifecycle, from analyzing your codebase and generating configs to shipping your app and fixing failures. Connect your repo, tell the agent to deploy, and go live. Learn more in the [introduction][docs-introduction] or jump to the [quickstart][docs-quickstart].
 
 | [![][go-live-shield-badge]][dashboard-link] | No installation required! Sign up and deploy your first app on Nixopus Cloud.  |
 | :------------------------------------------ | :----------------------------------------------------------------------------- |
@@ -68,10 +68,10 @@ Nixopus is the deployment platform where an AI agent handles your entire deploy 
 
 ### How It Works
 
-1. **Connect your repo** — [link your GitHub account][docs-github-integration] and select a repository.
-2. **Tell the agent to deploy** — from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying], the agent analyzes your codebase, generates the right config, and deploys.
-3. **Go live** — your app gets a URL with HTTPS. Automatic SSL, routing, and domain management.
-4. **Agent keeps watching** *(in development)* — if something fails, the agent reads the logs, creates a PR with a fix, and redeploys.
+1. **Connect your repo** - [link your GitHub account][docs-github-integration] and select a repository.
+2. **Tell the agent to deploy** - from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying], the agent analyzes your codebase, generates the right config, and deploys.
+3. **Go live** - your app gets a URL with HTTPS. Automatic SSL, routing, and domain management.
+4. **Agent keeps watching** *(in development)* - if something fails, the agent reads the logs, creates a PR with a fix, and redeploys.
 
 <div align="right">
 
@@ -81,15 +81,13 @@ Nixopus is the deployment platform where an AI agent handles your entire deploy 
 
 ## Features
 
-Nixopus is a deployment platform where an AI agent handles your entire deploy lifecycle. You push code, the agent builds, deploys, monitors, and fixes — no Dockerfiles to wrangle, no CI pipelines to wire, no servers to babysit.
-
 ![][image-feat-ai-deploy]
 
 ### [AI-Powered Deployment][docs-introduction]
 
-**The agent generates configs, deploys, and fixes failures — autonomously.**
+**The agent generates configs, deploys, and fixes failures. Autonomously.**
 
-Push your code. The agent analyzes your codebase, generates the right build configuration, deploys your app, and if something breaks, it reads the logs, identifies the root cause, creates a fix PR, and redeploys. No more context-switching between logs, external AI tools, and your terminal.
+On other platforms, a failed deployment means reading logs, copying the error to an AI tool, getting a fix, pushing, redeploying. Repeat. Nixopus closes that loop. The agent detects the failure, diagnoses it, raises a PR with the fix, and redeploys without you.
 
 [![][back-to-top]](#readme-top)
 
@@ -97,9 +95,9 @@ Push your code. The agent analyzes your codebase, generates the right build conf
 
 ### [Everything Through Chat][docs-ai-chat]
 
-**Deploy, add domains, check logs, roll back, troubleshoot — one conversational interface.**
+**Deploy, add domains, check logs, roll back, troubleshoot. One conversational interface.**
 
-No more context-switching between dashboards, terminals, and external tools. Talk to the agent in natural language. Tag resources with `@App`, `@Container`, or `@Domain` to give it focus. From the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying] — one interface for everything.
+Talk to the agent in natural language from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying]. Tag resources with `@App`, `@Container`, or `@Domain` to give it focus.
 
 [![][back-to-top]](#readme-top)
 
@@ -109,7 +107,7 @@ No more context-switching between dashboards, terminals, and external tools. Tal
 
 **Deploy from VS Code or Cursor without opening a browser.**
 
-The [extension][docs-extension] brings an AI-powered agent into your sidebar. It analyzes your codebase, generates configs, and deploys — all through [chat][docs-extension-deploying], right in your editor. No context switch. No browser tab.
+The [extension][docs-extension] puts the same agent in your sidebar. Chat, deploy, and manage your apps without leaving the editor.
 
 [![][back-to-top]](#readme-top)
 
@@ -129,7 +127,7 @@ Connect multiple servers and manage them all from one place. Monitor CPU, RAM, a
 
 **Terminal and containers right in the dashboard.**
 
-SSH into your server, inspect running [containers][docs-containers], stream logs, and debug — all from the browser. No separate [terminal][docs-terminal] or jump host required. Full access to your infrastructure when you need it.
+SSH into your server, inspect running [containers][docs-containers], stream logs, and debug from the browser. No separate [terminal][docs-terminal] or jump host required.
 
 [![][back-to-top]](#readme-top)
 
@@ -137,9 +135,9 @@ SSH into your server, inspect running [containers][docs-containers], stream logs
 
 ### [Framework Agnostic][docs-introduction]
 
-**Next.js, Django, Rails, Go, FastAPI, Compose stacks — anything that runs in a container.**
+**Next.js, Django, Rails, Go, FastAPI, Compose stacks. Anything that runs in a container.**
 
-The agent detects your framework, generates the right Dockerfile or Compose configuration, and [deploys][docs-deploying-apps]. If it fits a container image, it ships on Nixopus.
+If it fits a container image, it [ships on Nixopus][docs-deploying-apps]. The agent detects your stack and generates the right build configuration automatically.
 
 <div align="right">
 
@@ -151,10 +149,10 @@ The agent detects your framework, generates the right Dockerfile or Compose conf
 
 Beyond these features, Nixopus also includes:
 
-- [x] **Auto HTTPS** — Every deployment gets TLS via Caddy. SSL provisioned and renewed automatically via Let's Encrypt. See [configuration][docs-configuration].
-- [x] **[Custom Domains][docs-domains]** — Point your domain at Nixopus with automatic DNS verification and SSL. Tell the agent "add domain app.mysite.com."
-- [x] **[Instant Rollbacks][docs-deployments]** — Roll back to any previous deployment. Previous images are retained, so rollbacks don't require a full rebuild.
-- [x] **[Open Source & Self-Hostable][docs-installation]** — Your code, your data, your infrastructure. Self-hosting is free forever with full feature parity. No lock-in.
+- [x] **Auto HTTPS**: Every deployment gets TLS via Caddy. SSL provisioned and renewed automatically via Let's Encrypt. See [configuration][docs-configuration].
+- [x] **[Custom Domains][docs-domains]**: Point your domain at Nixopus with automatic DNS verification and SSL. Tell the agent "add domain app.mysite.com."
+- [x] **[Instant Rollbacks][docs-deployments]**: Roll back to any previous deployment. Previous images are retained, so rollbacks don't require a full rebuild.
+- [x] **[Open Source & Self-Hostable][docs-installation]**: Your code, your data, your infrastructure. Self-hosting is free forever with full feature parity. No lock-in.
 
 > More features are being added as Nixopus evolves.
 
@@ -172,13 +170,9 @@ Beyond these features, Nixopus also includes:
 
 ## Demo
 
-See Nixopus in action — from deploying apps to day-to-day operations on your infrastructure.
+See Nixopus in action, from deploying apps to day-to-day operations on your infrastructure.
 
 <video src="https://nixopus.ai/videos/nixopus-demo-landscape.mp4" width="180"></video>
-
-> [!TIP]
->
-> You can also deploy from VS Code or Cursor using the [editor extension][docs-extension] — open the chat and say "deploy this project."
 
 <div align="right">
 
@@ -214,7 +208,7 @@ All parameters are optional. Pass them as environment variables before the insta
 
 | Environment Variable | Required | Description                  | Default                |
 | -------------------- | -------- | ---------------------------- | ---------------------- |
-| `DOMAIN`             | No       | Domain for automatic HTTPS   | *(empty — IP mode)*   |
+| `DOMAIN`             | No       | Domain for automatic HTTPS   | *(empty, IP mode)*   |
 | `HOST_IP`            | No       | Public IP of the machine     | *(auto-detected)*      |
 | `ADMIN_EMAIL`        | No       | Admin account email          | *(empty)*              |
 | `CADDY_HTTP_PORT`    | No       | HTTP port                    | `80`                   |
@@ -240,7 +234,7 @@ All parameters are optional. Pass them as environment variables before the insta
 
 > [!NOTE]
 >
-> Use a fresh, dedicated VPS — not a machine already running other production services. The first user to sign up becomes the admin. After that, registration is closed — you invite users manually.
+> Use a fresh, dedicated VPS, not a machine already running other production services. The first user to sign up becomes the admin. After that, registration is closed and you invite users manually.
 
 <div align="right">
 
@@ -254,7 +248,7 @@ Contributions of all types are more than welcome; if you are interested in contr
 
 > [!TIP]
 >
-> We welcome all contributions that help make Nixopus better. Whether it's bug fixes, new features, documentation, or feedback — every contribution counts.
+> We welcome all contributions that help make Nixopus better. Whether it's bug fixes, new features, documentation, or feedback, every contribution counts.
 
 <a href="https://github.com/raghavyuva/nixopus/graphs/contributors" target="_blank">
   <table>
@@ -296,13 +290,11 @@ This project is [FSL-1.1-ALv2](./LICENSE.md) licensed.
 <!-- LINK GROUP -->
 
 [back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square
-[blog-link]: https://nixopus.com/blog
 [dashboard-link]: https://dashboard.nixopus.com
 [discord-link]: https://discord.gg/skdcq39Wpv
 [discord-shield]: https://img.shields.io/badge/Discord-Join-5865F2?labelColor=black&logo=discord&logoColor=white&style=flat-square
 [discord-shield-badge]: https://img.shields.io/badge/Discord-Join-5865F2?labelColor=black&logo=discord&logoColor=white&style=for-the-badge
 [docs-ai-chat]: https://docs.nixopus.com/guides/ai-chat
-[docs-changelog]: https://docs.nixopus.com/changelog
 [docs-configuration]: https://docs.nixopus.com/self-hosting/configuration
 [docs-containers]: https://docs.nixopus.com/guides/containers
 [docs-deploying-apps]: https://docs.nixopus.com/guides/deploying-apps
@@ -316,7 +308,6 @@ This project is [FSL-1.1-ALv2](./LICENSE.md) licensed.
 [docs-installation]: https://docs.nixopus.com/self-hosting/installation
 [docs-introduction]: https://docs.nixopus.com/getting-started/introduction
 [docs-license]: https://docs.nixopus.com/license
-[docs-link]: https://docs.nixopus.com
 [docs-quickstart]: https://docs.nixopus.com/getting-started/quickstart
 [docs-terminal]: https://docs.nixopus.com/guides/terminal
 [github-forks-link]: https://github.com/raghavyuva/nixopus/network/members

@@ -1,80 +1,251 @@
 <div align="center">
-<a href="https://nixopus.com"><img width="1800" height="520" alt="Heading(4)" src="https://github.com/user-attachments/assets/e103a9df-7abf-4f78-b75a-221331231247" /></a>
-</div>
 
-<p align="center">
- Open Source alternative to vercel, heroku, netlify with Terminal integration, and Self Hosting capabilities.
-</p>
+<a href="https://nixopus.com"><img width="1800" height="520" alt="Nixopus" src="https://github.com/user-attachments/assets/e103a9df-7abf-4f78-b75a-221331231247" /></a>
+
+<h5 align="center">
+  Open Source alternative to Vercel, Heroku, Netlify with Terminal integration, and Self Hosting capabilities
+</h5>
 
 <p align="center">
   <a href="https://nixopus.com"><b>Website</b></a> •
   <a href="https://docs.nixopus.com"><b>Documentation</b></a> •
   <a href="https://nixopus.com/blog"><b>Blog</b></a> •
-  <a href="https://discord.gg/skdcq39Wpv"><b>Discord</b></a> •
+  <a href="https://discord.gg/skdcq39Wpv"><b>Join Discord</b></a> •
   <a href="https://github.com/raghavyuva/nixopus/discussions/262"><b>Roadmap</b></a>
 </p>
 
-<br>
 <p align="center">
- <a href="https://trendshift.io/repositories/15336" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15336" alt="raghavyuva/nixopus | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+  <a href="https://github.com/raghavyuva/nixopus/stargazers"><img src="https://img.shields.io/github/stars/raghavyuva/nixopus?style=flat-square" alt="GitHub stars" /></a>
+  <a href="https://github.com/raghavyuva/nixopus/network/members"><img src="https://img.shields.io/github/forks/raghavyuva/nixopus?style=flat-square" alt="GitHub forks" /></a>
+  <a href="https://github.com/raghavyuva/nixopus/issues"><img src="https://img.shields.io/github/issues/raghavyuva/nixopus?style=flat-square" alt="GitHub issues" /></a>
+  <a href="https://github.com/raghavyuva/nixopus/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/license-FSL--1.1--ALv2-blue?style=flat-square" alt="License" /></a>
+  <br>
+  <a href="https://trendshift.io/repositories/15336" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15336" alt="Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
-<br>
 
-<img width="1210" height="764" alt="image" src="assets/nixopus_dashboard.jpeg" />
+</div>
 
-> ⚠️ **Important Note**: Nixopus is currently in alpha/pre-release stage and is not yet ready for production use. While you're welcome to try it out, we recommend waiting for the beta or stable release before using it in production environments. The platform is still undergoing testing and development.
+---
 
-# Features
+<details>
+<summary><h2>Table of Contents</h2></summary>
 
-- **Deploy apps with one click.** No config files, no SSH commands.
-- **Manage files in your browser.** Drag, drop, edit. Like any file manager.
-- **Built-in terminal.** Access your server without leaving the page.
-- **Real-time monitoring.** See CPU, RAM, disk usage at a glance.
-- **Auto SSL certificates.** Your domains get HTTPS automatically.
-- **GitHub integration.** Push code → auto deploy.
-- **Proxy management.** Route traffic with Caddy reverse proxy.
-- **Smart alerts.** Get notified via Slack, Discord, or email when something's wrong.
+- [About the Name](#about-the-name)
+- [Getting Started](#getting-started)
+  - [Quick Start](#quick-start)
+- [Features](#features)
+  - [Extensions](#extensions)
+  - [Hosting Projects](#hosting-projects)
+  - [Terminal](#terminal)
+  - [File Manager](#file-manager)
+  - [Additional Features](#additional-features)
+- [Demo](#demo)
+  - [What you’ll see](#what-youll-see)
+  - [Screenshots (placeholders)](#screenshots-placeholders)
+  - [Video (placeholder)](#video-placeholder)
+  - [Live Preview (optional)](#live-preview-optional)
+- [Installation](#installation)
+  - [Quick Install](#quick-install)
+  - [Custom Installation](#custom-installation)
+  - [Installation Options](#installation-options)
+- [🔗 Links](#-links)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Installation & Quick Start
+</details>
 
-This section will help you set up Nixopus on your VPS quickly.
+---
 
-> 💡 **Quick Tip**: Use our [**Install Command Generator**](https://docs.nixopus.com/install/#generate-your-installation-command) to customize your installation command with a visual interface!
+<a id="about-the-name"></a>
+## About the Name
 
-### Install Nixopus
+Nixopus is derived from the combination of "octopus" (representing flexibility and multi-tasking) and the Linux penguin mascot (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.
 
-**To get started without domain names, and to try out over ip:port deployment:**
+---
+
+<a id="getting-started"></a>
+## Getting Started
+
+> **Important Note**: Nixopus is currently in **alpha/pre-release** stage and is not yet ready for production use. While you're welcome to try it out, we recommend waiting for the beta or stable release before using it in production environments.
+
+Nixopus transforms your VPS into a complete application hosting environment. Deploy applications directly from GitHub, manage server files through a browser-based interface, and execute commands via an integrated terminal—all without leaving the dashboard.
+
+### Quick Start
+
+1. **Install Nixopus** on your VPS:
+   ```bash
+   curl -sSL https://install.nixopus.com | bash
+   ```
+
+2. **Access the Dashboard** at `http://your-server-ip` or your configured domain
+
+3. **Deploy Your First Project** by connecting your GitHub repository
+
+For detailed installation instructions, visit our [Installation Guide](https://docs.nixopus.com/install/).
+
+> [!IMPORTANT]
+> Star us, you’ll receive all release notifications from GitHub without any delay.
+
+[![Star](assets/star.png)](https://github.com/raghavyuva/nixopus)
+
+
+---
+
+
+<a id="features"></a>
+## Features
+
+Nixopus transforms your VPS into a complete application hosting environment. Deploy applications directly from GitHub, manage server files through a browser based interface, and execute commands via an integrated terminal all without leaving the dashboard.
+
+<a id="extensions"></a>
+### [Extensions](https://docs.nixopus.com/extensions)
+
+Automate server tasks through a library of pre-built configurations. Extensions allow you to extend Nixopus functionality with modular components that integrate seamlessly with your workflow.
+
+**Key Capabilities:**
+- Pre-built extension library
+- Custom extension support
+- Easy integration with existing deployments
+- Automated server task management
+
+
+![Extensions](assets/nixopus_dashboard.jpeg)
+
+<a id="hosting-projects"></a>
+### [Hosting Projects](https://docs.nixopus.com/self-host)
+
+Deploy applications directly from GitHub repositories with automatic builds and zero configuration files. Nixopus handles the entire deployment pipeline from code to production.
+
+**Key Capabilities:**
+- One-click deployments from GitHub
+- Automatic builds and zero configuration
+- CI/CD integration with automatic deployments on push
+- Docker support for Compose, Dockerfiles, and static sites
+- Automatic SSL certificate generation
+- Reverse proxy routing with built-in Caddy
+- Health checks and monitoring
+- Environment variable management
+- Custom domain configuration
+
+![Hosting Projects](assets/nixopus_dashboard.jpeg)
+
+<a id="terminal"></a>
+### [Terminal](https://docs.nixopus.com/terminal)
+
+Execute server commands through a secure, web-based terminal with SSH integration. Access your server directly from the browser without additional tools.
+
+**Key Capabilities:**
+- Web-based terminal interface
+- Full SSH integration
+- Secure command execution
+- Real-time command output
+- Multi-session support
+
+![Terminal](assets/nixopus_dashboard.jpeg)
+
+<a id="file-manager"></a>
+### [File Manager](https://docs.nixopus.com/file-manager)
+
+Browse, edit, upload, and organize files using drag-and-drop operations. Manage your server files through an intuitive visual interface.
+
+**Key Capabilities:**
+- Visual file browser
+- Drag-and-drop file uploads
+- In-browser file editing
+- File organization and management
+- Multi-file operations
+
+![File Manager](assets/nixopus_dashboard.jpeg)
+
+### Additional Features
+
+- **Real-time Monitoring** - Track CPU, RAM, and disk usage with live system statistics
+- **Smart Notifications** - Receive deployment alerts via Slack, Discord, or email
+- **Authentication** - Built-in user management with SuperTokens integration
+- **Domain Management** - Configure custom domains with automatic SSL certificate generation
+
+---
+
+<a id="demo"></a>
+## Demo
+
+See Nixopus in action, from deployments to day-to-day operations on your VPS.
+
+### What you’ll see
+
+- **Deploy from GitHub**: connect a repo and ship updates with a streamlined flow
+- **Operate from the dashboard**: manage apps, domains, env vars, and deployments in one place
+- **Built-in tools**: use the web terminal + file manager without leaving your browser
+
+### Screenshots (placeholders)
+
+> Replace the image paths below when you’re ready (screenshots / gifs / videos will be added later).
+
+<div align="center">
+
+| Dashboard | Hosting Projects |
+| --- | --- |
+| ![Dashboard Overview](assets/nixopus_dashboard.jpeg) | ![Hosting Projects](assets/nixopus_dashboard.jpeg) |
+| *Overview of deployments, health, and activity* | *Connect a repo, deploy, and manage releases* |
+
+| Terminal | File Manager |
+| --- | --- |
+| ![Terminal](assets/nixopus_dashboard.jpeg) | ![File Manager](assets/nixopus_dashboard.jpeg) |
+| *Run commands securely from the browser* | *Upload, edit, and organize server files visually* |
+
+</div>
+
+### Video (placeholder)
+
+- **Demo video**: (add YouTube link / MP4 later)
+
+### Live Preview (optional)
+
+- (add hosted demo URL later)
+
+---
+
+<a id="installation"></a>
+## Installation
+
+### Quick Install
+
+Install Nixopus on your VPS with a single command:
 
 ```bash
-sudo curl -sSL https://install.nixopus.com | bash
+curl -sSL https://install.nixopus.com | bash
 ```
 
-**For custom ip setups:**
+### Custom Installation
+
+**For custom IP setups:**
 
 ```bash
-sudo curl -sSL https://install.nixopus.com | bash -s -- --host-ip 10.0.0.154
+curl -sSL https://install.nixopus.com | bash -s -- --host-ip 10.0.0.154
 ```
 
-**To install only the CLI tool without running `nixopus install`:**
+**To install only the CLI tool:**
 
 ```bash
-sudo curl -sSL https://install.nixopus.com | bash -s -- --skip-nixopus-install
+curl -sSL https://install.nixopus.com | bash -s -- --skip-nixopus-install
 ```
 
-#### Optional Parameters
+### Installation Options
 
-You can customize your installation by providing the following optional parameters:
+You can customize your installation with the following optional parameters:
 
-- `--api-domain` or `-ad`: Specify the domain where the Nixopus API will be accessible (e.g., `nixopusapi.example.tld`)
-- `--view-domain` or `-vd`: Specify the domain where the Nixopus app will be accessible (e.g., `nixopus.example.tld`)
-- `--host-ip` or `-ip`: Specify the IP address of the server to use when no domains are provided (e.g., `10.0.0.154` or `192.168.1.100`). If not provided, the public IP will be automatically detected.
-- `--verbose` or `-v`: Show more details while installing
-- `--timeout` or `-t`: Set timeout for each step (default: 300 seconds)
-- `--force` or `-f`: Replace files if they already exist
-- `--dry-run` or `-d`: See what would happen without making changes
-- `--config-file` or `-c`: Path to custom config file (defaults to built-in [`config.prod.yaml`](https://raw.githubusercontent.com/raghavyuva/nixopus/refs/heads/master/helpers/config.prod.yaml))
+| Parameter | Short | Description | Example |
+|-----------|-------|-------------|---------|
+| `--api-domain` | `-ad` | Domain for Nixopus API | `nixopusapi.example.tld` |
+| `--view-domain` | `-vd` | Domain for Nixopus dashboard | `nixopus.example.tld` |
+| `--host-ip` | `-ip` | IP address of the server | `10.0.0.154` |
+| `--verbose` | `-v` | Show detailed installation logs | - |
+| `--timeout` | `-t` | Timeout for each step (default: 300s) | `600` |
+| `--force` | `-f` | Replace existing files | - |
+| `--dry-run` | `-d` | Preview changes without applying | - |
+| `--config-file` | `-c` | Path to custom config file | `/path/to/config.yaml` |
 
-Example with optional parameters:
+**Example with custom domains:**
 
 ```bash
 sudo nixopus install \
@@ -84,25 +255,51 @@ sudo nixopus install \
   --timeout 600
 ```
 
-Example for custom ip setup:
-
-```bash
-sudo nixopus install \
-  --host-ip 10.0.0.154 \
-  --verbose
-```
-
-> [!NOTE]  
+> [!NOTE]
 > Running `nixopus install` requires root privileges (sudo) to install system dependencies like Docker. If you encounter permission errors, make sure to run the command with `sudo`.
 
-You can also install the CLI and run `nixopus install` with options in a single command, refer [installation documentation](https://docs.nixopus.com/install/#installation-options) for more details on options
+For more detailed installation instructions, visit our [Installation Guide](https://docs.nixopus.com/install/).
 
-## About the Name
+---
 
-Nixopus is derived from the combination of "octopus" and the Linux penguin (Tux). While the name might suggest a connection to [NixOS](https://nixos.org/), Nixopus is an independent project with no direct relation to NixOS or its ecosystem.
+<a id="links"></a>
+## 🔗 Links
 
-## Contributors
+- **Website**: [https://nixopus.com](https://nixopus.com)
+- **Documentation**: [https://docs.nixopus.com](https://docs.nixopus.com)
+- **Discord Community**: [https://discord.gg/skdcq39Wpv](https://discord.gg/skdcq39Wpv)
+- **Blog**: [https://nixopus.com/blog](https://nixopus.com/blog)
+- **Roadmap**: [GitHub Discussions](https://github.com/raghavyuva/nixopus/discussions/262)
+- **Report Issues**: [GitHub Issues](https://github.com/raghavyuva/nixopus/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/raghavyuva/nixopus/discussions)
+
+---
+
+<a id="contributing"></a>
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**, feel free to check out our [Github Issues](https://github.com/raghavyuva/nixopus/issues)
+
+Thank you to all the contributors who help make Nixopus better!
 
 <a href="https://github.com/raghavyuva/nixopus/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=raghavyuva/nixopus" alt="Nixopus project contributors" />
 </a>
+
+---
+
+<a id="license"></a>
+## License
+
+Distributed under the FSL-1.1-ALv2 License. Visit [LICENSE.md](./LICENSE.md) for more information.
+
+---
+
+
+<div align="center">
+
+**Made with ❤️ by the Nixopus community**
+
+[Back to Top](#table-of-contents)
+
+</div>

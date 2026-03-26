@@ -2,7 +2,7 @@
 
 ![][image-overview]
 
-An open-source, AI-powered deployment platform that deploys, monitors, and fixes your apps, autonomously.<br/>
+An open-source, AI-powered platform that deploys, monitors, and fixes your apps, autonomously.<br/>
 Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to go live in minutes.
 
 <p align="center">
@@ -33,8 +33,8 @@ Self-host on your own infrastructure or use [Nixopus Cloud][dashboard-link] to g
 - [Getting Started \& Join Our Community](#getting-started--join-our-community)
   - [How It Works](#how-it-works)
 - [Features](#features)
-  - [AI-Powered Deployment](#ai-powered-deployment)
-  - [Everything Through Chat](#everything-through-chat)
+  - [AI-Powered Lifecycle](#ai-powered-lifecycle)
+  - [Chat Interface](#chat-interface)
   - [Editor Extension](#editor-extension)
   - [Multi-Server Orchestration](#multi-server-orchestration)
   - [Full Machine Access](#full-machine-access)
@@ -81,50 +81,39 @@ Nixopus is the deployment platform where an AI agent handles your entire deploy 
 
 ## Features
 
+
+### [AI-Powered Lifecycle][docs-introduction]
 ![][image-feat-ai-deploy]
-
-### [AI-Powered Deployment][docs-introduction]
-
 The agent generates configs, deploys, and fixes failures, autonomously. On other platforms, a failed deployment means reading logs, copying the error to an AI tool, getting a fix, pushing, redeploying. Repeat. Nixopus closes that loop. The agent detects the failure, diagnoses it, raises a PR with the fix, and redeploys without you.
 
 [![][back-to-top]](#readme-top)
 
+### [Chat Interface][docs-ai-chat]
 ![][image-feat-chat]
-
-### [Everything Through Chat][docs-ai-chat]
-
 Deploy, add domains, check logs, roll back, troubleshoot. One conversational interface. Talk to the agent in natural language from the [dashboard][docs-ai-chat] or your [editor][docs-extension-deploying]. Tag resources with `@App`, `@Container`, or `@Domain` to give it focus.
 
 [![][back-to-top]](#readme-top)
 
-![][image-feat-editor]
-
 ### [Editor Extension][docs-extension]
-
+![][image-feat-editor]
 Deploy from VS Code or Cursor without opening a browser. The [extension][docs-extension] puts the same agent in your sidebar. Chat, deploy, and manage your apps without leaving the editor.
 
 [![][back-to-top]](#readme-top)
 
-![][image-feat-multi-server]
-
 ### [Multi-Server Orchestration][docs-introduction]
-
+![][image-feat-multi-server]
 One dashboard. Every server. Connect multiple servers and manage them all from one place. Monitor CPU, RAM, and running apps across your entire fleet. Multi-machine deployments, load balancing, and automated scaling are on the roadmap.
 
 [![][back-to-top]](#readme-top)
 
-![][image-feat-terminal]
-
 ### [Full Machine Access][docs-terminal]
-
+![][image-feat-terminal]
 Terminal and containers right in the dashboard. SSH into your server, inspect running [containers][docs-containers], stream logs, and debug from the browser. No separate [terminal][docs-terminal] or jump host required.
 
 [![][back-to-top]](#readme-top)
 
-![][image-feat-framework]
-
 ### [Framework Agnostic][docs-introduction]
-
+![][image-feat-framework]
 Next.js, Django, Rails, Go, FastAPI, Compose stacks. Anything that runs in a container. If it fits a container image, it [ships on Nixopus][docs-deploying-apps]. The agent detects your stack and generates the right build configuration automatically.
 
 <div align="right">
@@ -137,7 +126,7 @@ Next.js, Django, Rails, Go, FastAPI, Compose stacks. Anything that runs in a con
 
 Beyond these features, Nixopus also includes:
 
-- [x] **Auto HTTPS**: Every deployment gets TLS via Caddy. SSL provisioned and renewed automatically via Let's Encrypt. See [configuration][docs-configuration].
+- [x] **Auto TLS**: Every deployment gets TLS via Caddy. SSL provisioned and renewed automatically via Let's Encrypt. See [configuration][docs-configuration].
 - [x] **[Custom Domains][docs-domains]**: Point your domain at Nixopus with automatic DNS verification and SSL. Tell the agent "add domain app.mysite.com."
 - [x] **[Instant Rollbacks][docs-deployments]**: Roll back to any previous deployment. Previous images are retained, so rollbacks don't require a full rebuild.
 - [x] **[Open Source & Self-Hostable][docs-installation]**: Your code, your data, your infrastructure. Self-hosting is free forever with full feature parity. No lock-in.

@@ -49,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.skip-arm64 && '[{"platform":"linux/amd64","runner":"ubuntu-latest"}]' || '[{"platform":"linux/amd64","runner":"ubuntu-latest"},{"platform":"linux/arm64","runner":"ubuntu-24.04-arm64"}]') }}
+        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.skip-arm64 && '[{"platform":"linux/amd64","runner":"ubuntu-latest"}]' || '[{"platform":"linux/amd64","runner":"ubuntu-latest"},{"platform":"linux/arm64","runner":"ubuntu-24.04-arm"}]') }}
 
     steps:
       - name: Prepare platform pair
@@ -125,7 +125,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.skip-arm64 && '[{"platform":"linux/amd64","runner":"ubuntu-latest"}]' || '[{"platform":"linux/amd64","runner":"ubuntu-latest"},{"platform":"linux/arm64","runner":"ubuntu-24.04-arm64"}]') }}
+        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.skip-arm64 && '[{"platform":"linux/amd64","runner":"ubuntu-latest"}]' || '[{"platform":"linux/amd64","runner":"ubuntu-latest"},{"platform":"linux/arm64","runner":"ubuntu-24.04-arm"}]') }}
 
     steps:
       - name: Prepare platform pair

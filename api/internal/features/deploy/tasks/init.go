@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -99,7 +100,12 @@ func (t *TaskService) SetupCreateDeploymentQueue() {
 				defer t.DeregisterCancellation(deploymentID)
 
 				t.Logger.Log(logger.Info, "starting update deployment", data.CorrelationID)
-				return t.HandleUpdateDeployment(ctx, data)
+				if err := t.HandleUpdateDeployment(ctx, data); err != nil {
+					t.Logger.Log(logger.Error, "update deployment failed: "+err.Error(), data.CorrelationID)
+					return err
+				}
+				t.Logger.Log(logger.Info, "update deployment completed", data.CorrelationID)
+				return nil
 			},
 		})
 
@@ -125,7 +131,12 @@ func (t *TaskService) SetupCreateDeploymentQueue() {
 				defer t.DeregisterCancellation(deploymentID)
 
 				t.Logger.Log(logger.Info, "starting redeploy", data.CorrelationID)
-				return t.HandleReDeploy(ctx, data)
+				if err := t.HandleReDeploy(ctx, data); err != nil {
+					t.Logger.Log(logger.Error, "redeploy failed: "+err.Error(), data.CorrelationID)
+					return err
+				}
+				t.Logger.Log(logger.Info, "redeploy completed", data.CorrelationID)
+				return nil
 			},
 		})
 
@@ -145,7 +156,12 @@ func (t *TaskService) SetupCreateDeploymentQueue() {
 			RetryLimit: 1,
 			Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
 				t.Logger.Log(logger.Info, "starting rollback", data.CorrelationID)
-				return t.HandleRollback(ctx, data)
+				if err := t.HandleRollback(ctx, data); err != nil {
+					t.Logger.Log(logger.Error, "rollback failed: "+err.Error(), data.CorrelationID)
+					return err
+				}
+				t.Logger.Log(logger.Info, "rollback completed", data.CorrelationID)
+				return nil
 			},
 		})
 
@@ -165,7 +181,12 @@ func (t *TaskService) SetupCreateDeploymentQueue() {
 			RetryLimit: 1,
 			Handler: func(ctx context.Context, data shared_types.TaskPayload) error {
 				t.Logger.Log(logger.Info, "starting restart", data.CorrelationID)
-				return t.HandleRestart(ctx, data)
+				if err := t.HandleRestart(ctx, data); err != nil {
+					t.Logger.Log(logger.Error, "restart failed: "+err.Error(), data.CorrelationID)
+					return err
+				}
+				t.Logger.Log(logger.Info, "restart completed", data.CorrelationID)
+				return nil
 			},
 		})
 	})
@@ -176,37 +197,48 @@ func (t *TaskService) StartConsumers(ctx context.Context) error {
 }
 
 func (t *TaskService) BuildPack(ctx context.Context, d shared_types.TaskPayload) error {
-	var err error
+	allServers, err := t.Storage.GetApplicationServers(d.Application.ID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve application servers: %w", err)
+	}
+	if len(allServers) == 0 {
+		return t.buildPackSingle(ctx, d)
+	}
+	servers := filterServers(allServers, d.TargetServerIDs)
+	if len(servers) == 0 && len(d.TargetServerIDs) > 0 {
+		return fmt.Errorf("none of the requested target servers are assigned to this application")
+	}
+	if len(servers) == 0 {
+		servers = allServers
+	}
+	if len(servers) == 1 {
+		return t.buildPackSingle(ctx, d)
+	}
+	return t.fanOut(ctx, d, servers, t.buildPackSingle)
+}
+
+// buildPackSingle runs the build for the current context's server (or org default if no ServerIDKey).
+func (t *TaskService) buildPackSingle(ctx context.Context, d shared_types.TaskPayload) error {
 	switch d.Application.BuildPack {
 	case shared_types.DockerFile:
-		err = t.PrerunCommands(ctx, d)
-		if err != nil {
+		if err := t.PrerunCommands(ctx, d); err != nil {
 			return err
 		}
 		if err := checkCancelled(ctx); err != nil {
 			return err
 		}
-		err = t.HandleCreateDockerfileDeployment(ctx, d)
-		if err != nil {
+		if err := t.HandleCreateDockerfileDeployment(ctx, d); err != nil {
 			return err
 		}
 		if err := checkCancelled(ctx); err != nil {
 			return err
 		}
-		err = t.PostRunCommands(ctx, d)
-		if err != nil {
-			return err
-		}
+		return t.PostRunCommands(ctx, d)
 	case shared_types.DockerCompose:
-		err = t.HandleCreateDockerComposeDeployment(ctx, d)
+		return t.HandleCreateDockerComposeDeployment(ctx, d)
 	case shared_types.Static:
-		err = t.HandleCreateStaticDeployment(ctx, d)
+		return t.HandleCreateStaticDeployment(ctx, d)
 	default:
 		return types.ErrInvalidBuildPack
 	}
-
-	if err != nil {
-		return err
-	}
-	return nil
 }

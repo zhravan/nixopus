@@ -28,6 +28,8 @@ import (
 	healthcheck "github.com/nixopus/nixopus/api/internal/features/healthcheck/controller"
 	"github.com/nixopus/nixopus/api/internal/features/logger"
 	machine_controller "github.com/nixopus/nixopus/api/internal/features/machine/controller"
+	machine_storage "github.com/nixopus/nixopus/api/internal/features/machine/storage"
+	mcpController "github.com/nixopus/nixopus/api/internal/features/mcp/controller"
 	"github.com/nixopus/nixopus/api/internal/features/notification"
 	"github.com/nixopus/nixopus/api/internal/features/notification/channel"
 	notificationController "github.com/nixopus/nixopus/api/internal/features/notification/controller"
@@ -237,6 +239,10 @@ func (router *Router) registerPublicRoutes(server *fuego.Server, apiV1 api.Versi
 	authController := router.createAuthController(dispatcher)
 	authGroup := fuego.Group(server, apiV1.Path+"/auth")
 	router.RegisterAuthRoutes(authGroup, authController)
+
+	mcpPublicCtrl := mcpController.NewMCPController(router.app.Store, router.app.Ctx, router.logger)
+	mcpPublicGroup := fuego.Group(server, apiV1.Path+"/mcp")
+	router.RegisterMCPPublicRoutes(mcpPublicGroup, mcpPublicCtrl)
 }
 
 // registerProtectedRoutes registers routes that require authentication
@@ -355,7 +361,8 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 	})
 	router.RegisterServerRoutes(serverGroup, serverController)
 
-	machineController := machine_controller.NewMachineController(router.app.Store, router.app.Ctx, router.logger)
+	machineTimescaleStore, _ := machine_storage.NewTimescaleStore(router.app.Ctx, config.AppConfig.Timescale.URL)
+	machineController := machine_controller.NewMachineController(router.app.Store, router.app.Ctx, router.logger, machineTimescaleStore)
 	machineGroup := fuego.Group(server, apiV1.Path+"/machine")
 	router.applyMiddleware(machineGroup, MiddlewareConfig{
 		RBAC:         true,
@@ -381,6 +388,16 @@ func (router *Router) registerProtectedRoutes(server *fuego.Server, apiV1 api.Ve
 		ResourceName: "trail",
 	})
 	router.RegisterTrailRoutes(trailGroup, trailController)
+
+	mcpCtrl := mcpController.NewMCPController(router.app.Store, router.app.Ctx, router.logger)
+	mcpGroup := fuego.Group(server, apiV1.Path+"/mcp")
+	router.applyMiddleware(mcpGroup, MiddlewareConfig{
+		RBAC:         true,
+		FeatureFlag:  "mcp",
+		Audit:        true,
+		ResourceName: "mcp",
+	})
+	router.RegisterMCPRoutes(mcpGroup, mcpCtrl)
 }
 
 func (router *Router) createAuthController(dispatcher *notification.Dispatcher) *auth.AuthController {

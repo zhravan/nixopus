@@ -2,6 +2,8 @@ package ssh
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -15,6 +17,7 @@ import (
 	"github.com/nixopus/nixopus/api/internal/config"
 	"github.com/nixopus/nixopus/api/internal/features/logger"
 	"github.com/nixopus/nixopus/api/internal/features/ssh/service"
+	sshstorage "github.com/nixopus/nixopus/api/internal/features/ssh/storage"
 	"github.com/nixopus/nixopus/api/internal/types"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -69,9 +72,13 @@ type SSHManager struct {
 }
 
 var (
-	// orgManagers caches SSHManager instances per organization ID
-	orgManagers   = make(map[string]*SSHManager)
-	orgManagersMu sync.RWMutex
+	// serverManagers caches SSHManager per server (ssh_key.id).
+	// orgToServerIDs is the reverse index: orgID → []serverID for org-level eviction.
+	// No orgDefaultServer cache — default-server lookup always goes to DB (~0.1ms index
+	// scan), which is correct under horizontal scaling and direct DB writes by other services.
+	serverManagers   = make(map[string]*SSHManager)
+	orgToServerIDs   = make(map[string][]string)
+	serverManagersMu sync.RWMutex
 
 	// onInvalidateHooks are called (in order) after an org's SSH manager is
 	// evicted. Downstream packages (docker, SFTP pool, caddy) register hooks
@@ -100,82 +107,182 @@ func fireInvalidateHooks(orgID uuid.UUID) {
 	}
 }
 
-// GetSSHManagerForOrganization returns an SSHManager for a specific organization.
-// Caches managers per organization to avoid repeated database queries.
-// Uses double-checked locking so concurrent callers for the same org don't race.
+// GetSSHManagerForOrganization returns an SSHManager for the org's default server.
+// Always queries the DB for the current default (cheap partial-unique-index scan, ~0.1ms).
+// This is intentionally not cached: it keeps behavior correct across multiple API
+// instances and when other services write SSH keys directly to the database.
+// Signature unchanged — all existing callers continue to work.
 func GetSSHManagerForOrganization(ctx context.Context, orgID uuid.UUID) (*SSHManager, error) {
 	if config.GlobalStore == nil {
 		return nil, fmt.Errorf("global store not initialized, ensure config.Init() has been called")
 	}
 
-	orgIDStr := orgID.String()
-
-	// Fast path: check cache under read lock
-	orgManagersMu.RLock()
-	if manager, exists := orgManagers[orgIDStr]; exists {
-		orgManagersMu.RUnlock()
-		return manager, nil
-	}
-	orgManagersMu.RUnlock()
-
-	// Slow path: acquire write lock and double-check before creating
-	orgManagersMu.Lock()
-	defer orgManagersMu.Unlock()
-
-	if manager, exists := orgManagers[orgIDStr]; exists {
-		return manager, nil
-	}
-
-	sshService := service.NewSSHKeyService(config.GlobalStore, ctx, logger.NewLogger())
-	sshConfig, err := sshService.GetSSHConfigForOrganization(orgID)
+	sshKeyStorage := sshstorage.SSHKeyStorage{DB: config.GlobalStore.DB, Ctx: ctx}
+	defaultKey, err := sshKeyStorage.GetDefaultSSHKeyByOrganizationID(orgID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get SSH config for organization %s: %w", orgIDStr, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("no default server configured for organization %s", orgID.String())
+		}
+		return nil, fmt.Errorf("failed to get default SSH key for organization %s: %w", orgID.String(), err)
+	}
+
+	return GetSSHManagerForServer(ctx, orgID, defaultKey.ID)
+}
+
+// GetSSHManagerForServer returns an SSHManager for a specific server (ssh_key.id).
+// Validates that serverID belongs to orgID. Caches the manager under serverID.
+// This is the single place where managers are built and stored.
+func GetSSHManagerForServer(ctx context.Context, orgID uuid.UUID, serverID uuid.UUID) (*SSHManager, error) {
+	if config.GlobalStore == nil {
+		return nil, fmt.Errorf("global store not initialized")
+	}
+
+	if orgID == uuid.Nil {
+		return nil, fmt.Errorf("orgID must not be nil")
+	}
+	if serverID == uuid.Nil {
+		return nil, fmt.Errorf("serverID must not be nil")
+	}
+
+	serverIDStr := serverID.String()
+
+	// Fast path: cache hit (read lock only)
+	serverManagersMu.RLock()
+	if mgr, exists := serverManagers[serverIDStr]; exists {
+		serverManagersMu.RUnlock()
+		return mgr, nil
+	}
+	serverManagersMu.RUnlock()
+
+	// Slow path: load from DB under write lock (double-checked)
+	serverManagersMu.Lock()
+	defer serverManagersMu.Unlock()
+
+	if mgr, exists := serverManagers[serverIDStr]; exists {
+		return mgr, nil
+	}
+
+	// Validate server belongs to org
+	sshKeyStorage := sshstorage.SSHKeyStorage{DB: config.GlobalStore.DB, Ctx: ctx}
+	sshKey, err := sshKeyStorage.GetSSHKeyByID(serverID)
+	if err != nil {
+		return nil, fmt.Errorf("server %s not found: %w", serverIDStr, err)
+	}
+	if sshKey.OrganizationID != orgID {
+		return nil, fmt.Errorf("server %s does not belong to organization %s", serverIDStr, orgID.String())
+	}
+
+	// Build SSH config from the specific key
+	sshSvc := service.NewSSHKeyService(config.GlobalStore, ctx, logger.NewLogger())
+	sshConfig, err := sshSvc.GetSSHConfigForKey(sshKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build SSH config for server %s: %w", serverIDStr, err)
 	}
 
 	sshClient := NewSSHFromConfig(sshConfig)
 	if sshClient == nil {
-		return nil, fmt.Errorf("SSH config is nil for organization %s", orgIDStr)
+		return nil, fmt.Errorf("SSH config is nil for server %s", serverIDStr)
 	}
 	if len(sshClient.PrivateKey) == 0 && len(sshClient.Password) == 0 {
-		return nil, fmt.Errorf("SSH config for organization %s has no credentials: private key and password are both empty - please configure an SSH key or password in server settings", orgIDStr)
+		return nil, fmt.Errorf("SSH config for server %s has no credentials", serverIDStr)
+	}
+	if len(sshClient.PrivateKey) > 0 && !strings.HasPrefix(sshClient.PrivateKey, "-----BEGIN") {
+		return nil, fmt.Errorf("SSH private key for server %s is not a valid PEM key", serverIDStr)
 	}
 
 	manager := NewSSHManager()
-	manager.clients["default"] = sshClient
-	orgManagers[orgIDStr] = manager
+	if err := manager.AddClient("default", sshClient); err != nil {
+		return nil, fmt.Errorf("failed to register SSH client for server %s: %w", serverIDStr, err)
+	}
+
+	serverManagers[serverIDStr] = manager
+	orgToServerIDs[orgID.String()] = appendUnique(orgToServerIDs[orgID.String()], serverIDStr)
 
 	return manager, nil
 }
 
-// InvalidateSSHManagerCache clears the cached SSH manager for an organization.
-// Closes all pooled connections and stops the cleanup goroutine before removing
-// the manager, so no resources leak. Also fires registered hooks so downstream
-// caches (Docker, SFTP, Caddy) are flushed. Safe to call with uuid.Nil (no-op).
+// appendUnique appends s to slice only if not already present.
+func appendUnique(slice []string, s string) []string {
+	for _, v := range slice {
+		if v == s {
+			return slice
+		}
+	}
+	return append(slice, s)
+}
+
+// InvalidateSSHManagerCache evicts all cached SSH managers for an organization.
+// Closes all pooled connections, clears the reverse index, then fires registered hooks.
+// Safe to call with uuid.Nil (no-op).
 func InvalidateSSHManagerCache(orgID uuid.UUID) {
 	if orgID == uuid.Nil {
 		return
 	}
 	orgIDStr := orgID.String()
 
-	orgManagersMu.Lock()
-	old, exists := orgManagers[orgIDStr]
-	delete(orgManagers, orgIDStr)
-	orgManagersMu.Unlock()
+	serverManagersMu.Lock()
+	serverIDs := orgToServerIDs[orgIDStr]
+	var toClose []*SSHManager
+	for _, sid := range serverIDs {
+		if mgr, exists := serverManagers[sid]; exists {
+			toClose = append(toClose, mgr)
+			delete(serverManagers, sid)
+		}
+	}
+	delete(orgToServerIDs, orgIDStr)
+	serverManagersMu.Unlock()
 
-	if exists && old != nil {
-		old.Close()
+	for _, mgr := range toClose {
+		mgr.Close()
 	}
 
 	fireInvalidateHooks(orgID)
 }
 
+// InvalidateServerManagerCache evicts a single server's cached SSH manager.
+// Removes it from the reverse index. Safe to call with uuid.Nil (no-op).
+func InvalidateServerManagerCache(serverID uuid.UUID) {
+	if serverID == uuid.Nil {
+		return
+	}
+	serverIDStr := serverID.String()
+
+	serverManagersMu.Lock()
+	mgr, exists := serverManagers[serverIDStr]
+	if !exists {
+		serverManagersMu.Unlock()
+		return
+	}
+	delete(serverManagers, serverIDStr)
+
+	var foundOrgID string
+	for orgIDStr, ids := range orgToServerIDs {
+		for i, sid := range ids {
+			if sid == serverIDStr {
+				foundOrgID = orgIDStr
+				orgToServerIDs[orgIDStr] = append(ids[:i], ids[i+1:]...)
+				break
+			}
+		}
+	}
+	serverManagersMu.Unlock()
+
+	mgr.Close()
+	if foundOrgID != "" {
+		if parsed, err := uuid.Parse(foundOrgID); err == nil {
+			fireInvalidateHooks(parsed)
+		}
+	}
+}
+
 // InvalidateAllSSHManagerCaches clears every cached manager. Useful at shutdown
 // or when a global config change (e.g. key rotation) affects all orgs.
 func InvalidateAllSSHManagerCaches() {
-	orgManagersMu.Lock()
-	snapshot := orgManagers
-	orgManagers = make(map[string]*SSHManager)
-	orgManagersMu.Unlock()
+	serverManagersMu.Lock()
+	snapshot := serverManagers
+	serverManagers = make(map[string]*SSHManager)
+	orgToServerIDs = make(map[string][]string)
+	serverManagersMu.Unlock()
 
 	for _, mgr := range snapshot {
 		if mgr != nil {
@@ -189,25 +296,16 @@ func InvalidateAllSSHManagerCaches() {
 // The organization ID should be set in context by the auth middleware via types.OrganizationIDKey.
 // Uses the global store set during config.Init().
 func GetSSHManagerFromContext(ctx context.Context) (*SSHManager, error) {
-	orgIDAny := ctx.Value(types.OrganizationIDKey)
-	if orgIDAny == nil {
-		return nil, fmt.Errorf("organization ID not found in context")
-	}
+	orgIDStr, _ := ctx.Value(types.OrganizationIDKey).(string)
+	orgID, _ := uuid.Parse(orgIDStr)
 
-	var orgID uuid.UUID
-	switch v := orgIDAny.(type) {
-	case string:
-		var err error
-		orgID, err = uuid.Parse(v)
-		if err != nil {
-			return nil, fmt.Errorf("invalid organization ID in context: %w", err)
+	serverIDStr, _ := ctx.Value(types.ServerIDKey).(string)
+	if serverIDStr != "" {
+		serverID, err := uuid.Parse(serverIDStr)
+		if err == nil && serverID != uuid.Nil {
+			return GetSSHManagerForServer(ctx, orgID, serverID)
 		}
-	case uuid.UUID:
-		orgID = v
-	default:
-		return nil, fmt.Errorf("unexpected organization ID type in context: %T", v)
 	}
-
 	return GetSSHManagerForOrganization(ctx, orgID)
 }
 
@@ -319,6 +417,15 @@ func (m *SSHManager) Borrow(id string) (*goph.Client, func(), error) {
 	}
 	release := func() { entry.inUse.Add(-1) }
 	return client, release, nil
+}
+
+// IsNoDefaultServerError returns true when the error means the org has no default server configured.
+// Callers should map this to 503 Service Unavailable.
+func IsNoDefaultServerError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(err.Error(), "no default server configured")
 }
 
 // IsClosedConnectionError checks if the error indicates a closed or stale network connection.

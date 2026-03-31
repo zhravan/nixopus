@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+type TimescaleConfig struct {
+	URL string `mapstructure:"url"`
+}
+
 type Config struct {
 	Server       ServerConfig       `mapstructure:"server"`
 	Database     DatabaseConfig     `mapstructure:"database"`
@@ -19,6 +23,7 @@ type Config struct {
 	Trail        TrailConfig        `mapstructure:"trail"`
 	Live         LiveConfig         `mapstructure:"live"`
 	S3           S3Config           `mapstructure:"s3"`
+	Timescale    TimescaleConfig    `mapstructure:"timescale"`
 }
 
 // LiveConfig holds configuration for the live gateway (WebSocket, file sync, build).
@@ -138,6 +143,7 @@ const UserContextKey contextKey = "user"
 const AuthTokenKey ClientContext = "auth_token"
 const DBContextKey ClientContext = "db"
 const OrganizationIDKey contextKey = "organization_id"
+const ServerIDKey contextKey = "server_id"
 
 type AvailableActions string
 
